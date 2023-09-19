@@ -1,3 +1,0 @@
-TODO: venv aufsetzen
-TODO: Django installieren
-
