@@ -9,3 +9,6 @@ def about(request):
 
 def contact_us(request):
     return HttpResponse('<h1>IoTree42 - Contact Us</h1>')
+
+def impressum(request):
+    return HttpResponse('<h1>IoTree42 - Impressum</h1>')
