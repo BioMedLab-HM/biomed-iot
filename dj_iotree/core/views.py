@@ -12,3 +12,6 @@ def contact_us(request):
 
 def impressum(request):
     return HttpResponse('<h1>IoTree42 - Impressum</h1>')
+
+def datenschutz(request):
+    return HttpResponse('<h1>IoTree42 - Impressum</h1>')
