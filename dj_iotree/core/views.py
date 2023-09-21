@@ -2,16 +2,16 @@ from django.shortcuts import render
 from django.http import HttpResponse
 
 def home(request):
-    return HttpResponse('<h1>IoTree42 - Home</h1>')
+    return render(request, 'core/home.html')
 
 def about(request):
-    return HttpResponse('<h1>IoTree42 - About</h1>')
+    return render(request, 'core/about.html')
 
 def contact_us(request):
-    return HttpResponse('<h1>IoTree42 - Contact Us</h1>')
+    return render(request, 'core/contact_us.html')
 
 def impressum(request):
-    return HttpResponse('<h1>IoTree42 - Impressum</h1>')
+    return render(request, 'core/impressum.html')
 
 def datenschutz(request):
-    return HttpResponse('<h1>IoTree42 - Impressum</h1>')
+    return render(request, 'core/datenschutz.html')
