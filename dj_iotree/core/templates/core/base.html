@@ -22,11 +22,11 @@
         <!-- Responsive navbar-->
         <nav class="navbar navbar-expand-lg navbar-dark bg-primary">
             <div class="container">
-                <a class="navbar-brand" href="/">IoTree42</a>
+                <a class="navbar-brand" href="{% url 'core-home' %}">IoTree42</a>
                 <button class="navbar-toggler" type="button" data-bs-toggle="collapse" data-bs-target="#navbarSupportedContent" aria-controls="navbarSupportedContent" aria-expanded="false" aria-label="Toggle navigation"><span class="navbar-toggler-icon"></span></button>
                 <div class="collapse navbar-collapse" id="navbarSupportedContent">
                     <ul class="navbar-nav ms-auto mb-2 mb-lg-0">
-                        <li class="nav-item"><a class="nav-link active" aria-current="page" href="/">Home</a></li>
+                        <li class="nav-item"><a class="nav-link active" aria-current="page" href="{% url 'core-home' %}">Home</a></li>
                         <li class="nav-item"><a class="nav-link" href="#">Gateways</a></li>
                         <li class="nav-item"><a class="nav-link" href="#">Data</a></li>
                         <li class="nav-item"><a class="nav-link" href="#">Grafana</a></li>
@@ -43,9 +43,9 @@
                         <li class="nav-item dropdown">
                             <a class="nav-link dropdown-toggle" id="navbarDropdown" href="#" role="button" data-bs-toggle="dropdown" aria-expanded="false">About</a>
                             <ul class="dropdown-menu dropdown-menu-end" aria-labelledby="navbarDropdown">
-                                <li><a class="dropdown-item" href="/about">About IoTree42</a></li>
-                                <li><a class="dropdown-item" href="/impressum">Impressum</a></li>
-                                <li><a class="dropdown-item" href="/datenschutz">Datenschutz</a></li>
+                                <li><a class="dropdown-item" href="{% url 'core-about' %}">About IoTree42</a></li>
+                                <li><a class="dropdown-item" href="{% url 'core-impressum' %}">Impressum</a></li>
+                                <li><a class="dropdown-item" href="{% url 'core-datenschutz' %}">Datenschutz</a></li>
                             </ul>
                         </li>
                     </ul>
