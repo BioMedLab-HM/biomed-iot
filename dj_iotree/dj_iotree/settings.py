@@ -11,7 +11,11 @@ https://docs.djangoproject.com/en/4.2/ref/settings/
 """
 
 import os
+import json
 from pathlib import Path
+
+with open('/etc/iotree/config.json', encoding='utf-8') as config_file:
+   config = json.load(config_file)
 
 # Build paths inside the project like this: BASE_DIR / 'subdir'.
 BASE_DIR = Path(__file__).resolve().parent.parent
@@ -131,13 +135,14 @@ MEDIA_URL = '/media/'
 LOGIN_REDIRECT_URL = 'core-home'
 LOGIN_URL = 'login'
 
-# TODO: setup in gmail
+# TODO: setup in gmail etc
 EMAIL_BACKEND = 'django.core.mail.backends.smtp.EmailBackend'
-EMAIL_HOST = 'smtp.gmail.com'
+EMAIL_HOST = 'smtp.gmail.com'  # 'smtp.gmail.com'
 EMAIL_PORT = 587
 EMAIL_USE_TLS = True
-EMAIL_HOST_USER = os.environ.get('EMAIL_USER')
-EMAIL_HOST_PASSWORD = os.environ.get('EMAIL_PASS')
+EMAIL_HOST_PASSWORD = config["SENDING_PASS"]
+EMAIL_HOST_USER = config["SENDING_MAIL"]
+
 
 # Default primary key field type
 # https://docs.djangoproject.com/en/4.2/ref/settings/#default-auto-field
