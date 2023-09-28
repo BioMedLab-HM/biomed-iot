@@ -52,9 +52,9 @@ parse_installation_scheme() {
     while getopts "pl" option 2>/dev/null; do  # 2>/dev/null discards error (stderr) messages
         case $option in
             p)  
-                chosen_scheme="public (https support)" ;;
+                chosen_scheme="public" ;;
             l)  
-                chosen_scheme="local (no https support)" ;;
+                chosen_scheme="local" ;;
             ?)  
                 printf "Invalid option! Usage: sudo bash setup.sh -p (public) or -l (local)\n" >&2
                 return $FAILURE ;;
@@ -214,7 +214,7 @@ get_ip_address() {
 prompt_for_domain_name() {
     local installation_scheme=$1 
     local domain_name
-    if [[ $installation_scheme = "public (https support)" ]]; then
+    if [[ $installation_scheme = "public" ]]; then
         read -p "Enter the server domain name (e.g. example.com), if available. [Default: '$(hostname)']: " domain_name
     else
         domain_name=$(hostname)
@@ -251,7 +251,6 @@ do_install() {
     printf "\nThis will install Iotree42 with server installation scheme: $installation_scheme.\n"
     confirm_proceed "Do you want to proceed?" || exit $FAILURE
 
-
 # Get configuration data from user
     linux_username=$(prompt_for_linux_username) || exit $FAILURE
     iotree_admin_password=$(prompt_for_password_of_length 1 "for your IoTree42 'admin' user")  # 12!!
@@ -261,7 +260,6 @@ do_install() {
     reset_email_password=${reset_email_and_password[1]}
     ip_address=$(get_ip_address)
     domain_name=$(prompt_for_domain_name installation_scheme)
-
 
 # Update and install software
     printf "\nStarting installation of IoTree42 for user '$linux_username'. Please do not interrupt!\n" >&2
@@ -278,16 +276,24 @@ do_install() {
     apt install -y curl inotify-tools zip adduser git 
     apt install -y libopenjp2-7 libtiff5 libfontconfig1 
 
-    if [[ $installation_scheme == "public (https support)" ]]; then  # besser doch $public = true ?
-        printf "public scheme packages installation...\n" >&2
-        apt -y install ufw
-        apt install fail2ban
-        apt install certbot python3-certbot-nginx
-    fi
-
-# Install main components of IoTree42
+    # install server (security) relevant packages
     apt install nginx
     # TODO node + npm ?
+    apt install fail2ban
+    systemctl start fail2ban  # start if not yet startet automatically
+    systemctl enable fail2ban  # automatically start on system boot
+    cp /etc/fail2ban/jail.conf /etc/fail2ban/jail.local  # Backup mit .local wird bevorzugt und bei updates nicht überschrieben
+    # TODO: tbc @ https://www.linuxcapable.com/how-to-install-fail2ban-on-debian-linux/
+    apt -y install ufw
+    sudo ufw enable  # automatically start on system boot
+
+    if [[ $installation_scheme == "public (https support)" ]]; then  # besser doch $public = true ?
+        printf "public scheme packages installation...\n" >&2
+        
+        apt install certbot python3-certbot-nginx
+    fi
+    
+# Install main components of IoTree42
     apt install mosquitto mosquitto-clients
     # TODO Docker falls nötig
 
@@ -334,12 +340,11 @@ do_install() {
     ### TODO Final Confirmation Output to User ###
     printf "\nAll entries above can be changed later in the file /etc/iotree/config.json\n" >&2
     # Endpunkte (Dienste) mit ports
-    # Hinweis auf config.json
     # You can delete ... (if not auto delete)
     # (if anything went wrong, user should be able to redo install or to fully remove all files
     # ask user to reboot
 
-    if [[ $installation_scheme == "public (https support)" ]]; then  # besser doch $public = true ?
+    if [[ $installation_scheme == "public" ]]; then
         printf "--> The server can be reached at: https://$domain_name/ \n" >&2 
     else
         printf "--> The server can be reached at: http://$ip_address/ \n" >&2
