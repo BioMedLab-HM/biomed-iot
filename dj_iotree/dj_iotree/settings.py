@@ -14,6 +14,7 @@ import os
 import json
 from pathlib import Path
 
+# TODO: config.json befüllen
 with open('/etc/iotree/config.json', encoding='utf-8') as config_file:
    config = json.load(config_file)
 
@@ -30,7 +31,7 @@ SECRET_KEY = 'django-insecure-)ui!dcv0g-fxfvfzapgsdz%th9w#jt5qvwcn@(i@b^u!!pf$&j
 # SECURITY WARNING: don't run with debug turned on in production!
 DEBUG = True
 
-ALLOWED_HOSTS = []
+ALLOWED_HOSTS = [config.get('HOST_IP'), config.get('HOSTNAME'),"localhost"]
 
 
 # Application definition
@@ -82,10 +83,17 @@ WSGI_APPLICATION = 'dj_iotree.wsgi.application'
 # Database
 # https://docs.djangoproject.com/en/4.2/ref/settings/#databases
 
+# TODO: get data from config.json (config.get(...))
 DATABASES = {
     'default': {
-        'ENGINE': 'django.db.backends.sqlite3',
-        'NAME': BASE_DIR / 'db.sqlite3',
+        # 'ENGINE': 'django.db.backends.sqlite3',
+        # 'NAME': BASE_DIR / 'db.sqlite3',
+        'ENGINE': 'django.db.backends.postgresql_psycopg2',
+        'NAME': config.get("POSTGRES_NAME"),  # the database name
+        'USER': config.get("POSTGRES_USER"),
+        'PASSWORD': config.get("POSTGRES_PASSWORD"),
+        'HOST': 'localhost',
+        'PORT': '',
     }
 }
 
@@ -127,6 +135,7 @@ USE_TZ = True
 # TODO: static files; not for production use, see "Deploying static files" (https://docs.djangoproject.com/en/4.2/howto/static-files/)
 STATIC_URL = '/static/'
 STATICFILES_DIRS = [BASE_DIR / 'static']
+#STATIC_ROOT = os.path.join(BASE_DIR, 'static/')
 
 # TODO: static files; see above
 MEDIA_ROOT = BASE_DIR / 'media'

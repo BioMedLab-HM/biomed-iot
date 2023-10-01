@@ -86,26 +86,6 @@ confirm_proceed() {
     done
 }
 
-is_valid_linux_username() {
-    local username=$1
-    if ! id "$username" &> /dev/null; then  # &> /dev/null discards stdout and stderr (error) messages
-        return $FAILURE   
-    fi
-}
-
-prompt_for_linux_username() {
-    local entered_username
-    printf "\n" >&2
-    read -p "Enter Linux username for this installation: " entered_username
-
-    if is_valid_linux_username "$entered_username"; then  
-        printf "$entered_username"
-    else
-        printf "The username you entered does not exist. Exiting setup.\n" >&2
-        return $FAILURE
-    fi
-}
-
 prompt_for_password_of_length() {
     local required_length=$1
     local for_reason=$2
@@ -223,12 +203,13 @@ prompt_for_domain_name() {
 }
 
 install_basic_packages() {
-    : # install apt necessary packages --> Funct.-Name ggf. anpassen
+    : 
+    # TODO: install apt necessary packages --> Funct.-Name ggf. anpassen ODER func Löschen
 }
 
 do_install() {
     local installation_scheme
-    local linux_username
+    local linux_username=$SUDO_USER
     local iotree_admin_password
     local django_admin_email
     local reset_email_and_password
@@ -236,6 +217,7 @@ do_install() {
     local reset_email_password
     local ip_address
     local domain_name
+    local installation_dir="/home/$linux_username/iotree42"
 
     print_logo_header
 
@@ -252,7 +234,7 @@ do_install() {
     confirm_proceed "Do you want to proceed?" || exit $FAILURE
 
 # Get configuration data from user
-    linux_username=$(prompt_for_linux_username) || exit $FAILURE
+    # linux_username=$(prompt_for_linux_username) || exit $FAILURE
     iotree_admin_password=$(prompt_for_password_of_length 1 "for your IoTree42 'admin' user")  # 12!!
     django_admin_email=$(get_email_for_django_admin)
     reset_email_and_password=($(prompt_for_reset_email_credentials))
@@ -267,14 +249,38 @@ do_install() {
     printf "\nInstalling $installation_scheme\n" >&2
 
     # Update package lists
-    sudo apt update
+    apt update
 
     # Install Python-related packages
-    sudo apt install -y python3-pip python3-venv
+    apt install -y python3-pip python3-venv python3-dev
 
     # Install neccessary libraries and other software
     apt install -y curl inotify-tools zip adduser git 
-    apt install -y libopenjp2-7 libtiff5 libfontconfig1 
+    apt install -y libopenjp2-7 libtiff5 libfontconfig1
+
+    # install postgreSQL (https://www.digitalocean.com/community/tutorials/how-to-set-up-django-with-postgres-nginx-and-gunicorn-on-debian-11)
+    # Befehle evtl. in separate postgresetup.sh? 
+    apt install libpq-dev postgresql postgresql-contrib
+    sudo -u postgres psql -c "CREATE DATABASE dj_iotree_db;"
+    postgrespass=$(LC_ALL=C tr -dc 'A-Za-z0-9_!@#$%^&*()-' < /dev/urandom | head -c 20 | xargs) # LC_ALL=C (locale) ensures tr command behaves consistently
+    sudo -u postgres psql -c "CREATE USER dj_iotree_user WITH PASSWORD '$postgrespass';"
+    sudo -u postgres psql -c "ALTER ROLE dj_iotree_user SET client_encoding TO 'utf8';"
+    sudo -u postgres psql -c "ALTER ROLE dj_iotree_user SET default_transaction_isolation TO 'read committed';"
+    sudo -u postgres psql -c "ALTER ROLE dj_iotree_user SET timezone TO 'UTC';"  # adjust to local time application level
+    sudo -u postgres psql -c "GRANT ALL PRIVILEGES ON DATABASE dj_iotree_db TO dj_iotree_user;"
+    sudo -u postgres psql -c "GRANT ALL ON ALL TABLES IN SCHEMA public TO dj_iotree_user;"
+    sudo -u postgres psql -c "grant create on schema public to dj_iotree_user;"
+    # TODO: Password in config.json speichern
+
+    # Django setup
+    python3 -m venv $installation_dir/dj_iotree/dj_venv
+    source $installation_dir/dj_iotree/dj_venv/bin/activate
+    pip install -r $installation_dir/dj_iotree/requirements.txt
+    deactivate
+    # TODO: create superuser
+    python manage.py makemigrations
+    python manage.py migrate
+    python manage.py collectstatic
 
     # install server (security) relevant packages
     apt install nginx
