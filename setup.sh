@@ -259,6 +259,15 @@ do_install() {
     apt install -y curl inotify-tools zip adduser git 
     apt install -y libopenjp2-7 libtiff5 libfontconfig1
 
+    # install server security packages
+    apt install fail2ban
+    systemctl start fail2ban  # start if not yet startet automatically
+    systemctl enable fail2ban  # automatically start on system boot
+    cp /etc/fail2ban/jail.conf /etc/fail2ban/jail.local  # Backup mit .local wird bevorzugt und bei updates nicht überschrieben
+    apt -y install ufw
+    sudo ufw enable  # automatically start on system boot
+    # TODO: configure fail2ban (https://www.linuxcapable.com/how-to-install-fail2ban-on-debian-linux/#Conclusion-Installing-Fail2ban-on-Debian)
+
     # install postgreSQL (https://www.digitalocean.com/community/tutorials/how-to-set-up-django-with-postgres-nginx-and-gunicorn-on-debian-11)
     # Befehle evtl. in separate postgresetup.sh? 
     apt install libpq-dev postgresql postgresql-contrib
@@ -282,24 +291,16 @@ do_install() {
     runuser -u $linux_username -- python3 -m venv $installation_dir/dj_iotree/dj_venv
     source $installation_dir/dj_iotree/dj_venv/bin/activate
     pip install -r $installation_dir/dj_iotree/requirements.txt
-    DJANGO_SUPERUSER_SCRIPT="from django.contrib.auth.models import User; User.objects.create_superuser('admin', '$django_admin_email', '$django_admin_password')"
-    echo $DJANGO_SUPERUSER_SCRIPT | runuser -u $linux_username -- $installation_dir/dj_iotree/dj_venv/bin/python $installation_dir/dj_iotree/manage.py shell
     $installation_dir/dj_iotree/dj_venv_000/bin/python $installation_dir/dj_iotree/manage.py makemigrations
     $installation_dir/dj_iotree/dj_venv_000/bin/python $installation_dir/dj_iotree/manage.py migrate
+    DJANGO_SUPERUSER_SCRIPT="from django.contrib.auth.models import User; User.objects.create_superuser('admin', '$django_admin_email', '$django_admin_password')"
+    echo $DJANGO_SUPERUSER_SCRIPT | runuser -u $linux_username -- $installation_dir/dj_iotree/dj_venv/bin/python $installation_dir/dj_iotree/manage.py shell
     $installation_dir/dj_iotree/dj_venv_000/bin/python $installation_dir/dj_iotree/manage.py collectstatic --noinput
     deactivate
 
     # install server (security) relevant packages
     apt install nginx
     # TODO node + npm ?
-    apt install fail2ban
-    systemctl start fail2ban  # start if not yet startet automatically
-    systemctl enable fail2ban  # automatically start on system boot
-    cp /etc/fail2ban/jail.conf /etc/fail2ban/jail.local  # Backup mit .local wird bevorzugt und bei updates nicht überschrieben
-    # TODO: tbc @ https://www.linuxcapable.com/how-to-install-fail2ban-on-debian-linux/
-    apt -y install ufw
-    sudo ufw enable  # automatically start on system boot
-
     if [[ $installation_scheme == "public (https support)" ]]; then  # besser doch $public = true ?
         printf "public scheme packages installation...\n" >&2
         
