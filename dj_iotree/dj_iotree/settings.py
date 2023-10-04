@@ -13,6 +13,7 @@ https://docs.djangoproject.com/en/4.2/ref/settings/
 import os
 import json
 from pathlib import Path
+from django.db.backends.postgresql.psycopg_any import IsolationLevel
 
 # TODO: config.json befüllen
 with open('/etc/iotree/config.json', encoding='utf-8') as config_file:
@@ -88,12 +89,12 @@ DATABASES = {
     'default': {
         # 'ENGINE': 'django.db.backends.sqlite3',
         # 'NAME': BASE_DIR / 'db.sqlite3',
-        'ENGINE': 'django.db.backends.postgresql_psycopg2',
+        "ENGINE": "django.db.backends.postgresql",
         'NAME': config.get("POSTGRES_NAME"),  # the database name
         'USER': config.get("POSTGRES_USER"),
         'PASSWORD': config.get("POSTGRES_PASSWORD"),
-        'HOST': 'localhost',
-        'PORT': '',
+        'HOST': '127.0.0.1',
+        'PORT': '5432',
     }
 }
 
@@ -134,8 +135,8 @@ USE_TZ = True
 
 # TODO: static files; not for production use, see "Deploying static files" (https://docs.djangoproject.com/en/4.2/howto/static-files/)
 STATIC_URL = '/static/'
-STATICFILES_DIRS = [BASE_DIR / 'static']
-#STATIC_ROOT = os.path.join(BASE_DIR, 'static/')
+# STATICFILES_DIRS = [BASE_DIR / 'static']
+STATIC_ROOT = os.path.join(BASE_DIR, 'static/')
 
 # TODO: static files; see above
 MEDIA_ROOT = BASE_DIR / 'media'

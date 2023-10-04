@@ -210,7 +210,7 @@ install_basic_packages() {
 do_install() {
     local installation_scheme
     local linux_username=$SUDO_USER
-    local iotree_admin_password
+    local django_admin_password
     local django_admin_email
     local reset_email_and_password
     local reset_email
@@ -235,7 +235,8 @@ do_install() {
 
 # Get configuration data from user
     # linux_username=$(prompt_for_linux_username) || exit $FAILURE
-    iotree_admin_password=$(prompt_for_password_of_length 1 "for your IoTree42 'admin' user")  # 12!!
+    # TODO: django_admin_password mit länge 12 in Production statt 1 zu Testzwecken
+    django_admin_password=$(prompt_for_password_of_length 1 "for your IoTree42 'admin' user")
     django_admin_email=$(get_email_for_django_admin)
     reset_email_and_password=($(prompt_for_reset_email_credentials))
     reset_email=${reset_email_and_password[0]}
@@ -261,26 +262,31 @@ do_install() {
     # install postgreSQL (https://www.digitalocean.com/community/tutorials/how-to-set-up-django-with-postgres-nginx-and-gunicorn-on-debian-11)
     # Befehle evtl. in separate postgresetup.sh? 
     apt install libpq-dev postgresql postgresql-contrib
+
     sudo -u postgres psql -c "CREATE DATABASE dj_iotree_db;"
     postgrespass=$(LC_ALL=C tr -dc 'A-Za-z0-9_!@#$%^&*()-' < /dev/urandom | head -c 20 | xargs) # LC_ALL=C (locale) ensures tr command behaves consistently
     sudo -u postgres psql -c "CREATE USER dj_iotree_user WITH PASSWORD '$postgrespass';"
+    # TODO: echo in postgrespass.txt löschen. Ist nur für testzwecke
+    echo $postgrespass > /home/rene/dev/postgrespass.txt  # diese Zeile entfernen
     sudo -u postgres psql -c "ALTER ROLE dj_iotree_user SET client_encoding TO 'utf8';"
     sudo -u postgres psql -c "ALTER ROLE dj_iotree_user SET default_transaction_isolation TO 'read committed';"
-    sudo -u postgres psql -c "ALTER ROLE dj_iotree_user SET timezone TO 'UTC';"  # adjust to local time application level
+    sudo -u postgres psql -c "ALTER ROLE dj_iotree_user SET timezone TO 'UTC';"
     sudo -u postgres psql -c "GRANT ALL PRIVILEGES ON DATABASE dj_iotree_db TO dj_iotree_user;"
-    sudo -u postgres psql -c "GRANT ALL ON ALL TABLES IN SCHEMA public TO dj_iotree_user;"
-    sudo -u postgres psql -c "grant create on schema public to dj_iotree_user;"
-    # TODO: Password in config.json speichern
+    sudo -u postgres psql -c "ALTER DATABASE dj_iotree_db OWNER TO dj_iotree_user;"
+    sudo -u postgres psql -c "GRANT USAGE, CREATE ON SCHEMA public TO dj_iotree_user;"
+    # TODO: postgrespass in config.json speichern
 
     # Django setup
-    python3 -m venv $installation_dir/dj_iotree/dj_venv
-    source $installation_dir/dj_iotree/dj_venv/bin/activate
-    pip install -r $installation_dir/dj_iotree/requirements.txt
+    runuser -u $linux_username -- python3 -m venv $installation_dir/dj_iotree/dj_venv_000
+    runuser -u $linux_username -- source $installation_dir/dj_iotree/dj_venv_000/bin/activate
+    runuser -u $linux_username -- pip install -r $installation_dir/dj_iotree/requirements.txt
+    echo "from django.contrib.auth.models import User; User.objects.create_superuser('admin', '$django_admin_email', '$django_admin_password')" | runuser -u $linux_username -- $installation_dir/dj_iotree/dj_venv/bin/python $installation_dir/dj_iotree/manage.py shell
+    DJANGO_SUPERUSER_SCRIPT="from django.contrib.auth.models import User; User.objects.create_superuser('admin', '$django_admin_email', '$django_admin_password')"
+    echo $DJANGO_SUPERUSER_SCRIPT | runuser -u $linux_username -- $installation_dir/dj_iotree/dj_venv_000/bin/python $installation_dir/dj_iotree/manage.py shell
+    runuser -u $linux_username -- $installation_dir/dj_iotree/dj_venv_000/bin/python $installation_dir/dj_iotree/manage.py makemigrations
+    runuser -u $linux_username -- $installation_dir/dj_iotree/dj_venv_000/bin/python $installation_dir/dj_iotree/manage.py migrate
+    runuser -u $linux_username -- $installation_dir/dj_iotree/dj_venv_000/bin/python $installation_dir/dj_iotree/manage.py collectstatic
     deactivate
-    # TODO: create superuser
-    python manage.py makemigrations
-    python manage.py migrate
-    python manage.py collectstatic
 
     # install server (security) relevant packages
     apt install nginx
