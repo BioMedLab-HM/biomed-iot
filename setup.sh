@@ -260,18 +260,19 @@ do_install() {
     apt install -y libopenjp2-7 libtiff5 libfontconfig1
 
     # install server security packages
-    apt install fail2ban
+    apt install -y fail2ban
     systemctl start fail2ban  # start if not yet startet automatically
     systemctl enable fail2ban  # automatically start on system boot
     cp /etc/fail2ban/jail.conf /etc/fail2ban/jail.local  # Backup mit .local wird bevorzugt und bei updates nicht überschrieben
-    apt -y install ufw
-    sudo ufw enable  # automatically start on system boot
+    apt install -y ufw
+    ufw enable  # automatically start on system boot
+    ufw allow ssh
+    ufw allow 'Nginx Full'
     # TODO: configure fail2ban (https://www.linuxcapable.com/how-to-install-fail2ban-on-debian-linux/#Conclusion-Installing-Fail2ban-on-Debian)
 
     # install postgreSQL (https://www.digitalocean.com/community/tutorials/how-to-set-up-django-with-postgres-nginx-and-gunicorn-on-debian-11)
     # Befehle evtl. in separate postgresetup.sh? 
     apt install libpq-dev postgresql postgresql-contrib
-
     sudo -u postgres psql -c "CREATE DATABASE dj_iotree_db;"
     postgrespass=$(LC_ALL=C tr -dc 'A-Za-z0-9_!@#$%^&*()-' < /dev/urandom | head -c 20 | xargs) # LC_ALL=C (locale) ensures tr command behaves consistently
     sudo -u postgres psql -c "CREATE USER dj_iotree_user WITH PASSWORD '$postgrespass';"

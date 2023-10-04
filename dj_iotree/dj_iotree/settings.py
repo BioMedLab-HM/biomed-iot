@@ -135,8 +135,8 @@ USE_TZ = True
 
 # TODO: static files; not for production use, see "Deploying static files" (https://docs.djangoproject.com/en/4.2/howto/static-files/)
 STATIC_URL = '/static/'
-# STATICFILES_DIRS = [BASE_DIR / 'static']
-STATIC_ROOT = os.path.join(BASE_DIR, 'static/')
+STATICFILES_DIRS = [BASE_DIR / 'static']  # for development
+# TODO: STATIC_ROOT = [BASE_DIR / 'static']  # for production
 
 # TODO: static files; see above
 MEDIA_ROOT = BASE_DIR / 'media'
