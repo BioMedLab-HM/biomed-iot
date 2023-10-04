@@ -1,5 +1,5 @@
 #!/bin/bash
-set -e
+set -e  # Enable errexit (exit on error)
 
 #
 # Kurzer Überblick über den Code
@@ -276,16 +276,17 @@ do_install() {
     sudo -u postgres psql -c "GRANT USAGE, CREATE ON SCHEMA public TO dj_iotree_user;"
     # TODO: postgrespass in config.json speichern
 
+    # TODO: venv für mqtttodb Skript installieren
+
     # Django setup
-    runuser -u $linux_username -- python3 -m venv $installation_dir/dj_iotree/dj_venv_000
-    runuser -u $linux_username -- source $installation_dir/dj_iotree/dj_venv_000/bin/activate
-    runuser -u $linux_username -- pip install -r $installation_dir/dj_iotree/requirements.txt
-    echo "from django.contrib.auth.models import User; User.objects.create_superuser('admin', '$django_admin_email', '$django_admin_password')" | runuser -u $linux_username -- $installation_dir/dj_iotree/dj_venv/bin/python $installation_dir/dj_iotree/manage.py shell
+    runuser -u $linux_username -- python3 -m venv $installation_dir/dj_iotree/dj_venv
+    source $installation_dir/dj_iotree/dj_venv/bin/activate
+    pip install -r $installation_dir/dj_iotree/requirements.txt
     DJANGO_SUPERUSER_SCRIPT="from django.contrib.auth.models import User; User.objects.create_superuser('admin', '$django_admin_email', '$django_admin_password')"
-    echo $DJANGO_SUPERUSER_SCRIPT | runuser -u $linux_username -- $installation_dir/dj_iotree/dj_venv_000/bin/python $installation_dir/dj_iotree/manage.py shell
-    runuser -u $linux_username -- $installation_dir/dj_iotree/dj_venv_000/bin/python $installation_dir/dj_iotree/manage.py makemigrations
-    runuser -u $linux_username -- $installation_dir/dj_iotree/dj_venv_000/bin/python $installation_dir/dj_iotree/manage.py migrate
-    runuser -u $linux_username -- $installation_dir/dj_iotree/dj_venv_000/bin/python $installation_dir/dj_iotree/manage.py collectstatic
+    echo $DJANGO_SUPERUSER_SCRIPT | runuser -u $linux_username -- $installation_dir/dj_iotree/dj_venv/bin/python $installation_dir/dj_iotree/manage.py shell
+    $installation_dir/dj_iotree/dj_venv_000/bin/python $installation_dir/dj_iotree/manage.py makemigrations
+    $installation_dir/dj_iotree/dj_venv_000/bin/python $installation_dir/dj_iotree/manage.py migrate
+    $installation_dir/dj_iotree/dj_venv_000/bin/python $installation_dir/dj_iotree/manage.py collectstatic --noinput
     deactivate
 
     # install server (security) relevant packages
