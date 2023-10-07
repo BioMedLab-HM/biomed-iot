@@ -248,6 +248,9 @@ do_install() {
     printf "\nStarting installation of IoTree42 for user '$linux_username'. Please do not interrupt!\n" >&2
     confirm_proceed "Do you want to proceed?"
     printf "\nInstalling $installation_scheme\n" >&2
+    
+    # TODO: tmp folder + config befehle evtl in separatem block?
+    mkdir ./tmp  # create temporary folder for config files
 
     # Update package lists
     apt update
@@ -259,19 +262,25 @@ do_install() {
     apt install -y curl inotify-tools zip adduser git 
     apt install -y libopenjp2-7 libtiff5 libfontconfig1
 
-    # install server security packages
+    # Install server security packages fail2ban and ufw
     apt install -y fail2ban
     systemctl start fail2ban  # start if not yet startet automatically
     systemctl enable fail2ban  # automatically start on system boot
-    cp /etc/fail2ban/jail.conf /etc/fail2ban/jail.local  # Backup mit .local wird bevorzugt und bei updates nicht überschrieben
     apt install -y ufw
     ufw enable  # automatically start on system boot
-    ufw allow ssh
-    ufw allow 'Nginx Full'
-    # TODO: configure fail2ban (https://www.linuxcapable.com/how-to-install-fail2ban-on-debian-linux/#Conclusion-Installing-Fail2ban-on-Debian)
+    ufw allow ssh # port 22
+    ufw allow 'Nginx Full'  # port 80 (HTTP) and Port 443 (HTTPS)
+    # TODO: fail2ban jail.local: 
+        # bantime  = 60m
+        # [nginx-limit-req] 
+        # enabled = true # falls Mosquitto nicht hinter nginx; `ngx_http_limit_req_module` benötigt, siehe jail.
+    mkdir $installation_dir/tmp
+    $installation_dir/lib/tmp.jail.local.sh > $installation_dir/tmp/jail.local
+    cp $installation_dir/tmp/jail.local /etc/fail2ban/jail.local
+    # TODO: file permission for jail.local
+    systemctl restart fail2ban
 
     # install postgreSQL (https://www.digitalocean.com/community/tutorials/how-to-set-up-django-with-postgres-nginx-and-gunicorn-on-debian-11)
-    # Befehle evtl. in separate postgresetup.sh? 
     apt install libpq-dev postgresql postgresql-contrib
     sudo -u postgres psql -c "CREATE DATABASE dj_iotree_db;"
     postgrespass=$(LC_ALL=C tr -dc 'A-Za-z0-9_!@#$%^&*()-' < /dev/urandom | head -c 20 | xargs) # LC_ALL=C (locale) ensures tr command behaves consistently
