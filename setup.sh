@@ -274,9 +274,9 @@ do_install() {
         # bantime  = 60m
         # [nginx-limit-req] 
         # enabled = true # falls Mosquitto nicht hinter nginx; `ngx_http_limit_req_module` benötigt, siehe jail.
-    mkdir $installation_dir/tmp
-    $installation_dir/lib/tmp.jail.local.sh > $installation_dir/tmp/jail.local
-    cp $installation_dir/tmp/jail.local /etc/fail2ban/jail.local
+    mkdir $installation_dir/config
+    $installation_dir/config/tmp.jail.local.sh > $installation_dir/config/jail.local
+    cp $installation_dir/config/jail.local /etc/fail2ban/jail.local
     # TODO: file permission for jail.local
     systemctl restart fail2ban
 
