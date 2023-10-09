@@ -1,6 +1,6 @@
 #!/bin/sh
 
-# define parameters which are passed in.
+# Get passed parameter
 # TODO: USERNAME entfernen?
 USERNAME=$1
 HOSTIP=$2
@@ -12,7 +12,7 @@ DJANGOKEY=$7
 POSTGRESUSER=$9
 POSTGRESPASSWORD=$10
 
-# config.json template definition
+# Define config.json template
 cat << EOF
 {       
         "SENDING_MAIL":"$SENDMAIL",
