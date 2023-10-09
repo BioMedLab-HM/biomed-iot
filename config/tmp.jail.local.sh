@@ -2,7 +2,6 @@
 
 # jail.local template definition
 cat << EOF
-
 #
 # WARNING: heavily refactored in 0.9.0 release.  Please review and
 #          customize settings for your setup.
