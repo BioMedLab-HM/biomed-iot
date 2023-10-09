@@ -1,6 +1,6 @@
 #!/bin/sh
 
-# Template definition
+# jail.local template definition
 cat << EOF
 
 #
