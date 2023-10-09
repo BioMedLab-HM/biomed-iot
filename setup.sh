@@ -159,9 +159,9 @@ get_email_for_django_admin() {
     printf "$email"
 }
 
-prompt_for_reset_email_credentials() {
-    local reset_email="none"
-    local reset_email_password="none"
+prompt_for_pwreset_email_credentials() {
+    local pwreset_email="none"
+    local pwreset_email_password="none"
 
     printf "\nProvide an email address for the password reset function now or set it later in the file /etc/iotree/config.json\n" >&2
     while true; do
@@ -169,11 +169,12 @@ prompt_for_reset_email_credentials() {
 
         case "$answer" in
             [Yy])
-                reset_email=$(prompt_for_confirmed_text_input \
+                pwreset_email=$(prompt_for_confirmed_text_input \
                     "Enter the password reset email address" \
                     "Confirm the password reset email address")
                 printf "Provide the password associated with the password reset email: "
-                reset_email_password=$(prompt_for_password_of_length 1 "for the password reset email")
+                # TODO: min Password length 12
+                pwreset_email_password=$(prompt_for_password_of_length 1 "for the password reset email")
                 break ;;
             [Nn])
                 break ;;
@@ -181,25 +182,26 @@ prompt_for_reset_email_credentials() {
                 printf "Invalid input. Please enter 'Y' or 'N'." ;;
         esac
     done
-    printf "%s %s" "$reset_email" "$reset_email_password"
+    printf "%s %s" "$pwreset_email" "$pwreset_email_password"
 }
 
 get_ip_address() {
     local ip_address
+    # TODO: Was ist mit öffentlicher IP-Adresse?
     # Extract the first IP address of the running network interface
     ip_address="$(ip addr | grep 'state UP' -A2 | tail -n1 | awk '{print $2}' | cut -f1  -d'/')"
     printf "$ip_address"
 }
 
-prompt_for_domain_name() {
+prompt_for_host_name() {
     local installation_scheme=$1 
-    local domain_name
+    local host_name
     if [[ $installation_scheme = "public" ]]; then
-        read -p "Enter the server domain name (e.g. example.com), if available. [Default: '$(hostname)']: " domain_name
+        read -p "Enter the server domain name (e.g. example.com), if available. [Default: '$(hostname)']: " host_name
     else
-        domain_name=$(hostname)
+        host_name=$(hostname)
     fi
-    printf "$domain_name"
+    printf "$host_name"
 }
 
 install_basic_packages() {
@@ -212,11 +214,11 @@ do_install() {
     local linux_username=$SUDO_USER
     local django_admin_password
     local django_admin_email
-    local reset_email_and_password
-    local reset_email
-    local reset_email_password
+    local pwreset_email_and_password
+    local pwreset_email
+    local pwreset_email_password
     local ip_address
-    local domain_name
+    local host_name
     local installation_dir="/home/$linux_username/iotree42"
 
     print_logo_header
@@ -238,11 +240,12 @@ do_install() {
     # TODO: django_admin_password mit länge 12 in Production statt 1 zu Testzwecken
     django_admin_password=$(prompt_for_password_of_length 1 "for your IoTree42 'admin' user")
     django_admin_email=$(get_email_for_django_admin)
-    reset_email_and_password=($(prompt_for_reset_email_credentials))
-    reset_email=${reset_email_and_password[0]}
-    reset_email_password=${reset_email_and_password[1]}
+    pwreset_email_and_password=($(prompt_for_pwreset_email_credentials))
+    pwreset_email=${pwreset_email_and_password[0]}
+    pwreset_email_password=${pwreset_email_and_password[1]}
+    # TODO: evtl. name: server_ip
     ip_address=$(get_ip_address)
-    domain_name=$(prompt_for_domain_name installation_scheme)
+    host_name=$(prompt_for_host_name installation_scheme)
 
 # Update and install software
     printf "\nStarting installation of IoTree42 for user '$linux_username'. Please do not interrupt!\n" >&2
@@ -251,6 +254,9 @@ do_install() {
     
     # TODO: tmp folder + config befehle evtl in separatem block?
     mkdir ./tmp  # create temporary folder for config files
+    mkdir /etc/iotree
+    # TODO: build reload3.sh file (bzw. vergleichbares) falls nötig
+    # TODO: building gateway zip file
 
     # Update package lists
     apt update
@@ -270,14 +276,12 @@ do_install() {
     ufw enable  # automatically start on system boot
     ufw allow ssh # port 22
     ufw allow 'Nginx Full'  # port 80 (HTTP) and Port 443 (HTTPS)
-    # TODO: fail2ban jail.local: 
-        # bantime  = 60m
+    # TODO: optional in fail2ban jail.local: 
         # [nginx-limit-req] 
         # enabled = true # falls Mosquitto nicht hinter nginx; `ngx_http_limit_req_module` benötigt, siehe jail.
     mkdir $installation_dir/config
     $installation_dir/config/tmp.jail.local.sh > $installation_dir/config/jail.local
     cp $installation_dir/config/jail.local /etc/fail2ban/jail.local
-    # TODO: file permission for jail.local
     systemctl restart fail2ban
 
     # install postgreSQL (https://www.digitalocean.com/community/tutorials/how-to-set-up-django-with-postgres-nginx-and-gunicorn-on-debian-11)
@@ -293,11 +297,11 @@ do_install() {
     sudo -u postgres psql -c "GRANT ALL PRIVILEGES ON DATABASE dj_iotree_db TO dj_iotree_user;"
     sudo -u postgres psql -c "ALTER DATABASE dj_iotree_db OWNER TO dj_iotree_user;"
     sudo -u postgres psql -c "GRANT USAGE, CREATE ON SCHEMA public TO dj_iotree_user;"
-    # TODO: postgrespass in config.json speichern
 
-    # TODO: venv für mqtttodb Skript installieren
+    # TODO: venv für mqtttodb Skript installieren (evtl an anderer Stelle)
 
     # Django setup
+    # TODO: remove _000 from venv
     runuser -u $linux_username -- python3 -m venv $installation_dir/dj_iotree/dj_venv
     source $installation_dir/dj_iotree/dj_venv/bin/activate
     pip install -r $installation_dir/dj_iotree/requirements.txt
@@ -308,7 +312,7 @@ do_install() {
     $installation_dir/dj_iotree/dj_venv_000/bin/python $installation_dir/dj_iotree/manage.py collectstatic --noinput
     deactivate
 
-    # install server (security) relevant packages
+    # install server relevant packages
     apt install nginx
     # TODO node + npm ?
     if [[ $installation_scheme == "public (https support)" ]]; then  # besser doch $public = true ?
@@ -332,9 +336,6 @@ do_install() {
 
     # TODO nodered / flowforge
 
-    # TODO Copy Django files, create venvs and install requirements (u.a. django-oauth-toolkit) oder erst bei config?
-        # hier mock-ordner
-
     # TODO start/restart/status check: mosquitto, grafana-server, influxdb, ...
     systemctl start mosquitto
     service influxdb start
@@ -344,6 +345,18 @@ do_install() {
         # Loaded: loaded (/lib/systemd/system/influxdb.service; enabled; vendor preset: enable>
         # Active: active (running)
 
+    # Build iotree config.json file
+    # TODO: config.json Daten ergänzen + evtl als array?
+    $installation_dir/config/tmp.config.json.sh \
+        $linux_username \
+        $ip_address \
+        $host_name \
+        $adminmail \
+        $pwreset_email \
+        $pwreset_email_password \
+        $djangokey \
+        $postgrespass \
+        > ./tmp/config.json
 
     ### TODO Make configurations ###
     # Certbot: https://www.digitalocean.com/community/tutorials/how-to-secure-nginx-with-let-s-encrypt-on-debian-11
@@ -369,7 +382,7 @@ do_install() {
     # ask user to reboot
 
     if [[ $installation_scheme == "public" ]]; then
-        printf "--> The server can be reached at: https://$domain_name/ \n" >&2 
+        printf "--> The server can be reached at: https://$host_name/ \n" >&2 
     else
         printf "--> The server can be reached at: http://$ip_address/ \n" >&2
     fi
