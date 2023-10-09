@@ -210,6 +210,7 @@ install_basic_packages() {
 }
 
 do_install() {
+# TODO: mögliche Struktur: "install basic packages" --> install_... --> confgure_... usw.
     local installation_scheme
     local linux_username=$SUDO_USER
     local django_admin_password
@@ -253,7 +254,7 @@ do_install() {
     printf "\nInstalling $installation_scheme\n" >&2
     
     # TODO: tmp folder + config befehle evtl in separatem block?
-    mkdir ./tmp  # create temporary folder for config files
+    mkdir $installation_dir/tmp  # create temporary folder for config files
     mkdir /etc/iotree
     # TODO: build reload3.sh file (bzw. vergleichbares) falls nötig
     # TODO: building gateway zip file
@@ -280,8 +281,8 @@ do_install() {
         # [nginx-limit-req] 
         # enabled = true # falls Mosquitto nicht hinter nginx; `ngx_http_limit_req_module` benötigt, siehe jail.
     mkdir $installation_dir/config
-    $installation_dir/config/tmp.jail.local.sh > $installation_dir/config/jail.local
-    cp $installation_dir/config/jail.local /etc/fail2ban/jail.local
+    $installation_dir/config/tmp.jail.local.sh > $installation_dir/tmp/jail.local
+    cp $installation_dir/tmp/jail.local /etc/fail2ban/jail.local
     systemctl restart fail2ban
 
     # install postgreSQL (https://www.digitalocean.com/community/tutorials/how-to-set-up-django-with-postgres-nginx-and-gunicorn-on-debian-11)
@@ -312,7 +313,15 @@ do_install() {
     $installation_dir/dj_iotree/dj_venv_000/bin/python $installation_dir/dj_iotree/manage.py collectstatic --noinput
     deactivate
 
-    # install server relevant packages
+# install server relevant packages
+    # Build gunicorn config files
+    $installation_dir/config/tmp.gunicorn.socket.sh $linux_username $installation_dir > $installation_dir/tmp/gunicorn.socket
+    $installation_dir/config/tmp.gunicorn.service.sh > $installation_dir/tmp/gunicorn.service
+    cp $installation_dir/tmp/gunicorn.socket /etc/systemd/system/gunicorn.socket
+    cp $installation_dir/tmp/gunicorn.service /etc/systemd/system/gunicorn.service
+    sudo systemctl start gunicorn.socket
+    sudo systemctl enable gunicorn.socket
+
     apt install nginx
     # TODO node + npm ?
     if [[ $installation_scheme == "public (https support)" ]]; then  # besser doch $public = true ?
@@ -356,7 +365,9 @@ do_install() {
         $pwreset_email_password \
         $djangokey \
         $postgrespass \
-        > ./tmp/config.json
+        > $installation_dir/tmp/config.json
+
+    # TODO: config Dateien in Zielordner kopieren
 
     ### TODO Make configurations ###
     # Certbot: https://www.digitalocean.com/community/tutorials/how-to-secure-nginx-with-let-s-encrypt-on-debian-11
