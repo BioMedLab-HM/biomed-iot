@@ -329,30 +329,35 @@ do_install() {
     ln -s /etc/nginx/sites-available/nginx-iotree-ssl /etc/nginx/sites-enabled
     systemctl restart nginx
 
-
     # TODO node + npm ?
+
+
     if [[ $installation_scheme == "public (https support)" ]]; then  # besser doch $public = true ?
         printf "public scheme packages installation...\n" >&2
-        
+        # TODO: TLS Verschlüsselung einrichten. Standard oder nur bei 'public'?
         apt install -y certbot python3-certbot-nginx
     fi
     
 # Install main components of IoTree42
+
+    # Mosquitto MQTT Broker
     apt install -y mosquitto mosquitto-clients
     # TODO Docker falls nötig
-
-    # install with specific version:
-    # Grafana (https://grafana.com/grafana/download?platform=linux&edition=oss)
-    wget https://dl.grafana.com/oss/release/grafana_9.5.2_amd64.deb
-    dpkg -i grafana_9.5.2_amd64.deb
 
     # InfluxDB (https://docs.influxdata.com/influxdb/v2.7/install/?t=Linux)
     wget https://dl.influxdata.com/influxdb/releases/influxdb2-2.7.0-amd64.deb
     dpkg -i influxdb2-2.7.0-amd64.deb
+    # TODO: InfluxDB configuration
 
-    # TODO nodered / flowforge
+    # Grafana (https://grafana.com/grafana/download?platform=linux&edition=oss)
+    wget https://dl.grafana.com/oss/release/grafana_9.5.2_amd64.deb
+    dpkg -i grafana_9.5.2_amd64.deb
+    # TODO: Grafana configuration
 
-    # TODO start/restart/status check: mosquitto, grafana-server, influxdb, ...
+    # TODO nodered / flowforge installation
+    # TODO: Flowforge Configuration
+
+    # TODO start/restart/status check: mosquitto, grafana-server, influxdb, ... bei Bedarf, sonst vorher bei den einzelnen Installationen
     systemctl start mosquitto
     service influxdb start
     # service influxdb status
@@ -380,7 +385,7 @@ do_install() {
     chmod 744 /etc/iotree/config.json
     # und weitere
 
-    ### TODO Make configurations ###
+    ### TODO Make configurations ###  ODEr alles schon jeweils vorher bei den einzelnen Programminstallationen
     # Certbot: https://www.digitalocean.com/community/tutorials/how-to-secure-nginx-with-let-s-encrypt-on-debian-11
     # setupt/generate user, pws, keys etc for:
     # config.json, mqttodb, grafana. influxdb, gunicorn, mosquitto, nginx-nossl/ssl, reload.sh, nodered
@@ -396,7 +401,7 @@ do_install() {
     # set file permissions!
 
 
-    ### TODO Final Confirmation Output to User ###
+    ### TODO Final confirmation output to user ###
     printf "\nAll entries above can be changed later in the file /etc/iotree/config.json\n" >&2
 
     if [ ! -e /run/gunicorn.sock ]; then echo "Check for Instructions: https://www.digitalocean.com/community/tutorials/how-to-set-up-django-with-postgres-nginx-and-gunicorn-on-debian-11";fi
@@ -404,8 +409,7 @@ do_install() {
 
     # Endpunkte (Dienste) mit ports
     # You can delete ... (if not auto delete)
-    # (if anything went wrong, user should be able to redo install or to fully remove all files
-    # ask user to reboot
+    # (if anything went wrong, user should be able to redo install or to fully remove all files (uninstall routine)
 
     if [[ $installation_scheme == "public" ]]; then
         printf "--> The server can be reached at: https://$domain/ \n" >&2 
@@ -413,9 +417,12 @@ do_install() {
         printf "--> The server can be reached at: http://$ip_address/ \n" >&2
     fi
     
+    # ask user to reboot
+
 }
 
 do_install "$@"
-printf "\n!!!!!!!!!!!!!!!!!!!!!!!!!!! END !!!!!!!!!!!!!!!!!!!!!!!!!!!\n\n"  # line is just for debugging
 # wrapped up in a function so that for some protection against only getting 
 # half the file during "curl | sh"
+
+printf "\n!!!!!!!!!!!!!!!!!!!!!!!!!!! END !!!!!!!!!!!!!!!!!!!!!!!!!!!\n\n"  # nur für debugging --> Entfernen!
