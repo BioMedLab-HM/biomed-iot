@@ -16,10 +16,10 @@ User=$USERNAME
 Group=www-data
 WorkingDirectory=$INSTALLATIONDIR/dj_iotree
 ExecStart=$INSTALLATIONDIR/dj_iotree/dj_venv/bin/gunicorn \
-          --access-logfile - \
-          --workers 3 \
-          --bind unix:/run/gunicorn.sock \
-          dj_iotree.wsgi:application
+    --access-logfile - \
+    --workers 3 \
+    --bind unix:/run/gunicorn.sock \
+    dj_iotree.wsgi:application
 
 [Install]
 WantedBy=multi-user.target

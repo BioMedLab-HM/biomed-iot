@@ -1,7 +1,7 @@
 #!/bin/sh
 
 # Get passed parameter
-VAR=$1
+# none
 
 # Define gunicorn.socket template
 cat << EOF
@@ -13,5 +13,4 @@ ListenStream=/run/gunicorn.sock
 
 [Install]
 WantedBy=sockets.target
-
 EOF

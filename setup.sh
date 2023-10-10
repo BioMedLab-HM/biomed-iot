@@ -193,15 +193,15 @@ get_ip_address() {
     printf "$ip_address"
 }
 
-prompt_for_host_name() {
+prompt_for_domain() {
     local installation_scheme=$1 
-    local host_name
+    local domain
     if [[ $installation_scheme = "public" ]]; then
-        read -p "Enter the server domain name (e.g. example.com), if available. [Default: '$(hostname)']: " host_name
+        read -p "Enter the server domain name (e.g. example.com), if available. [Default: '$(hostname)']: " domain
     else
-        host_name=$(hostname)
+        domain=$(hostname)
     fi
-    printf "$host_name"
+    printf "$domain"
 }
 
 install_basic_packages() {
@@ -219,7 +219,7 @@ do_install() {
     local pwreset_email
     local pwreset_email_password
     local ip_address
-    local host_name
+    local domain
     local installation_dir="/home/$linux_username/iotree42"
 
     print_logo_header
@@ -246,7 +246,7 @@ do_install() {
     pwreset_email_password=${pwreset_email_and_password[1]}
     # TODO: evtl. name: server_ip
     ip_address=$(get_ip_address)
-    host_name=$(prompt_for_host_name installation_scheme)
+    domain=$(prompt_for_domain installation_scheme)
 
 # Update and install software
     printf "\nStarting installation of IoTree42 for user '$linux_username'. Please do not interrupt!\n" >&2
@@ -267,26 +267,27 @@ do_install() {
 
     # Install neccessary libraries and other software
     apt install -y curl inotify-tools zip adduser git 
-    apt install -y libopenjp2-7 libtiff5 libfontconfig1
+    apt install -y libopenjp2-7 libtiff6 libfontconfig1
 
     # Install server security packages fail2ban and ufw
     apt install -y fail2ban
     systemctl start fail2ban  # start if not yet startet automatically
     systemctl enable fail2ban  # automatically start on system boot
     apt install -y ufw
-    ufw enable  # automatically start on system boot
     ufw allow ssh # port 22
-    ufw allow 'Nginx Full'  # port 80 (HTTP) and Port 443 (HTTPS)
+    ufw allow 80, 
+    ufw allow 443/tcp # ports: 22 (SSH), 80 (HTTP), 443 (HTTPS)
+    ufw enable  # activate ufw and automatically start on system boot
     # TODO: optional in fail2ban jail.local: 
         # [nginx-limit-req] 
         # enabled = true # falls Mosquitto nicht hinter nginx; `ngx_http_limit_req_module` benötigt, siehe jail.
     mkdir $installation_dir/config
-    $installation_dir/config/tmp.jail.local.sh > $installation_dir/tmp/jail.local
+    bash $installation_dir/config/tmp.jail.local.sh > $installation_dir/tmp/jail.local
     cp $installation_dir/tmp/jail.local /etc/fail2ban/jail.local
     systemctl restart fail2ban
 
     # install postgreSQL (https://www.digitalocean.com/community/tutorials/how-to-set-up-django-with-postgres-nginx-and-gunicorn-on-debian-11)
-    apt install libpq-dev postgresql postgresql-contrib
+    apt install -y libpq-dev postgresql postgresql-contrib
     sudo -u postgres psql -c "CREATE DATABASE dj_iotree_db;"
     postgrespass=$(LC_ALL=C tr -dc 'A-Za-z0-9_!@#$%^&*()-' < /dev/urandom | head -c 20 | xargs) # LC_ALL=C (locale) ensures tr command behaves consistently
     sudo -u postgres psql -c "CREATE USER dj_iotree_user WITH PASSWORD '$postgrespass';"
@@ -302,36 +303,45 @@ do_install() {
     # TODO: venv für mqtttodb Skript installieren (evtl an anderer Stelle)
 
     # Django setup
-    # TODO: remove _000 from venv
     runuser -u $linux_username -- python3 -m venv $installation_dir/dj_iotree/dj_venv
     source $installation_dir/dj_iotree/dj_venv/bin/activate
     pip install -r $installation_dir/dj_iotree/requirements.txt
-    $installation_dir/dj_iotree/dj_venv_000/bin/python $installation_dir/dj_iotree/manage.py makemigrations
-    $installation_dir/dj_iotree/dj_venv_000/bin/python $installation_dir/dj_iotree/manage.py migrate
+    $installation_dir/dj_iotree/dj_venv/bin/python $installation_dir/dj_iotree/manage.py makemigrations
+    $installation_dir/dj_iotree/dj_venv/bin/python $installation_dir/dj_iotree/manage.py migrate
     DJANGO_SUPERUSER_SCRIPT="from django.contrib.auth.models import User; User.objects.create_superuser('admin', '$django_admin_email', '$django_admin_password')"
     echo $DJANGO_SUPERUSER_SCRIPT | runuser -u $linux_username -- $installation_dir/dj_iotree/dj_venv/bin/python $installation_dir/dj_iotree/manage.py shell
-    $installation_dir/dj_iotree/dj_venv_000/bin/python $installation_dir/dj_iotree/manage.py collectstatic --noinput
+    $installation_dir/dj_iotree/dj_venv/bin/python $installation_dir/dj_iotree/manage.py collectstatic --noinput
     deactivate
 
 # install server relevant packages
     # Build gunicorn config files
-    $installation_dir/config/tmp.gunicorn.socket.sh $linux_username $installation_dir > $installation_dir/tmp/gunicorn.socket
-    $installation_dir/config/tmp.gunicorn.service.sh > $installation_dir/tmp/gunicorn.service
+    bash $installation_dir/config/tmp.gunicorn.socket.sh > $installation_dir/tmp/gunicorn.socket
+    bash $installation_dir/config/tmp.gunicorn.service.sh $linux_username $installation_dir > $installation_dir/tmp/gunicorn.service
     cp $installation_dir/tmp/gunicorn.socket /etc/systemd/system/gunicorn.socket
     cp $installation_dir/tmp/gunicorn.service /etc/systemd/system/gunicorn.service
     sudo systemctl start gunicorn.socket
     sudo systemctl enable gunicorn.socket
 
-    apt install nginx
+    # install and configure nginx
+    apt install -y nginx
+    bash $installation_dir/config/tmp.nginx-iotree-ssl.sh $installation_dir $domain > $installation_dir/tmp/nginx-iotree-ssl
+    cp $installation_dir/tmp/nginx-iotree-ssl /etc/nginx/sites-available/nginx-iotree-ssl
+    ln -s /etc/nginx/sites-available/nginx-iotree-ssl /etc/nginx/sites-enabled
+    systemctl restart nginx
+
+
+
+
+
     # TODO node + npm ?
     if [[ $installation_scheme == "public (https support)" ]]; then  # besser doch $public = true ?
         printf "public scheme packages installation...\n" >&2
         
-        apt install certbot python3-certbot-nginx
+        apt install -y certbot python3-certbot-nginx
     fi
     
 # Install main components of IoTree42
-    apt install mosquitto mosquitto-clients
+    apt install -y mosquitto mosquitto-clients
     # TODO Docker falls nötig
 
     # install with specific version:
@@ -356,18 +366,22 @@ do_install() {
 
     # Build iotree config.json file
     # TODO: config.json Daten ergänzen + evtl als array?
-    $installation_dir/config/tmp.config.json.sh \
+    bash $installation_dir/config/tmp.config.json.sh \
         $linux_username \
         $ip_address \
-        $host_name \
+        $domain \
         $adminmail \
         $pwreset_email \
         $pwreset_email_password \
         $djangokey \
         $postgrespass \
         > $installation_dir/tmp/config.json
-
-    # TODO: config Dateien in Zielordner kopieren
+    
+    cp $installation_dir/tmp/config.json /etc/iotree/config.json
+    
+    # change file permissions
+    chmod 744 /etc/iotree/config.json
+    # und weitere
 
     ### TODO Make configurations ###
     # Certbot: https://www.digitalocean.com/community/tutorials/how-to-secure-nginx-with-let-s-encrypt-on-debian-11
@@ -387,13 +401,17 @@ do_install() {
 
     ### TODO Final Confirmation Output to User ###
     printf "\nAll entries above can be changed later in the file /etc/iotree/config.json\n" >&2
+
+    if [ ! -e /run/gunicorn.sock ]; then echo "Check for Instructions: https://www.digitalocean.com/community/tutorials/how-to-set-up-django-with-postgres-nginx-and-gunicorn-on-debian-11";fi
+    # TODO: oder Handbuchcheck für Fehler
+
     # Endpunkte (Dienste) mit ports
     # You can delete ... (if not auto delete)
     # (if anything went wrong, user should be able to redo install or to fully remove all files
     # ask user to reboot
 
     if [[ $installation_scheme == "public" ]]; then
-        printf "--> The server can be reached at: https://$host_name/ \n" >&2 
+        printf "--> The server can be reached at: https://$domain/ \n" >&2 
     else
         printf "--> The server can be reached at: http://$ip_address/ \n" >&2
     fi

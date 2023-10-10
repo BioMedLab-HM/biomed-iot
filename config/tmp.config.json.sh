@@ -4,7 +4,7 @@
 # TODO: USERNAME entfernen?
 USERNAME=$1
 HOSTIP=$2
-HOSTNAME=$3
+DOMAIN=$3
 ADMINMAIL=$4
 SENDMAIL=$5
 SENDPASS=$6
@@ -23,7 +23,7 @@ cat << EOF
         "DJANGO_SECRET_KEY":"$DJANGOKEY",
 
         "HOST_IP":"$HOSTIP",
-        "HOSTNAME":"$HOSTNAME",
+        "DOMAIN":"$DOMAIN",
 
         "POSTGRES_NAME":"dj_iotree_db",
         "POSTGRES_USER":"dj_iotree_user",
