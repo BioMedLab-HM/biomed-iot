@@ -1,6 +1,6 @@
 #!/bin/sh
 
-# jail.local template definition
+# Define jail.local template
 cat << EOF
 #
 # WARNING: heavily refactored in 0.9.0 release.  Please review and

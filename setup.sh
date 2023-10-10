@@ -324,13 +324,10 @@ do_install() {
 
     # install and configure nginx
     apt install -y nginx
-    bash $installation_dir/config/tmp.nginx-iotree-ssl.sh $installation_dir $domain > $installation_dir/tmp/nginx-iotree-ssl
+    bash $installation_dir/config/tmp.nginx-iotree-ssl.sh $installation_dir $ip_address $domain > $installation_dir/tmp/nginx-iotree-ssl
     cp $installation_dir/tmp/nginx-iotree-ssl /etc/nginx/sites-available/nginx-iotree-ssl
     ln -s /etc/nginx/sites-available/nginx-iotree-ssl /etc/nginx/sites-enabled
     systemctl restart nginx
-
-
-
 
 
     # TODO node + npm ?

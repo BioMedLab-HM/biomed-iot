@@ -2,13 +2,14 @@
 
 # Get passed parameter
 INSTALLATIONDIR=$1
-DOMAIN=$2
+IP_ADDRESS=$2
+DOMAIN=$3
 
-# Define gunicorn.socket template
+# Define nginx server block template
 cat << EOF
 server {
     listen 80;
-    server_name $DOMAIN;
+    server_name $IP_ADDRESS $DOMAIN;
 
     location = /favicon.ico { access_log off; log_not_found off; }
     location /static/ {
