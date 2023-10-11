@@ -324,20 +324,39 @@ do_install() {
 
     # install and configure nginx
     apt install -y nginx
-    bash $installation_dir/config/tmp.nginx-iotree-ssl.sh $installation_dir $ip_address $domain > $installation_dir/tmp/nginx-iotree-ssl
-    cp $installation_dir/tmp/nginx-iotree-ssl /etc/nginx/sites-available/nginx-iotree-ssl
-    ln -s /etc/nginx/sites-available/nginx-iotree-ssl /etc/nginx/sites-enabled
-    systemctl restart nginx
 
-    # TODO node + npm ?
+    # TODO: Diese Variable weiter oben in Funktion den Nutzer abfragen
+    no_tls=0  
 
+    if [[ $no_tls -eq 0 ]]; then
+        if [[ $installation_scheme == "public" ]]; then  
+            # public heißt öffentlich erreichbarer Server ggf. mit www-Adresse
+            printf "'public' scheme packages (with TLS encryption) installation. Further user input may be neccessary\n" >&2
 
-    if [[ $installation_scheme == "public (https support)" ]]; then  # besser doch $public = true ?
-        printf "public scheme packages installation...\n" >&2
-        # TODO: TLS Verschlüsselung einrichten. Standard oder nur bei 'public'?
-        apt install -y certbot python3-certbot-nginx
+            bash $installation_dir/config/tmp.nginx-iotree-ssl.sh $installation_dir $domain www.$domain > $installation_dir/tmp/nginx-iotree-ssl
+            cp $installation_dir/tmp/nginx-iotree-ssl /etc/nginx/sites-available/nginx-iotree-ssl
+            ln -s /etc/nginx/sites-available/nginx-iotree-ssl /etc/nginx/sites-enabled
+            systemctl restart nginx
+
+            apt install -y certbot python3-certbot-nginx
+            certbot --nginx -d $domain -d www.$domain
+            # Optional: test server with https://www.ssllabs.com/ssltest/ 
+        else
+            printf "'local' scheme packages (with TLS encryption) installation. When prompted for 'Common Name' enter this machines hostname '$domain'.\n" >&2
+            bash $installation_dir/config/tmp.nginx-iotree-ssl.sh $installation_dir $ip_address $domain > $installation_dir/tmp/nginx-iotree-ssl
+            cp $installation_dir/tmp/nginx-iotree-ssl /etc/nginx/sites-available/nginx-iotree-ssl
+            ln -s /etc/nginx/sites-available/nginx-iotree-ssl /etc/nginx/sites-enabled
+            systemctl restart nginx
+            openssl req -x509 -nodes -days 365 -newkey rsa:2048 -keyout /etc/ssl/private/nginx-selfsigned.key -out /etc/ssl/certs/nginx-selfsigned.crt
+            # TODO: was passiert nach 365 Tagen?
+            openssl dhparam -out /etc/nginx/dhparam.pem 4096
+            # TODO: TLS setup mit Selbstzertifikat fortsetzen: https://hostadvice.com/how-to/web-hosting/vps/how-to-configure-nginx-to-use-self-signed-ssl-tls-certificate-on-ubuntu-18-04-vps-or-dedicated-server/ 
+        fi
+    else
+        # TODO: nginx-iotree-nossl config
     fi
-    
+
+
 # Install main components of IoTree42
 
     # Mosquitto MQTT Broker
