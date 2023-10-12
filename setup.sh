@@ -46,7 +46,7 @@ is_running_with_sudo() {
     fi
 }
 
-parse_installation_scheme() {
+parse_setup_scheme() {
     local chosen_scheme
 
     while getopts "pl" option 2>/dev/null; do  # 2>/dev/null discards error (stderr) messages
@@ -161,7 +161,7 @@ get_email_for_django_admin() {
 
 prompt_for_pwreset_email_credentials() {
     local pwreset_email="none"
-    local pwreset_email_password="none"
+    local pwreset_email_pass="none"
 
     printf "\nProvide an email address for the password reset function now or set it later in the file /etc/iotree/config.json\n" >&2
     while true; do
@@ -174,7 +174,7 @@ prompt_for_pwreset_email_credentials() {
                     "Confirm the password reset email address")
                 printf "Provide the password associated with the password reset email: "
                 # TODO: min Password length 12
-                pwreset_email_password=$(prompt_for_password_of_length 1 "for the password reset email")
+                pwreset_email_pass=$(prompt_for_password_of_length 1 "for the password reset email")
                 break ;;
             [Nn])
                 break ;;
@@ -182,7 +182,7 @@ prompt_for_pwreset_email_credentials() {
                 printf "Invalid input. Please enter 'Y' or 'N'." ;;
         esac
     done
-    printf "%s %s" "$pwreset_email" "$pwreset_email_password"
+    printf "%s %s" "$pwreset_email" "$pwreset_email_pass"
 }
 
 get_ip_address() {
@@ -194,9 +194,9 @@ get_ip_address() {
 }
 
 prompt_for_domain() {
-    local installation_scheme=$1 
+    local setup_scheme=$1 
     local domain
-    if [[ $installation_scheme = "public" ]]; then
+    if [[ $setup_scheme = "public" ]]; then
         read -p "Enter the server domain name (e.g. example.com), if available. [Default: '$(hostname)']: " domain
     else
         domain=$(hostname)
@@ -211,16 +211,16 @@ install_basic_packages() {
 
 do_install() {
 # TODO: mögliche Struktur: "install basic packages" --> install_... --> confgure_... usw.
-    local installation_scheme
-    local linux_username=$SUDO_USER
-    local django_admin_password
+    local setup_scheme
+    local linux_user=$SUDO_USER
+    local django_admin_pass
     local django_admin_email
-    local pwreset_email_and_password
+    local pwreset_email_and_pass
     local pwreset_email
-    local pwreset_email_password
+    local pwreset_email_pass
     local ip_address
     local domain
-    local installation_dir="/home/$linux_username/iotree42"
+    local setup_dir="/home/$linux_user/iotree42"
 
     print_logo_header
 
@@ -232,29 +232,29 @@ do_install() {
 
     is_running_with_sudo || exit $FAILURE
 
-    installation_scheme=$(parse_installation_scheme "$@") || exit $FAILURE
-    printf "\nThis will install Iotree42 with server installation scheme: $installation_scheme.\n"
+    setup_scheme=$(parse_setup_scheme "$@") || exit $FAILURE
+    printf "\nThis will install Iotree42 with server installation scheme: $setup_scheme.\n"
     confirm_proceed "Do you want to proceed?" || exit $FAILURE
 
 # Get configuration data from user
-    # linux_username=$(prompt_for_linux_username) || exit $FAILURE
-    # TODO: django_admin_password mit länge 12 in Production statt 1 zu Testzwecken
-    django_admin_password=$(prompt_for_password_of_length 1 "for your IoTree42 'admin' user")
+    # linux_user=$(prompt_for_linux_user) || exit $FAILURE
+    # TODO: django_admin_pass mit länge 12 in Production statt 1 zu Testzwecken
+    django_admin_pass=$(prompt_for_password_of_length 1 "for your IoTree42 'admin' user")
     django_admin_email=$(get_email_for_django_admin)
-    pwreset_email_and_password=($(prompt_for_pwreset_email_credentials))
-    pwreset_email=${pwreset_email_and_password[0]}
-    pwreset_email_password=${pwreset_email_and_password[1]}
+    pwreset_email_and_pass=($(prompt_for_pwreset_email_credentials))
+    pwreset_email=${pwreset_email_and_pass[0]}
+    pwreset_email_pass=${pwreset_email_and_pass[1]}
     # TODO: evtl. name: server_ip
     ip_address=$(get_ip_address)
-    domain=$(prompt_for_domain installation_scheme)
+    domain=$(prompt_for_domain setup_scheme)
 
 # Update and install software
-    printf "\nStarting installation of IoTree42 for user '$linux_username'. Please do not interrupt!\n" >&2
+    printf "\nStarting installation of IoTree42 for user '$linux_user'. Please do not interrupt!\n" >&2
     confirm_proceed "Do you want to proceed?"
-    printf "\nInstalling $installation_scheme\n" >&2
+    printf "\nInstalling $setup_scheme\n" >&2
     
     # TODO: tmp folder + config befehle evtl in separatem block?
-    mkdir $installation_dir/tmp  # create temporary folder for config files
+    mkdir $setup_dir/tmp  # create temporary folder for config files
     mkdir /etc/iotree
     # TODO: build reload3.sh file (bzw. vergleichbares) falls nötig
     # TODO: building gateway zip file
@@ -281,9 +281,9 @@ do_install() {
     # TODO: optional in fail2ban jail.local: 
         # [nginx-limit-req] 
         # enabled = true # falls Mosquitto nicht hinter nginx; `ngx_http_limit_req_module` benötigt, siehe jail.
-    mkdir $installation_dir/config
-    bash $installation_dir/config/tmp.jail.local.sh > $installation_dir/tmp/jail.local
-    cp $installation_dir/tmp/jail.local /etc/fail2ban/jail.local
+    mkdir $setup_dir/config
+    bash $setup_dir/config/tmp.jail.local.sh > $setup_dir/tmp/jail.local
+    cp $setup_dir/tmp/jail.local /etc/fail2ban/jail.local
     systemctl restart fail2ban
 
     # install postgreSQL (https://www.digitalocean.com/community/tutorials/how-to-set-up-django-with-postgres-nginx-and-gunicorn-on-debian-11)
@@ -303,22 +303,22 @@ do_install() {
     # TODO: venv für mqtttodb Skript installieren (evtl an anderer Stelle)
 
     # Django setup
-    runuser -u $linux_username -- python3 -m venv $installation_dir/dj_iotree/dj_venv
-    source $installation_dir/dj_iotree/dj_venv/bin/activate
-    pip install -r $installation_dir/dj_iotree/requirements.txt
-    $installation_dir/dj_iotree/dj_venv/bin/python $installation_dir/dj_iotree/manage.py makemigrations
-    $installation_dir/dj_iotree/dj_venv/bin/python $installation_dir/dj_iotree/manage.py migrate
-    DJANGO_SUPERUSER_SCRIPT="from django.contrib.auth.models import User; User.objects.create_superuser('admin', '$django_admin_email', '$django_admin_password')"
-    echo $DJANGO_SUPERUSER_SCRIPT | runuser -u $linux_username -- $installation_dir/dj_iotree/dj_venv/bin/python $installation_dir/dj_iotree/manage.py shell
-    $installation_dir/dj_iotree/dj_venv/bin/python $installation_dir/dj_iotree/manage.py collectstatic --noinput
+    runuser -u $linux_user -- python3 -m venv $setup_dir/dj_iotree/dj_venv
+    source $setup_dir/dj_iotree/dj_venv/bin/activate
+    pip install -r $setup_dir/dj_iotree/requirements.txt
+    $setup_dir/dj_iotree/dj_venv/bin/python $setup_dir/dj_iotree/manage.py makemigrations
+    $setup_dir/dj_iotree/dj_venv/bin/python $setup_dir/dj_iotree/manage.py migrate
+    DJANGO_SUPERUSER_SCRIPT="from django.contrib.auth.models import User; User.objects.create_superuser('admin', '$django_admin_email', '$django_admin_pass')"
+    echo $DJANGO_SUPERUSER_SCRIPT | runuser -u $linux_user -- $setup_dir/dj_iotree/dj_venv/bin/python $setup_dir/dj_iotree/manage.py shell
+    $setup_dir/dj_iotree/dj_venv/bin/python $setup_dir/dj_iotree/manage.py collectstatic --noinput
     deactivate
 
 # install server relevant packages
     # Build gunicorn config files
-    bash $installation_dir/config/tmp.gunicorn.socket.sh > $installation_dir/tmp/gunicorn.socket
-    bash $installation_dir/config/tmp.gunicorn.service.sh $linux_username $installation_dir > $installation_dir/tmp/gunicorn.service
-    cp $installation_dir/tmp/gunicorn.socket /etc/systemd/system/gunicorn.socket
-    cp $installation_dir/tmp/gunicorn.service /etc/systemd/system/gunicorn.service
+    bash $setup_dir/config/tmp.gunicorn.socket.sh > $setup_dir/tmp/gunicorn.socket
+    bash $setup_dir/config/tmp.gunicorn.service.sh $linux_user $setup_dir > $setup_dir/tmp/gunicorn.service
+    cp $setup_dir/tmp/gunicorn.socket /etc/systemd/system/gunicorn.socket
+    cp $setup_dir/tmp/gunicorn.service /etc/systemd/system/gunicorn.service
     sudo systemctl start gunicorn.socket
     sudo systemctl enable gunicorn.socket
 
@@ -329,27 +329,38 @@ do_install() {
     no_tls=0  
 
     if [[ $no_tls -eq 0 ]]; then
-        if [[ $installation_scheme == "public" ]]; then  
-            # public heißt öffentlich erreichbarer Server ggf. mit www-Adresse
+        apt install -y openssl
+
+        if [[ $setup_scheme == "public" ]]; then  
+            # TODO: evtl setup_scheme refactoring. public heißt öffentlich erreichbarer Server ggf. mit www-Adresse
             printf "'public' scheme packages (with TLS encryption) installation. Further user input may be neccessary\n" >&2
 
-            bash $installation_dir/config/tmp.nginx-iotree-ssl.sh $installation_dir $domain www.$domain > $installation_dir/tmp/nginx-iotree-ssl
-            cp $installation_dir/tmp/nginx-iotree-ssl /etc/nginx/sites-available/nginx-iotree-ssl
-            ln -s /etc/nginx/sites-available/nginx-iotree-ssl /etc/nginx/sites-enabled
+            bash $setup_dir/config/tmp.nginx-iotree-ssl-public.sh $setup_dir $domain > $setup_dir/tmp/nginx-iotree-ssl-public
+            cp $setup_dir/tmp/nginx-iotree-ssl-public /etc/nginx/sites-available/nginx-iotree-ssl-public
+            ln -s /etc/nginx/sites-available/nginx-iotree-ssl-public /etc/nginx/sites-enabled
             systemctl restart nginx
 
             apt install -y certbot python3-certbot-nginx
-            certbot --nginx -d $domain -d www.$domain
-            # Optional: test server with https://www.ssllabs.com/ssltest/ 
+            openssl dhparam -out /etc/nginx/dhparam.pem 4096  # Generate Diffie-Hellman group parameters to enhance security.
+            cp $setup_dir/tmp/tmp.ssl-params.conf /etc/nginx/snippets/ssl-params.conf # Configuration snippet to define SSL settings
+            certbot --nginx --rsa-key-size 2048 -d $domain -d www.$domain  # default: 2048 bit; higher values may cost server performance
+            # Certbot's systemd timer auto-renews certificates within 30 days of expiration twice daily.
+            # Certbot adds a systemd timer that runs twice a day and automatically renews any certificate that’s within thirty days of expiration.
+            # Optional: test server with https://www.ssllabs.com/ssltest/
         else
-            printf "'local' scheme packages (with TLS encryption) installation. When prompted for 'Common Name' enter this machines hostname '$domain'.\n" >&2
-            bash $installation_dir/config/tmp.nginx-iotree-ssl.sh $installation_dir $ip_address $domain > $installation_dir/tmp/nginx-iotree-ssl
-            cp $installation_dir/tmp/nginx-iotree-ssl /etc/nginx/sites-available/nginx-iotree-ssl
+            printf "'local' scheme packages (with TLS encryption) installation. This can take some time. Further user input may be neccessary. When prompted for 'Common Name' enter this machines hostname '$domain'.\n" >&2
+            bash $setup_dir/config/tmp.nginx-iotree-ssl.sh $setup_dir $ip_address $domain > $setup_dir/tmp/nginx-iotree-ssl
+            cp $setup_dir/tmp/nginx-iotree-ssl /etc/nginx/sites-available/nginx-iotree-ssl
             ln -s /etc/nginx/sites-available/nginx-iotree-ssl /etc/nginx/sites-enabled
             systemctl restart nginx
-            openssl req -x509 -nodes -days 365 -newkey rsa:2048 -keyout /etc/ssl/private/nginx-selfsigned.key -out /etc/ssl/certs/nginx-selfsigned.crt
+            # Create Self-Signed Certificate
+            openssl req -x509 -nodes -days 365 -newkey rsa:2048 -keyout /etc/ssl/private/nginx-iotree.key -out /etc/ssl/certs/nginx-iotree.crt
             # TODO: was passiert nach 365 Tagen?
-            openssl dhparam -out /etc/nginx/dhparam.pem 4096
+            # Configure Nginx HTTP Web Server to use SSL
+            openssl dhparam -out /etc/nginx/dhparam.pem 4096  # Generate Diffie-Hellman group parameters to enhance security.
+            cp $setup_dir/tmp/tmp.self-signed.conf /etc/nginx/snippets/self-signed.conf  # Configuration snippet for SSL key and cert.
+            cp $setup_dir/tmp/tmp.ssl-params.conf /etc/nginx/snippets/ssl-params.conf # Configuration snippet to define SSL settings
+
             # TODO: TLS setup mit Selbstzertifikat fortsetzen: https://hostadvice.com/how-to/web-hosting/vps/how-to-configure-nginx-to-use-self-signed-ssl-tls-certificate-on-ubuntu-18-04-vps-or-dedicated-server/ 
         fi
     else
@@ -387,18 +398,18 @@ do_install() {
 
     # Build iotree config.json file
     # TODO: config.json Daten ergänzen + evtl als array?
-    bash $installation_dir/config/tmp.config.json.sh \
-        $linux_username \
+    bash $setup_dir/config/tmp.config.json.sh \
+        $linux_user \
         $ip_address \
         $domain \
         $adminmail \
         $pwreset_email \
-        $pwreset_email_password \
+        $pwreset_email_pass \
         $djangokey \
         $postgrespass \
-        > $installation_dir/tmp/config.json
+        > $setup_dir/tmp/config.json
     
-    cp $installation_dir/tmp/config.json /etc/iotree/config.json
+    cp $setup_dir/tmp/config.json /etc/iotree/config.json
     
     # change file permissions
     chmod 744 /etc/iotree/config.json
@@ -430,7 +441,7 @@ do_install() {
     # You can delete ... (if not auto delete)
     # (if anything went wrong, user should be able to redo install or to fully remove all files (uninstall routine)
 
-    if [[ $installation_scheme == "public" ]]; then
+    if [[ $setup_scheme == "public" ]]; then
         printf "--> The server can be reached at: https://$domain/ \n" >&2 
     else
         printf "--> The server can be reached at: http://$ip_address/ \n" >&2

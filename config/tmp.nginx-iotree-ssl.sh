@@ -9,6 +9,7 @@ DOMAIN=$3
 cat << EOF
 server {
     listen 80;
+    listen [::]:80;
     server_name $IP_ADDRESS $DOMAIN;
 
     location = /favicon.ico { access_log off; log_not_found off; }
