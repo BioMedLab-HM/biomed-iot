@@ -1,5 +1,11 @@
 #!/bin/sh
 
+# TODO: 
+# - Ergänzungen bei Gunicorn?
+# - location /media/ ...
+# - ggf. Grafana?
+# - weitere Dienste?
+
 # Get passed parameter
 SETUP_DIR=$1
 IP_ADDRESS=$2
@@ -29,7 +35,7 @@ server {
     listen 80;
     listen [::]:80;
 
-    server_name $IP_ADDRESS $DOMAIN;
+    server_name $IP_ADDRESS $MACHINE_NAME;
 
     return 302 https://$server_name$request_uri;  # change 302 to 301 after successfull testing
 }
