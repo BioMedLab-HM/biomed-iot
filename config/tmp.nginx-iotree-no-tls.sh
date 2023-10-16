@@ -1,7 +1,11 @@
 #!/bin/sh
 
+# Not using TLS encryption is not recommended but may be considered 
+# when security is less important and 
+# system ressources  are limited (e.g. on older Raspberry Pi)
+
 # Get passed parameter
-INSTALLATIONDIR=$1
+SETUP_DIR=$1
 IP_ADDRESS=$2
 DOMAIN=$3
 
@@ -14,7 +18,7 @@ server {
 
     location = /favicon.ico { access_log off; log_not_found off; }
     location /static/ {
-        root $INSTALLATIONDIR/dj_iotree;
+        root $SETUP_DIR/dj_iotree;
     }
 
     location / {

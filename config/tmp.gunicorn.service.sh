@@ -2,7 +2,7 @@
 
 # Get passed parameter
 USERNAME=$1
-INSTALLATIONDIR=$2
+SETUP_DIR=$2
 
 # Define gunicorn.service template
 cat << EOF
@@ -14,8 +14,8 @@ After=network.target
 [Service]
 User=$USERNAME
 Group=www-data
-WorkingDirectory=$INSTALLATIONDIR/dj_iotree
-ExecStart=$INSTALLATIONDIR/dj_iotree/dj_venv/bin/gunicorn \
+WorkingDirectory=$SETUP_DIR/dj_iotree
+ExecStart=$SETUP_DIR/dj_iotree/dj_venv/bin/gunicorn \
     --access-logfile - \
     --workers 3 \
     --bind unix:/run/gunicorn.sock \
