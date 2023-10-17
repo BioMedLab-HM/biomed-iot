@@ -342,6 +342,7 @@ do_install() {
     apt install -y nginx
 
     if [[ $setup_scheme == "TLS_WITH_DOMAIN" ]]; then
+        # TODO: TLS-Setup mit Domain testen (use: sudo nginx -t)
         printf "\nInstalling packages for '$setup_scheme' scheme. Further user input may be neccessary\n" >&2
         apt install -y openssl  # some names still use ssl
         apt install -y certbot python3-certbot-nginx
@@ -359,6 +360,7 @@ do_install() {
         systemctl restart nginx  # restart Nginx to implement changes
 
     elif [[ $setup_scheme != "TLS_NO_DOMAIN" ]]; then
+        # TODO: TLS-Setup mit Selbstzertifikat testen (use: sudo nginx -t)
         printf "\nInstalling packages and doing configurations for '$setup_scheme' scheme. This can take some time.\n" >&2
         apt install -y openssl
 
@@ -370,7 +372,8 @@ do_install() {
         # Create Self-Signed Certificate
         printf "Further user input may be neccessary. When prompted for 'Common Name' enter this machines hostname: '$machine_name'.\n" >&2
         openssl req -x509 -nodes -days 365 -newkey rsa:2048 -keyout /etc/ssl/private/nginx-iotree.key -out /etc/ssl/certs/nginx-iotree.crt
-        # TODO: was passiert nach 365 Tagen? --> chronjob!? oder höhere Zahl?
+        # TODO: Zertifikationserneuerung --> cronjob!? (besser als lange Zeitangabe)
+        # TODO: openssl req evtl per config file automatisieren
 
         # Configure Nginx HTTP Web Server to use TLS
         openssl dhparam -out /etc/nginx/dhparam.pem 2048  # Generate Diffie-Hellman group parameters to enhance security. Using 4096 may take >> 30 min!
