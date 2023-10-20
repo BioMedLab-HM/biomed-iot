@@ -342,7 +342,7 @@ do_install() {
     apt install -y nginx
 
     if [[ $setup_scheme == "TLS_WITH_DOMAIN" ]]; then
-        # TODO: TLS-Setup mit Domain testen (use: sudo nginx -t)
+        # TODO: TLS-Setup mit Domain testen (use: "sudo nginx -t" to check for syntax errors)
         printf "\nInstalling packages for '$setup_scheme' scheme. Further user input may be neccessary\n" >&2
         apt install -y openssl  # some names still use ssl
         apt install -y certbot python3-certbot-nginx
