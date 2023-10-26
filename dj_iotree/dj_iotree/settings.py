@@ -39,7 +39,7 @@ ALLOWED_HOSTS = [config.get('HOST_IP'), config.get('DOMAIN'),"localhost", "127.0
 
 INSTALLED_APPS = [
     'core.apps.CoreConfig',
-    'users.apps.UsersConfig',
+    'users', # 'users.apps.UsersConfig',
     'crispy_forms',
     'crispy_bootstrap5',
     'django.contrib.admin',
@@ -48,6 +48,7 @@ INSTALLED_APPS = [
     'django.contrib.sessions',
     'django.contrib.messages',
     'django.contrib.staticfiles',
+    #'oauth2_provider',
 ]
 
 MIDDLEWARE = [
@@ -98,6 +99,13 @@ DATABASES = {
     }
 }
 
+AUTH_USER_MODEL='users.CustomUser'
+
+AUTHENTICATION_BACKENDS = [
+    'users.backends.UsernameAuthBackend',
+    'users.backends.EmailAuthBackend',
+    # ...any other authentication backend
+]
 
 # Password validation
 # https://docs.djangoproject.com/en/4.2/ref/settings/#auth-password-validators
@@ -160,3 +168,41 @@ DEFAULT_AUTO_FIELD = 'django.db.models.BigAutoField'
 
 CRISPY_ALLOWED_TEMPLATE_PACKS = "bootstrap5"
 CRISPY_TEMPLATE_PACK = "bootstrap5"
+
+# TODO: Hier weitere security settings?
+
+# TODO: Logger nach Debugging entfernen
+LOGGING = {
+    'version': 1,
+    'disable_existing_loggers': False,
+    'formatters': {
+        'verbose': {
+            'format': '{levelname} {asctime} {module} {message}',
+            'style': '{',
+        },
+        'simple': {
+            'format': '{levelname} {message}',
+            'style': '{',
+        },
+    },
+    'handlers': {
+        'file': {
+            'level': 'DEBUG',
+            'class': 'logging.FileHandler',
+            'filename': '/home/rene/dev/iotree42/debug.log',   # Choose your path
+            'formatter': 'verbose'
+        },
+    },
+    'loggers': {
+        'django': {
+            'handlers': ['file'],
+            'level': 'DEBUG',
+            'propagate': True,
+        },
+        'users': {  # Replace 'your_app_name' with the name of your app or module
+            'handlers': ['file'],
+            'level': 'DEBUG',
+            'propagate': False,
+        },
+    },
+}
