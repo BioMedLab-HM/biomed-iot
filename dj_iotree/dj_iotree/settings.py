@@ -39,7 +39,7 @@ ALLOWED_HOSTS = [config.get('HOST_IP'), config.get('DOMAIN'),"localhost", "127.0
 
 INSTALLED_APPS = [
     'core.apps.CoreConfig',
-    'users', # 'users.apps.UsersConfig',
+    'users.apps.UsersConfig',  # 'users', 
     'crispy_forms',
     'crispy_bootstrap5',
     'django.contrib.admin',
@@ -171,7 +171,8 @@ CRISPY_TEMPLATE_PACK = "bootstrap5"
 
 # TODO: Hier weitere security settings?
 
-# TODO: Logger nach Debugging entfernen
+
+# TODO: Logger ggf. nach Debugging entfernen?
 LOGGING = {
     'version': 1,
     'disable_existing_loggers': False,
