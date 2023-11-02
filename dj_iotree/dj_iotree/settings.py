@@ -16,6 +16,7 @@ from pathlib import Path
 from django.db.backends.postgresql.psycopg_any import IsolationLevel
 
 # TODO: config.json befüllen
+# TODO: Optional config verschlüsseln
 with open('/etc/iotree/config.json', encoding='utf-8') as config_file:
    config = json.load(config_file)
 
@@ -107,6 +108,13 @@ AUTHENTICATION_BACKENDS = [
     # ...any other authentication backend
 ]
 
+OAUTH2_PROVIDER = {
+    'AUTHORIZATION_CODE_EXPIRE_SECONDS': 60 * 65,
+    'ACCESS_TOKEN_EXPIRE_SECONDS': 60 * 60,
+    'OAUTH_SINGLE_ACCESS_TOKEN': True,
+    'OAUTH_DELETE_EXPIRED': True
+ }
+
 # Password validation
 # https://docs.djangoproject.com/en/4.2/ref/settings/#auth-password-validators
 
@@ -133,7 +141,7 @@ LANGUAGE_CODE = 'en-us'
 
 TIME_ZONE = 'UTC'
 
-USE_I18N = True
+USE_I18N = True  # Internationalization framework, enabling support for multiple languages
 
 USE_TZ = True
 
