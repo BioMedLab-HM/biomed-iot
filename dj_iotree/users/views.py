@@ -63,3 +63,22 @@ def profile(request):
     }
 
     return render(request, 'users/profile.html', context)
+
+
+# Prepare a map of common locations to timezone choices you wish to offer.
+common_timezones = {
+    "Berlin": "Europe/Berlin",
+    "London": "Europe/London",
+    "New York": "America/New_York",
+}
+timezones = [('New York', 'America/New_York'), ('London', 'Europe/London')]
+
+@login_required
+def set_timezone(request):
+    if request.method == "POST":
+        request.session["django_timezone"] = request.POST["timezone"]
+        return redirect("/")
+    else:
+         # Convert the dictionary to a list of tuples and sort by city name
+        timezones_list = sorted(common_timezones.items(), key=lambda x: x[0])
+        return render(request, "set_timezone.html", {"timezones": timezones_list})

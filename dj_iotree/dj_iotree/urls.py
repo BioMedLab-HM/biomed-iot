@@ -50,6 +50,7 @@ urlpatterns = [
              template_name='users/password_reset_complete.html'
          ),
          name='password_reset_complete'),
+    path('set_timezone/', user_views.set_timezone, name='set_timezone'),
     path('', include('core.urls')),
 ]
 
