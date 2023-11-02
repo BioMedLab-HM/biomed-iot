@@ -49,7 +49,9 @@ INSTALLED_APPS = [
     'django.contrib.sessions',
     'django.contrib.messages',
     'django.contrib.staticfiles',
+    # TODO: OAuth ggf. für Grafana und NodeRed/FlowFuse (siehe auch CORS Middleware)
     'oauth2_provider',
+    'corsheaders',
 ]
 
 MIDDLEWARE = [
@@ -60,7 +62,9 @@ MIDDLEWARE = [
     'django.contrib.auth.middleware.AuthenticationMiddleware',
     'django.contrib.messages.middleware.MessageMiddleware',
     'django.middleware.clickjacking.XFrameOptionsMiddleware',
-    'users.middleware.TimezoneMiddleware',
+    'corsheaders.middleware.CorsMiddleware',
+    'users.middleware.TimezoneMiddleware',  # see https://docs.djangoproject.com/en/4.2/topics/i18n/timezones/
+    # TODO: Ggf. automatische TZ-Erkennung https://github.com/adamcharnock/django-tz-detect
 ]
 
 ROOT_URLCONF = 'dj_iotree.urls'
@@ -109,12 +113,15 @@ AUTHENTICATION_BACKENDS = [
     # ...any other authentication backend
 ]
 
-OAUTH2_PROVIDER = {
-    'AUTHORIZATION_CODE_EXPIRE_SECONDS': 60 * 65,
-    'ACCESS_TOKEN_EXPIRE_SECONDS': 60 * 60,
-    'OAUTH_SINGLE_ACCESS_TOKEN': True,
-    'OAUTH_DELETE_EXPIRED': True
- }
+# TODO: Nach setup: https://stackoverflow.com/questions/40933006/how-to-increase-expires-in-time-of-a-access-token-in-oauth-provider-toolkit-dj
+# OAUTH2_PROVIDER = {
+#     'AUTHORIZATION_CODE_EXPIRE_SECONDS': 60 * 65,
+#     'ACCESS_TOKEN_EXPIRE_SECONDS': 60 * 60,
+#     'OAUTH_SINGLE_ACCESS_TOKEN': True,
+#     'OAUTH_DELETE_EXPIRED': True
+#  }
+# TODO: Nur zum Testen/Tutorial: CORS_ORIGIN_ALLOW_ALL = True
+# CORS_ORIGIN_ALLOW_ALL = True
 
 # Password validation
 # https://docs.djangoproject.com/en/4.2/ref/settings/#auth-password-validators
