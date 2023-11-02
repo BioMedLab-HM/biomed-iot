@@ -387,13 +387,14 @@ do_install() {
         bash $setup_dir/config/tmp.nginx-iotree-no-tls.sh $setup_dir $server_ip $machine_name > $setup_dir/tmp/nginx-iotree-no-tls.conf
         cp $setup_dir/tmp/nginx-iotree-no-tls.conf /etc/nginx/sites-available/
         ln -s /etc/nginx/sites-available/nginx-iotree-no-tls.conf /etc/nginx/sites-enabled
+        
+        systemctl restart nginx  # restart Nginx to implement changes
     fi
 
 # Install main components of IoTree42
 
     # Mosquitto MQTT Broker
     apt install -y mosquitto mosquitto-clients
-    # TODO Docker falls nötig
 
     # InfluxDB (https://docs.influxdata.com/influxdb/v2.7/install/?t=Linux)
     wget https://dl.influxdata.com/influxdb/releases/influxdb2-2.7.0-amd64.deb
@@ -407,6 +408,7 @@ do_install() {
 
     # TODO nodered / flowforge installation
     # TODO: Flowforge Configuration
+    # TODO Docker falls nötig
 
     # TODO start/restart/status check: mosquitto, grafana-server, influxdb, ... bei Bedarf, sonst vorher bei den einzelnen Installationen
     systemctl start mosquitto
@@ -447,6 +449,7 @@ do_install() {
 
 
     ### TODO Final confirmation output to user ###
+    # Alle printouts in eine txt- oder log-Datei ausgeben
     printf "\nAll entries above can be changed later in the file /etc/iotree/config.json\n" >&2
 
     if [ ! -e /run/gunicorn.sock ]; then echo "Check for Instructions: https://www.digitalocean.com/community/tutorials/how-to-set-up-django-with-postgres-nginx-and-gunicorn-on-debian-11";fi
