@@ -1,8 +1,5 @@
 #!/bin/sh
 
-# Get passed parameter
-# none
-
 # Define gunicorn.socket template
 cat << EOF
 [Unit]

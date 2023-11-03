@@ -190,7 +190,7 @@ CRISPY_TEMPLATE_PACK = "bootstrap5"
 # TODO: Hier weitere security settings?
 
 
-# TODO: Logger ggf. nach Debugging entfernen?
+# TODO: KEIN Logger level "DEBUG" in production?
 LOGGING = {
     'version': 1,
     'disable_existing_loggers': False,

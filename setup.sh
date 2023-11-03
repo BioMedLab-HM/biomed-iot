@@ -395,6 +395,16 @@ do_install() {
 
     # Mosquitto MQTT Broker
     apt install -y mosquitto mosquitto-clients
+    local dynsec_plugin_path
+    echo whereis mosquitto_dynamic_security.so > dynsec_plugin_path
+    if [[ $setup_scheme == "TLS_WITH_DOMAIN" ]]; then
+        :
+    elif [[ $setup_scheme != "TLS_NO_DOMAIN" ]]; then
+        :
+    else  # setup_scheme == "NO_TLS"
+        bash $setup_dir/config/tmp.mosquitto-no-tls.sh $setup_dir $dynsec_plugin_path > $setup_dir/tmp/mosquitto-no-tls.conf
+        cp $setup_dir/tmp/mosquitto-no-tls.conf /etc/mosquitto/conf.d
+    fi
 
     # InfluxDB (https://docs.influxdata.com/influxdb/v2.7/install/?t=Linux)
     wget https://dl.influxdata.com/influxdb/releases/influxdb2-2.7.0-amd64.deb
@@ -421,6 +431,8 @@ do_install() {
 
     # Build iotree config.json file
     # TODO: config.json Daten ergänzen + evtl als array?
+    # TODO: Sollen die Nutzernamen für die Dienste bereits im Template stehen oder sollen sie
+    # im Setup zufallsgeneriert werden?!
     bash $setup_dir/config/tmp.config.json.sh \
         $linux_user \
         $server_ip \
