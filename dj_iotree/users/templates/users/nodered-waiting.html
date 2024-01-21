@@ -1,0 +1,31 @@
+<div class="text-center mt-5">
+    <h1>Node-RED Instance Is Starting Up</h1>
+    <div class="form-container">
+        <p>Your Node-RED instance is just restarting. Please wait, this may take a few seconds.</p>
+        <p>Reloading in <span id="countdown" class="fw-bold">5</span> seconds...</p>
+        <button id="reloadButton" data-url="{% url 'nodered-manager' %}">Reload Page Now</button>
+    </div>
+</div>
+
+<script>
+    var redirectUrl = "{% url 'nodered-manager' %}";
+    var countdownElement = document.getElementById('countdown');
+    var countdownTime = 5; // seconds
+
+    var countdownInterval = setInterval(function() {
+        countdownTime--;
+        countdownElement.textContent = countdownTime;
+
+        if (countdownTime <= 0) {
+            clearInterval(countdownInterval);
+            window.location.href = redirectUrl; // Use the variable
+        }
+    }, 1000); // Update the countdown every second
+</script>
+
+<script>
+    document.getElementById('reloadButton').addEventListener('click', function() {
+        var url = this.getAttribute('data-url');
+        window.location.href = url;
+    });
+</script>

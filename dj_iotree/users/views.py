@@ -1,8 +1,21 @@
+import json
 from django.shortcuts import render, redirect
 from django.contrib import messages
 from django.contrib.auth.decorators import login_required
 from django.contrib.auth import authenticate, login
 from .forms import UserRegisterForm, UserUpdateForm, ProfileUpdateForm, UserLoginForm
+from .models import NodeRedUserData
+import docker
+import secrets
+from django.http import JsonResponse
+from django.db import IntegrityError
+import random
+import string
+from django.db import transaction
+
+
+with open('/etc/iotree/config.json', encoding='utf-8') as config_file:
+   config = json.load(config_file)
 
 
 def register(request):
@@ -82,3 +95,145 @@ def set_timezone(request):
          # Convert the dictionary to a list of tuples and sort by city name
         timezones_list = sorted(common_timezones.items(), key=lambda x: x[0])
         return render(request, "set_timezone.html", {"timezones": timezones_list})
+
+
+@login_required
+def nodered_manager(request):
+    print("nodered_manager called")  # TODO: Später entfernen
+
+    user = request.user
+    container = None
+    container_status = 'no-container'
+    container_name = None
+    access_token = ''
+    
+    # hole nodered daten aus DB. Wenn nicht klappt, status 'no-container'
+    try: 
+        nodered_data = NodeRedUserData.objects.get(user=user)
+        container_name = nodered_data.container_name
+        access_token = nodered_data.access_token
+    ### Except "kein DB Eintrag": 
+    except NodeRedUserData.DoesNotExist:
+        container_status = 'no-container'
+    
+    if container_name is not None:
+        # hole container wenn nicht None. Wenn nicht klappt, status 'no-container'
+        docker_client = docker.from_env()
+        try:
+            container = docker_client.containers.get(container_name)
+            container_status = container.status
+        except docker.errors.NotFound:  # If the container does not exist
+            container_status = container_status#'no-container'
+        # oder redirect errorseite
+        except docker.errors.APIError as e:  # various reasons:  invalid parameters, issues with the Docker daemon, network problems, other Docker-related issues
+            container_status = 'error'  # will lead to default case that renders nodered-unavailable page
+
+    # Bearbeite POST requests
+    if request.method == 'POST':
+        action = request.POST.get('action')
+
+        if action == 'create':
+            # neuen Container-Name generieren
+            allowed_chars = string.ascii_lowercase + string.ascii_uppercase + string.digits
+            new_name = ''.join(random.choice(allowed_chars) for _ in range(20))  # 20 random upper/lower case letters and digits
+            # Access-Token generieren
+            new_token = secrets.token_urlsafe(22)
+            # Container-Name und Access-Token in DB speichern
+            try:
+                with transaction.atomic():
+                    obj, created = NodeRedUserData.objects.get_or_create(user=user, defaults={
+                        'container_name': new_name,
+                        # 'container_port': 0,
+                        'access_token': new_token
+                    })
+                    if not created:
+                        # Need to update the existing object with the new values.
+                        obj.container_name = new_name
+                        # obj.container_port = 0
+                        obj.access_token = new_token
+                        obj.save()  # Here you might specify update_fields if required.
+            except IntegrityError:
+                # Handle the IntegrityError case, could log or re-raise with additional context
+                pass
+
+            container_volume_name = f'{new_name}-volume'
+            docker_client = docker.from_env()
+            try:
+                container = docker_client.containers.run(
+                    "nodered/node-red",
+                    detach=True,
+                    ports={'1880/tcp': None},
+                    volumes={container_volume_name: {'bind': '/data', 'mode': 'rw'}},
+                    name=new_name
+                )
+                # Hier war: container.reload()
+                container_status = 'created' # container.status
+            except docker.errors.ContainerError:
+                pass  # --> hier NodeRed Baustellenseite anzeigen und nicht neu laden (Sackgasse)
+            except docker.errors.ImageNotFound:
+                pass  # --> hier NodeRed Baustellenseite anzeigen und nicht neu laden (Sackgasse)                                          
+            # TODO: settings.js action für Authentication hier
+            
+        elif action == 'start':
+            # start the container
+            try:
+                container.start()
+            except docker.errors.APIError as e:
+                container_status = 'error'  # will lead to default case that renders nodered-unavailable page
+        
+        else:
+            container_status = 'error'  # will lead to default case that renders nodered-unavailable page
+
+    # hole container status
+    if container_status != 'no-container' and container_status != 'error':
+        container_status = container.status
+
+    # Rendere entsprechende Templates je Container Status
+    match container_status:  # TODO: evtl container health statt status weil differenzierter
+        case 'no-container':
+            content_template = 'users/nodered-create-instance.html'
+        case 'created':
+            content_template = 'users/nodered-waiting.html'
+        case 'restarting':  # alternativ "starting" bei Variante mit container health
+            content_template = 'users/nodered-waiting.html'
+        case 'exited':
+            content_template = 'users/nodered-start-instance.html'
+        case 'running':  # by container.status
+            # Reload to get latest state and port information
+            container.reload()
+            container_health = container.attrs['State']['Health']['Status']
+            print("Container Health:", container_health)
+
+            # Node-RED is ready
+            if container_health == 'healthy':
+                content_template = 'users/nodered-embedded.html'
+            else:
+                # If Node-RED is not yet healthy, check and update the port if necessary
+                container_port = container.attrs['NetworkSettings']['Ports']['1880/tcp'][0]['HostPort']
+                if nodered_data.container_port != container_port:
+                    nodered_data.container_port = container_port
+                    nodered_data.save(update_fields=['container_port'])
+                    print("nodered_data saved - container_port updated")  # TODO: Remove later
+                
+                content_template = 'users/nodered-waiting.html'
+
+        case _:
+            content_template = 'users/nodered-unavailable.html'
+
+    context = {'content_template': content_template, 'instance_name': container_name, 'status': container_status}
+    return render(request, 'users/nodered-manager.html', context)
+
+
+
+### Alt ###
+
+@login_required
+def check_container_status(request, username):
+    client = docker.from_env()
+    try:
+        container = client.containers.get(username)
+        is_running = container.status == 'running'
+    except docker.errors.NotFound:
+        is_running = False
+
+    return JsonResponse({'is_running': is_running})

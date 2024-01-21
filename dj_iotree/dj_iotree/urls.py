@@ -24,6 +24,14 @@ from users import views as user_views
 urlpatterns = [
     path('admin/', admin.site.urls),
     path('o/', include('oauth2_provider.urls', namespace='oauth2_provider')),
+    path('nodered-manager/', user_views.nodered_manager, name='nodered-manager'),
+    path('nodered-create-instance/', user_views.nodered_manager, name='nodered-create-instance'),
+    path('nodered-start-instance/', user_views.nodered_manager, name='nodered-start-instance'),
+    path('nodered-waiting/', user_views.nodered_manager, name='nodered-waiting'),
+    path('nodered-embedded/', user_views.nodered_manager, name='nodered-embedded'),
+    path('nodered-unavailable/', user_views.nodered_manager, name='nodered-unavailable'),
+        # path('check-container-status/<str:username>/', user_views.check_container_status, name='check_container_status'),
+        # path('nodered/waiting', user_views.nodered_waiting, name='nodered_waiting'),
     # path('auth/callback/', views.oauth_callback, name='oauth_callback'),
     path('register/', user_views.register, name='register'),
     path('profile/', user_views.profile, name='profile'),
@@ -50,7 +58,7 @@ urlpatterns = [
              template_name='users/password_reset_complete.html'
          ),
          name='password_reset_complete'),
-    path('set_timezone/', user_views.set_timezone, name='set_timezone'),
+    # path('set_timezone/', user_views.set_timezone, name='set_timezone'),
     path('', include('core.urls')),
 ]
 

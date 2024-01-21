@@ -24,7 +24,7 @@ print_logo_header() {
 <<<----       Version v0.x.y        --->>>
 
 For installation on a Raspberry Pi, use a PiBakery image on GitHub: 
-<hier Link>
+# TODO: <hier Link>
 
 EOF
 }
@@ -48,27 +48,6 @@ is_running_with_sudo() {
     fi
 }
 
-# TODO: A parse options function originally used for setup scheme. Maybe usage for general pupose, else delete
-# parse_setup_scheme() {
-#     local chosen_scheme
-
-#     while getopts "pl" option 2>/dev/null; do  # 2>/dev/null discards error (stderr) messages
-#         case $option in
-#             p)  
-#                 chosen_scheme="public" ;;
-#             l)  
-#                 chosen_scheme="local" ;;
-#             ?)  
-#                 printf "Invalid option! Usage: sudo bash setup.sh -p (public) or -l (local)\n" >&2
-#                 return $FAILURE ;;
-#         esac
-#     done
-#     if [ -z "$chosen_scheme" ]; then
-#         printf "No options were used. Usage: sudo bash setup.sh -p (public) or -l (local)\n" >&2
-#         return $FAILURE
-#     fi
-#     printf "$chosen_scheme"
-# }
 
 get_setup_scheme() {
     local chosen_scheme="TLS_NO_DOMAIN"  # Default to TLS_NO_DOMAIN
@@ -116,7 +95,14 @@ confirm_proceed() {
     done
 }
 
-get_password_of_length() {
+get_rand_str_of_length() {
+    local string_length=$1
+    # LC_ALL=C (locale) ensures tr command behaves consistently
+    rand_string=$(LC_ALL=C tr -dc 'A-Za-z0-9_!@#$%^&*()-' < /dev/urandom | head -c $string_length | xargs)
+    printf "$rand_string"
+}
+
+get_password_min_length() {
     local required_length=$1
     local for_reason=$2
     local password
@@ -173,7 +159,7 @@ get_email_for_django_admin() {
 
     while true; do
         email=$(get_confirmed_text_input \
-            "Enter an email address for your IoTree42 user 'admin'" \
+            "Enter an email address for your IoTree42 admin user" \
             "Confirm your email address")
 
         # Very basic email validity check. Maximum length of an email is 320 characters per RFC 3696
@@ -201,7 +187,7 @@ get_pwreset_email_credentials() {
                     "Enter the password reset email address" \
                     "Confirm the password reset email address")
                 printf "Provide the password associated with the password reset email: "
-                pwreset_email_pass=$(get_password_of_length 12 "for the password reset email")
+                pwreset_email_pass=$(get_password_min_length 12 "for the password reset email")
                 break ;;
             [Nn])
                 break ;;
@@ -231,6 +217,7 @@ do_install() {
 
     local chosen_scheme
     local linux_user=$SUDO_USER
+    local django_admin_name="admin"
     local django_admin_pass
     local django_admin_email
     local pwreset_email_and_pass
@@ -240,6 +227,8 @@ do_install() {
     local machine_name=$(hostname)
     local domain
     local setup_dir="/home/$linux_user/iotree42"
+    local linux_codename=$(cat /etc/os-release | grep VERSION_CODENAME | cut -d'=' -f2)
+
 
     print_logo_header
 
@@ -257,7 +246,7 @@ do_install() {
     confirm_proceed "Do you want to proceed?" || exit $FAILURE
 
     domain=$(get_domain setup_scheme)
-    django_admin_pass=$(get_password_of_length 12 "for your IoTree42 'admin' user")
+    django_admin_pass=$(get_password_min_length 12 "for your IoTree42 admin user")
     django_admin_email=$(get_email_for_django_admin)
     pwreset_credentials=($(get_pwreset_email_credentials))
     pwreset_email=${pwreset_credentials[0]}
@@ -275,6 +264,8 @@ do_install() {
 
     # Update package lists
     apt update
+
+    # TODO: Install/setup NTP deamon (für externe Geräte)
 
     # Install Python-related packages
     apt install -y python3-pip python3-venv python3-dev
@@ -307,10 +298,10 @@ do_install() {
     # and https://forum.mattermost.com/t/pq-permission-denied-for-schema-public/14273)
     apt install -y libpq-dev postgresql postgresql-contrib
     sudo -u postgres psql -c "CREATE DATABASE dj_iotree_db;"
-    postgrespass=$(LC_ALL=C tr -dc 'A-Za-z0-9_!@#$%^&*()-' < /dev/urandom | head -c 20 | xargs) # LC_ALL=C (locale) ensures tr command behaves consistently
-    sudo -u postgres psql -c "CREATE USER dj_iotree_user WITH PASSWORD '$postgrespass';"
-    # TODO: echo in postgrespass.txt löschen. Ist nur für testzwecke
-    echo $postgrespass > /home/rene/dev/postgrespass.txt  # diese Zeile entfernen
+    postgres_pass=$(LC_ALL=C tr -dc 'A-Za-z0-9_!@#$%^&*()-' < /dev/urandom | head -c 20 | xargs)
+    sudo -u postgres psql -c "CREATE USER dj_iotree_user WITH PASSWORD '$postgres_pass';"
+    # TODO: echo in postgres_pass.txt löschen. Ist nur für testzwecke
+    echo $postgres_pass > /home/rene/dev/postgres_pass.txt  # diese Zeile entfernen
     sudo -u postgres psql -c "ALTER ROLE dj_iotree_user SET client_encoding TO 'utf8';"
     sudo -u postgres psql -c "ALTER ROLE dj_iotree_user SET default_transaction_isolation TO 'read committed';"
     sudo -u postgres psql -c "ALTER ROLE dj_iotree_user SET timezone TO 'UTC';"
@@ -319,13 +310,14 @@ do_install() {
     sudo -u postgres psql -c "GRANT USAGE, CREATE ON SCHEMA public TO dj_iotree_user;"
 
     # Django setup
+    django_secret = get_rand_str_of_length 50
     runuser -u $linux_user -- python3 -m venv $setup_dir/dj_iotree/dj_venv
     source $setup_dir/dj_iotree/dj_venv/bin/activate
     pip install -r $setup_dir/dj_iotree/requirements.txt
     $setup_dir/dj_iotree/dj_venv/bin/python $setup_dir/dj_iotree/manage.py makemigrations
     $setup_dir/dj_iotree/dj_venv/bin/python $setup_dir/dj_iotree/manage.py migrate
     # DJANGO_SUPERUSER_SCRIPT="from django.contrib.auth.models import User; User.objects.create_superuser('admin', '$django_admin_email', '$django_admin_pass')"
-    DJANGO_SUPERUSER_SCRIPT="from users.models import CustomUser; CustomUser.objects.create_superuser('admin', '$django_admin_email', '$django_admin_pass')"
+    DJANGO_SUPERUSER_SCRIPT="from users.models import CustomUser; CustomUser.objects.create_superuser('$django_admin_name', '$django_admin_email', '$django_admin_pass')"
     echo $DJANGO_SUPERUSER_SCRIPT | runuser -u $linux_user -- $setup_dir/dj_iotree/dj_venv/bin/python $setup_dir/dj_iotree/manage.py shell
     $setup_dir/dj_iotree/dj_venv/bin/python $setup_dir/dj_iotree/manage.py collectstatic --noinput
     deactivate
@@ -416,9 +408,38 @@ do_install() {
     dpkg -i grafana_9.5.2_amd64.deb
     # TODO: Grafana configuration
 
-    # TODO nodered / flowforge installation
-    # TODO: Flowforge Configuration
-    # TODO Docker falls nötig
+    # TODO: Docker installation (https://docs.docker.com/engine/install/debian/#install-using-the-repository)
+    # Add Docker's official GPG key:
+    sudo apt-get update
+    sudo apt-get install ca-certificates curl gnupg
+    sudo install -m 0755 -d /etc/apt/keyrings
+    curl -fsSL https://download.docker.com/linux/debian/gpg | sudo gpg --dearmor -o /etc/apt/keyrings/docker.gpg
+    sudo chmod a+r /etc/apt/keyrings/docker.gpg
+    # Add the repository to Apt sources:
+    echo \
+    "deb [arch=$(dpkg --print-architecture) signed-by=/etc/apt/keyrings/docker.gpg] https://download.docker.com/linux/debian \
+    $(. /etc/os-release && echo "$linux_codename") stable" | \
+    sudo tee /etc/apt/sources.list.d/docker.list > /dev/null
+    sudo apt-get update
+    # Install latest Docker version
+    sudo apt-get install -y docker-ce docker-ce-cli containerd.io docker-buildx-plugin docker-compose-plugin
+    usermod -aG docker $USER
+
+    # TODO: nodered installation
+    docker run -d -p 1880 -v $django_username-volume:/data --name $django_username nodered/node-red
+    # Real-time Port Resolution: Port will be looked up dynamically when clicking on 'nodered' in the website's menu
+    mkdir /etc/nginx/conf.d/nodered_locations
+    # Update script for nodered container locations in nginx server block
+    local update_nginx_nodered_location_path=/etc/iotree/update_nginx_nodered_location.sh # TODO: pfad in config.json schreiben
+    if [[ $setup_scheme == "TLS_NO_DOMAIN" ]]; then
+        cp $setup_dir/config/tmp.update_nginx_nodered_location.sh $update_nginx_nodered_location_path
+    else
+        cp $setup_dir/config/tmp.update_nginx_nodered_location_tls.sh $update_nginx_nodered_location_path
+
+    chmod +x /etc/iotree/update_nginx.sh
+
+    # $linux_user ALL=(ALL) NOPASSWD: $update_nginx_nodered_location_path  # TODO: Wenn dies, dann automatisch in visudo reinschreiben
+
 
     # TODO start/restart/status check: mosquitto, grafana-server, influxdb, ... bei Bedarf, sonst vorher bei den einzelnen Installationen
     systemctl start mosquitto
@@ -430,20 +451,24 @@ do_install() {
         # Active: active (running)
 
     # Build iotree config.json file
-    # TODO: config.json Daten ergänzen + evtl als array?
+    # TODO: config.json Daten ergänzen/korrigieren + evtl als array?
     # TODO: Sollen die Nutzernamen für die Dienste bereits im Template stehen oder sollen sie
     # im Setup zufallsgeneriert werden?!
     bash $setup_dir/config/tmp.config.json.sh \
         $linux_user \
         $server_ip \
         $domain \
+        $django_admin_name \
         $adminmail \
         $pwreset_email \
         $pwreset_email_pass \
-        $djangokey \
-        $postgrespass \
+        $django_secret \
+        $postgres_pass \
+        # TODO: Weitere Werte in config.json: 
+            # $update_nginx_nodered_location_path
+            # ...s.o.
         > $setup_dir/tmp/config.json
-    
+        
     cp $setup_dir/tmp/config.json /etc/iotree/config.json
     
     # change file permissions
@@ -480,8 +505,8 @@ do_install() {
     
     # ask user to reboot
 
+    printf "\n\n\n ### FINISHED INSTALLATION OF IOTREE42 ### \n\n\n"
+
 }
 
 do_install "$@"
-
-printf "\n\n\n!!!!!!!!!!!!!!!!!!!!!!!!!!! END !!!!!!!!!!!!!!!!!!!!!!!!!!!\n\n\n"  # nur für debugging --> Entfernen!

@@ -2,6 +2,8 @@ from django.db import models
 from django.contrib.auth.models import AbstractUser, BaseUserManager  # User (if Django standard User model shall be used)
 from PIL import Image
 from django.utils.translation import gettext_lazy as _  # This is for automatic translation in case if it is implemented later
+import os
+import subprocess
 
 
 class CustomUserManager(BaseUserManager):
@@ -72,3 +74,10 @@ class Profile(models.Model):
             img.thumbnail(output_size)
             img.save(self.image.path)
             
+
+class NodeRedUserData(models.Model):
+    user = models.OneToOneField(CustomUser, on_delete=models.CASCADE, primary_key=True)
+    container_name = models.CharField(max_length=30)
+    container_port = models.CharField(max_length=5, default=0)  # since highest port number has five digits (65535)
+    access_token = models.CharField(max_length=100)
+    # later maybe add data from the container like flows, dashboards and list of installed nodered plugins

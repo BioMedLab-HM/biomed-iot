@@ -1,0 +1,52 @@
+{% extends "core/iframe_base.html" %}
+
+{% block iframe_content %}
+
+    {% if container_status == 'no_container' %}
+        <div class="form-container">
+            <p>No Node-RED instance found for your account.</p>
+            <form method="post">
+                {% csrf_token %}
+                <button type="submit">Start Node-RED Now</button>
+            </form>
+        </div>
+        
+    {% elif container_status == 'exited' %}
+        <div class="form-container">
+            <p>Node-RED container exists but is not running.</p>
+            <form method="post">
+                {% csrf_token %}
+                <button type="submit">Restart Node-RED Now</button>
+            </form>
+        </div>
+
+    {% elif container_status == 'restarting' %}
+        <div class="waiting-container">
+            <p>Node-RED is starting for user {{ username }}. This may take a while (up to 20 seconds). Click the button to reload and check if it's up.</p>
+            <p>Auto-reloading in <span id="countdown">5</span> seconds...</p>
+            <button onclick="window.location.href='/nodered/'">Reload Page Now</button>
+        </div>
+        <script>
+            var countdownElement = document.getElementById('countdown');
+            var countdownTime = 5; // 10 seconds for countdown
+        
+            var countdownInterval = setInterval(function() {
+                countdownTime--;
+                countdownElement.textContent = countdownTime;
+        
+                if (countdownTime <= 0) {
+                    clearInterval(countdownInterval);
+                    window.location.href = '/nodered/'; // Redirect to the /nodered/ URL
+                }
+            }, 1000); // Update the countdown every second
+        </script>
+
+    {% elif is_running %}
+        <!-- Hier erscheint die URL mit Portnummer im Quellcode im Browser. Evtl Rev. Proxi mit nginx? -->
+        <iframe src="http://192.168.64.25:{{ container_port }}" allowfullscreen>
+            <p>Your browser does not support iframes.</p>
+        </iframe>
+    {% endif %}
+    
+    
+{% endblock iframe_content %}

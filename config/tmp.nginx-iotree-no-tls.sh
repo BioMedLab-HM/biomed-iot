@@ -30,5 +30,7 @@ server {
         include proxy_params;
         proxy_pass http://unix:/run/gunicorn.sock;
     }
+
+    include /etc/nginx/conf.d/nodered_locations/*;
 }
 EOF

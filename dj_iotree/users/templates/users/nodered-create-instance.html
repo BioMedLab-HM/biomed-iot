@@ -1,0 +1,11 @@
+    <div class="text-center mt-5">
+        <h1>Create a Node-RED instance</h1>
+        <div class="form-container">
+            <p>No Node-RED instance found for your account. You can start it now.</p>
+            <form method="post">
+                {% csrf_token %}
+                <button type="submit" name="action" value="create">Start With Node-RED</button>
+            </form>
+        </div>
+    </div>
+
