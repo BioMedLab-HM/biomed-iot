@@ -160,8 +160,9 @@ def nodered_manager(request):
             docker_client = docker.from_env()
             try:
                 container = docker_client.containers.run(
-                    "nodered/node-red",
+                    'nodered/node-red',
                     detach=True,
+                    restart_policy={"Name": "always", "MaximumRetryCount": 5}, # Try 5 times to restart container when it exits e.g. server reboot (see: https://docs.docker.com/config/containers/start-containers-automatically/)
                     ports={'1880/tcp': None},
                     volumes={container_volume_name: {'bind': '/data', 'mode': 'rw'}},
                     name=new_name
