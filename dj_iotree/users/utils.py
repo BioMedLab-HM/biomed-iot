@@ -29,21 +29,3 @@ def update_nginx_configuration(instance):
 )
     if result.returncode != 0:
         print("Error:", result.stderr.decode())  # TODO: Später entfernen bzw durch log ersetzen
-
-    # subprocess.run(['sudo', script_path, path_segment, str(port)], check=True)
-
-    # new_block = f"""
-    # location /nodered/{path_segment}/ {{
-    #     proxy_pass http://localhost:{port};
-    #     # add_header X-Frame-Options "SAMEORIGIN";  # instance only displayed within an iframe
-    #     # add_header Content-Security-Policy "frame-ancestors 'self'";  # restricts embedding to the same origin as the page
-    # }}
-    # """
-    # # Add a new or change an existing Nginx configuration file
-    # nginx_conf_path = f'/etc/nginx/conf.d/nodered_locations/{path_segment}'
-
-    # with open(nginx_conf_path, 'w') as file:
-    #     file.write(new_block)
-    
-    # # Craceful reload to apply changes
-    # reload_nginx()

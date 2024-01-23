@@ -1,0 +1,76 @@
+/* Custom CSS: Include in HTML AFTER the styles.css file */
+
+/* Custom variables */
+:root {
+    --new-navbar-padding: 0rem; /*  Adjust this value to match the actual height of your navbar */
+    --navbar-total-height: 40px; /* Total height of the navbar */
+}
+
+/* Navbar adjustments */
+.navbar {
+    padding-top: var(--new-navbar-padding);
+    padding-bottom: var(--new-navbar-padding);
+}
+
+.navbar-toggler {
+    padding: 0.15rem;
+    font-size: 0.9rem;
+}
+
+.navbar-nav .nav-link {
+    padding: 0.25rem 0;
+}
+
+/* iframe container to fill the rest of the viewport height */
+.iframe-container {
+    height: calc(100vh - var(--navbar-total-height)); /* This will adjust the height to take up the remaining space */
+    width: 100%;
+    display: flex; /* Using flex to center the child vertically */
+    justify-content: center; /* Centers children vertically */
+    align-items: top; /* Centers children horizontally */
+    overflow: hidden;
+}
+
+iframe {
+    width: 100%;
+    height: 100%; /* Let the iframe fill the container */
+    border: none; /* Remove the border */
+}
+
+/* Other container styles */
+.form-container {
+    /* Remove the height here if .form-container should just be centered inside .iframe-container */
+    width: 100%; /* Optional: If you want .form-container to fill the width of its parent */
+    padding: 0; /* Optional: If you need some padding inside .form-container */
+    box-sizing: border-box; /* Ensures padding is included in height calculation */
+}
+
+.form-container form {
+    margin-top: 0px;
+}
+
+body, html {
+    height: 100%;
+    margin: 0;
+}
+
+/* Design Elements */
+
+button,
+[type=button],
+[type=reset],
+[type=submit] {
+  -webkit-appearance: none; /* Remove native OS styling */
+     -moz-appearance: none; /* For Mozilla Firefox */
+          appearance: none; /* Standard syntax */
+
+  /* Add your custom styles */
+  background-color: #007bff; /* Bootstrap primary button color */
+  color: white;
+  border: none;
+  padding: .375rem .75rem; /* Bootstrap default padding */
+  border-radius: .25rem; /* Bootstrap default border-radius */
+  font-size: 1rem; /* Bootstrap default font size */
+  line-height: 1.5; /* Bootstrap default line height */
+  transition: color .15s ease-in-out, background-color .15s ease-in-out, border-color .15s ease-in-out, box-shadow .15s ease-in-out; /* Smooth transition for hover effects */
+}

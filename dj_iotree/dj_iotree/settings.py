@@ -168,8 +168,8 @@ MEDIA_URL = '/media/'
 
 LOGIN_REDIRECT_URL = 'core-home'
 # TODO: LOGIN_URL auf admin/login nur vorrübergehend für OAuth setup
-# LOGIN_URL = 'login'
-LOGIN_URL='/admin/login/'
+LOGIN_URL = 'login'
+# LOGIN_URL='/admin/login/'
 
 EMAIL_BACKEND = 'django.core.mail.backends.smtp.EmailBackend'
 EMAIL_HOST = 'smtp.gmail.com'
