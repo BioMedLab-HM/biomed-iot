@@ -23,3 +23,5 @@ def update_nodered_config(sender, instance, **kwargs):
         print("Jetzt kommt die Updatefunction")  # TODO: Später entfernen bzw durch log ersetzen
         update_nginx_configuration(instance)
             
+
+# TODO: When User is deleted

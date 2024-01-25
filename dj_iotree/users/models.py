@@ -66,9 +66,7 @@ class Profile(models.Model):
 
     def save(self, *args, **kwargs):  # save function overridden to resize large images
         super().save(*args, **kwargs)
-
         img = Image.open(self.image.path)
-
         if img.height > 300 or img.width > 300:
             output_size = (300, 300)
             img.thumbnail(output_size)
@@ -80,4 +78,5 @@ class NodeRedUserData(models.Model):
     container_name = models.CharField(max_length=30)
     container_port = models.CharField(max_length=5, default=0)  # since highest port number has five digits (65535)
     access_token = models.CharField(max_length=100)
+    
     # later maybe add data from the container like flows, dashboards and list of installed nodered plugins

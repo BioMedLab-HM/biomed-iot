@@ -28,8 +28,7 @@ def register(request):
                 messages.success(request, f'Your account has been created! You are now able to log in')
                 return redirect('login')
             except Exception as e:
-                # Log the error for debugging
-                print(str(e))
+                # TODO?: Log the error for debugging
                 messages.error(request, f'An error occurred while creating your account. Please try again.')
     else:
         form = UserRegisterForm()
@@ -99,7 +98,6 @@ def set_timezone(request):
 
 @login_required
 def nodered_manager(request):
-    print("nodered_manager called")  # TODO: Später entfernen
 
     user = request.user
     container = None
@@ -158,7 +156,7 @@ def nodered_manager(request):
 
             container_volume_name = f'{new_name}-volume'
             docker_client = docker.from_env()
-            try:
+            try:  # TODO: for safety: possibly implement explicit rate limiting for running a new container
                 container = docker_client.containers.run(
                     'nodered/node-red',
                     detach=True,
@@ -203,7 +201,6 @@ def nodered_manager(request):
             # Reload to get latest state and port information
             container.reload()
             container_health = container.attrs['State']['Health']['Status']
-            print("Container Health:", container_health)
 
             # Node-RED is ready
             if container_health == 'healthy':
@@ -214,7 +211,6 @@ def nodered_manager(request):
                 if nodered_data.container_port != container_port:
                     nodered_data.container_port = container_port
                     nodered_data.save(update_fields=['container_port'])
-                    print("nodered_data saved - container_port updated")  # TODO: Remove later
                 
                 content_template = 'users/nodered-waiting.html'
 

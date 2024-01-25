@@ -21,11 +21,12 @@ def update_nginx_configuration(instance):
 
     # Call the script with sudo
     print("jetzt kommt die Ausführung des Bash scriptes")
+    command = ['sudo', script_path, path_segment, str(port)]
     result = subprocess.run(
-    ['sudo', script_path, path_segment, str(port)],
+    command,
     check=False,  # change to False to handle errors manually
     stdout=subprocess.PIPE,
     stderr=subprocess.PIPE
-)
+    )
     if result.returncode != 0:
         print("Error:", result.stderr.decode())  # TODO: Später entfernen bzw durch log ersetzen

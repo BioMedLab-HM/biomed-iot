@@ -438,7 +438,7 @@ do_install() {
 
     chmod +x /etc/iotree/update_nginx.sh
 
-    # $linux_user ALL=(ALL) NOPASSWD: $update_nginx_nodered_location_path  # TODO: Wenn dies, dann automatisch in visudo reinschreiben
+    # $linux_user ALL=(ALL) NOPASSWD: $update_nginx_nodered_location_path  # TODO: Falls notwendig, dann automatisch in visudo reinschreiben
 
 
     # TODO start/restart/status check: mosquitto, grafana-server, influxdb, ... bei Bedarf, sonst vorher bei den einzelnen Installationen

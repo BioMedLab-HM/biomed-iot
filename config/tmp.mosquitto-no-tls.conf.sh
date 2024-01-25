@@ -16,5 +16,5 @@ allow_anonymous false
 plugin $DYNSEC_PLUGIN_PATH
 plugin_opt_config_file /etc/mosquitto/dynamic-security.json
 
-acl_file /etc/iotree/.acl
+# acl_file /etc/iotree/.acl  # TODO: only for optional backup. To be implemented if desired
 EOF

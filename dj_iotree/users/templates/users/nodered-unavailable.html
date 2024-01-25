@@ -2,7 +2,7 @@
         <h1>Error</h1>
         <p>Unable to start Node-Red. Please try again later or contact the Admin.</p>
         <p>Instance name is {{ instance_name }}</p>
-        <p>Container Status: {{ status }}</p>
+        <p>Docker Container Status: {{ status }}</p>
         <div class="form-container">
             <button id="reloadButton" data-url="{% url 'nodered-manager' %}">Try Again Now</button>
         </div>
