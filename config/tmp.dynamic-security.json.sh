@@ -1,13 +1,19 @@
 #!/bin/sh
 
 # Get passed parameter
-VAR_1=$1
+VAR_1=$1  # TODO
 
 # Define dynamic-security.json template
 # see: https://mosquitto.org/documentation/dynamic-security/
 
 # TODO:
 # Clients:
+# - admin
+# - djControle
+# - djSend
+# - mqttInToDB
+# - mqttOutToDB
+# - <> (has role userDevice)
 # Groups
 # Roles
 # - admin
@@ -15,7 +21,7 @@ VAR_1=$1
 # - djSend
 # - mqttInToDB
 # - mqttOutToDB
-# - user
+# - userDevice
 
 
 cat << EOF
@@ -27,8 +33,60 @@ cat << EOF
 		"subscribe":	false,
 		"unsubscribe":	false
 	},
-	"clients":	[],
+	"clients":	[{
+			"username":	"admin",
+			"textname":	"Dynsec admin user",
+			"roles":	[{
+					"rolename":	"admin"
+				}],
+			"password":	"TODO",
+			"salt":	"TODO",
+			"iterations":	101
+		}],
 	"groups":	[],
-	"roles":	[]
+	"roles":	[{
+			"rolename":	"admin",
+			"acls":	[{
+					"acltype":	"publishClientSend",
+					"topic":	"$CONTROL/dynamic-security/#",
+					"priority":	0,
+					"allow":	true
+				}, {
+					"acltype":	"publishClientReceive",
+					"topic":	"$CONTROL/dynamic-security/#",
+					"priority":	0,
+					"allow":	true
+				}, {
+					"acltype":	"publishClientReceive",
+					"topic":	"$SYS/#",
+					"priority":	0,
+					"allow":	true
+				}, {
+					"acltype":	"publishClientReceive",
+					"topic":	"#",
+					"priority":	0,
+					"allow":	true
+				}, {
+					"acltype":	"subscribePattern",
+					"topic":	"$CONTROL/dynamic-security/#",
+					"priority":	0,
+					"allow":	true
+				}, {
+					"acltype":	"subscribePattern",
+					"topic":	"$SYS/#",
+					"priority":	0,
+					"allow":	true
+				}, {
+					"acltype":	"subscribePattern",
+					"topic":	"#",
+					"priority":	0,
+					"allow":	true
+				}, {
+					"acltype":	"unsubscribePattern",
+					"topic":	"#",
+					"priority":	0,
+					"allow":	true
+				}]
+		}]
 }
 EOF

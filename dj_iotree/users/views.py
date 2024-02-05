@@ -97,7 +97,7 @@ def set_timezone(request):
 
 
 @login_required
-def nodered_manager(request):
+def nodered_manager(request):  # TODO: Refactor
 
     user = request.user
     container = None
@@ -149,7 +149,7 @@ def nodered_manager(request):
                         obj.container_name = new_name
                         # obj.container_port = 0
                         obj.access_token = new_token
-                        obj.save()  # Here you might specify update_fields if required.
+                        obj.save()  # TODO: Check if name and token already exist
             except IntegrityError:
                 # Handle the IntegrityError case, could log or re-raise with additional context
                 pass

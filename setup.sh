@@ -388,15 +388,18 @@ do_install() {
     # Mosquitto MQTT Broker
     apt install -y mosquitto mosquitto-clients
     local dynsec_plugin_path
-    echo whereis mosquitto_dynamic_security.so > dynsec_plugin_path
+    whereis mosquitto_dynamic_security.so | awk '{print $2}' > dynsec_plugin_path
+    echo "include_dir /etc/mosquitto/conf.d" >> /etc/mosquitto/mosquitto.conf
+    # TODO: copy JSON template an Ziel kopieren
     if [[ $setup_scheme == "TLS_WITH_DOMAIN" ]]; then
-        :
+        : # TODO: 
     elif [[ $setup_scheme != "TLS_NO_DOMAIN" ]]; then
-        :
+        : # TODO: 
     else  # setup_scheme == "NO_TLS"
         bash $setup_dir/config/tmp.mosquitto-no-tls.sh $setup_dir $dynsec_plugin_path > $setup_dir/tmp/mosquitto-no-tls.conf
         cp $setup_dir/tmp/mosquitto-no-tls.conf /etc/mosquitto/conf.d
     fi
+    systemctl restart mosquitto.service
 
     # InfluxDB (https://docs.influxdata.com/influxdb/v2.7/install/?t=Linux)
     wget https://dl.influxdata.com/influxdb/releases/influxdb2-2.7.0-amd64.deb
