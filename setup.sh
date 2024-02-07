@@ -392,8 +392,10 @@ do_install() {
     echo "include_dir /etc/mosquitto/conf.d" >> /etc/mosquitto/mosquitto.conf
     # TODO: copy JSON template an Ziel kopieren
     if [[ $setup_scheme == "TLS_WITH_DOMAIN" ]]; then
+    
         : # TODO: 
     elif [[ $setup_scheme != "TLS_NO_DOMAIN" ]]; then
+        # https://www.google.com/search?client=safari&rls=en&q=mosquitto+self+certificate+tls&ie=UTF-8&oe=UTF-8
         : # TODO: 
     else  # setup_scheme == "NO_TLS"
         bash $setup_dir/config/tmp.mosquitto-no-tls.sh $setup_dir $dynsec_plugin_path > $setup_dir/tmp/mosquitto-no-tls.conf
