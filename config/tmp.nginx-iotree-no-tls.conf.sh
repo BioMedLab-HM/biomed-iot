@@ -22,15 +22,26 @@ server {
     server_name $IP_ADDRESS $MACHINE_NAME;
 
     location = /favicon.ico { access_log off; log_not_found off; }
+
+    # location to Django static files
     location /static/ {
-        root $SETUP_DIR/dj_iotree;
+        alias $SETUP_DIR/dj_iotree/staticfiles/;
     }
 
+    # location and proxy pass to gunicorn server (the Django server)
     location / {
         include proxy_params;
         proxy_pass http://unix:/run/gunicorn.sock;
     }
 
+    # location files for nodered container instances
     include /etc/nginx/conf.d/nodered_locations/*;
 }
+# Optional: Uncomment to direct MQTT traffic through nginx as reverse proxy
+# stream {
+#     server {
+#         listen 1883;
+#         proxy_pass localhost:1883;
+#     }
+# }
 EOF

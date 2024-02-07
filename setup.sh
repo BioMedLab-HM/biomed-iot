@@ -353,11 +353,12 @@ do_install() {
         systemctl restart nginx  # restart Nginx to implement changes
 
     elif [[ $setup_scheme != "TLS_NO_DOMAIN" ]]; then
+        # https://www.digitalocean.com/community/tutorials/how-to-create-a-self-signed-ssl-certificate-for-nginx-on-debian-10 
         # TODO: TLS-Setup mit Selbstzertifikat testen (use: sudo nginx -t)
         printf "\nInstalling packages and doing configurations for '$setup_scheme' scheme. This can take some time.\n" >&2
         apt install -y openssl
 
-        cp $setup_dir/tmp/tmp.tls-params.conf /etc/nginx/snippets/tls-params.conf # snippet to define TLS (formely SSL) settings in addition to certbot.
+        cp $setup_dir/tmp/tmp.tls-params.conf /etc/nginx/snippets/tls-params.conf # snippet to define TLS settings in addition to certbot.
         bash $setup_dir/config/tmp.nginx-iotree-tls-local.sh $setup_dir $server_ip $machine_name > $setup_dir/tmp/nginx-iotree-tls-local.conf
         cp $setup_dir/tmp/nginx-iotree-tls-local.conf /etc/nginx/sites-available/
         ln -s /etc/nginx/sites-available/nginx-iotree-tls-local /etc/nginx/sites-enabled
@@ -366,7 +367,7 @@ do_install() {
         printf "Further user input may be neccessary. When prompted for 'Common Name' enter this machines hostname: '$machine_name'.\n" >&2
         openssl req -x509 -nodes -days 365 -newkey rsa:2048 -keyout /etc/ssl/private/nginx-iotree.key -out /etc/ssl/certs/nginx-iotree.crt
         # TODO: Zertifikationserneuerung --> cronjob!? (besser als lange Zeitangabe)
-        # TODO: openssl req evtl per config file automatisieren
+        # TODO: openssl req evtl per config file automatisieren damit keine Nutzereingabe nötig ist
 
         # Configure Nginx HTTP Web Server to use TLS
         openssl dhparam -out /etc/nginx/dhparam.pem 2048  # Generate Diffie-Hellman group parameters to enhance security. Using 4096 may take >> 30 min!
@@ -388,18 +389,19 @@ do_install() {
     # Mosquitto MQTT Broker
     apt install -y mosquitto mosquitto-clients
     local dynsec_plugin_path
-    whereis mosquitto_dynamic_security.so | awk '{print $2}' > dynsec_plugin_path
+    dynsec_plugin_path=$(sudo whereis mosquitto_dynamic_security.so | awk '{print $2}')
     echo "include_dir /etc/mosquitto/conf.d" >> /etc/mosquitto/mosquitto.conf
-    # TODO: copy JSON template an Ziel kopieren
-    if [[ $setup_scheme == "TLS_WITH_DOMAIN" ]]; then
     
-        : # TODO: 
-    elif [[ $setup_scheme != "TLS_NO_DOMAIN" ]]; then
+    # TODO: copy JSON template an Ziel kopieren
+    
+
+    if [[ $setup_scheme == "NO_TLS" ]]; then
+        bash $setup_dir/config/tmp.mosquitto-no-tls.conf.sh $dynsec_plugin_path > $setup_dir/tmp/mosquitto-no-tls.conf
+        cp $setup_dir/tmp/mosquitto-no-tls.conf /etc/mosquitto/conf.d  # conf.d is a directory for custom conf files to include
+    else 
         # https://www.google.com/search?client=safari&rls=en&q=mosquitto+self+certificate+tls&ie=UTF-8&oe=UTF-8
-        : # TODO: 
-    else  # setup_scheme == "NO_TLS"
-        bash $setup_dir/config/tmp.mosquitto-no-tls.sh $setup_dir $dynsec_plugin_path > $setup_dir/tmp/mosquitto-no-tls.conf
-        cp $setup_dir/tmp/mosquitto-no-tls.conf /etc/mosquitto/conf.d
+        bash $setup_dir/config/tmp.mosquitto-tls.conf.sh $dynsec_plugin_path > $setup_dir/tmp/mosquitto-tls.conf
+        cp $setup_dir/tmp/mosquitto-tls.conf /etc/mosquitto/conf.d
     fi
     systemctl restart mosquitto.service
 
@@ -432,7 +434,8 @@ do_install() {
 
     # TODO: nodered installation
     docker run -d -p 1880 -v $django_username-volume:/data --name $django_username nodered/node-red
-    # Real-time Port Resolution: Port will be looked up dynamically when clicking on 'nodered' in the website's menu
+    # Nginx-configuration directory for Real-time Port Resolution of nodered containers, meaning, port 
+    # will be looked up dynamically when clicking on 'nodered' in the website's menu
     mkdir /etc/nginx/conf.d/nodered_locations
     # Update script for nodered container locations in nginx server block
     local update_nginx_nodered_location_path=/etc/iotree/update_nginx_nodered_location.sh # TODO: pfad in config.json schreiben
@@ -443,7 +446,8 @@ do_install() {
 
     chmod +x /etc/iotree/update_nginx.sh
 
-    # $linux_user ALL=(ALL) NOPASSWD: $update_nginx_nodered_location_path  # TODO: Falls notwendig, dann automatisch in visudo reinschreiben
+    # $linux_user ALL=(ALL) NOPASSWD: $update_nginx_nodered_location_path  # TODO: eher nicht notwendig, da dieses setup-script bereits mit sudo ausgeführt werden konnte
+
 
 
     # TODO start/restart/status check: mosquitto, grafana-server, influxdb, ... bei Bedarf, sonst vorher bei den einzelnen Installationen
@@ -502,8 +506,9 @@ do_install() {
     # (if anything went wrong, user should be able to redo install or to fully remove all files (uninstall routine)
 
     if [[ $setup_scheme == "TLS_WITH_DOMAIN" ]]; then
+        printf "IMPORTANT: Check if the file paths to SSL-Certificate and Key in the stream{}-block in the file /etc/nginx/sites-available/$domain are correct! Otherwise outward MQTT-connections will not work" >&2 
         printf "--> The server can be reached at: https://$domain/ \n" >&2 
-        printf "\n Optional: Rate your TLS with https://www.ssllabs.com/ssltest/. It should get an A or A+ rating\n"
+        printf "\n Optional: Rate your TLS with https://www.ssllabs.com/ssltest/. It should get an A or A+ rating\n" >&2
     else
         printf "--> The server can be reached at: http://$server_ip/ \n" >&2
     fi
