@@ -33,5 +33,5 @@ max_connections -1
 max_inflight_messages 100
 
 plugin $DYNSEC_PLUGIN_PATH
-plugin_opt_config_file /etc/mosquitto/dynamic-security.json
+plugin_opt_config_file /var/lib/mosquitto/dynamic-security.json
 EOF

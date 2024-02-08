@@ -7,7 +7,7 @@ VAR_1=$1  # TODO
 # see: https://mosquitto.org/documentation/dynamic-security/
 
 # TODO:
-# Clients:
+# Clients: (username, password (salt?, iterations?), roles, )
 # - admin
 # - djControle
 # - djSend

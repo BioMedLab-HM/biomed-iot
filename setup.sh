@@ -132,14 +132,13 @@ get_password_min_length() {
 
 get_confirmed_text_input() {
     local input_prompt=$1
-    local confirmation_prompt=$2
     local input
     local confirmation
 
     while true; do
         printf "\n" >&2
         read -p "$input_prompt: " input
-        read -p "$confirmation_prompt: " confirmation
+        read -p "Please repeat your entry: " confirmation
 
         if [[ -z $input ]]; then
             printf "Nothing entered. Please try again.\n" >&2
@@ -158,9 +157,7 @@ get_email_for_django_admin() {
     printf "\n\nProvide an IoTree42 admin email address. You can change it later in the file /etc/iotree/config.json\n" >&2
 
     while true; do
-        email=$(get_confirmed_text_input \
-            "Enter an email address for your IoTree42 admin user" \
-            "Confirm your email address")
+        email=$(get_confirmed_text_input "Enter an email address for your IoTree42 admin user")
 
         # Very basic email validity check. Maximum length of an email is 320 characters per RFC 3696
         if [[ ${#email} -le 320 && $email == *@* ]]; then
@@ -183,9 +180,7 @@ get_pwreset_email_credentials() {
 
         case "$answer" in
             [Yy])
-                pwreset_email=$(get_confirmed_text_input \
-                    "Enter the password reset email address" \
-                    "Confirm the password reset email address")
+                pwreset_email=$(get_confirmed_text_input "Enter the password reset email address")
                 printf "Provide the password associated with the password reset email: "
                 pwreset_email_pass=$(get_password_min_length 12 "for the password reset email")
                 break ;;
@@ -217,7 +212,7 @@ do_install() {
 
     local chosen_scheme
     local linux_user=$SUDO_USER
-    local django_admin_name="admin"
+    local django_admin_name=""
     local django_admin_pass
     local django_admin_email
     local pwreset_email_and_pass
@@ -228,7 +223,6 @@ do_install() {
     local domain
     local setup_dir="/home/$linux_user/iotree42"
     local linux_codename=$(cat /etc/os-release | grep VERSION_CODENAME | cut -d'=' -f2)
-
 
     print_logo_header
 
@@ -246,6 +240,7 @@ do_install() {
     confirm_proceed "Do you want to proceed?" || exit $FAILURE
 
     domain=$(get_domain setup_scheme)
+    django_admin_name=$(get_confirmed_text_input "Enter a safe username for your website admin user (= django- and mosquitto-admin)")
     django_admin_pass=$(get_password_min_length 12 "for your IoTree42 admin user")
     django_admin_email=$(get_email_for_django_admin)
     pwreset_credentials=($(get_pwreset_email_credentials))
@@ -316,7 +311,6 @@ do_install() {
     pip install -r $setup_dir/dj_iotree/requirements.txt
     $setup_dir/dj_iotree/dj_venv/bin/python $setup_dir/dj_iotree/manage.py makemigrations
     $setup_dir/dj_iotree/dj_venv/bin/python $setup_dir/dj_iotree/manage.py migrate
-    # DJANGO_SUPERUSER_SCRIPT="from django.contrib.auth.models import User; User.objects.create_superuser('admin', '$django_admin_email', '$django_admin_pass')"
     DJANGO_SUPERUSER_SCRIPT="from users.models import CustomUser; CustomUser.objects.create_superuser('$django_admin_name', '$django_admin_email', '$django_admin_pass')"
     echo $DJANGO_SUPERUSER_SCRIPT | runuser -u $linux_user -- $setup_dir/dj_iotree/dj_venv/bin/python $setup_dir/dj_iotree/manage.py shell
     $setup_dir/dj_iotree/dj_venv/bin/python $setup_dir/dj_iotree/manage.py collectstatic --noinput
@@ -391,9 +385,16 @@ do_install() {
     local dynsec_plugin_path
     dynsec_plugin_path=$(sudo whereis mosquitto_dynamic_security.so | awk '{print $2}')
     echo "include_dir /etc/mosquitto/conf.d" >> /etc/mosquitto/mosquitto.conf
-    
-    # TODO: copy JSON template an Ziel kopieren
-    
+    # Initialize and build dynamic-security.json file
+    mosquitto_ctrl dynsec init /var/lib/mosquitto/dynamic-security.json $django_admin_name $django_admin_pass
+    # Considering: https://stackoverflow.com/questions/71197601/prevent-systemctl-restart-mosquitto-service-from-resetting-dynamic-security
+    chown mosquitto /var/lib/mosquitto/dynamic-security.json
+    chmod 700 /var/lib/mosquitto/dynamic-security.json
+    # TODO: next line in template with other commands OR just Message from template
+    mosquitto_pub -u $django_admin_name -P $django_admin_pass -h localhost -t '$CONTROL/dynamic-security/v1' -m '{"commands":[{"command":"setDefaultACLAccess","acls":[{"acltype":"publishClientSend","allow":false},{"acltype":"publishClientReceive","allow":false},{"acltype":"subscribe","allow":false},{"acltype":"unsubscribe","allow":false}]}]}' -d
+
+    bash $setup_dir/config/tmp.dynamic-security.json.sh $TODO > $setup_dir/tmp/dynamic-security.json  # TODO variablen einfügen und .json.sh fertigstellen
+    cp $setup_dir/tmp/dynamic-security.json /etc/mosquitto
 
     if [[ $setup_scheme == "NO_TLS" ]]; then
         bash $setup_dir/config/tmp.mosquitto-no-tls.conf.sh $dynsec_plugin_path > $setup_dir/tmp/mosquitto-no-tls.conf
@@ -433,20 +434,20 @@ do_install() {
     usermod -aG docker $USER
 
     # TODO: nodered installation
-    docker run -d -p 1880 -v $django_username-volume:/data --name $django_username nodered/node-red
+    docker pull nodered/node-red  # Container instances can be started later on the website
     # Nginx-configuration directory for Real-time Port Resolution of nodered containers, meaning, port 
     # will be looked up dynamically when clicking on 'nodered' in the website's menu
     mkdir /etc/nginx/conf.d/nodered_locations
     # Update script for nodered container locations in nginx server block
-    local update_nginx_nodered_location_path=/etc/iotree/update_nginx_nodered_location.sh # TODO: pfad in config.json schreiben
+    local update_nginx_nodered_location_path=/etc/iotree/update_nginx_nodered_location.sh
     if [[ $setup_scheme == "TLS_NO_DOMAIN" ]]; then
         cp $setup_dir/config/tmp.update_nginx_nodered_location.sh $update_nginx_nodered_location_path
     else
         cp $setup_dir/config/tmp.update_nginx_nodered_location_tls.sh $update_nginx_nodered_location_path
 
-    chmod +x /etc/iotree/update_nginx.sh
+    chmod +x /etc/iotree/update_nginx.sh  # TODO: dieses Skript per inotifywait statt djangoskript oder zumindest das "nginx reload"?
 
-    # $linux_user ALL=(ALL) NOPASSWD: $update_nginx_nodered_location_path  # TODO: eher nicht notwendig, da dieses setup-script bereits mit sudo ausgeführt werden konnte
+    # $linux_user ALL=(ALL) NOPASSWD: $update_nginx_nodered_location_path  # TODO: eher nicht notwendig, da dieses setup-script bereits mit sudo ausgeführt werden konnte?
 
 
 
