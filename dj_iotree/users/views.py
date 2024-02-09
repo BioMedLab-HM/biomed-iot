@@ -97,7 +97,7 @@ def set_timezone(request):
 
 
 @login_required
-def nodered_manager(request):  # TODO: Refactor
+def nodered_manager_view(request):  # TODO: Refactor
     user = request.user
     container = None
     container_status = 'no-container'

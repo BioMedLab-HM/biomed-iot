@@ -29,6 +29,7 @@ def update_nodered_config(sender, instance, **kwargs):
 def user_delete(sender, instance, **kwargs):
     # TODO: implement
     pass
+    # TODO: stop and delete Nodered Container
 
     # username = str(instance)
     # IDs = instance.last_name

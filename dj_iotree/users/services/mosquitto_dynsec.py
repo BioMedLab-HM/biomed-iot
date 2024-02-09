@@ -1,6 +1,8 @@
 import json
 import paho.mqtt.client as mqtt
 
+# TODO: docstrings vervollständigen/komprimieren, Returnwerte analysieren
+
 class MosquittoDynSec:
     '''Based on commands at https://github.com/eclipse/mosquitto/blob/master/plugins/dynamic-security/README.md'''
 
@@ -37,25 +39,15 @@ class MosquittoDynSec:
 
     def set_default_acl_access(self, publish_client_send_allow, publish_client_receive_allow, subscribe_allow, unsubscribe_allow):
         """
-        Sets the default ACL access for the MQTT broker.
+        Configures default ACL permissions for MQTT clients.
 
-        This method configures the default access control list (ACL) settings for clients connecting
-        to the MQTT broker. It determines what actions (publishing or subscribing) are allowed or
-        denied by default if no specific ACL rules match a client's request.
+        :param publish_client_send_allow: Allow clients to publish messages (True/False).
+        :param publish_client_receive_allow: Allow clients to receive messages (True/False).
+        :param subscribe_allow: Allow clients to subscribe to topics (True/False).
+        :param unsubscribe_allow: Allow clients to unsubscribe from topics (True/False).
+        :return: Result of the command operation.
 
-        :param publish_client_send_allow: A boolean indicating whether clients are allowed to publish
-                                        messages by default (True) or not (False).
-        :param publish_client_receive_allow: A boolean indicating whether clients are allowed to receive
-                                            published messages by default (True) or not (False).
-        :param subscribe_allow: A boolean indicating whether clients are allowed to subscribe to topics
-                                by default (True) or not (False).
-        :param unsubscribe_allow: A boolean indicating whether clients are allowed to unsubscribe from
-                                topics by default (True) or not (False).
-        :return: The result of sending the command to the MQTT broker, typically indicating success or
-                failure of the operation.
-
-        Example:
-            set_default_acl_access(True, False, True, False)
+        Sets the default actions clients can perform if no specific ACLs apply.
         """
         command = {
             "commands": [
@@ -73,6 +65,11 @@ class MosquittoDynSec:
         return self._send_command(command)
 
     def get_default_acl_access(self):
+        """
+    Retrieves the current default ACL access settings from the MQTT broker.
+
+    :return: The default ACL access configuration as set in the MQTT broker.
+    """
         command = {
             "commands": [
                 {
@@ -83,6 +80,19 @@ class MosquittoDynSec:
         return self._send_command(command)
 
     def create_client(self, username, password, clientid=None, textname=None, textdescription=None, groups=None, roles=None):
+        """
+        Creates a new client in the MQTT broker's dynamic security system 
+        with specified credentials, and optionally assigns it client ID, name, description, groups, and roles.
+
+        :param username: Username for the new client.
+        :param password: Password for the new client.
+        :param clientid: Optional MQTT client ID. If not provided or empty, the client ID is not set.
+        :param textname: Optional human-readable name for the client.
+        :param textdescription: Optional description for the client.
+        :param groups: Optional list of groups to assign the client to, each a dict with 'groupname' and 'priority'.
+        :param roles: Optional list of roles to assign to the client, each a dict with 'rolename' and 'priority'.
+        :return: Result of the operation.
+        """
         command = {
             "commands": [
                 {
@@ -108,6 +118,12 @@ class MosquittoDynSec:
         return self._send_command(command)
     
     def delete_client(self, username):
+        """
+        Deletes an existing client from the MQTT broker's dynamic security system.
+
+        :param username: The username of the client to delete.
+        :return: Result of the operation.
+        """
         command = {
             "commands": [
                 {
@@ -119,6 +135,13 @@ class MosquittoDynSec:
         return self._send_command(command)
 
     def enable_client(self, username):
+        """
+        Allow client to connect (default when new client is created).
+
+        param username: The username of the client to enable.
+        :return: Result of the operation. Success indicates the client was enabled.
+
+        """
         command = {
             "commands": [
                 {
@@ -130,6 +153,13 @@ class MosquittoDynSec:
         return self._send_command(command)
 
     def disable_client(self, username):
+        """
+        Stop a client from being able to log in, and kick any clients with matching username that are currently connected.
+
+        param username: The username of the client to disable.
+        :return: Result of the operation. Success indicates the client was disabled and any active connections were terminated.
+
+        """
         command = {
             "commands": [
                 {
@@ -141,6 +171,12 @@ class MosquittoDynSec:
         return self._send_command(command)
 
     def get_client(self, username):
+        """
+        Retrieves information about a specific client from the MQTT broker's dynamic security system.
+
+        :param username: The username of the client to retrieve information about.
+        :return: A dictionary containing the client's details, including username, client ID, status, and associated roles and groups, based on the MQTT broker's response.
+        """
         command = {
             "commands": [
                 {
@@ -177,6 +213,19 @@ class MosquittoDynSec:
         return self._send_command(command)
 
     def modify_client(self, username, clientid=None, password=None, textname=None, textdescription=None, roles=None, groups=None):
+        """
+        Updates the properties and permissions of an existing client in the MQTT broker's dynamic security system.
+
+        :param username: The username of the client to modify.
+        :param clientid: Optional new client ID for the client. If None, the client ID is not modified.
+        :param password: Optional new password for the client. If None, the password is not modified.
+        :param textname: Optional new human-readable name for the client.
+        :param textdescription: Optional new description for the client.
+        :param roles: Optional list of roles to assign to the client. Each role should be specified as a dictionary with 'rolename' and 'priority'.
+        :param groups: Optional list of groups to add the client to. Each group should be specified as a dictionary with 'groupname' and 'priority'.
+        :return: Result of the operation, indicating success or failure.
+        """
+
         command = {
             "commands": [
                 {
@@ -202,6 +251,21 @@ class MosquittoDynSec:
         return self._send_command(command)
 
     def set_client_id(self, username, clientid=""):
+        """
+        Assigns or clears a client ID for a specific client in the MQTT broker's dynamic security system.
+
+        :param username: The username of the client whose client ID is to be set or cleared.
+        :param clientid: The new client ID to assign to the client. If an empty string is provided, the client's ID is cleared.
+        :return: Result of the operation, indicating success or failure.
+
+        Example:
+            # Assign a new client ID to a user
+            set_client_id("john_doe", "johns_device_123")
+            
+            # Clear an existing client ID from a user
+            set_client_id("jane_doe", "")
+        """
+
         command = {
             "commands": [
                 {
@@ -214,6 +278,18 @@ class MosquittoDynSec:
         return self._send_command(command)
 
     def set_client_password(self, username, password):
+        """
+        Updates the password for a specific client in the MQTT broker's dynamic security system.
+
+        :param username: The username of the client whose password is to be updated.
+        :param password: The new password for the client.
+        :return: Result of the operation, indicating success or failure.
+
+        Example:
+            # Change password for a user
+            set_client_password("john_doe", "new_secure_password")
+        """
+
         command = {
             "commands": [
                 {
@@ -226,6 +302,21 @@ class MosquittoDynSec:
         return self._send_command(command)
 
     def add_client_role(self, username, rolename, priority=-1):
+        """
+        Assigns a role to a specific client, optionally with a specified priority.
+
+        :param username: The username of the client to which the role is to be assigned.
+        :param rolename: The name of the role to assign to the client.
+        :param priority: The priority of the role for this client. Defaults to -1, indicating lowest priority.
+        :return: Result of the operation, indicating success or failure.
+
+        This method is useful for dynamically managing client permissions by assigning roles that define a set of access control lists (ACLs).
+
+        Example:            
+            # Assign a 'Publisher' role to 'jane_doe' with a higher priority
+            add_client_role("jane_doe", "Publisher", priority=10)
+        """
+
         command = {
             "commands": [
                 {
@@ -239,6 +330,18 @@ class MosquittoDynSec:
         return self._send_command(command)
 
     def remove_client_role(self, username, rolename):
+        """
+        Removes a previously assigned role from a specific client.
+
+        :param username: The username of the client from which the role is to be removed.
+        :param rolename: The name of the role to remove from the client.
+        :return: Result of the operation, indicating success or failure.
+
+        Example:
+            # Remove the 'Publisher' role from 'jane_doe'
+            remove_client_role("jane_doe", "Publisher")
+        """
+
         command = {
             "commands": [
                 {
@@ -251,6 +354,19 @@ class MosquittoDynSec:
         return self._send_command(command)
 
     def add_group_client(self, groupname, username, priority=-1):
+        """
+        Adds a client to a specified group with an optional priority level.
+
+        :param groupname: The name of the group to which the client will be added.
+        :param username: The username of the client to add to the group.
+        :param priority: The priority of the client within the group. Defaults to -1 for lowest priority.
+        :return: Result of the operation, indicating success or failure.
+
+        Example:
+            # Add 'john_doe' to the 'Engineering' group with default priority
+            add_group_client("Engineering", "john_doe")
+        """
+
         command = {
             "commands": [
                 {
