@@ -1,9 +1,7 @@
 # Utility functions 
-
-import os
 import subprocess
 
-
+# TODO: stattdessen mit inotifywait lösen
 def reload_nginx():
     # Command to reload Nginx
     command = ['sudo', 'systemctl', 'reload', 'nginx']

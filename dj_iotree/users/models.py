@@ -4,6 +4,7 @@ from PIL import Image
 from django.utils.translation import gettext_lazy as _  # This is for automatic translation in case if it is implemented later
 import os
 import subprocess
+from django.conf import settings
 
 
 class CustomUserManager(BaseUserManager):
@@ -58,7 +59,7 @@ class CustomUser(AbstractUser):
 
 
 class Profile(models.Model):
-    user = models.OneToOneField(CustomUser, on_delete=models.CASCADE)
+    user = models.OneToOneField(settings.AUTH_USER_MODEL, on_delete=models.CASCADE)
     image = models.ImageField(default='default.jpg', upload_to='profile_pics')
 
     def __str__(self):
@@ -71,12 +72,46 @@ class Profile(models.Model):
             output_size = (300, 300)
             img.thumbnail(output_size)
             img.save(self.image.path)
-            
+    
+    def __str__(self):
+        return self.user
+
 
 class NodeRedUserData(models.Model):
-    user = models.OneToOneField(CustomUser, on_delete=models.CASCADE, primary_key=True)
+    user = models.OneToOneField(settings.AUTH_USER_MODEL, on_delete=models.CASCADE, primary_key=True)
     container_name = models.CharField(max_length=30)
     container_port = models.CharField(max_length=5, default=0)  # since highest port number has five digits (65535)
     access_token = models.CharField(max_length=100)
-    
     # later maybe add data from the container like flows, dashboards and list of installed nodered plugins
+
+    def __str__(self):
+        return self.container_name
+
+class MosquittoGroup(models.Model):
+    groupname = models.CharField(max_length=50)
+    priority = models.IntegerField()
+
+    def __str__(self):
+        return self.groupname
+
+
+class MosquittoRole(models.Model):
+    rolename = models.CharField(max_length=50)
+    priority = models.IntegerField()
+
+    def __str__(self):
+        return self.rolename
+
+
+class MosquittoClientData(models.Model):
+    user = models.OneToOneField(settings.AUTH_USER_MODEL, on_delete=models.CASCADE, primary_key=True)
+    username = models.CharField(max_length=50)
+    password = models.CharField(max_length=50, default="")  # Misspelling corrected
+    client_id = models.CharField(max_length=23, blank=True, default="")  # Use blank=True for optional fields
+    textname = models.CharField(max_length=50, blank=True, default="")
+    textdescription = models.CharField(max_length=600, blank=True, default="")
+    groups = models.ManyToManyField(MosquittoGroup, blank=True)  # Optional relationship to groups
+    roles = models.ManyToManyField(MosquittoRole, blank=True)  # Optional relationship to roles
+
+    def __str__(self):
+        return self.username
