@@ -382,20 +382,44 @@ do_install() {
 
     # Mosquitto MQTT Broker
     apt install -y mosquitto mosquitto-clients
+
+    # Add dynamic-security-plugin-path and dynamic-security.json file-path to mosquitto.conf
     local dynsec_plugin_path
     dynsec_plugin_path=$(sudo whereis mosquitto_dynamic_security.so | awk '{print $2}')
     echo "include_dir /etc/mosquitto/conf.d" >> /etc/mosquitto/mosquitto.conf
+
     # Initialize and build dynamic-security.json file
-    mosquitto_ctrl dynsec init /var/lib/mosquitto/dynamic-security.json $django_admin_name $django_admin_pass
-    # Considering: https://stackoverflow.com/questions/71197601/prevent-systemctl-restart-mosquitto-service-from-resetting-dynamic-security
+    local dynsec_admin_name=$(LC_ALL=C tr -dc 'A-Za-z0-9_!@#$%^&*()-' < /dev/urandom | head -c 10 | xargs)
+    local dynsec_admin_pass=$(LC_ALL=C tr -dc 'A-Za-z0-9_!@#$%^&*()-' < /dev/urandom | head -c 20 | xargs)
+    mosquitto_ctrl dynsec init /var/lib/mosquitto/dynamic-security.json $dynsec_admin_name $dynsec_admin_pass
+    # Set file permissions, see https://stackoverflow.com/questions/71197601/prevent-systemctl-restart-mosquitto-service-from-resetting-dynamic-security
     chown mosquitto /var/lib/mosquitto/dynamic-security.json
     chmod 700 /var/lib/mosquitto/dynamic-security.json
-    # TODO: next line in template with other commands OR just Message from template
-    mosquitto_pub -u $django_admin_name -P $django_admin_pass -h localhost -t '$CONTROL/dynamic-security/v1' -m '{"commands":[{"command":"setDefaultACLAccess","acls":[{"acltype":"publishClientSend","allow":false},{"acltype":"publishClientReceive","allow":false},{"acltype":"subscribe","allow":false},{"acltype":"unsubscribe","allow":false}]}]}' -d
 
-    bash $setup_dir/config/tmp.dynamic-security.json.sh $TODO > $setup_dir/tmp/dynamic-security.json  # TODO variablen einfügen und .json.sh fertigstellen
-    cp $setup_dir/tmp/dynamic-security.json /etc/mosquitto
+    # Add Clients and Roles to dynamic-security.json
+    dj_mqtt_controle_user=$(LC_ALL=C tr -dc 'A-Za-z0-9_!@#$%^&*()-' < /dev/urandom | head -c 10 | xargs)
+    dj_mqtt_controle_pw=$(LC_ALL=C tr -dc 'A-Za-z0-9_!@#$%^&*()-' < /dev/urandom | head -c 20 | xargs)
+    mqtt_in_to_db_user=$(LC_ALL=C tr -dc 'A-Za-z0-9_!@#$%^&*()-' < /dev/urandom | head -c 10 | xargs)
+    mqtt_in_to_db_pw=$(LC_ALL=C tr -dc 'A-Za-z0-9_!@#$%^&*()-' < /dev/urandom | head -c 20 | xargs)
+    mqtt_out_to_db_user=$(LC_ALL=C tr -dc 'A-Za-z0-9_!@#$%^&*()-' < /dev/urandom | head -c 10 | xargs)
+    mqtt_out_to_db_pw=$(LC_ALL=C tr -dc 'A-Za-z0-9_!@#$%^&*()-' < /dev/urandom | head -c 20 | xargs)
+    user_for_website_admin=$(LC_ALL=C tr -dc 'A-Za-z0-9_!@#$%^&*()-' < /dev/urandom | head -c 10 | xargs)
+    pw_for_website_admin=$(LC_ALL=C tr -dc 'A-Za-z0-9_!@#$%^&*()-' < /dev/urandom | head -c 20 | xargs)
 
+    local dynsec_commands=$(bash 
+        $dj_mqtt_controle_user \
+        $dj_mqtt_controle_pw \
+        $mqtt_in_to_db_user \
+        $mqtt_in_to_db_pw \
+        $mqtt_out_to_db_user \
+        $mqtt_out_to_db_pw \
+        $user_for_website_admin \
+        $pw_for_website_admin \
+        > tmp.dynamic-security-commands.sh)
+    mosquitto_pub -u $dynsec_admin_name -P $dynsec_admin_pass -h localhost -t '$CONTROL/dynamic-security/v1' -m '$dynsec_commands' -d
+    # TODO: Hier, Python-Logik um mqtt Client für admin-Nutzer der Webseite in PostgresDB zu schreiben
+
+    # Create config file for mosquitto to include into mosquitto.conf
     if [[ $setup_scheme == "NO_TLS" ]]; then
         bash $setup_dir/config/tmp.mosquitto-no-tls.conf.sh $dynsec_plugin_path > $setup_dir/tmp/mosquitto-no-tls.conf
         cp $setup_dir/tmp/mosquitto-no-tls.conf /etc/mosquitto/conf.d  # conf.d is a directory for custom conf files to include
@@ -474,6 +498,12 @@ do_install() {
         $pwreset_email_pass \
         $django_secret \
         $postgres_pass \
+        $dj_mqtt_controle_user \
+        $dj_mqtt_controle_pw \
+        $mqtt_in_to_db_user \
+        $mqtt_in_to_db_pw \
+        $mqtt_out_to_db_user \
+        $mqtt_out_to_db_pw \
         # TODO: Weitere Werte in config.json: 
             # $update_nginx_nodered_location_path
             # ...s.o.
