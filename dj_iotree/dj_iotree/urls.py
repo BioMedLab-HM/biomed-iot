@@ -23,19 +23,25 @@ from users import views as user_views
 
 urlpatterns = [
     path('admin/', admin.site.urls),
-    path('o/', include('oauth2_provider.urls', namespace='oauth2_provider')),
+
+    # path('o/', include('oauth2_provider.urls', namespace='oauth2_provider')),
+    # path('auth/callback/', views.oauth_callback, name='oauth_callback'),
+
     path('nodered-manager/', user_views.nodered_manager_view, name='nodered-manager'),
     path('nodered-create-instance/', user_views.nodered_manager_view, name='nodered-create-instance'),
     path('nodered-start-instance/', user_views.nodered_manager_view, name='nodered-start-instance'),
     path('nodered-waiting/', user_views.nodered_manager_view, name='nodered-waiting'),
     path('nodered-embedded/', user_views.nodered_manager_view, name='nodered-embedded'),
     path('nodered-unavailable/', user_views.nodered_manager_view, name='nodered-unavailable'),
-    # path('auth/callback/', views.oauth_callback, name='oauth_callback'),
+
     path('register/', user_views.register, name='register'),
     path('profile/', user_views.profile, name='profile'),
+
     # path('login/', auth_views.LoginView.as_view(template_name='users/login.html'), name='login'),  # uses Django's own login view
     path('login/', user_views.user_login, name='login'),
+    # path('login/', user_views.CustomLoginView.as_view(template_name='users/login.html'), name='login'),
     path('logout/', auth_views.LogoutView.as_view(template_name='users/logout.html'), name='logout'),
+
     path('password-reset/',
          auth_views.PasswordResetView.as_view(
              template_name='users/password_reset.html'

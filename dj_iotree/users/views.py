@@ -33,7 +33,7 @@ def register(request):
     else:
         form = UserRegisterForm()
     return render(request, 'users/register.html', {'form': form})
-
+    
 
 def user_login(request):
     if request.method == "POST":
@@ -41,7 +41,7 @@ def user_login(request):
         if form.is_valid():
             # The 'username' field can be either a username or an email
             user = authenticate(request, 
-                                username=form.cleaned_data['username'], 
+                                username=form.cleaned_data['username'],
                                 password=form.cleaned_data['password'])
             if user:
                 login(request, user)
@@ -159,7 +159,7 @@ def nodered_manager_view(request):  # TODO: Refactor
                 container = docker_client.containers.run(
                     'nodered/node-red',
                     detach=True,
-                    restart_policy={"Name": "always", "MaximumRetryCount": 5}, # Try 5 times to restart container when it exits e.g. server reboot (see: https://docs.docker.com/config/containers/start-containers-automatically/)
+                    restart_policy={"Name": "always"}, # Or: {"Name": "on-failure", "MaximumRetryCount": 5}, (see: https://docs.docker.com/config/containers/start-containers-automatically/)
                     ports={'1880/tcp': None},
                     volumes={container_volume_name: {'bind': '/data', 'mode': 'rw'}},
                     name=new_name

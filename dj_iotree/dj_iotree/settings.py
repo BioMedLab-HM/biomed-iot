@@ -108,9 +108,8 @@ DATABASES = {
 AUTH_USER_MODEL='users.CustomUser'
 
 AUTHENTICATION_BACKENDS = [
-    'users.backends.UsernameAuthBackend',
+    # 'users.backends.UsernameAuthBackend',  # commented out to disallow login with username because username may be shared with other users
     'users.backends.EmailAuthBackend',
-    # ...any other authentication backend
 ]
 
 # TODO: Nach setup: https://stackoverflow.com/questions/40933006/how-to-increase-expires-in-time-of-a-access-token-in-oauth-provider-toolkit-dj
@@ -140,7 +139,7 @@ AUTH_PASSWORD_VALIDATORS = [
         'NAME': 'django.contrib.auth.password_validation.CommonPasswordValidator',
     },
     # {
-    #     'NAME': 'django.contrib.auth.password_validation.NumericPasswordValidator',
+    #     'NAME': 'django.contrib.auth.password_validation.NumericPasswordValidator',  # unecessary because of custom validators
     # },
     {
         'NAME': 'users.password_validation.UpperCaseValidator',
@@ -208,7 +207,7 @@ CRISPY_TEMPLATE_PACK = "bootstrap5"
 # TODO: Hier weitere security settings?
 
 
-# TODO: KEIN Logger level "DEBUG" in production?
+# TODO: KEIN Logger level "DEBUG" in production!
 LOGGING = {
     'version': 1,
     'disable_existing_loggers': False,
