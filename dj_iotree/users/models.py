@@ -87,6 +87,7 @@ class NodeRedUserData(models.Model):
     def __str__(self):
         return self.container_name
 
+
 class MosquittoGroup(models.Model):
     groupname = models.CharField(max_length=50)
     priority = models.IntegerField()

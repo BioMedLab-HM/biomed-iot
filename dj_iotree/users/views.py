@@ -159,7 +159,9 @@ def nodered_manager_view(request):  # TODO: Refactor
                 container = docker_client.containers.run(
                     'nodered/node-red',
                     detach=True,
-                    restart_policy={"Name": "always"}, # Or: {"Name": "on-failure", "MaximumRetryCount": 5}, (see: https://docs.docker.com/config/containers/start-containers-automatically/)
+                    restart_policy={"Name": "always"}, 
+                    # "always: restart the container automatically unless manually stopped; restarts with Docker deamon or if manually restarted. 
+                    # (see: https://docs.docker.com/config/containers/start-containers-automatically/)
                     ports={'1880/tcp': None},
                     volumes={container_volume_name: {'bind': '/data', 'mode': 'rw'}},
                     name=new_name

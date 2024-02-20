@@ -132,8 +132,8 @@ cat << EOF
 		},
 		{
 			"command": "createClient",
-			"username": "$DJ_CONTROLE_USER",
-			"password": "$DJ_CONTROLE_PW",
+			"username": "$DJ_MQTT_CONTROLE_USER",
+			"password": "$DJ_MQTT_CONTROLE_PW",
 			"textname": "djControle",
 			"roles": [
 				{ "rolename": "djControle", "priority": -1 }

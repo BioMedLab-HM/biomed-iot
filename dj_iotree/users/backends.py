@@ -34,7 +34,7 @@ class UsernameAuthBackend(ModelBackend):
         try:
             return CustomUser.objects.get(pk=user_id)
         except CustomUser.DoesNotExist:
-            logger.debug("User does not exist for username: %s", username)
+            logger.debug("User does not exist for user_id: %s", user_id)
             return None
         
 
@@ -65,3 +65,4 @@ class EmailAuthBackend(ModelBackend):
             return CustomUser.objects.get(pk=user_id)
         except CustomUser.DoesNotExist:
             return None
+        

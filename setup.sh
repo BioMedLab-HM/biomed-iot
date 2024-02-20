@@ -284,7 +284,7 @@ do_install() {
     # TODO: optional in fail2ban jail.local: 
         # [nginx-limit-req] 
         # enabled = true # falls Mosquitto nicht hinter nginx; `ngx_http_limit_req_module` benötigt, siehe jail.
-    mkdir $setup_dir/config
+    mkdir $setup_dir/config  # TODO: WHAT??? WHY???
     bash $setup_dir/config/tmp.jail.local.sh > $setup_dir/tmp/jail.local
     cp $setup_dir/tmp/jail.local /etc/fail2ban/jail.local
     systemctl restart fail2ban
@@ -403,20 +403,20 @@ do_install() {
     mqtt_in_to_db_pw=$(LC_ALL=C tr -dc 'A-Za-z0-9_!@#$%^&*()-' < /dev/urandom | head -c 20 | xargs)
     mqtt_out_to_db_user=$(LC_ALL=C tr -dc 'A-Za-z0-9_!@#$%^&*()-' < /dev/urandom | head -c 10 | xargs)
     mqtt_out_to_db_pw=$(LC_ALL=C tr -dc 'A-Za-z0-9_!@#$%^&*()-' < /dev/urandom | head -c 20 | xargs)
-    client_for_website_admin=$(LC_ALL=C tr -dc 'A-Za-z0-9_!@#$%^&*()-' < /dev/urandom | head -c 10 | xargs)
+    client_name_for_website_admin=$(LC_ALL=C tr -dc 'A-Za-z0-9_!@#$%^&*()-' < /dev/urandom | head -c 10 | xargs)
     client_pw_for_website_admin=$(LC_ALL=C tr -dc 'A-Za-z0-9_!@#$%^&*()-' < /dev/urandom | head -c 20 | xargs)
 
-    dynsec_commands=$(bash /home/rene/dev/iotree42/config/tmp.mosquitto-dynsec-commands.sh \
-        "$dj_mqtt_controle_user" \
-        "$dj_mqtt_controle_pw" \
-        "$mqtt_in_to_db_user" \
-        "$mqtt_in_to_db_pw" \
-        "$mqtt_out_to_db_user" \
-        "$mqtt_out_to_db_pw" \
-        "$client_for_website_admin" \
-        "$client_pw_for_website_admin")
+    dynsec_commands=$(bash $setup_dir/config/tmp.mosquitto-dynsec-commands.sh \
+        $dj_mqtt_controle_user \
+        $dj_mqtt_controle_pw \
+        $mqtt_in_to_db_user \
+        $mqtt_in_to_db_pw \
+        $mqtt_out_to_db_user \
+        $mqtt_out_to_db_pw \
+        $client_name_for_website_admin \
+        $client_pw_for_website_admin)
 
-    mosquitto_pub -u $dynsec_admin_name -P $dynsec_admin_pass -h localhost -t '$CONTROL/dynamic-security/v1' -m '$dynsec_commands' -d
+    mosquitto_pub -u $dynsec_admin_name -P $dynsec_admin_pass -h localhost -t '$CONTROL/dynamic-security/v1' -m "$dynsec_commands" -d
     
     # TODO: Hier, Python-Logik um mqtt Client für admin-Nutzer der Webseite in PostgresDB zu schreiben
     source $setup_dir/dj_iotree/dj_venv/bin/activate
