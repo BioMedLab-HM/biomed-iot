@@ -1,12 +1,19 @@
 import json
-import paho.mqtt.client as mqtt
+# import paho.mqtt.client as mqtt
+import asyncio
+import aiomqtt
+from queue import Queue
+import time
 
 # TODO: docstrings vervollständigen/komprimieren, Returnwerte analysieren
 
-class MosquittoDynSec:
-    '''Based on commands at https://github.com/eclipse/mosquitto/blob/master/plugins/dynamic-security/README.md'''
 
-    def __init__(self, username, password, host="localhost", port=1883):
+class MosquittoDynSec:
+    '''
+    Based on commands at https://github.com/eclipse/mosquitto/blob/master/plugins/dynamic-security/README.md
+    '''
+
+    def __init__(self, username, password, host="localhost", port=1883, response_queue=None):
         """
         Initializes the MosquittoDynSec class with connection details to the MQTT broker.
 
@@ -16,28 +23,64 @@ class MosquittoDynSec:
         :param port: The network port of the MQTT server. Defaults to 1883.
         
         Upon initialization, this method creates an MQTT client, sets up authentication if username
-        and password are provided, and establishes a connection to the MQTT broker.
+        and password are provided, and establishes a connection to the MQTT broker. The on_response callback 
+        needs to be implemented by the caller. The callback passes the received mqtt response to the caller.
         """
         self.username = username
         self.password = password
         self.host = host
         self.port = port
-        self.client = mqtt.Client()
-        if username and password:
-            self.client.username_pw_set(username, password)
+        # self.client = mqtt.Client(mqtt.CallbackAPIVersion.VERSION2)
+
+        # Assign callbacks
+        # self.client.on_connect = self.on_connect
+        # self.client.on_message = self.on_message
+
+        #self.on_response = on_response  # Callback function to pass the response to the caller
+        self.response_queue = response_queue
+
+        # Set up authentication if username and password are provided
+        # if username and password:
+        #     self.client.username_pw_set(username, password)
 
         # Connect to the MQTT broker
-        self.client.connect(host, port, 60)
-        self.client.loop_start()
+        # self.client.connect(host, port, 60)
+        # self.client.loop_start()
 
-    def _send_command(self, command):
+    # def on_connect(self, client, userdata, flags, rc, properties):
+    #     # Subscribe to the response topic
+    #     self.client.subscribe("$CONTROL/dynamic-security/v1/response", qos=2)
+    #     print(f"Paho Client Return code: {rc}\n", )
+
+    # def on_message(self, client, userdata, msg):
+    #     try:
+    #         #print(f"Response01: {msg.topic} {message.payload.decode('utf-8')}\n")
+    #         # Handle the message, possibly decoding JSON
+    #         response = json.loads(message.payload.decode('utf-8'))
+    #         #print(f"{response}\n")
+    #         # if self.on_response is not None:
+    #         #     self.on_response(response)
+    #         if self.response_queue is not None:
+    #             self.response_queue.put(response)
+    #     except Exception as e:
+    #         print(f"Error handling message: {e}")
+        
+
+    async def _send_command(self, command):
         # Construct and send a command to the control topic
         topic = "$CONTROL/dynamic-security/v1"
         payload = json.dumps(command)
-        result = self.client.publish(topic, payload)
-        return result
+        async with aiomqtt.Client(self.hostname, self.port, self.username, self.password, keepalive=60) as client:
+            await client.subscribe("$CONTROL/dynamic-security/v1/#")
+            async for message in client.messages:
+                print(message.payload)
+                return json.loads(message.payload.decode('utf-8'))
+            await client.publish(topic, payload)
 
-    def set_default_acl_access(self, publish_client_send_allow, publish_client_receive_allow, subscribe_allow, unsubscribe_allow):
+        # success = self.client.publish(topic, payload)
+        # return await success  # success code: "MQTT_ERR_SUCCESS". For list of codes see: https://github.com/eclipse/paho.mqtt.python/blob/master/src/paho/mqtt/client.py
+
+    async def set_default_acl_access(self, publish_client_send_allow, publish_client_receive_allow, subscribe_allow, unsubscribe_allow):
         """
         Configures default ACL permissions for MQTT clients.
 
@@ -62,9 +105,9 @@ class MosquittoDynSec:
                 }
             ]
         }
-        return self._send_command(command)
+        return await self._send_command(command)
 
-    def get_default_acl_access(self):
+    async def  get_default_acl_access(self):
         """
     Retrieves the current default ACL access settings from the MQTT broker.
 
@@ -77,9 +120,9 @@ class MosquittoDynSec:
                 }
             ]
         }
-        return self._send_command(command)
+        return await self._send_command(command)
 
-    def create_client(self, username, password, clientid=None, textname=None, textdescription=None, groups=None, roles=None):
+    async def  create_client(self, username, password, clientid=None, textname=None, textdescription=None, groups=None, roles=None):
         """
         Creates a new client in the MQTT broker's dynamic security system 
         with specified credentials, and optionally assigns it client ID, name, description, groups, and roles.
@@ -115,9 +158,9 @@ class MosquittoDynSec:
         if roles:
             command["commands"][0]["roles"] = [{"rolename": role["rolename"], "priority": role["priority"]} for role in roles]
 
-        return self._send_command(command)
+        return await self._send_command(command)
     
-    def delete_client(self, username):
+    async def  delete_client(self, username):
         """
         Deletes an existing client from the MQTT broker's dynamic security system.
 
@@ -132,9 +175,9 @@ class MosquittoDynSec:
                 }
             ]
         }
-        return self._send_command(command)
+        return await self._send_command(command)
 
-    def enable_client(self, username):
+    async def  enable_client(self, username):
         """
         Allow client to connect (default when new client is created).
 
@@ -150,9 +193,9 @@ class MosquittoDynSec:
                 }
             ]
         }
-        return self._send_command(command)
+        return await self._send_command(command)
 
-    def disable_client(self, username):
+    async def  disable_client(self, username):
         """
         Stop a client from being able to log in, and kick any clients with matching username that are currently connected.
 
@@ -168,9 +211,9 @@ class MosquittoDynSec:
                 }
             ]
         }
-        return self._send_command(command)
+        return await self._send_command(command)
 
-    def get_client(self, username):
+    async def  get_client(self, username):
         """
         Retrieves information about a specific client from the MQTT broker's dynamic security system.
 
@@ -185,9 +228,9 @@ class MosquittoDynSec:
                 }
             ]
         }
-        return self._send_command(command)
+        return await self._send_command(command)
 
-    def list_clients(self, verbose=False, count=-1, offset=0):
+    async def  list_clients(self, verbose=False, count=-1, offset=0):
         """
         Lists clients with options for verbosity, count, and offset.
 
@@ -210,9 +253,9 @@ class MosquittoDynSec:
                 }
             ]
         }
-        return self._send_command(command)
+        return await self._send_command(command)
 
-    def modify_client(self, username, clientid=None, password=None, textname=None, textdescription=None, roles=None, groups=None):
+    async def  modify_client(self, username, clientid=None, password=None, textname=None, textdescription=None, roles=None, groups=None):
         """
         Updates the properties and permissions of an existing client in the MQTT broker's dynamic security system.
 
@@ -248,9 +291,9 @@ class MosquittoDynSec:
         if groups:
             command["commands"][0]["groups"] = [{"groupname": group["groupname"], "priority": group["priority"]} for group in groups]
 
-        return self._send_command(command)
+        return await self._send_command(command)
 
-    def set_client_id(self, username, clientid=""):
+    async def  set_client_id(self, username, clientid=""):
         """
         Assigns or clears a client ID for a specific client in the MQTT broker's dynamic security system.
 
@@ -275,9 +318,9 @@ class MosquittoDynSec:
                 }
             ]
         }
-        return self._send_command(command)
+        return await self._send_command(command)
 
-    def set_client_password(self, username, password):
+    async def  set_client_password(self, username, password):
         """
         Updates the password for a specific client in the MQTT broker's dynamic security system.
 
@@ -299,9 +342,9 @@ class MosquittoDynSec:
                 }
             ]
         }
-        return self._send_command(command)
+        return await self._send_command(command)
 
-    def add_client_role(self, username, rolename, priority=-1):
+    async def  add_client_role(self, username, rolename, priority=-1):
         """
         Assigns a role to a specific client, optionally with a specified priority.
 
@@ -327,9 +370,9 @@ class MosquittoDynSec:
                 }
             ]
         }
-        return self._send_command(command)
+        return await self._send_command(command)
 
-    def remove_client_role(self, username, rolename):
+    async def  remove_client_role(self, username, rolename):
         """
         Removes a previously assigned role from a specific client.
 
@@ -351,9 +394,9 @@ class MosquittoDynSec:
                 }
             ]
         }
-        return self._send_command(command)
+        return await self._send_command(command)
 
-    def add_group_client(self, groupname, username, priority=-1):
+    async def  add_group_client(self, groupname, username, priority=-1):
         """
         Adds a client to a specified group with an optional priority level.
 
@@ -377,9 +420,9 @@ class MosquittoDynSec:
                 }
             ]
         }
-        return self._send_command(command)
+        return await self._send_command(command)
 
-    def create_group(self, groupname, roles=None):
+    async def  create_group(self, groupname, roles=None):
         """
         Creates a new group with the specified name and optionally assigns roles to it.
 
@@ -405,9 +448,9 @@ class MosquittoDynSec:
         if roles:
             command["commands"][0]["roles"] = [{"rolename": role["rolename"], "priority": role["priority"]} for role in roles]
 
-        return self._send_command(command)
+        return await self._send_command(command)
 
-    def delete_group(self, groupname):
+    async def  delete_group(self, groupname):
         """
         Deletes a group with the specified name.
 
@@ -425,9 +468,9 @@ class MosquittoDynSec:
                 }
             ]
         }
-        return self._send_command(command)
+        return await self._send_command(command)
 
-    def get_group(self, groupname):
+    async def  get_group(self, groupname):
         """
         Retrieves information about a specified group.
 
@@ -446,9 +489,9 @@ class MosquittoDynSec:
                 }
             ]
         }
-        return self._send_command(command)
+        return await self._send_command(command)
 
-    def list_groups(self, verbose=False, count=-1, offset=0):
+    async def  list_groups(self, verbose=False, count=-1, offset=0):
         """
         Lists groups with options for verbosity, count, and offset.
 
@@ -471,9 +514,9 @@ class MosquittoDynSec:
                 }
             ]
         }
-        return self._send_command(command)
+        return await self._send_command(command)
 
-    def modify_group(self, groupname, textname=None, textdescription=None, roles=None, clients=None):
+    async def  modify_group(self, groupname, textname=None, textdescription=None, roles=None, clients=None):
         """
         Modifies an existing group with new properties, roles, and clients.
 
@@ -506,9 +549,9 @@ class MosquittoDynSec:
         if clients:
             command["commands"][0]["clients"] = [{"username": client["username"], "priority": client["priority"]} for client in clients]
 
-        return self._send_command(command)
+        return await self._send_command(command)
 
-    def remove_group_client(self, groupname, username):
+    async def  remove_group_client(self, groupname, username):
         """
         Removes a client from a specified group.
 
@@ -528,9 +571,9 @@ class MosquittoDynSec:
                 }
             ]
         }
-        return self._send_command(command)
+        return await self._send_command(command)
 
-    def add_group_role(self, groupname, rolename, priority=-1):
+    async def  add_group_role(self, groupname, rolename, priority=-1):
         """
         Adds a role to a specified group with an optional priority.
 
@@ -552,9 +595,9 @@ class MosquittoDynSec:
                 }
             ]
         }
-        return self._send_command(command)
+        return await self._send_command(command)
 
-    def remove_group_role(self, groupname, rolename):
+    async def  remove_group_role(self, groupname, rolename):
         """
         Removes a role from a specified group.
 
@@ -574,9 +617,9 @@ class MosquittoDynSec:
                 }
             ]
         }
-        return self._send_command(command)
+        return await self._send_command(command)
 
-    def set_anonymous_group(self, groupname):
+    async def  set_anonymous_group(self, groupname):
         """
         Sets the specified group as the anonymous group. Anonymous clients will inherit the permissions of this group.
 
@@ -594,9 +637,9 @@ class MosquittoDynSec:
                 }
             ]
         }
-        return self._send_command(command)
+        return await self._send_command(command)
 
-    def get_anonymous_group(self):
+    async def  get_anonymous_group(self):
         """
         Retrieves the name of the group set as the anonymous group.
 
@@ -613,9 +656,9 @@ class MosquittoDynSec:
                 }
             ]
         }
-        return self._send_command(command)
+        return await self._send_command(command)
 
-    def create_role(self, rolename, textname=None, textdescription=None, acls=None):
+    async def  create_role(self, rolename, textname=None, textdescription=None, acls=None):
         """
         Creates a new role with an optional description, name, and set of ACLs.
 
@@ -645,9 +688,9 @@ class MosquittoDynSec:
         if acls:
             command["commands"][0]["acls"] = acls
 
-        return self._send_command(command)
+        return await self._send_command(command)
 
-    def get_role(self, rolename):
+    async def  get_role(self, rolename):
         """
         Retrieves information about a specified role.
 
@@ -666,9 +709,9 @@ class MosquittoDynSec:
                 }
             ]
         }
-        return self._send_command(command)
+        return await self._send_command(command)
 
-    def list_roles(self, verbose=False, count=-1, offset=0):
+    async def  list_roles(self, verbose=False, count=-1, offset=0):
         """
         Lists roles with options for verbosity, count, and offset.
 
@@ -691,9 +734,9 @@ class MosquittoDynSec:
                 }
             ]
         }
-        return self._send_command(command)
+        return await self._send_command(command)
 
-    def modify_role(self, rolename, textname=None, textdescription=None, acls=None):
+    async def  modify_role(self, rolename, textname=None, textdescription=None, acls=None):
         """
         Modifies an existing role with new properties and/or a set of ACLs.
 
@@ -723,9 +766,9 @@ class MosquittoDynSec:
         if acls:
             command["commands"][0].setdefault("acls", []).extend(acls)
 
-        return self._send_command(command)
+        return await self._send_command(command)
 
-    def delete_role(self, rolename):
+    async def  delete_role(self, rolename):
         """
         Deletes a role with the specified name.
 
@@ -743,9 +786,9 @@ class MosquittoDynSec:
                 }
             ]
         }
-        return self._send_command(command)
+        return await self._send_command(command)
 
-    def add_role_acl(self, rolename, acltype, topic, priority=-1, allow=True):
+    async def  add_role_acl(self, rolename, acltype, topic, priority=-1, allow=True):
         """
         Adds an ACL to a specified role.
 
@@ -771,9 +814,9 @@ class MosquittoDynSec:
                 }
             ]
         }
-        return self._send_command(command)
+        return await self._send_command(command)
 
-    def remove_role_acl(self, rolename, acltype, topic):
+    async def  remove_role_acl(self, rolename, acltype, topic):
         """
         Removes an ACL from a specified role.
 
@@ -795,9 +838,10 @@ class MosquittoDynSec:
                 }
             ]
         }
-        return self._send_command(command)
+        return await self._send_command(command)
 
     def __del__(self):
+        pass
         # Clean up and disconnect
-        self.client.loop_stop()
-        self.client.disconnect()
+        # self.client.loop_stop()
+        # self.client.disconnect()
