@@ -12,13 +12,18 @@ https://docs.djangoproject.com/en/4.2/ref/settings/
 
 import os
 import json
+import tomllib
 from pathlib import Path
 from django.db.backends.postgresql.psycopg_any import IsolationLevel
 
-# TODO: config.json befüllen
+# TODO: config befüllen
 # TODO: Optional config verschlüsseln
-with open('/etc/iotree/config.json', encoding='utf-8') as config_file:
-   config = json.load(config_file)
+
+with open("/etc/iotree/config.toml", "rb") as f:
+    config = tomllib.load(f)
+
+MOSQUITTO_SETTINGS = config['mosquitto']
+
 
 # Build paths inside the project like this: BASE_DIR / 'subdir'.
 BASE_DIR = Path(__file__).resolve().parent.parent
@@ -28,12 +33,12 @@ BASE_DIR = Path(__file__).resolve().parent.parent
 # See https://docs.djangoproject.com/en/4.2/howto/deployment/checklist/
 
 # SECURITY WARNING: keep the secret key used in production secret!
-SECRET_KEY = config.get('DJANGO_SECRET_KEY')
+SECRET_KEY = config['django']['SECRET_KEY']
 
 # SECURITY WARNING: don't run with debug turned on in production!
-DEBUG = True
+DEBUG = True  # TODO: set False before deployment
 
-ALLOWED_HOSTS = [config.get('HOST_IP'), config.get('DOMAIN'),"localhost", "127.0.0.1"]
+ALLOWED_HOSTS = [config['host']['IP'], config['host']['DOMAIN'], "localhost", "127.0.0.1"]
 
 
 # Application definition
@@ -90,18 +95,16 @@ WSGI_APPLICATION = 'dj_iotree.wsgi.application'
 
 # Database
 # https://docs.djangoproject.com/en/4.2/ref/settings/#databases
-
-# TODO: get data from config.json (config.get(...))
 DATABASES = {
     'default': {
         # 'ENGINE': 'django.db.backends.sqlite3',
         # 'NAME': BASE_DIR / 'db.sqlite3',
-        "ENGINE": "django.db.backends.postgresql",
-        'NAME': config.get("POSTGRES_NAME"),  # the database name
-        'USER': config.get("POSTGRES_USER"),
-        'PASSWORD': config.get("POSTGRES_PASSWORD"),
-        'HOST': '127.0.0.1',
-        'PORT': '5432',
+        "ENGINE": config['postgres']['ENGINE'],
+        'NAME': config['postgres']['NAME'],  # the database name
+        'USER': config['postgres']['USER'],
+        'PASSWORD': config['postgres']['PASSWORD'],
+        'HOST': config['postgres']['HOST'],
+        'PORT': config['postgres']['PORT'],
     }
 }
 
@@ -189,11 +192,11 @@ LOGIN_URL = 'login'
 # LOGIN_URL='/admin/login/'
 
 EMAIL_BACKEND = 'django.core.mail.backends.smtp.EmailBackend'
-EMAIL_HOST = 'smtp.gmail.com'
-EMAIL_PORT = 587
+EMAIL_HOST = config['mail']["EMAIL_HOST"]
+EMAIL_PORT = config['mail']["EMAIL_PORT"]
 EMAIL_USE_TLS = True
-EMAIL_HOST_PASSWORD = config["SENDING_PASS"]
-EMAIL_HOST_USER = config["SENDING_MAIL"]
+EMAIL_HOST_PASSWORD = config['mail']["SENDING_PASS"]
+EMAIL_HOST_USER = config['mail']["SENDING_MAIL"]
 
 
 # Default primary key field type
