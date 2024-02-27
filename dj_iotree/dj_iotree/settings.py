@@ -18,10 +18,10 @@ from django.db.backends.postgresql.psycopg_any import IsolationLevel
 
 # TODO: config befüllen
 # TODO: Optional config verschlüsseln
-
 with open("/etc/iotree/config.toml", "rb") as f:
     config = tomllib.load(f)
 
+# Data from config.toml
 MOSQUITTO_SETTINGS = config['mosquitto']
 
 

@@ -2,6 +2,9 @@
 
 import sys
 from pathlib import Path
+import time
+import tomllib
+import json
 
 # Current script directory: iotree42/tests
 script_dir = Path(__file__).resolve().parent
@@ -10,46 +13,26 @@ script_dir = Path(__file__).resolve().parent
 # Navigate up to iotree42 then into dj_iotree/users/services
 package_dir = script_dir.parent / 'dj_iotree' / 'users' / 'services'
 
-# Append the directory containing the mosquitto_dynsec module to sys.path
+# Add the project directory to the Python path
 sys.path.append(str(package_dir))
 
-# Now you can import your module
-import json
-# import paho.mqtt.client as mqtt
 from mosquitto_dynsec import MosquittoDynSec
-from queue import Queue
-import time
 
+with open("/etc/iotree/config.toml", "rb") as f:
+    config = tomllib.load(f)
 
-def handle_response(response):
-    #print("Received response:", response)
-    pass
+username = config['mosquitto']['DYNSEC_USER']
+password = config['mosquitto']['DYNSEC_PASSWORD']
 
-def main():
-    username = "admin"
-    password = "testpass"  # TODO: neues PW festlegen
-    host="localhost"
-    port=1883
+dynsec = MosquittoDynSec(username, password)
 
-    response_queue = Queue()
-    dynsec = MosquittoDynSec(username, password, host, port, response_queue=response_queue)
+start_time = time.time()
 
-    # Test function here
-    paho_result = dynsec.get_default_acl_access()
+# Dyn. Sec. Command to test 
+success, response = dynsec.set_default_acl_access(False, False, False, False)
 
-    # Print sending results from paho
-    print(f'Paho result code: {paho_result}\n')
+end_time = time.time()
+duration = end_time - start_time
 
-    # Print the response from Mosquitto Dynamic Security Plugin
-    response = response_queue.get()  # Blocks until a response is available
-    print("Received response:", response)
-
-    time.sleep(2)
-
-if __name__ == '__main__':
-    main()
-    
-
-# Sucessfully tested:
-    # dynsec.set_default_acl_access(False, False, False, False)
-    # 
+print(f"Function execution took: {duration} seconds.")
+print(f"Success: {success}\nResponse: {response}")
