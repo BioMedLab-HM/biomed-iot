@@ -8,6 +8,7 @@ import json
 class MosquittoDynSec:
     """
     Based on commands at https://github.com/eclipse/mosquitto/blob/master/plugins/dynamic-security/README.md
+    About Mosquitto Dynamic Security Plugin: https://mosquitto.org/documentation/dynamic-security/
 
     A Python interface for interacting with the Mosquitto MQTT broker's Dynamic Security Plugin.
     This class abstracts the MQTT communication and command sending to the Dynamic Security Plugin,
@@ -66,8 +67,8 @@ class MosquittoDynSec:
         # Events and timeouts
         self.subscription_event = threading.Event()
         self.message_received_event = threading.Event()
-        self.sub_event_timeout_seconds = 1
-        self.msg_received_timeout_seconds = 1
+        self.sub_event_timeout_seconds = 5
+        self.msg_received_timeout_seconds = 10
 
         # Assign callback functions
         self.client.on_connect = self.on_connect
@@ -101,7 +102,7 @@ class MosquittoDynSec:
             #print("Connected with result code " + str(rc))
             pass
         else:
-            print("Failed to connect, return code %d\n", rc)
+            print(f"Failed to connect, return code: {rc}\n")
 
     def on_subscribe(self, client, userdata, mid, granted_qos):
         #print("Subscribed to topic")
@@ -130,17 +131,25 @@ class MosquittoDynSec:
             self.message_received_event.clear()
             self.response_msg = None  # reset the variable for next request to the Dynamic Security Plugin
         else:
-            pass
             print(f"No message received: self.response_msg = {self.response_msg}")
+            self.response_msg = None
+            response = self.response_msg
+
         return response
 
     def _is_response_successful(self, command, response):
-        if response is None:
-            return False
-        # Check if the expected command is present in the response
-        command_name = command["commands"][0]["command"] # only one command is expected per function call
-        response_command_name = response["responses"][0]["command"]
-        return command_name == response_command_name
+        successful = False
+        if response is not None:
+            # Get command name of the command sent and command in response
+            command_name = command["commands"][0]["command"] # only one command is expected per function call
+            response_command_name = response["responses"][0]["command"]
+            
+            if command_name == response_command_name:  # Check if the expected command is present in the response
+                successful = True
+            if 'error' in response['responses'][0]:  # and command_name != "deleteGroup" and command_name != "deleteRole":
+                successful = False
+       
+        return successful
 
     def _execute_command(self, command):
         send_code = self._send_command(command)  # send_code for debugging
@@ -397,7 +406,7 @@ class MosquittoDynSec:
         }
 
         return self._execute_command(command)
-# TODO: ab hier weitertesten
+
     def set_client_password(self, username, password):
         """
         Updates the password for a specific client in the MQTT broker's dynamic security system.
@@ -422,7 +431,7 @@ class MosquittoDynSec:
         }
 
         return self._execute_command(command)
-
+# TODO: ab hier weitertesten
     def add_client_role(self, username, rolename, priority=-1):
         """
         Assigns a role to a specific client, optionally with a specified priority.
