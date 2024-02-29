@@ -26,7 +26,6 @@ admin_password = config['mosquitto']['DYNSEC_PASSWORD']
 
 dynsec = MosquittoDynSec(admin_username, admin_password)
 
-
 # Test-Client
 client_username = 'client_username'
 client_password = 'client_password'
@@ -64,8 +63,7 @@ client_roles = [{"rolename": role_name, "priority": 1}]
 
 start_time = time.time()
 
-# Dyn. Sec. Command to test 
-# Initialize a list to store tuples of success and response
+# Initialize a list to store tuples of 'function', 'send_code', 'success' and 'response'
 results = []
 
 import csv
@@ -99,26 +97,24 @@ function_calls = [
     ("remove_group_role", dynsec.remove_group_role(group_name, role_name)),
     ("delete_client", dynsec.delete_client(client_username)),
     ("remove_role_acl", dynsec.remove_role_acl(role_name, role_acltype, role_topic)),
-    ("create_group", dynsec.create_group(alternative_group_name, roles=group_roles)),  # Even with this line: 'error': 'Group not found
-    ("create_role", dynsec.create_role(alternative_role_name, textname=role_textname, textdescription=role_textdescription, acls=role_acls)),  # Even with this line: 'error': 'Role not found
-    ("delete_group", dynsec.delete_group(group_name)),  # TODO: Resolve error: {'responses': [{'command': 'deleteGroup', 'error': 'Group not found'}]}
-    ("delete_role", dynsec.delete_role(role_name)),  # TODO: Resolve error: {'responses': [{'command': 'deleteRole', 'error': 'Role not found'}]}
+    ("delete_role", dynsec.delete_role(role_name)), 
     ("create_role", dynsec.create_role(role_name, textname=role_textname, textdescription=role_textdescription, acls=role_acls)),
-    ("create_group", dynsec.create_group(group_name, roles=group_roles)),
-    ("set_anonymous_group", dynsec.set_anonymous_group(group_name)),
+    ("delete_group", dynsec.delete_group(group_name)),  #  Sometimes rror: {'responses': [{'command': 'deleteGroup', 'error': 'Group not found'}]}
+    ("create_group", dynsec.create_group(alternative_group_name, roles=group_roles)),  
+    ("create_role", dynsec.create_role(alternative_role_name, textname=role_textname, textdescription=role_textdescription, acls=role_acls)),  # Even with this line: 'error': 'Role not found
+    ("set_anonymous_group", dynsec.set_anonymous_group(alternative_group_name)),
     ("get_anonymous_group", dynsec.get_anonymous_group())
 ]
 
 # Open CSV file in write mode
 with open('dynsec-test-results.csv', mode='w', newline='') as file:
     writer = csv.writer(file, delimiter='\t')  # Using tab delimiter for TSV format
-    writer.writerow(['function', 'success', 'response'])  # Write header row
+    writer.writerow(['function', 'send_code', 'success', 'response'])  # Write header row
 
     # Iterate over each function call, execute it, and write results to file
     for function_name, call in function_calls:
-        success, response = call
-        writer.writerow([function_name, success, response])
-
+        success, response, send_code = call
+        writer.writerow([function_name, send_code, success, response])
 
 end_time = time.time()
 duration = end_time - start_time

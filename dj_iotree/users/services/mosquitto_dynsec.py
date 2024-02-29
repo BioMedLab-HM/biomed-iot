@@ -2,8 +2,6 @@ import threading
 import paho.mqtt.client as mqtt
 import json
 
-# TODO: docstrings vervollständigen/komprimieren, Returnwerte analysieren
-
 
 class MosquittoDynSec:
     """
@@ -18,9 +16,10 @@ class MosquittoDynSec:
     Dynamic Security Plugin. Setter functions are used to configure or modify settings, while
     getter functions are used to retrieve current configurations from the broker.
 
-    Setter functions return a tuple of (success, response), where 'success' is a boolean indicating
+    SETTER functions return a tuple of (success, response), where 'success' is a boolean indicating
     the operation's success, and 'response' is a dictionary containing the broker's response.
-    Getter functions similarly return a tuple of (success, response) where 'response' in this case
+
+    GETTER functions similarly return a tuple of (success, response) where 'response' in this case
     contains the requested configuration data.
 
     Example usage:
@@ -90,7 +89,6 @@ class MosquittoDynSec:
         pass
 
     def on_message(self, client, userdata, msg):
-        
         #print(f"Topic: `{msg.topic}`\nPayload: `{json.loads(msg.payload.decode('utf-8'))}`")
         self.response_msg = json.loads(msg.payload.decode('utf-8'))
         #print(f"on_message: self.response_msg = {self.response_msg}")
@@ -102,7 +100,7 @@ class MosquittoDynSec:
             #print("Connected with result code " + str(rc))
             pass
         else:
-            print(f"Failed to connect, return code: {rc}\n")
+            print(f"Failed to connect, return code: {rc}\n") # TODO: implement logging
 
     def on_subscribe(self, client, userdata, mid, granted_qos):
         #print("Subscribed to topic")
@@ -137,6 +135,36 @@ class MosquittoDynSec:
 
         return response
 
+    # def _is_response_successful(self, command, response):
+    #     if response is None:
+    #         return False
+        
+    #     # Get command name of the sent command and the command in the response
+    #     command_name = command["commands"][0]["command"]  # Only one command is expected per function call
+    #     response_command_name = response["responses"][0]["command"]
+        
+    #     # Early return if command names do not match
+    #     if command_name != response_command_name:
+    #         return False
+        
+    #     # Check for 'error' in the response and if it contains 'already'
+    #     if 'error' in response['responses'][0]:
+    #         error_message = response['responses'][0]['error']
+    #         # Return True if error message indicates a state of "already exists", implying success
+    #         if 'already' in error_message:  # Caveat: prone to minterpretation if response messages change in the future
+    #             # Known responses containing 'already':
+    #                     # 'Role already exists'
+    #                     # 'Group already exists'
+    #                     # 'Group is already in this role'
+    #                     # 'Client is already in this group'
+    #                     # 'ACL with this topic already exists'
+    #             return True
+    #         else:
+    #             return False
+
+    #     # If no error or mismatch in command names, assume success
+    #     return True
+
     def _is_response_successful(self, command, response):
         successful = False
         if response is not None:
@@ -146,8 +174,16 @@ class MosquittoDynSec:
             
             if command_name == response_command_name:  # Check if the expected command is present in the response
                 successful = True
-            if 'error' in response['responses'][0]:  # and command_name != "deleteGroup" and command_name != "deleteRole":
+            if 'error' in response['responses'][0]:
                 successful = False
+                if 'already' in response['responses'][0]['error']:  # caveat: prone to minterpretation if response messages change in the future
+                    # Known responses containing 'already':
+                        # 'Role already exists'
+                        # 'Group already exists'
+                        # 'Group is already in this role'
+                        # 'Client is already in this group'
+                        # 'ACL with this topic already exists'
+                    successful = True  # successful = True, since the Dynamic Security Plugin configuration already matches the desired state
        
         return successful
 
@@ -155,7 +191,7 @@ class MosquittoDynSec:
         send_code = self._send_command(command)  # send_code for debugging
         response = self._get_response()
         success = self._is_response_successful(command, response)
-        return success, response
+        return success, response, send_code
 
 
     """

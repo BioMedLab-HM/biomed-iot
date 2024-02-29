@@ -1,0 +1,37 @@
+function               	success 	response
+set_default_acl_access 	True    	{'responses': [{'command': 'setDefaultACLAccess'}]}
+get_default_acl_access 	True    	{'responses': [{'command': 'getDefaultACLAccess', 'data': {'acls': [{'acltype': 'publishClientSend', 'allow': False}, {'acltype': 'publishClientReceive', 'allow': False}, {'acltype': 'subscribe', 'allow': False}, {'acltype': 'unsubscribe', 'allow': False}]}}]}
+create_role            	True    	{'responses': [{'command': 'createRole'}]}
+get_role               	True    	{'responses': [{'command': 'getRole', 'data': {'role': {'rolename': 'role_name', 'textname': 'role_textname', 'textdescription': 'role_textdescription', 'acls': [{'acltype': 'subscribePattern', 'topic': 'role_topic', 'priority': -1, 'allow': True}]}}}]}
+list_roles             	True    	{'responses': [{'command': 'listRoles', 'data': {'totalCount': 2, 'roles': ['admin', 'role_name']}}]}
+add_role_acl           	False   	{'responses': [{'command': 'addRoleACL', 'error': 'ACL with this topic already exists'}]}
+modify_role            	True    	{'responses': [{'command': 'modifyRole'}]}
+create_group           	True    	{'responses': [{'command': 'createGroup'}]}
+get_group              	True    	{'responses': [{'command': 'getGroup', 'data': {'group': {'groupname': 'group_name', 'clients': [], 'roles': [{'rolename': 'role_name', 'priority': 1}]}}}]}
+list_groups            	True    	{'responses': [{'command': 'listGroups', 'data': {'totalCount': 1, 'groups': ['group_name']}}]}
+modify_group           	True    	{'responses': [{'command': 'modifyGroup'}]}
+create_client          	True    	{'responses': [{'command': 'createClient'}]}
+add_group_client       	False   	{'responses': [{'command': 'addGroupClient', 'error': 'Client is already in this group'}]}
+add_group_role         	False   	{'responses': [{'command': 'addGroupRole', 'error': 'Group is already in this role'}]}
+set_client_id          	True    	{'responses': [{'command': 'setClientId'}]}
+set_client_password    	True    	{'responses': [{'command': 'setClientPassword'}]}
+add_client_role        	True    	{'responses': [{'command': 'addClientRole'}]}
+disable_client         	True    	{'responses': [{'command': 'disableClient'}]}
+enable_client          	True    	{'responses': [{'command': 'enableClient'}]}
+get_client             	True    	{'responses': [{'command': 'getClient', 'data': {'client': {'username': 'client_username', 'clientid': 'client_id', 'textname': 'client_textname', 'textdescription': 'client_textdescription', 'roles': [{'rolename': 'role_name'}], 'groups': [{'groupname': 'group_name', 'priority': 1}]}}}]}
+list_clients           	True    	{'responses': [{'command': 'listClients', 'data': {'totalCount': 2, 'clients': ['admin', 'client_username']}}]}
+modify_client          	True    	{'responses': [{'command': 'modifyClient'}]}
+remove_client_role     	True    	{'responses': [{'command': 'removeClientRole'}]}
+remove_group_client    	True    	{'responses': [{'command': 'removeGroupClient'}]}
+remove_group_role      	True    	{'responses': [{'command': 'removeGroupRole'}]}
+delete_client          	True    	{'responses': [{'command': 'deleteClient'}]}
+remove_role_acl        	True    	{'responses': [{'command': 'removeRoleACL'}]}
+create_group           	True    	{'responses': [{'command': 'createGroup'}]}
+create_role            	True    	{'responses': [{'command': 'createRole'}]}
+add_role_acl           	True    	{'responses': [{'command': 'addRoleACL'}]}
+delete_group           	True    	{'responses': [{'command': 'deleteGroup'}]}
+delete_role            	True    	{'responses': [{'command': 'deleteRole'}]}
+create_role            	True    	{'responses': [{'command': 'createRole'}]}
+create_group           	True    	{'responses': [{'command': 'createGroup'}]}
+set_anonymous_group    	True    	{'responses': [{'command': 'setAnonymousGroup'}]}
+get_anonymous_group    	True    	{'responses': [{'command': 'getAnonymousGroup', 'data': {'group': {'groupname': 'group_name'}}}]}

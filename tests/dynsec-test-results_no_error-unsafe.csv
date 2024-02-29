@@ -1,0 +1,37 @@
+function               	send_code 	success 	response
+set_default_acl_access 	(0, 2)    	True    	{'responses': [{'command': 'setDefaultACLAccess'}]}
+get_default_acl_access 	(0, 3)    	True    	{'responses': [{'command': 'getDefaultACLAccess', 'data': {'acls': [{'acltype': 'publishClientSend', 'allow': False}, {'acltype': 'publishClientReceive', 'allow': False}, {'acltype': 'subscribe', 'allow': False}, {'acltype': 'unsubscribe', 'allow': False}]}}]}
+create_role            	(0, 4)    	True    	{'responses': [{'command': 'createRole', 'error': 'Role already exists'}]}
+get_role               	(0, 5)    	True    	{'responses': [{'command': 'getRole', 'data': {'role': {'rolename': 'role_name', 'textname': 'role_textname', 'textdescription': 'role_textdescription', 'acls': [{'acltype': 'subscribePattern', 'topic': 'role_topic', 'priority': -1, 'allow': True}]}}}]}
+list_roles             	(0, 6)    	True    	{'responses': [{'command': 'listRoles', 'data': {'totalCount': 3, 'roles': ['admin', 'alternative_role_name', 'role_name']}}]}
+add_role_acl           	(0, 7)    	True    	{'responses': [{'command': 'addRoleACL', 'error': 'ACL with this topic already exists'}]}
+modify_role            	(0, 8)    	True    	{'responses': [{'command': 'modifyRole'}]}
+create_group           	(0, 9)    	True    	{'responses': [{'command': 'createGroup', 'error': 'Group already exists'}]}
+get_group              	(0, 10)   	True    	{'responses': [{'command': 'getGroup', 'data': {'group': {'groupname': 'group_name', 'clients': [], 'roles': [{'rolename': 'role_name', 'priority': 1}]}}}]}
+list_groups            	(0, 11)   	True    	{'responses': [{'command': 'listGroups', 'data': {'totalCount': 2, 'groups': ['alternative_group_name', 'group_name']}}]}
+modify_group           	(0, 12)   	True    	{'responses': [{'command': 'modifyGroup'}]}
+create_client          	(0, 13)   	True    	{'responses': [{'command': 'createClient'}]}
+add_group_client       	(0, 14)   	True    	{'responses': [{'command': 'addGroupClient', 'error': 'Client is already in this group'}]}
+add_group_role         	(0, 15)   	True    	{'responses': [{'command': 'addGroupRole', 'error': 'Group is already in this role'}]}
+set_client_id          	(0, 16)   	True    	{'responses': [{'command': 'setClientId'}]}
+set_client_password    	(0, 17)   	True    	{'responses': [{'command': 'setClientPassword'}]}
+add_client_role        	(0, 18)   	True    	{'responses': [{'command': 'addClientRole'}]}
+disable_client         	(0, 19)   	True    	{'responses': [{'command': 'disableClient'}]}
+enable_client          	(0, 20)   	True    	{'responses': [{'command': 'enableClient'}]}
+get_client             	(0, 21)   	True    	{'responses': [{'command': 'getClient', 'data': {'client': {'username': 'client_username', 'clientid': 'client_id', 'textname': 'client_textname', 'textdescription': 'client_textdescription', 'roles': [{'rolename': 'role_name'}], 'groups': [{'groupname': 'group_name', 'priority': 1}]}}}]}
+list_clients           	(0, 22)   	True    	{'responses': [{'command': 'listClients', 'data': {'totalCount': 2, 'clients': ['admin', 'client_username']}}]}
+modify_client          	(0, 23)   	True    	{'responses': [{'command': 'modifyClient'}]}
+remove_client_role     	(0, 24)   	True    	{'responses': [{'command': 'removeClientRole'}]}
+remove_group_client    	(0, 25)   	True    	{'responses': [{'command': 'removeGroupClient'}]}
+remove_group_role      	(0, 26)   	True    	{'responses': [{'command': 'removeGroupRole'}]}
+delete_client          	(0, 27)   	True    	{'responses': [{'command': 'deleteClient'}]}
+remove_role_acl        	(0, 28)   	True    	{'responses': [{'command': 'removeRoleACL'}]}
+create_group           	(0, 29)   	True    	{'responses': [{'command': 'createGroup', 'error': 'Group already exists'}]}
+create_role            	(0, 30)   	True    	{'responses': [{'command': 'createRole', 'error': 'Role already exists'}]}
+add_role_acl           	(0, 31)   	True    	{'responses': [{'command': 'addRoleACL'}]}
+delete_group           	(0, 32)   	True    	{'responses': [{'command': 'deleteGroup'}]}
+delete_role            	(0, 33)   	True    	{'responses': [{'command': 'deleteRole'}]}
+create_role            	(0, 34)   	True    	{'responses': [{'command': 'createRole'}]}
+create_group           	(0, 35)   	True    	{'responses': [{'command': 'createGroup'}]}
+set_anonymous_group    	(0, 36)   	True    	{'responses': [{'command': 'setAnonymousGroup'}]}
+get_anonymous_group    	(0, 37)   	True    	{'responses': [{'command': 'getAnonymousGroup', 'data': {'group': {'groupname': 'group_name'}}}]}
