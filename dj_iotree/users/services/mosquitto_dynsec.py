@@ -135,37 +135,8 @@ class MosquittoDynSec:
 
         return response
 
-    # def _is_response_successful(self, command, response):
-    #     if response is None:
-    #         return False
-        
-    #     # Get command name of the sent command and the command in the response
-    #     command_name = command["commands"][0]["command"]  # Only one command is expected per function call
-    #     response_command_name = response["responses"][0]["command"]
-        
-    #     # Early return if command names do not match
-    #     if command_name != response_command_name:
-    #         return False
-        
-    #     # Check for 'error' in the response and if it contains 'already'
-    #     if 'error' in response['responses'][0]:
-    #         error_message = response['responses'][0]['error']
-    #         # Return True if error message indicates a state of "already exists", implying success
-    #         if 'already' in error_message:  # Caveat: prone to minterpretation if response messages change in the future
-    #             # Known responses containing 'already':
-    #                     # 'Role already exists'
-    #                     # 'Group already exists'
-    #                     # 'Group is already in this role'
-    #                     # 'Client is already in this group'
-    #                     # 'ACL with this topic already exists'
-    #             return True
-    #         else:
-    #             return False
-
-    #     # If no error or mismatch in command names, assume success
-    #     return True
-
     def _is_response_successful(self, command, response):
+        # Response codes for Mosquitto on GitHub: https://github.com/search?q=repo%3Aeclipse%2Fmosquitto++%7B%27responses%27&type=code
         successful = False
         if response is not None:
             # Get command name of the command sent and command in response
