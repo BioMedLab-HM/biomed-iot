@@ -144,21 +144,21 @@ AUTH_PASSWORD_VALIDATORS = [
     # {
     #     'NAME': 'django.contrib.auth.password_validation.NumericPasswordValidator',  # unecessary because of custom validators
     # },
-    {
-        'NAME': 'users.password_validation.UpperCaseValidator',
-    },
+    # {
+    #     'NAME': 'users.password_validation.UpperCaseValidator',  # TODO: activate for production
+    # },
     {
         'NAME': 'users.password_validation.LowerCaseValidator',
     },
-    {
-        'NAME': 'users.password_validation.DigitValidator',
-    },
-    {
-        'NAME': 'users.password_validation.SymbolValidator',
-        "OPTIONS": {
-            "symbols": "!@#$%&*()_+-=[]}{|;:<>/?",
-        },
-    },
+    # {
+    #     'NAME': 'users.password_validation.DigitValidator',  # TODO: activate for production
+    # },
+    # {
+    #     'NAME': 'users.password_validation.SymbolValidator',  # TODO: activate for production
+    #     "OPTIONS": {
+    #         "symbols": "!@#$%&*()_+-=[]}{|;:<>/?",
+    #     },
+    # },
 ]
 
 

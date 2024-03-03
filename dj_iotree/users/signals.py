@@ -16,7 +16,7 @@ def create_profile(sender, instance, created, **kwargs):
 def save_profile(sender, instance, **kwargs):
     instance.profile.save()
     
-
+# TODO: avoid using signal also for this update_nodered_config() function (has been unreliable in the past)
 @receiver(post_save, sender=NodeRedUserData)
 def update_nodered_config(sender, instance, **kwargs):
     if kwargs.get('update_fields') and 'container_port' in kwargs['update_fields']:
@@ -29,7 +29,7 @@ def update_nodered_config(sender, instance, **kwargs):
 def user_delete(sender, instance, **kwargs):
     # TODO: implement
     pass
-    # TODO: stop and delete Nodered Container
+    # stop and delete Nodered Container
 
     # username = str(instance)
     # IDs = instance.last_name

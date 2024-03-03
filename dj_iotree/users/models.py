@@ -11,7 +11,6 @@ class CustomUserManager(BaseUserManager):
     """
     About custom user models: https://medium.com/@akshatgadodia/the-power-of-customising-django-user-why-you-should-start-early-e9036eae8c6d
     """
-
     def create_user(self, username, email, password=None, **extra_fields):
         """
         Create and save a user with the given username, email and password.
@@ -88,8 +87,9 @@ class NodeRedUserData(models.Model):
         return self.container_name
 
 
+#  Do not use for now
 class MosquittoGroup(models.Model):
-    groupname = models.CharField(max_length=50)
+    groupname = models.CharField(max_length=30, unique=True)
     priority = models.IntegerField()
 
     def __str__(self):
@@ -97,22 +97,22 @@ class MosquittoGroup(models.Model):
 
 
 class MosquittoRole(models.Model):
-    rolename = models.CharField(max_length=50)
+    rolename = models.CharField(max_length=30, unique=True)
     priority = models.IntegerField()
 
     def __str__(self):
         return self.rolename
 
 
-class MosquittoClientData(models.Model):
-    user = models.OneToOneField(settings.AUTH_USER_MODEL, on_delete=models.CASCADE, primary_key=True)
-    username = models.CharField(max_length=50)
-    password = models.CharField(max_length=50, default="")  # Misspelling corrected
-    client_id = models.CharField(max_length=23, blank=True, default="")  # Use blank=True for optional fields
-    textname = models.CharField(max_length=50, blank=True, default="")
-    textdescription = models.CharField(max_length=600, blank=True, default="")
-    groups = models.ManyToManyField(MosquittoGroup, blank=True)  # Optional relationship to groups
-    roles = models.ManyToManyField(MosquittoRole, blank=True)  # Optional relationship to roles
+class MosquittoClient(models.Model):
+    user = models.ForeignKey(settings.AUTH_USER_MODEL, on_delete=models.CASCADE)
+    client_username = models.CharField(max_length=18, unique=True, primary_key=True)  # Ensures client_username is unique across all instances
+    client_password = models.CharField(max_length=32, default="")
+    client_id = models.CharField(max_length=23, blank=True, default="", unique=True)  # max_length=23 for compatibility with MQTT 3.1.1
+    textname = models.CharField(max_length=30, blank=True, default="")
+    textdescription = models.CharField(max_length=100, blank=True, default="")
+    groups = models.ManyToManyField(MosquittoGroup, blank=True)
+    roles = models.ManyToManyField(MosquittoRole, blank=True)
 
     def __str__(self):
-        return self.username
+        return self.client_username

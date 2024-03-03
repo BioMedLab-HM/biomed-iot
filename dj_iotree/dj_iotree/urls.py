@@ -27,6 +27,13 @@ urlpatterns = [
     # path('o/', include('oauth2_provider.urls', namespace='oauth2_provider')),
     # path('auth/callback/', views.oauth_callback, name='oauth_callback'),
 
+    path('client-list/', user_views.client_list, name='client-list'),
+    path('add-client/', user_views.add_client, name='add-client'),
+    # path('modify_client/', user_views.modify_client, name='modify-client'),
+    path('modify-client/<str:client_username>/', user_views.modify_client, name='modify-client'),
+    path('delete-client/<str:client_username>/', user_views.delete_client, name='delete-client'),
+    #path('delete_client/', user_views.delete_client, name='delete-client'),
+
     path('nodered-manager/', user_views.nodered_manager_view, name='nodered-manager'),
     path('nodered-create-instance/', user_views.nodered_manager_view, name='nodered-create-instance'),
     path('nodered-start-instance/', user_views.nodered_manager_view, name='nodered-start-instance'),

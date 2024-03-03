@@ -1,0 +1,18 @@
+{% extends "core/base.html" %}
+{% load crispy_forms_tags %}
+{% block content %}
+<div class="content-section">
+    <a href="{% url 'add-client' %}" class="btn btn-primary">Add New Client</a>
+    <ul class="list-group mt-3">
+        {% for client in clients %}
+        <li class="list-group-item">
+            Username: {{ client.client_username }}, ID: {{ client.client_id }}, Name: {{ client.textname }}, Description: {{ client.textdescription }}
+            <a href="{% url 'modify-client' client.client_username %}" class="text-secondary">Modify</a> |
+            <a href="{% url 'delete-client' client.client_username %}" class="text-danger">Delete</a>
+        </li>
+        {% empty %}
+        <li class="list-group-item">No clients added yet.</li>
+        {% endfor %}
+    </ul>
+</div>
+{% endblock content %}

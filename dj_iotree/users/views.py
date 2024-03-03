@@ -1,10 +1,10 @@
 import json
-from django.shortcuts import render, redirect
+from django.shortcuts import render, redirect, get_object_or_404
 from django.contrib import messages
 from django.contrib.auth.decorators import login_required
 from django.contrib.auth import authenticate, login
-from .forms import UserRegisterForm, UserUpdateForm, ProfileUpdateForm, UserLoginForm
-from .models import NodeRedUserData
+from .forms import UserRegisterForm, UserUpdateForm, ProfileUpdateForm, UserLoginForm, ClientForm
+from .models import NodeRedUserData, MosquittoGroup, MosquittoRole, MosquittoClient
 import docker
 import secrets
 from django.http import JsonResponse
@@ -85,6 +85,7 @@ common_timezones = {
 }
 timezones = [('New York', 'America/New_York'), ('London', 'Europe/London')]
 
+# Experimental function
 @login_required
 def set_timezone(request):
     if request.method == "POST":
@@ -95,7 +96,61 @@ def set_timezone(request):
         timezones_list = sorted(common_timezones.items(), key=lambda x: x[0])
         return render(request, "set_timezone.html", {"timezones": timezones_list})
 
+@login_required
+def client_list(request):
+    # Filter clients by the current user and pass to the template
+    clients = MosquittoClient.objects.filter(user=request.user)
+    mock_clients = [
+        {'client_username': 'user1', 'client_id': '001', 'textname': 'Client 1', 'textdescription': 'Description for Client 1'},
+        {'client_username': 'user2', 'client_id': '002', 'textname': 'Client 2', 'textdescription': 'Description for Client 2'},
+        {'client_username': 'user3', 'client_id': '003', 'textname': 'Client 3', 'textdescription': 'Description for Client 3'},
+    ]
+    context = {'clients': mock_clients}
+    return render(request, 'users/client_list.html', context)
 
+@login_required
+def add_client(request):
+    if request.method == 'POST':
+        form = ClientForm(request.POST)
+        if form.is_valid():
+            # Instead of directly saving the form, save it to a model instance without committing to the database yet
+            new_client = form.save(commit=False)
+            # Set the user field to the currently logged-in user
+            new_client.user = request.user
+            # Now save the model instance to the database
+            new_client.save()
+            return redirect('client-list')
+    else:
+        form = ClientForm()
+    return render(request, 'users/add_client.html', {'form': form})
+
+@login_required
+def modify_client(request, client_username):
+    client = get_object_or_404(MosquittoClient, pk=client_username)
+    if request.method == 'POST':
+        form = ClientForm(request.POST, instance=client)
+        if form.is_valid():
+            form.save()
+            return redirect('client-list')
+    else:
+        form = ClientForm(instance=client)
+    return render(request, 'users/modify_client.html', {'form': form, 'client': client})
+
+@login_required
+def delete_client(request, client_username):
+    client = get_object_or_404(MosquittoClient, pk=client_username)
+    if request.method == 'POST':
+        # If the 'delete' action is confirmed
+        if 'confirm_delete' in request.POST:
+            client.delete()
+            return redirect('client-list')
+        else:
+            # If any other action, just redirect back to the client list
+            return redirect('client-list')
+    else:
+        # Render a confirmation page/template
+        return render(request, 'users/delete_client.html', {'client': client})
+    
 @login_required
 def nodered_manager_view(request):  # TODO: Refactor
     user = request.user
@@ -191,13 +246,13 @@ def nodered_manager_view(request):  # TODO: Refactor
     # Rendere entsprechende Templates je Container Status
     match container_status:  # TODO: evtl container health statt status weil differenzierter
         case 'no-container':
-            content_template = 'users/nodered-create-instance.html'
+            content_template = 'users/nodered_create_instance.html'
         case 'created':
-            content_template = 'users/nodered-waiting.html'
+            content_template = 'users/nodered_waiting.html'
         case 'restarting':  # alternativ "starting" bei Variante mit container health
-            content_template = 'users/nodered-waiting.html'
+            content_template = 'users/nodered_waiting.html'
         case 'exited':
-            content_template = 'users/nodered-start-instance.html'
+            content_template = 'users/nodered_start_instance.html'
         case 'running':  # by container.status
             # Reload to get latest state and port information
             container.reload()
@@ -205,7 +260,7 @@ def nodered_manager_view(request):  # TODO: Refactor
 
             # Node-RED is ready
             if container_health == 'healthy':
-                content_template = 'users/nodered-embedded.html'
+                content_template = 'users/nodered_embedded.html'
             else:
                 # If Node-RED is not yet healthy, check and update the port if necessary
                 container_port = container.attrs['NetworkSettings']['Ports']['1880/tcp'][0]['HostPort']
@@ -213,13 +268,13 @@ def nodered_manager_view(request):  # TODO: Refactor
                     nodered_data.container_port = container_port
                     nodered_data.save(update_fields=['container_port'])
                 
-                content_template = 'users/nodered-waiting.html'
+                content_template = 'users/nodered_waiting.html'
 
         case _:
-            content_template = 'users/nodered-unavailable.html'
+            content_template = 'users/nodered_unavailable.html'
 
     context = {'content_template': content_template, 'instance_name': container_name, 'status': container_status}
-    return render(request, 'users/nodered-manager.html', context)
+    return render(request, 'users/nodered_manager.html', context)  # TODO: make template name a variable
 
 
 
