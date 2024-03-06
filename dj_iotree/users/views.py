@@ -3,8 +3,8 @@ from django.shortcuts import render, redirect, get_object_or_404
 from django.contrib import messages
 from django.contrib.auth.decorators import login_required
 from django.contrib.auth import authenticate, login
-from .forms import UserRegisterForm, UserUpdateForm, ProfileUpdateForm, UserLoginForm, ClientForm
-from .models import NodeRedUserData, MosquittoGroup, MosquittoRole, MosquittoClient
+from .forms import UserRegisterForm, UserUpdateForm, ProfileUpdateForm, UserLoginForm, MQTTClientForm
+from .models import NodeRedUserData, MQTTClient
 import docker
 import secrets
 from django.http import JsonResponse
@@ -12,10 +12,8 @@ from django.db import IntegrityError
 import random
 import string
 from django.db import transaction
-
-
-with open('/etc/iotree/config.json', encoding='utf-8') as config_file:
-   config = json.load(config_file)
+from django.conf import settings
+from .services.nodered_utils import update_nginx_nodered_conf
 
 
 def register(request):
@@ -99,7 +97,7 @@ def set_timezone(request):
 @login_required
 def client_list(request):
     # Filter clients by the current user and pass to the template
-    clients = MosquittoClient.objects.filter(user=request.user)
+    clients = MQTTClient.objects.filter(user=request.user)
     mock_clients = [
         {'client_username': 'user1', 'client_id': '001', 'textname': 'Client 1', 'textdescription': 'Description for Client 1'},
         {'client_username': 'user2', 'client_id': '002', 'textname': 'Client 2', 'textdescription': 'Description for Client 2'},
@@ -126,7 +124,7 @@ def add_client(request):
 
 @login_required
 def modify_client(request, client_username):
-    client = get_object_or_404(MosquittoClient, pk=client_username)
+    client = get_object_or_404(MQTTClient, pk=client_username)
     if request.method == 'POST':
         form = ClientForm(request.POST, instance=client)
         if form.is_valid():
@@ -138,7 +136,7 @@ def modify_client(request, client_username):
 
 @login_required
 def delete_client(request, client_username):
-    client = get_object_or_404(MosquittoClient, pk=client_username)
+    client = get_object_or_404(MQTTClient, pk=client_username)
     if request.method == 'POST':
         # If the 'delete' action is confirmed
         if 'confirm_delete' in request.POST:
@@ -152,7 +150,7 @@ def delete_client(request, client_username):
         return render(request, 'users/delete_client.html', {'client': client})
     
 @login_required
-def nodered_manager_view(request):  # TODO: Refactor
+def nodered_manager(request):  # TODO: Refactor
     user = request.user
     container = None
     container_status = 'no-container'
@@ -175,7 +173,7 @@ def nodered_manager_view(request):  # TODO: Refactor
             container = docker_client.containers.get(container_name)
             container_status = container.status
         except docker.errors.NotFound:  # If the container does not exist
-            container_status = container_status#'no-container'
+            container_status = 'no-container'
         # oder redirect errorseite
         except docker.errors.APIError as e:  # various reasons:  invalid parameters, issues with the Docker daemon, network problems, other Docker-related issues
             container_status = 'error'  # will lead to default case that renders nodered-unavailable page
@@ -204,6 +202,7 @@ def nodered_manager_view(request):  # TODO: Refactor
                         # obj.container_port = 0
                         obj.access_token = new_token
                         obj.save()  # TODO: Check if name and token already exist
+                        update_nginx_nodered_conf()
             except IntegrityError:
                 # Handle the IntegrityError case, could log or re-raise with additional context
                 pass
@@ -267,7 +266,7 @@ def nodered_manager_view(request):  # TODO: Refactor
                 if nodered_data.container_port != container_port:
                     nodered_data.container_port = container_port
                     nodered_data.save(update_fields=['container_port'])
-                
+                    update_nginx_nodered_conf()
                 content_template = 'users/nodered_waiting.html'
 
         case _:

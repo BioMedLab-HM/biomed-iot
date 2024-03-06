@@ -2,7 +2,7 @@ from django.db.models.signals import post_save, pre_delete
 # from django.contrib.auth.models import User
 from django.dispatch import receiver
 from .models import CustomUser, Profile, NodeRedUserData  # settings.AUTH_USER_MODEL instead of writing the class name directly
-from .utils import update_nginx_configuration
+# from .services.nodered_utils import update_nginx_nodered_conf
 from django.conf import settings
 
 
@@ -16,13 +16,14 @@ def create_profile(sender, instance, created, **kwargs):
 def save_profile(sender, instance, **kwargs):
     instance.profile.save()
     
-# TODO: avoid using signal also for this update_nodered_config() function (has been unreliable in the past)
-@receiver(post_save, sender=NodeRedUserData)
-def update_nodered_config(sender, instance, **kwargs):
-    if kwargs.get('update_fields') and 'container_port' in kwargs['update_fields']:
-        # The 'container_port' field was updated
-        print("Jetzt kommt die Updatefunction")  # TODO: Später entfernen bzw durch log ersetzen
-        update_nginx_configuration(instance)
+
+# # TODO: avoid using signal also for this update_nodered_config() function (has been unreliable in the past)
+# @receiver(post_save, sender=NodeRedUserData)
+# def update_nodered_config(sender, instance, **kwargs):
+#     if kwargs.get('update_fields') and 'container_port' in kwargs['update_fields']:
+#         # The 'container_port' field was updated
+#         print("Neuuer Serverblock für Nodered Instanz wird erstellt")  # TODO: Später entfernen bzw durch log ersetzen
+#         update_nginx_nodered_conf(instance)
             
 
 @receiver(pre_delete, sender=settings.AUTH_USER_MODEL)

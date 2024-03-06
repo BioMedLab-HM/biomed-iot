@@ -78,8 +78,8 @@ class Profile(models.Model):
 
 class NodeRedUserData(models.Model):
     user = models.OneToOneField(settings.AUTH_USER_MODEL, on_delete=models.CASCADE, primary_key=True)
-    container_name = models.CharField(max_length=30)
-    container_port = models.CharField(max_length=5, default=0)  # since highest port number has five digits (65535)
+    container_name = models.CharField(max_length=30, unique=True, primary_key=True)
+    container_port = models.CharField(max_length=5, default=0, unique=True)  # since highest possible port number has five digits (65535)
     access_token = models.CharField(max_length=100)
     # later maybe add data from the container like flows, dashboards and list of installed nodered plugins
 
@@ -87,32 +87,13 @@ class NodeRedUserData(models.Model):
         return self.container_name
 
 
-#  Do not use for now
-class MosquittoGroup(models.Model):
-    groupname = models.CharField(max_length=30, unique=True)
-    priority = models.IntegerField()
-
-    def __str__(self):
-        return self.groupname
-
-
-class MosquittoRole(models.Model):
-    rolename = models.CharField(max_length=30, unique=True)
-    priority = models.IntegerField()
-
-    def __str__(self):
-        return self.rolename
-
-
-class MosquittoClient(models.Model):
+class MQTTClient(models.Model):
     user = models.ForeignKey(settings.AUTH_USER_MODEL, on_delete=models.CASCADE)
-    client_username = models.CharField(max_length=18, unique=True, primary_key=True)  # Ensures client_username is unique across all instances
-    client_password = models.CharField(max_length=32, default="")
+    client_username = models.CharField(max_length=20, unique=True, primary_key=True)
+    client_password = models.CharField(max_length=30, default="")
     client_id = models.CharField(max_length=23, blank=True, default="", unique=True)  # max_length=23 for compatibility with MQTT 3.1.1
     textname = models.CharField(max_length=30, blank=True, default="")
-    textdescription = models.CharField(max_length=100, blank=True, default="")
-    groups = models.ManyToManyField(MosquittoGroup, blank=True)
-    roles = models.ManyToManyField(MosquittoRole, blank=True)
+    acltype = models.CharField(max_length=20, blank=True, default="")
 
     def __str__(self):
         return self.client_username
