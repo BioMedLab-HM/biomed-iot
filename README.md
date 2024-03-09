@@ -1,6 +1,6 @@
 # IoTree42
 
-hier gibts bald was zu sehen
+An open source IoT platform for data collection, visualization and automation.
 
 ## Installation:
 
