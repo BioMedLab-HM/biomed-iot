@@ -15,14 +15,13 @@ import json
 import tomllib
 from pathlib import Path
 from django.db.backends.postgresql.psycopg_any import IsolationLevel
-from .utils import update_nginx_configuration
 
 # TODO: config befüllen
 # TODO: Optional config verschlüsseln
 with open("/etc/iotree/config.toml", "rb") as f:
     config = tomllib.load(f)
 
-# Data from config.toml
+# Data from config.toml for other modules
 MOSQUITTO_SETTINGS = config['mosquitto']
 NODERED_SETTINGS = config['nodered']
 

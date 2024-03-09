@@ -1,7 +1,7 @@
 # Utility functions for Nodered
 import subprocess
 from django.conf import settings
-import server_utils 
+from . import server_utils
 
 def update_nodered_nginx_conf(instance):
     print("update_nodered_nginx_conf() ausgeführt")  # TODO: Später entfernen bzw durch log ersetzen

@@ -29,10 +29,8 @@ urlpatterns = [
 
     path('client-list/', user_views.client_list, name='client-list'),
     path('add-client/', user_views.add_client, name='add-client'),
-    # path('modify_client/', user_views.modify_client, name='modify-client'),
     path('modify-client/<str:client_username>/', user_views.modify_client, name='modify-client'),
     path('delete-client/<str:client_username>/', user_views.delete_client, name='delete-client'),
-    #path('delete_client/', user_views.delete_client, name='delete-client'),
 
     path('nodered-manager/', user_views.nodered_manager, name='nodered-manager'),
     path('nodered-create-instance/', user_views.nodered_manager, name='nodered-create-instance'),
