@@ -5,19 +5,19 @@
 
 # Parameters: $1 - Path Segment, $2 - Port
 
-PATH_SEGMENT=$1
+CONTAINER_NAME=$1
 PORT=$2
-NGINX_CONF_PATH="/etc/nginx/conf.d/nodered_locations/$PATH_SEGMENT.conf"
+NGINX_CONF_PATH="/etc/nginx/conf.d/nodered_locations/$CONTAINER_NAME.conf"
 
 mkdir -p /etc/nginx/conf.d/nodered_locations/
 
 # Create or overwrite the Nginx configuration for the given path segment
 cat > $NGINX_CONF_PATH <<EOF
-location /nodered/$PATH_SEGMENT/ {
+location /nodered/$CONTAINER_NAME/ {
     proxy_set_header X-Frame-Options "";
     proxy_hide_header X-Frame-Options;
     proxy_http_version 1.1;
-    rewrite ^/nodered/$PATH_SEGMENT/(.*)$ /\$1 break;
+    rewrite ^/nodered/$CONTAINER_NAME/(.*)$ /\$1 break;
     proxy_set_header Upgrade \$http_upgrade;
     proxy_set_header Connection "upgrade";
     proxy_pass http://localhost:$PORT;

@@ -22,7 +22,6 @@ def update_nodered_nginx_conf(instance):
         stdout=subprocess.PIPE,
         stderr=subprocess.PIPE
     )
-    server_utils.reload_nginx()
     
     if result.returncode != 0:
         print("Error:", result.stderr.decode())  # TODO: Später entfernen bzw durch log ersetzen

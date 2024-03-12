@@ -152,15 +152,15 @@ def delete_client(request, client_username):
 # nodered_manager (NEU)
 # hole daten aus DB
 # wenn daten vorhanden --> hole containerinformationen
-    # wenn container läuft --> embedded seite
+    # wenn container läuft --> redirect embedded seite
 
-# wenn kein container oder wenn keine daten vorhanden -> create seite
+# wenn kein container oder wenn keine daten vorhanden -> redirect create seite
     # create seite POST: starte container, speichere daten --> redirect nodered_manager
 
-# wenn container startet --> wait seite
+# wenn container startet --> redirect wait seite
     # 5 sec warteanimation --> automatischer redirect nodered_manager
 
-# wenn container error --> error/unavailable seite
+# wenn container error --> redirect error/unavailable seite
     # Errormeldungen, Button --> redirect nodered_manager
 
 @login_required
@@ -196,63 +196,45 @@ def nodered_manager(request):
     context = {}
     return render(request, 'users/nodered_manager.html', context)
 
-@login_required
-def nodered_create_instance(request):
-    user = request.user
-    nodered_data = None
-
-    if request.method == 'POST':
-        if request.POST.get('action') == 'create':
-            # neuen Container-Name generieren
-            allowed_chars = string.ascii_lowercase + string.ascii_uppercase + string.digits
-            new_name = ''.join(random.choice(allowed_chars) for _ in range(20))  # 20 random upper/lower case letters and digits
-            # Access-Token generieren
-            new_token = secrets.token_urlsafe(22)
-            # Container-Name und Access-Token in DB speichern
-            try:
-                with transaction.atomic():
-                    nodered_data, created = NodeRedUserData.objects.get_or_create(user=user, defaults={
-                        'container_name': new_name,
-                        'access_token': new_token
-                    })
-                    if not created:
-                        # Need to update the existing object with the new values.
-                        nodered_data.container_name = new_name
-                        nodered_data.access_token = new_token
-                        nodered_data.save()  # TODO: Check if name and token already exist
-            except IntegrityError:
-                # Handle the IntegrityError case, could log or re-raise with additional context
-                pass
-
-            container_volume_name = f'{new_name}-volume'
-            docker_client = docker.from_env()
-            try:  # TODO: for safety: possibly implement explicit rate limiting for running a new container
-                container = docker_client.containers.run(
-                    'nodered/node-red',
-                    detach=True,
-                    restart_policy={"Name": "always"}, 
-                    # "always: restart the container automatically unless manually stopped; restarts with Docker deamon or if manually restarted. 
-                    # (see: https://docs.docker.com/config/containers/start-containers-automatically/)
-                    ports={'1880/tcp': None},
-                    volumes={container_volume_name: {'bind': '/data', 'mode': 'rw'}},
-                    name=new_name
-                )
-                # Hier war: container.reload()
-                nodered_data.container_port = 
-                update_nodered_nginx_conf(nodered_data)
-                container_status = 'created' # container.status
-            except docker.errors.ContainerError:
-                pass  # --> hier NodeRed Baustellenseite anzeigen und nicht neu laden (Sackgasse)
-            except docker.errors.ImageNotFound:
-                pass  # --> hier NodeRed Baustellenseite anzeigen und nicht neu laden (Sackgasse)                                          
-            # TODO: settings.js action für Authentication hier
-    context = {}
-    return render(request, 'users/nodered_create_instance.html', context)
 
 @login_required
 def nodered_start_instance(request):
     context = {}
     return render(request, 'users/nodered_start_instance.html', context)
+
+
+@login_required
+def nodered_create_instance(request):
+    if request.method == 'POST':
+        new_name = ''.join(random.choices(string.ascii_letters + string.digits, k=20))
+        new_token = secrets.token_urlsafe(22)
+        new_token = secrets.token_urlsafe(22)  # TODO: implement authentication in nodered!
+        # Update or create container name und access token in DB
+        with transaction.atomic():
+            nodered_data, created = NodeRedUserData.objects.update_or_create(
+                user=request.user, defaults={'container_name': new_name, 'access_token': new_token}
+            )
+        docker_client = docker.from_env()
+        try:  # TODO: for safety: possibly implement explicit rate limiting for running a new container
+            container = docker_client.containers.run(
+                'nodered/node-red',
+                detach=True,
+                restart_policy={"Name": "always"},
+                # "always: restart the container automatically unless manually stopped; restarts with Docker deamon or if manually restarted.
+                # (see: https://docs.docker.com/config/containers/start-containers-automatically/)
+                ports={'1880/tcp': None},
+                volumes={f'{new_name}-volume': {'bind': '/data', 'mode': 'rw'}},
+                name=new_name
+            )
+            container.reload()
+            nodered_data.container_port = container.attrs['NetworkSettings']['Ports']['1880/tcp'][0]['HostPort']
+            nodered_data.save()
+            update_nodered_nginx_conf(nodered_data)
+            return redirect('nodered-waiting')
+        except (docker.errors.ContainerError, docker.errors.ImageNotFound):
+            return redirect('nodered-unavailable')
+        
+    return render(request, 'users/nodered_create_instance.html')
 
 @login_required
 def nodered_waiting(request):
@@ -270,6 +252,8 @@ def nodered_unavailable(request):
     return render(request, 'users/nodered_unavailable.html', context)
 
 
+
+##########################
 @login_required
 def nodered_manager_ALT(request):
     user = request.user
