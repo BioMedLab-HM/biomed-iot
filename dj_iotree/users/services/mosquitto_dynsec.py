@@ -58,7 +58,7 @@ class MosquittoDynSec:
         self.response_msg = None
 
         # Create MQTT client instance
-        self.client = mqtt.Client()  # TODO: Migration to paho-mqtt 2.0: https://eclipse.dev/paho/files/paho.mqtt.python/html/migrations.html
+        self.client = mqtt.Client()
 
         # Set username and password
         self.client.username_pw_set(self.username, self.password)
@@ -100,7 +100,7 @@ class MosquittoDynSec:
             #print("Connected with result code " + str(rc))
             pass
         else:
-            print(f"Failed to connect, return code: {rc}\n") # TODO: implement logging
+            print(f"Failed to connect, return code: {rc}\n")
 
     def on_subscribe(self, client, userdata, mid, granted_qos):
         #print("Subscribed to topic")
@@ -438,7 +438,7 @@ class MosquittoDynSec:
         }
 
         return self._execute_command(command)
-# TODO: ab hier weitertesten
+
     def add_client_role(self, username, rolename, priority=-1):
         """
         Assigns a role to a specific client, optionally with a specified priority.
