@@ -149,22 +149,54 @@ def delete_client(request, client_username):
         return render(request, 'users/delete_client.html', {'client': client})
 
 
-# nodered_manager (NEU)
-# hole daten aus DB
-# wenn daten vorhanden --> hole containerinformationen
-    # wenn container läuft --> redirect embedded seite
-
-# wenn kein container oder wenn keine daten vorhanden -> redirect create seite
-    # create seite POST: starte container, speichere daten --> redirect nodered_manager
-
-# wenn container startet --> redirect wait seite
-    # 5 sec warteanimation --> automatischer redirect nodered_manager
-
-# wenn container error --> redirect error/unavailable seite
-    # Errormeldungen, Button --> redirect nodered_manager
-
+from .services.nodered_utils import NoderedContainer
 @login_required
 def nodered_manager(request):
+    nodered_data = None
+
+    # Try to get nodered data from database
+    try: 
+        nodered_data = NodeRedUserData.objects.get(user=user)
+    # Except "kein DB Eintrag": 
+    except NodeRedUserData.DoesNotExist:
+        nodered_data = None                                               # dublicate
+        container_status = 'no-container
+
+    if request.method == 'POST':
+        action = request.POST.get('action')
+        if action == 'create':
+            NoderedContainer.create_container():  
+    
+    if nodered_data:
+        nodered_container = NoderedContainer(nodered_data)
+        container_state = nodered_container.state
+        context = container_state
+
+    # get_nodered_data()
+
+    # Wenn POST-request
+        # Wenn POST-action "Create"
+            # create_nodered(): run new container, save container data to db
+            # redirect "nodered-waiting", dort nach warteschleife: redirect "nodered-embedded" 
+        # Wenn POST-action "restart"
+            # restart_nodered()
+            # redirect "nodered-embedded"
+        # Wenn POST-action "stop"
+            # stop_nodered(): dort auch oben message einblenden
+            # redirect "nodered-manager"
+
+    # Wenn keine Daten vorhanden
+        # context: Zeige Text "Nodered has not been started yet" und Button "Start (Create) Nodered"
+    # wenn daten vorhanden
+        # get_container_status()
+        # Wenn Status "exited" 
+            # context: Zeige Button "Restart Nodered"
+        # Sonst wenn Status "Running"
+            # context: Zeige Button "Stop Nodered"
+    
+
+@login_required
+def nodered_manager_ALT_2(request):
     user = request.user
     container = None
     nodered_data = None
@@ -195,12 +227,6 @@ def nodered_manager(request):
 
     context = {}
     return render(request, 'users/nodered_manager.html', context)
-
-
-@login_required
-def nodered_start_instance(request):
-    context = {}
-    return render(request, 'users/nodered_start_instance.html', context)
 
 
 @login_required
@@ -235,23 +261,6 @@ def nodered_create_instance(request):
             return redirect('nodered-unavailable')
         
     return render(request, 'users/nodered_create_instance.html')
-
-@login_required
-def nodered_waiting(request):
-    context = {}
-    return render(request, 'users/nodered_waiting.html', context)
-
-@login_required
-def nodered_embedded(request):
-    context = {}
-    return render(request, 'users/nodered_embedded.html', context)
-
-@login_required
-def nodered_unavailable(request):
-    context = {}
-    return render(request, 'users/nodered_unavailable.html', context)
-
-
 
 ##########################
 @login_required

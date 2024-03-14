@@ -3,6 +3,26 @@ import subprocess
 from django.conf import settings
 from . import server_utils
 
+class NoderedContainer():
+    def __init__(self, nodered_data):
+        self.container_name = nodered_data.container_name
+        self.container_port = nodered_data.container_port
+        self.access_token = nodered_data.access_token
+        self.state = 'no-container'
+
+    def create(self):
+        pass
+
+    def stop(self):
+        pass
+
+    def restart(self):
+        pass
+
+    def get_status(self):
+        pass
+
+
 def update_nodered_nginx_conf(instance):
     print("update_nodered_nginx_conf() ausgeführt")  # TODO: Später entfernen bzw durch log ersetzen
     # Logic to update Nginx configuration
