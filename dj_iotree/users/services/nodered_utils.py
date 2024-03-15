@@ -2,26 +2,70 @@
 import subprocess
 from django.conf import settings
 from . import server_utils
+import docker
 
 class NoderedContainer():
     def __init__(self, nodered_data):
-        self.container_name = nodered_data.container_name
-        self.container_port = nodered_data.container_port
+        self.name = nodered_data.container_name
+        self.port = nodered_data.container_port
         self.access_token = nodered_data.access_token
-        self.state = 'no-container'
+        self.state = 'none'
+        self.docker_client = docker.from_env()  # Store the Docker client as an instance variable
+        self.container = self.get_existing_container()
+
+    def get_existing_container(self):
+        """Attempt to get an existing container by name. Return None if not found."""
+        try:
+            return self.docker_client.containers.get(self.name)
+        except docker.errors.NotFound:
+            return None
 
     def create(self):
-        pass
+        if self.container is None:  # Only create a new container if one doesn't already exist
+            try:
+                self.container = self.docker_client.containers.run(
+                    'nodered/node-red',
+                    detach=True,
+                    restart_policy={"Name": "always"},
+                    ports={'1880/tcp': None},
+                    volumes={f'{self.name}-volume': {'bind': '/data', 'mode': 'rw'}},
+                    name=self.name
+                )
+                self.container.reload()
+                self.port = self.container.attrs['NetworkSettings']['Ports']['1880/tcp'][0]['HostPort']
+                self.state = 'running'
+            except (docker.errors.ContainerError, docker.errors.ImageNotFound) as e:
+                # Log error
+                self.container = None
 
     def stop(self):
-        pass
+        if self.container:
+            self.container.stop()
 
     def restart(self):
-        pass
+        if self.container:
+            self.container.restart()
 
-    def get_status(self):
-        pass
+    def determine_state(self):
+        if self.container:
+            self.container.reload()
+            container_status = self.container.status
+            try:
+                container_health = self.container.attrs['State']['Health']['Status']
+            except KeyError:
+                container_health = 'N/A'
+            # Determine the current state based on status and health
+            if container_status == 'running' and container_health == 'starting':
+                self.state = 'starting'
+            elif container_status == 'running' and container_health == 'healthy':
+                self.state = 'running'
+            elif container_status == 'exited' and container_health == 'unhealthy':
+                self.state = 'stopped'
+            else:
+                self.state = 'unknown'  
 
+        return self.state
+    
 
 def update_nodered_nginx_conf(instance):
     print("update_nodered_nginx_conf() ausgeführt")  # TODO: Später entfernen bzw durch log ersetzen

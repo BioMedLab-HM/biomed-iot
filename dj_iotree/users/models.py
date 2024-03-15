@@ -5,6 +5,8 @@ from django.utils.translation import gettext_lazy as _  # This is for automatic 
 import os
 import subprocess
 from django.conf import settings
+import random
+import string
 
 
 class CustomUserManager(BaseUserManager):
@@ -78,13 +80,20 @@ class Profile(models.Model):
 
 class NodeRedUserData(models.Model):
     user = models.OneToOneField(settings.AUTH_USER_MODEL, on_delete=models.CASCADE, primary_key=True)
-    container_name = models.CharField(max_length=30, unique=True, primary_key=True)
+    container_name = models.CharField(max_length=30, unique=True)
     container_port = models.CharField(max_length=5, default=0, unique=True)  # since highest possible port number has five digits (65535)
     access_token = models.CharField(max_length=100)
     # later maybe add data from the container like flows, dashboards and list of installed nodered plugins
 
     def __str__(self):
         return self.container_name
+
+    @staticmethod
+    def generate_unique_container_name():
+        while True:
+            new_name = ''.join(random.choice(string.ascii_letters + string.digits) for _ in range(20))
+            if not NodeRedUserData.objects.filter(container_name=new_name).exists():
+                return new_name
 
 
 class MQTTClient(models.Model):

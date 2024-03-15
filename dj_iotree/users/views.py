@@ -13,7 +13,8 @@ import random
 import string
 from django.db import transaction
 from django.conf import settings
-from .services.nodered_utils import update_nodered_nginx_conf
+from .services.nodered_utils import update_nodered_nginx_conf  # hier?
+from .services.nodered_utils import NoderedContainer
 
 
 def register(request):
@@ -147,30 +148,48 @@ def delete_client(request, client_username):
     else:
         # Render a confirmation page/template
         return render(request, 'users/delete_client.html', {'client': client})
+        
 
-
-from .services.nodered_utils import NoderedContainer
 @login_required
 def nodered_manager(request):
-    nodered_data = None
+    context = {}
+    
+    with transaction.atomic():
+        try:
+            # Attempt to create NodeRedUserData with a unique container name
+            nodered_data, created = NodeRedUserData.objects.get_or_create(
+                user=request.user,
+                defaults={
+                    'container_name': NodeRedUserData.generate_unique_container_name(),
+                    'access_token': secrets.token_urlsafe(22)
+                }
+            )
+        except IntegrityError:
+            # TODO: log error
+            pass
 
-    # Try to get nodered data from database
-    try: 
-        nodered_data = NodeRedUserData.objects.get(user=user)
-    # Except "kein DB Eintrag": 
-    except NodeRedUserData.DoesNotExist:
-        nodered_data = None                                               # dublicate
-        container_status = 'no-container
+        nodered_container = NoderedContainer(nodered_data)
 
     if request.method == 'POST':
         action = request.POST.get('action')
-        if action == 'create':
-            NoderedContainer.create_container():  
+        if action == 'run':
+            #request.session['data'] = ...  # make the data available in the next view
+            # TODO: Nodered soll nicht bei boot starten wenn vorher gestoppt. Start nur manuell oder bei Fehler
+            return redirect('nodered-embedded')  # je nach restart-Dauer eher 'nodered-waiting'
+        elif action == 'create':
+            nodered_container.create()
+            nodered_data.container_port = nodered_container.port
+            nodered_data.save()
+            update_nodered_nginx_conf(nodered_data)
+        elif action == 'restart':
+            nodered_container.restart()
+            #return redirect('nodered-waiting')  # je nach restart-Dauer eher 'nodered-waiting'
+        elif action == 'stop':
+            nodered_container.stop()
     
-    if nodered_data:
-        nodered_container = NoderedContainer(nodered_data)
-        container_state = nodered_container.state
-        context = container_state
+    container_state = nodered_container.determine_state()  # default for new NodeRedUserData: 'no-container'
+    context['container_state'] = container_state
+    return render(request, 'users/nodered_manager.html', context)
 
     # get_nodered_data()
 
@@ -233,7 +252,6 @@ def nodered_manager_ALT_2(request):
 def nodered_create_instance(request):
     if request.method == 'POST':
         new_name = ''.join(random.choices(string.ascii_letters + string.digits, k=20))
-        new_token = secrets.token_urlsafe(22)
         new_token = secrets.token_urlsafe(22)  # TODO: implement authentication in nodered!
         # Update or create container name und access token in DB
         with transaction.atomic():
@@ -335,7 +353,7 @@ def nodered_manager_ALT(request):
                     name=new_name
                 )
                 # Hier war: container.reload()
-                nodered_data.container_port = 
+                nodered_data.container_port = 'blablabla'
                 update_nodered_nginx_conf(nodered_data)
                 container_status = 'created' # container.status
             except docker.errors.ContainerError:
