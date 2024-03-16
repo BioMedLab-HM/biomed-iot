@@ -31,20 +31,20 @@
                 <button class="navbar-toggler" type="button" data-bs-toggle="collapse" data-bs-target="#navbarSupportedContent" aria-controls="navbarSupportedContent" aria-expanded="false" aria-label="Toggle navigation"><span class="navbar-toggler-icon"></span></button>
                 <div class="collapse navbar-collapse" id="navbarSupportedContent">
                     <ul class="navbar-nav ms-auto mb-2 mb-lg-0">
-                        <li class="nav-item"><a class="nav-link {% is_active 'core-home' %}" aria-current="page" href="{% url 'core-home' %}">Home</a></li>
+                        <li class="nav-item"><a class="nav-link {% is_active 'core-home' %}" aria-current="page" href="{% url 'core-home' %}">Get started</a></li>
                         {% if user.is_authenticated %}
                         <li class="nav-item"><a class="nav-link" href="{% url 'client-list' %}">Devices</a></li>
-                        <li class="nav-item"><a class="nav-link" href="#">Data</a></li>
-                        <li class="nav-item"><a class="nav-link" href="#">Grafana</a></li>
-                        <li class="nav-item"><a class="nav-link {% starts_with 'nodered' %}" href="{% url 'nodered-manager' %}">NodeRed</a></li>
+                        <li class="nav-item"><a class="nav-link" href="#">My Data</a></li>
+                        <li class="nav-item"><a class="nav-link" href="#">Visualize</a></li>
+                        <li class="nav-item"><a class="nav-link {% starts_with 'nodered' %}" href="{% url 'nodered-manager' %}">Automate</a></li>
                         {% endif %}
-                        <li class="nav-item"><a class="nav-link" href="#">Docs</a></li>
+                        <li class="nav-item"><a class="nav-link" href="#">Manual</a></li>
                         <li class="nav-item dropdown">
                             <a class="nav-link dropdown-toggle {% is_active 'core-about' 'core-impressum' 'core-datenschutz' %}" id="navbarDropdown" href="#" role="button" data-bs-toggle="dropdown" aria-expanded="false">About</a>
                             <ul class="dropdown-menu dropdown-menu-end" aria-labelledby="navbarDropdown">
                                 <li><a class="dropdown-item" href="{% url 'core-about' %}">About IoTree42</a></li>
-                                <li><a class="dropdown-item" href="{% url 'core-impressum' %}">Impressum</a></li>
-                                <li><a class="dropdown-item" href="{% url 'core-datenschutz' %}">Datenschutz</a></li>
+                                <li><a class="dropdown-item" href="{% url 'core-impressum' %}">Legal Notice</a></li>
+                                <li><a class="dropdown-item" href="{% url 'core-datenschutz' %}">Privacy Policy</a></li>
                             </ul>
                         </li>
                         <li class="nav-item dropdown">
