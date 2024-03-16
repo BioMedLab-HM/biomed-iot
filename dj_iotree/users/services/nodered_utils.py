@@ -63,15 +63,17 @@ class NoderedContainer():
             elif container_status == 'exited' and container_health == 'unhealthy':
                 self.state = 'stopped'
             else:
-                self.state = 'error'
+                self.state = 'unavailable'
 
         return self.state
     
     def determine_port(self):
-        if self.container:
-            self.container.reload()
-            self.port = self.container.attrs['NetworkSettings']['Ports']['1880/tcp'][0]['HostPort']
-
+        try:
+            if self.container:
+                self.container.reload()
+                self.port = self.container.attrs['NetworkSettings']['Ports']['1880/tcp'][0]['HostPort']
+        except KeyError:
+            self.port = '' 
 
 def update_nodered_nginx_conf(instance):
     print("update_nodered_nginx_conf() ausgeführt")  # TODO: Später entfernen bzw durch log ersetzen

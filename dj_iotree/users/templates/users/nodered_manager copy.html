@@ -1,0 +1,45 @@
+{% extends "core/base.html" %}
+<!-- Node-RED Manager -->
+
+{% block content %}
+<div class="container">
+    <div class="text-left mt-5">
+        <h1>Node-RED Manager</h1>
+        <!-- <div>Status: {{ container_state }}</div> -->
+        <form method="post">
+            {% csrf_token %}
+            {% if container_state == 'none' %}
+                <p>Use Node-RED to:</p>
+                <ul>
+                    <li>Automate tasks by connecting sensors and actuators through MQTT messages</li>
+                    <li>Store data into the Database</li>
+                </ul>
+                <button type="submit" name="action" value="create">Start with Nodered</button>
+            {% elif container_state == 'stopped' %}
+                <p>Your Nodered is currently stopped. Your flows are not running.</p>
+                <p>Restart Nodered to let it work again</p>
+                <button type="submit" name="action" value="restart">Restart Nodered</button>
+            {% elif container_state == 'running' %}
+                <p>Your Nodered is running and working.</p>
+                <p>Open Nodered now and edit your flows</p>
+                <button type="submit" name="action" value="run">Open Nodered</button>
+                <br><br><br>
+                <p>Stop Nodered to pause your flows and give back resources to the server.</p>
+                <button type="submit" name="action" value="stop">Stop Nodered</button>
+            {% elif container_state == 'starting' %}
+                <!-- Optionally, provide feedback to the user that the container is starting up -->
+                <p>Nodered is starting up. Please wait... </p>
+                <div class="spinner-border" role="status">
+                    <span class="sr-only"></span>
+                </div>
+                <!-- Automatic page reload after N seconds -->
+                <script>
+                    setTimeout(function(){
+                        window.location.reload(1);
+                    }, 5000);  // Adjust the time to wait (in milliseconds) before reloading
+                </script>
+            {% endif %}
+        </form>
+    </div>
+</div>
+{% endblock %}
