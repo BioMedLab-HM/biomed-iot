@@ -8,7 +8,11 @@
     <form method="post">
         {% csrf_token %}
         {% if container_state == 'none' %}
-            <p>Write a short informative text for a NodeRed beginner here </p>
+            <p>Use Node-RED to:</p>
+            <ul>
+                <li>Automate tasks by connecting sensors and actuators through MQTT messages</li>
+                <li>Store data into the Database</li>
+            </ul>
             <button type="submit" name="action" value="create">Start with Nodered</button>
         {% elif container_state == 'stopped' %}
             <p>Your Nodered is currently stopped. Your flows are not running.</p>
@@ -37,5 +41,3 @@
     </form>
 </div>
 {% endblock %}
-
-

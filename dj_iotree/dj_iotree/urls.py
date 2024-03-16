@@ -33,9 +33,7 @@ urlpatterns = [
     path('delete-client/<str:client_username>/', user_views.delete_client, name='delete-client'),
 
     path('nodered-manager/', user_views.nodered_manager, name='nodered-manager'),
-    path('nodered-waiting/', user_views.nodered_manager, name='nodered-waiting'),
-    path('nodered-embedded/', user_views.nodered_manager, name='nodered-embedded'),
-    path('nodered-unavailable/', user_views.nodered_manager, name='nodered-unavailable'),
+    path('nodered-embedded/', user_views.nodered_embedded, name='nodered-embedded'),
 
     path('register/', user_views.register, name='register'),
     path('profile/', user_views.profile, name='profile'),

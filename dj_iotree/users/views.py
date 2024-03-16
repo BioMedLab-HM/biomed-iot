@@ -13,8 +13,7 @@ import random
 import string
 from django.db import transaction
 from django.conf import settings
-from .services.nodered_utils import update_nodered_nginx_conf  # hier?
-from .services.nodered_utils import NoderedContainer
+from .services.nodered_utils import NoderedContainer, update_nodered_nginx_conf
 
 
 def register(request):
@@ -173,25 +172,60 @@ def nodered_manager(request):
     if request.method == 'POST':
         action = request.POST.get('action')
         if action == 'run':
-            #request.session['data'] = ...  # make the data available in the next view
-            # TODO: Nodered soll nicht bei boot starten wenn vorher gestoppt. Start nur manuell oder bei Fehler
-            return redirect('nodered-embedded')  # je nach restart-Dauer eher 'nodered-waiting'
+            nodered_container.determine_port()
+            if nodered_data.container_port != nodered_container.port:
+                update_nodered_data_container_port(nodered_data, nodered_container)
+                update_nodered_nginx_conf(nodered_data)
+            request.session['container_name'] = nodered_container.name
+            return redirect('nodered-embedded')
         elif action == 'create':
-            nodered_container.create()
-            nodered_data.container_port = nodered_container.port
-            nodered_data.save()
-            update_nodered_nginx_conf(nodered_data)
+            if nodered_container.get_existing_container() is None:
+                # Generate completely new data if no container is found
+                nodered_data.container_name = NodeRedUserData.generate_unique_container_name()
+                nodered_data.access_token = secrets.token_urlsafe(22)
+                nodered_data.save()
+
+                # Update the NoderedContainer instance with the new nodered_data
+                nodered_container.name = nodered_data.container_name
+                nodered_container.access_token = nodered_data.access_token
+
+                # Proceed to create the container
+                nodered_container.create()
+
+                # After creation, update the database with the new port
+                update_nodered_data_container_port(nodered_data, nodered_container)
+
+                update_nodered_nginx_conf(nodered_data)
+            else:
+                messages.error(request, 'A Node-RED container already exists.')
         elif action == 'restart':
             nodered_container.restart()
-            #return redirect('nodered-waiting')  # je nach restart-Dauer eher 'nodered-waiting'
+            update_nodered_data_container_port(nodered_data, nodered_container)
+            update_nodered_nginx_conf(nodered_data)
         elif action == 'stop':
+            update_nodered_data_container_port(nodered_data, nodered_container)
+            update_nodered_nginx_conf(nodered_data)
             nodered_container.stop()
     
     container_state = nodered_container.determine_state()  # default for new NodeRedUserData: 'no-container'
     context['container_state'] = container_state
+
+    if container_state == 'error':
+        messages.error(request, f'Unable to start Nodered. Please try again or contact the site admin.')
+        
     return render(request, 'users/nodered_manager.html', context)
 
-    # get_nodered_data()
+def update_nodered_data_container_port(nodered_data, nodered_container):
+    nodered_data.container_port = nodered_container.port
+    nodered_data.save()
+
+@login_required
+def nodered_embedded(request):
+    container_name = request.session.get('container_name')
+    context = {'container_name': container_name}
+    return render(request, 'users/nodered_embedded.html', context)
+
+# get_nodered_data()
 
     # Wenn POST-request
         # Wenn POST-action "Create"
@@ -213,6 +247,8 @@ def nodered_manager(request):
         # Sonst wenn Status "Running"
             # context: Zeige Button "Stop Nodered"
     
+
+####### ALT ############
 
 @login_required
 def nodered_manager_ALT_2(request):
@@ -280,7 +316,7 @@ def nodered_create_instance(request):
         
     return render(request, 'users/nodered_create_instance.html')
 
-##########################
+
 @login_required
 def nodered_manager_ALT(request):
     user = request.user

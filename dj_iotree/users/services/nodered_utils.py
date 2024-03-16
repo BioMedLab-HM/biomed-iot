@@ -8,9 +8,9 @@ class NoderedContainer():
     def __init__(self, nodered_data):
         self.name = nodered_data.container_name
         self.port = nodered_data.container_port
-        self.access_token = nodered_data.access_token
+        self.access_token = nodered_data.access_token  # TODO: login with access token for security
         self.state = 'none'
-        self.docker_client = docker.from_env()  # Store the Docker client as an instance variable
+        self.docker_client = docker.from_env()
         self.container = self.get_existing_container()
 
     def get_existing_container(self):
@@ -26,25 +26,26 @@ class NoderedContainer():
                 self.container = self.docker_client.containers.run(
                     'nodered/node-red',
                     detach=True,
-                    restart_policy={"Name": "always"},
+                    restart_policy={"Name": "unless-stopped"},
                     ports={'1880/tcp': None},
                     volumes={f'{self.name}-volume': {'bind': '/data', 'mode': 'rw'}},
                     name=self.name
                 )
-                self.container.reload()
-                self.port = self.container.attrs['NetworkSettings']['Ports']['1880/tcp'][0]['HostPort']
-                self.state = 'running'
+                self.determine_port()
+                # self.state = 'running'  # unpassend hier
             except (docker.errors.ContainerError, docker.errors.ImageNotFound) as e:
                 # Log error
                 self.container = None
 
     def stop(self):
         if self.container:
+            self.determine_port()
             self.container.stop()
 
     def restart(self):
         if self.container:
             self.container.restart()
+            self.determine_port()
 
     def determine_state(self):
         if self.container:
@@ -62,10 +63,15 @@ class NoderedContainer():
             elif container_status == 'exited' and container_health == 'unhealthy':
                 self.state = 'stopped'
             else:
-                self.state = 'unknown'  
+                self.state = 'error'
 
         return self.state
     
+    def determine_port(self):
+        if self.container:
+            self.container.reload()
+            self.port = self.container.attrs['NetworkSettings']['Ports']['1880/tcp'][0]['HostPort']
+
 
 def update_nodered_nginx_conf(instance):
     print("update_nodered_nginx_conf() ausgeführt")  # TODO: Später entfernen bzw durch log ersetzen
