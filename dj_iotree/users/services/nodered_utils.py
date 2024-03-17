@@ -20,6 +20,31 @@ class NoderedContainer():
         except docker.errors.NotFound:
             return None
 
+    @staticmethod
+    def check_container_state_by_name(container_name):  # for the endpoint
+        docker_client = docker.from_env()
+        state = ''
+        try:
+            container = docker_client.containers.get(container_name)
+            container.reload()
+            container_status = container.status
+            try:
+                container_health = container.attrs['State']['Health']['Status']
+            except KeyError:
+                container_health = 'N/A'
+            # Determine the current state based on status and health
+            if container_status == 'running' and container_health == 'starting':
+                state = 'starting'
+            elif container_status == 'running' and container_health == 'healthy':
+                state = 'running'
+            elif container_status == 'exited' and container_health == 'unhealthy':
+                state = 'stopped'
+            else:
+                state = 'unavailable'
+            return state
+        except docker.errors.NotFound:
+            return 'not_found'
+
     def create(self):
         if self.container is None:  # Only create a new container if one doesn't already exist
             try:

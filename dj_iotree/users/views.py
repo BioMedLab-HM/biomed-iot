@@ -174,12 +174,15 @@ def nodered_manager(request):
         action = request.POST.get('action')
 
         if action == 'run':
-            nodered_container.determine_port()
-            if nodered_data.container_port != nodered_container.port:
-                update_nodered_data_container_port(nodered_data, nodered_container)
-                update_nodered_nginx_conf(nodered_data)
-            request.session['container_name'] = nodered_container.name
-            return redirect('nodered-embedded')
+            if nodered_container.state == 'running':
+                nodered_container.determine_port()
+                if nodered_data.container_port != nodered_container.port:
+                    update_nodered_data_container_port(nodered_data, nodered_container)
+                    update_nodered_nginx_conf(nodered_data)
+                request.session['container_name'] = nodered_container.name
+                return redirect('nodered-embedded')
+            else:
+                messages.info(request, f'Cannot start Node-RED. Node-RED is {nodered_container.state}.')
         
         elif action == 'create':
             if nodered_container.get_existing_container() is None:
@@ -200,13 +203,16 @@ def nodered_manager(request):
 
                 update_nodered_nginx_conf(nodered_data)
             else:
-                messages.info(request, f'Node-RED is already running.')
+                messages.info(request, f'Node-RED is already created.')
 
         elif action == 'restart':
             if nodered_container.state == 'stopped':
                 nodered_container.restart()
                 update_nodered_data_container_port(nodered_data, nodered_container)
                 update_nodered_nginx_conf(nodered_data)
+                
+                # Attempt to retrieve the container name from the session.
+                request.session['container_name'] = nodered_container.name
             else:
                 messages.info(request, f'Cannot restart Node-RED. Node-RED is {nodered_container.state}.')
 
@@ -236,6 +242,28 @@ def update_nodered_data_container_port(nodered_data, nodered_container):
 
 @login_required
 def nodered_embedded(request):
+    # Attempt to retrieve the container name from the session.
     container_name = request.session.get('container_name')
+    # If no container name in session, redirect to manager view.
+    if not container_name:
+        messages.info(request, f'Reloading the Node-RED page brings you back to the Node-RED Manager page!')
+        return redirect('nodered-manager')
+
+    # Clear the container_name from the session after retrieving it
+    # This ensures that direct access to 'nodered_embedded' without first
+    # going through 'nodered_manager' will fail the container_name check next time
+    del request.session['container_name']
+
     context = {'container_name': container_name}
     return render(request, 'users/nodered_embedded.html', context)
+
+@login_required
+def nodered_status_check(request):
+    print('nodered_status_check: Started handling request')
+    # Attempt to retrieve the container name from the session.
+    container_name = request.session.get('container_name')
+    if not container_name:
+        return redirect('nodered-manager')
+    status = NoderedContainer.check_container_state_by_name(container_name)
+    print('nodered_status_check: Finished handling request')
+    return JsonResponse({"status": status})

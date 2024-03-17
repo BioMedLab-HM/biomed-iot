@@ -34,6 +34,7 @@ urlpatterns = [
 
     path('nodered-manager/', user_views.nodered_manager, name='nodered-manager'),
     path('nodered-embedded/', user_views.nodered_embedded, name='nodered-embedded'),
+    path('nodered-status-check/', user_views.nodered_status_check, name='nodered-status-check'),
 
     path('register/', user_views.register, name='register'),
     path('profile/', user_views.profile, name='profile'),
