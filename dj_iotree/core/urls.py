@@ -5,6 +5,6 @@ urlpatterns = [
     path('', views.home, name='core-home'),
     path('about/', views.about, name='core-about'),
     path('contact-us/', views.contact_us, name='core-contact-us'),
-    path('impressum/', views.impressum, name='core-impressum'),
-    path('datenschutz/', views.datenschutz, name='core-datenschutz'),
+    path('legal-notice/', views.legal_notice, name='core-legal-notice'),
+    path('privacy-policy/', views.privacy_policy, name='core-privacy-policy'),
 ]

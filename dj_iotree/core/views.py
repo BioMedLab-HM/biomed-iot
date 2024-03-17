@@ -1,8 +1,6 @@
 from django.shortcuts import render
 from django.http import HttpResponse
 
-# Temporärer context
-
 
 def home(request):
     return render(request, 'core/home.html')
@@ -13,8 +11,8 @@ def about(request):
 def contact_us(request):
     return render(request, 'core/contact_us.html', {'title': 'Contact Us'})
 
-def impressum(request):
-    return render(request, 'core/impressum.html', {'title': 'Impressum'})
+def legal_notice(request):
+    return render(request, 'core/legal_notice.html', {'title': 'Legal Notice'})
 
-def datenschutz(request):
-    return render(request, 'core/datenschutz.html', {'title': 'Datenschutz'})
+def privacy_policy(request):
+    return render(request, 'core/privacy_policy.html', {'title': 'Privacy Policy'})
