@@ -3,8 +3,8 @@ from django.shortcuts import render, redirect, get_object_or_404
 from django.contrib import messages
 from django.contrib.auth.decorators import login_required
 from django.contrib.auth import authenticate, login
-from .forms import UserRegisterForm, UserUpdateForm, ProfileUpdateForm, UserLoginForm, MQTTClientForm
-from .models import NodeRedUserData, MQTTClient
+from .forms import UserRegisterForm, UserUpdateForm, ProfileUpdateForm, UserLoginForm, MqttClientForm
+from .models import NodeRedUserData, MqttClient
 import docker
 import secrets
 from django.http import JsonResponse
@@ -14,7 +14,7 @@ import string
 from django.db import transaction
 from django.conf import settings
 from .services.nodered_utils import NoderedContainer, update_nodered_nginx_conf
-
+from .services.mosquitto_dynsec import MosquittoDynSec
 
 def register(request):
     if request.method == 'POST':
@@ -95,20 +95,62 @@ def set_timezone(request):
 
 @login_required
 def client_list(request):
-    # Filter clients by the current user and pass to the template
-    clients = MQTTClient.objects.filter(user=request.user)
-    mock_clients = [
-        {'client_username': 'user1', 'client_id': '001', 'textname': 'Client 1', 'textdescription': 'Description for Client 1'},
-        {'client_username': 'user2', 'client_id': '002', 'textname': 'Client 2', 'textdescription': 'Description for Client 2'},
-        {'client_username': 'user3', 'client_id': '003', 'textname': 'Client 3', 'textdescription': 'Description for Client 3'},
-    ]
-    context = {'clients': mock_clients}
+    dynsec = MosquittoDynSec()
+
+    if request.method == 'POST':
+        textname_form = MqttClientForm(request.POST)
+        if 'add' in request.POST:
+            if textname_form.is_valid():
+                # generate credentials and take textname from textname_form. Store into dynsec, then if successful into DB
+                rolename = request.user  # All mqtt clients shall have the same role
+                client_username = MqttClient.generate_unique_username()
+                client_password = secrets.token_urlsafe(22)
+                user_topic = '' # TODO: müsste einmal in der DB (bei Registration) als id festgelegt werden und zwar für in/<id> und out/<id> . D.h. z.B. im MqttClient Model.
+                role_acls=[{"acltype": "subscribePattern", "topic": "in/{user_topic}", "priority": -1, "allow": True}]
+                success = dynsec.create_role("BasicSubscriber", textname="Subscriber Role", textdescription="Can subscribe to topics",acls=role_acls)
+                success = dynsec.create_client(client_username, client_password, textname=textname_form.textname, rolename=)
+                
+                if success:
+                    mqtt_client = textname_form.save(commit=False)  # Create an instance without saving to the DB
+                    mqtt_client.username = client_username  # Manually set additional fields
+                    mqtt_client.password = client_password
+                    mqtt_client.save()  # Now save everything to the DB
+                    messages.success(request, 'Client successfully added.')
+                else:
+                    messages.error(request, 'Failed to add client.')
+                return redirect('device-list')
+
+        elif 'rename' in request.POST:
+            # Rename client logic
+            pass
+
+        elif 'delete' in request.POST:
+            # Delete client logic
+            pass
+
+    else:
+        form = MqttClientForm()
+
+    clients = MqttClient.objects.filter(user=request.user)
+
+    context = {'clients': clients, 'form': form}
     return render(request, 'users/client_list.html', context)
+
+
+    # Filter clients by the current user and pass to the template
+    # clients = MqttClient.objects.filter(user=request.user)
+    # mock_clients = [
+    #     {'client_username': 'user1', 'client_id': '001', 'textname': 'Client 1', 'textdescription': 'Description for Client 1'},
+    #     {'client_username': 'user2', 'client_id': '002', 'textname': 'Client 2', 'textdescription': 'Description for Client 2'},
+    #     {'client_username': 'user3', 'client_id': '003', 'textname': 'Client 3', 'textdescription': 'Description for Client 3'},
+    # ]
+    # context = {'clients': mock_clients}
+    # return render(request, 'users/client_list.html', context)
 
 @login_required
 def add_client(request):
     if request.method == 'POST':
-        form = MQTTClientForm(request.POST)
+        form = MqttClientForm(request.POST)
         if form.is_valid():
             # Instead of directly saving the form, save it to a model instance without committing to the database yet
             new_client = form.save(commit=False)
@@ -118,24 +160,24 @@ def add_client(request):
             new_client.save()
             return redirect('client-list')
     else:
-        form = MQTTClientForm()
+        form = MqttClientForm()
     return render(request, 'users/add_client.html', {'form': form})
 
 @login_required
 def modify_client(request, client_username):
-    client = get_object_or_404(MQTTClient, pk=client_username)
+    client = get_object_or_404(MqttClient, pk=client_username)
     if request.method == 'POST':
-        form = MQTTClientForm(request.POST, instance=client)
+        form = MqttClientForm(request.POST, instance=client)
         if form.is_valid():
             form.save()
             return redirect('client-list')
     else:
-        form = MQTTClientForm(instance=client)
+        form = MqttClientForm(instance=client)
     return render(request, 'users/modify_client.html', {'form': form, 'client': client})
 
 @login_required
 def delete_client(request, client_username):
-    client = get_object_or_404(MQTTClient, pk=client_username)
+    client = get_object_or_404(MqttClient, pk=client_username)
     if request.method == 'POST':
         # If the 'delete' action is confirmed
         if 'confirm_delete' in request.POST:
@@ -168,7 +210,7 @@ def nodered_manager(request):
             pass
 
         nodered_container = NoderedContainer(nodered_data)
-        nodered_container.state = nodered_container.determine_state()
+        nodered_container.determine_state()
 
     if request.method == 'POST':
         action = request.POST.get('action')
@@ -190,11 +232,11 @@ def nodered_manager(request):
                 nodered_data.container_name = NodeRedUserData.generate_unique_container_name()
                 nodered_data.access_token = secrets.token_urlsafe(22)
                 nodered_data.save()
-
+            
                 # Update the NoderedContainer instance with the new nodered_data
                 nodered_container.name = nodered_data.container_name
                 nodered_container.access_token = nodered_data.access_token
-
+            # if nodered_container.state == 'none':
                 # Proceed to create the container
                 nodered_container.create()
 
@@ -202,6 +244,8 @@ def nodered_manager(request):
                 update_nodered_data_container_port(nodered_data, nodered_container)
 
                 update_nodered_nginx_conf(nodered_data)
+
+                request.session['container_name'] = nodered_container.name
             else:
                 messages.info(request, f'Node-RED is already created.')
 
@@ -224,10 +268,10 @@ def nodered_manager(request):
             else:
                 messages.info(request, f'Cannot stop Node-RED. Node-RED is {nodered_container.state}.')
     
-    container_state = nodered_container.determine_state()  # default for new NodeRedUserData: 'no-container'
-    context['container_state'] = container_state
+    nodered_container.determine_state()
+    context['container_state'] = nodered_container.state
 
-    if container_state == 'unavailable':
+    if nodered_container.state == 'unavailable':
         messages.error(request, f'Unable to start Node-RED. Please try again or contact the site admin.')
         
     return render(request, 'users/nodered_manager.html', context)
@@ -262,8 +306,21 @@ def nodered_status_check(request):
     print('nodered_status_check: Started handling request')
     # Attempt to retrieve the container name from the session.
     container_name = request.session.get('container_name')
+    print("after session.get")
     if not container_name:
+        print("Not container name")
         return redirect('nodered-manager')
     status = NoderedContainer.check_container_state_by_name(container_name)
     print('nodered_status_check: Finished handling request')
     return JsonResponse({"status": status})
+
+
+@login_required
+def data_explorer(request):
+    context = {}
+    return render(request, 'users/data_explorer.html', context)
+
+@login_required
+def grafana_embedded(request):
+    context = {}
+    return render(request, 'users/grafana_embedded.html', context)

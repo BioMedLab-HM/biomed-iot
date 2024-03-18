@@ -16,3 +16,7 @@ def legal_notice(request):
 
 def privacy_policy(request):
     return render(request, 'core/privacy_policy.html', {'title': 'Privacy Policy'})
+
+def manual(request):
+    context = {}
+    return render(request, 'core/manual.html', context)

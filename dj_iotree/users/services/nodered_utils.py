@@ -89,7 +89,7 @@ class NoderedContainer():
                 self.state = 'stopped'
             else:
                 self.state = 'unavailable'
-
+        
         return self.state
     
     def determine_port(self):

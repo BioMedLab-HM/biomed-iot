@@ -90,19 +90,26 @@ class NodeRedUserData(models.Model):
 
     @staticmethod
     def generate_unique_container_name():
-        while True:
+        max_attempts = 1000
+        for _ in range(max_attempts):
             new_name = ''.join(random.choice(string.ascii_letters + string.digits) for _ in range(20))
             if not NodeRedUserData.objects.filter(container_name=new_name).exists():
                 return new_name
 
 
-class MQTTClient(models.Model):
+class MqttClient(models.Model):
     user = models.ForeignKey(settings.AUTH_USER_MODEL, on_delete=models.CASCADE)
-    client_username = models.CharField(max_length=20, unique=True, primary_key=True)
-    client_password = models.CharField(max_length=30, default="")
-    client_id = models.CharField(max_length=23, blank=True, default="", unique=True)  # max_length=23 for compatibility with MQTT 3.1.1
+    username = models.CharField(max_length=20, unique=True)
+    password = models.CharField(max_length=30, default="")
     textname = models.CharField(max_length=30, blank=True, default="")
-    acltype = models.CharField(max_length=20, blank=True, default="")
 
     def __str__(self):
-        return self.client_username
+        return self.username
+
+    @staticmethod
+    def generate_unique_username():
+        max_attempts = 1000
+        for _ in range(max_attempts):
+            new_name = ''.join(random.choice(string.ascii_letters + string.digits) for _ in range(20))
+            if not MqttClient.objects.filter(username=new_name).exists():
+                return new_name

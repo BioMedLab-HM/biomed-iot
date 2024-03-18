@@ -36,6 +36,10 @@ urlpatterns = [
     path('nodered-embedded/', user_views.nodered_embedded, name='nodered-embedded'),
     path('nodered-status-check/', user_views.nodered_status_check, name='nodered-status-check'),
 
+    path('data-explorer/', user_views.data_explorer, name='data-explorer'),
+
+    path('grafana-embedded/', user_views.grafana_embedded, name='grafana-embedded'),
+
     path('register/', user_views.register, name='register'),
     path('profile/', user_views.profile, name='profile'),
 

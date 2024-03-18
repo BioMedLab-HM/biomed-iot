@@ -1,7 +1,7 @@
 from django import forms
 # from django.contrib.auth.models import User
 from django.contrib.auth.forms import UserCreationForm, AuthenticationForm
-from .models import Profile, CustomUser, MQTTClient
+from .models import Profile, CustomUser, MqttClient
 from django.utils.translation import gettext_lazy as _
 
 
@@ -39,7 +39,7 @@ class ProfileUpdateForm(forms.ModelForm):
         fields = ['image']
 
 
-class MQTTClientForm(forms.ModelForm):
+class MqttClientForm(forms.ModelForm):
     class Meta:
-        model = MQTTClient
-        fields = ['client_username',  'client_password', 'client_id', 'textname', 'acltype']
+        model = MqttClient
+        fields = ['textname']
