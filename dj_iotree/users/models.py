@@ -97,6 +97,26 @@ class NodeRedUserData(models.Model):
                 return new_name
 
 
+class MqttMetaData(models.Model):
+    user = models.OneToOneField(settings.AUTH_USER_MODEL, on_delete=models.CASCADE, primary_key=True)
+    user_topic_id = models.CharField(max_length=6, unique=True)
+    nodered_role_name = models.CharField(max_length=14, unique=True)
+    device_role_name = models.CharField(max_length=14, unique=True)
+
+    def __str__(self):
+        return self.user_topic_id
+    
+    @staticmethod
+    def generate_unique_mqtt_metadata():
+        max_attempts = 1000
+        for _ in range(max_attempts):
+            new_topic_id = ''.join(random.choice(string.ascii_letters + string.digits) for _ in range(6))  # change to lowercase and numbers
+            nodered_role_name = new_topic_id + '-nodered'
+            device_role_name = new_topic_id + '-device'
+            if not MqttClient.objects.filter(user_topic_id=new_topic_id).exists():
+                return new_topic_id,  nodered_role_name, device_role_name
+
+
 class MqttClient(models.Model):
     user = models.ForeignKey(settings.AUTH_USER_MODEL, on_delete=models.CASCADE)
     username = models.CharField(max_length=20, unique=True)

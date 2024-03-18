@@ -93,22 +93,90 @@ def set_timezone(request):
         timezones_list = sorted(common_timezones.items(), key=lambda x: x[0])
         return render(request, "set_timezone.html", {"timezones": timezones_list})
 
+
 @login_required
 def client_list(request):
-    dynsec = MosquittoDynSec()
+    dynsec = MosquittoDynSec('','')
 
     if request.method == 'POST':
         textname_form = MqttClientForm(request.POST)
         if 'add' in request.POST:
             if textname_form.is_valid():
-                # generate credentials and take textname from textname_form. Store into dynsec, then if successful into DB
+# During registration:
+    # get user for model ???
+
+    # using mqtt metadata model static function
+        # generate user user_topic_id (only 6 lower case letters + digits > 2 billion combinations)
+        # define user topic structures for in- and out-topic
+    
+    # create roles with: nodered_role_success bzw. device_role_success = dynsec.create_role(...)
+        # for Node-RED: 
+            # rolename: <user_topic_id>-nodered (see above: using mqtt metadata model static function)
+            # acls: SUB to in-topic; pub to out-topic
+        # for device: 
+            # rolename: <user_topic_id>-device (see above: using mqtt metadata model static function)
+            # acls: pub to in-topic; SUB to out-topic
+    # if ..._role_success: (jeweils für Nodered role und device role)
+        # save to db: Node-RED/example device client with credentials and <user_topic_id>-nodered / <user_topic_id>-device role
+    # else:
+        # messages.error(request, 'Failed to create MQTT client for Node-RED/example device. Please contact admin and create one yourself')
+
+    # if nodered_role_success:
+        # generate credentials for Node-RED client
+        # set node_red_client_textname = 'Automation Tool Credentials'
+        # create nodered_client with: success = dynsec.create_client(...)
+        # if success:
+            # save to db: Node-RED client with credentials and <user_topic_id>-nodered role
+        # else:
+            # messages.error(request, 'Failed to create MQTT client for Node-RED. Please contact admin and create one yourself')
+
+    # if device_role_success:
+        # generate credentials for example device client
+        # set node_red_client_textname = 'Example Device'
+        # create example_device_client with: success = dynsec.create_client(...)
+        # if success:
+            # save to db: example device client with credentials and <user_topic_id>-device role
+        # else:
+            # messages.error(request, 'Failed to create MQTT client for an example device. Please contact admin and create one yourself')
+                
+
+# In view:
+    # get Node-RED client data (credentials + textname)
+                
+    # Add Client:
+        # get user for model ???
+        
+        # generate credentials for new device client
+        # get <user_topic_id>-device role
+
+        # create client with: success = dynsec.create_client(...)
+                
+        # if success:
+            # device_client = textname_form.save(commit=False)  # Create an instance without saving to the DB
+            # set device_client username with generated username
+            # set device_client password with generated password
+            # save device_client
+    
+    # Rename client
+        #
+    
+    # Delete client
+        #
+
                 rolename = request.user  # All mqtt clients shall have the same role
                 client_username = MqttClient.generate_unique_username()
                 client_password = secrets.token_urlsafe(22)
-                user_topic = '' # TODO: müsste einmal in der DB (bei Registration) als id festgelegt werden und zwar für in/<id> und out/<id> . D.h. z.B. im MqttClient Model.
-                role_acls=[{"acltype": "subscribePattern", "topic": "in/{user_topic}", "priority": -1, "allow": True}]
-                success = dynsec.create_role("BasicSubscriber", textname="Subscriber Role", textdescription="Can subscribe to topics",acls=role_acls)
-                success = dynsec.create_client(client_username, client_password, textname=textname_form.textname, rolename=)
+                user_topic_id = ''  # TODO: müsste einmal in der DB (bei Registration) als id festgelegt werden und zwar für in/<user_topic_id> und out/<user_topic_id> . D.h. z.B. im MqttClient Model.
+                user_in_topic = f'in/{user_topic_id}/#'
+                user_out_topic = f'out/{user_topic_id}/#'
+                role_acls=[{"acltype": "publishClientSend", "topic": {user_in_topic}, "priority": -1, "allow": True},
+                           {"acltype": "subscribePattern", "topic": {user_in_topic}, "priority": -1, "allow": True},
+                           {"acltype": "subscribePattern", "topic": {user_out_topic}, "priority": -1, "allow": True},
+                           {"acltype": "subscribePattern", "topic": {user_out_topic}, "priority": -1, "allow": True}]
+
+                # Save data to Mosquitto Dynamic Security Plugin
+                success = dynsec.create_role(rolename, textname="Subscriber Role",acls=role_acls)
+                success = dynsec.create_client(client_username, client_password, textname=textname_form.textname, rolename=rolename)
                 
                 if success:
                     mqtt_client = textname_form.save(commit=False)  # Create an instance without saving to the DB
@@ -221,7 +289,10 @@ def nodered_manager(request):
                 if nodered_data.container_port != nodered_container.port:
                     update_nodered_data_container_port(nodered_data, nodered_container)
                     update_nodered_nginx_conf(nodered_data)
+                
+                # Store the container name in the session.
                 request.session['container_name'] = nodered_container.name
+
                 return redirect('nodered-embedded')
             else:
                 messages.info(request, f'Cannot start Node-RED. Node-RED is {nodered_container.state}.')
@@ -242,9 +313,9 @@ def nodered_manager(request):
 
                 # After creation, update the database with the new port
                 update_nodered_data_container_port(nodered_data, nodered_container)
-
                 update_nodered_nginx_conf(nodered_data)
 
+                # Store the container name in the session.
                 request.session['container_name'] = nodered_container.name
             else:
                 messages.info(request, f'Node-RED is already created.')
@@ -255,7 +326,7 @@ def nodered_manager(request):
                 update_nodered_data_container_port(nodered_data, nodered_container)
                 update_nodered_nginx_conf(nodered_data)
                 
-                # Attempt to retrieve the container name from the session.
+                # Store the container name in the session.
                 request.session['container_name'] = nodered_container.name
             else:
                 messages.info(request, f'Cannot restart Node-RED. Node-RED is {nodered_container.state}.')
