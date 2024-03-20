@@ -23,6 +23,13 @@ def register(request):
             try:
                 form.save()
                 username = form.cleaned_data.get('username')
+
+                # UNTEN STEHENDES NOCHMAL VERPACKEN in Funktion
+                # created = mqtt_meta_data_manager.create nodered_role()
+                # create nodered_client
+                # if not created:
+                    # messages.error(request, "Failed to create MQTT client for Node-RED. Please contact admin or create one yourself on the 'Devices' page")
+                
                 messages.success(request, f'Your account has been created! You are now able to log in')
                 return redirect('login')
             except Exception as e:
@@ -96,72 +103,13 @@ def set_timezone(request):
 
 @login_required
 def client_list(request):
+    '''
     dynsec = MosquittoDynSec('','')
 
     if request.method == 'POST':
         textname_form = MqttClientForm(request.POST)
         if 'add' in request.POST:
             if textname_form.is_valid():
-# During registration:
-    # get user for model ???
-
-    # using mqtt metadata model static function
-        # generate user user_topic_id (only 6 lower case letters + digits > 2 billion combinations)
-        # define user topic structures for in- and out-topic
-    
-    # create roles with: nodered_role_success bzw. device_role_success = dynsec.create_role(...)
-        # for Node-RED: 
-            # rolename: <user_topic_id>-nodered (see above: using mqtt metadata model static function)
-            # acls: SUB to in-topic; pub to out-topic
-        # for device: 
-            # rolename: <user_topic_id>-device (see above: using mqtt metadata model static function)
-            # acls: pub to in-topic; SUB to out-topic
-    # if ..._role_success: (jeweils für Nodered role und device role)
-        # save to db: Node-RED/example device client with credentials and <user_topic_id>-nodered / <user_topic_id>-device role
-    # else:
-        # messages.error(request, 'Failed to create MQTT client for Node-RED/example device. Please contact admin and create one yourself')
-
-    # if nodered_role_success:
-        # generate credentials for Node-RED client
-        # set node_red_client_textname = 'Automation Tool Credentials'
-        # create nodered_client with: success = dynsec.create_client(...)
-        # if success:
-            # save to db: Node-RED client with credentials and <user_topic_id>-nodered role
-        # else:
-            # messages.error(request, 'Failed to create MQTT client for Node-RED. Please contact admin and create one yourself')
-
-    # if device_role_success:
-        # generate credentials for example device client
-        # set node_red_client_textname = 'Example Device'
-        # create example_device_client with: success = dynsec.create_client(...)
-        # if success:
-            # save to db: example device client with credentials and <user_topic_id>-device role
-        # else:
-            # messages.error(request, 'Failed to create MQTT client for an example device. Please contact admin and create one yourself')
-                
-
-# In view:
-    # get Node-RED client data (credentials + textname)
-                
-    # Add Client:
-        # get user for model ???
-        
-        # generate credentials for new device client
-        # get <user_topic_id>-device role
-
-        # create client with: success = dynsec.create_client(...)
-                
-        # if success:
-            # device_client = textname_form.save(commit=False)  # Create an instance without saving to the DB
-            # set device_client username with generated username
-            # set device_client password with generated password
-            # save device_client
-    
-    # Rename client
-        #
-    
-    # Delete client
-        #
 
                 rolename = request.user  # All mqtt clients shall have the same role
                 client_username = MqttClient.generate_unique_username()
@@ -203,17 +151,18 @@ def client_list(request):
 
     context = {'clients': clients, 'form': form}
     return render(request, 'users/client_list.html', context)
-
+'''
 
     # Filter clients by the current user and pass to the template
-    # clients = MqttClient.objects.filter(user=request.user)
-    # mock_clients = [
-    #     {'client_username': 'user1', 'client_id': '001', 'textname': 'Client 1', 'textdescription': 'Description for Client 1'},
-    #     {'client_username': 'user2', 'client_id': '002', 'textname': 'Client 2', 'textdescription': 'Description for Client 2'},
-    #     {'client_username': 'user3', 'client_id': '003', 'textname': 'Client 3', 'textdescription': 'Description for Client 3'},
-    # ]
-    # context = {'clients': mock_clients}
-    # return render(request, 'users/client_list.html', context)
+    clients = MqttClient.objects.filter(user=request.user)
+    mock_clients = [
+        {'client_username': 'user1', 'client_id': '001', 'textname': 'Client 1', 'textdescription': 'Description for Client 1'},
+        {'client_username': 'user2', 'client_id': '002', 'textname': 'Client 2', 'textdescription': 'Description for Client 2'},
+        {'client_username': 'user3', 'client_id': '003', 'textname': 'Client 3', 'textdescription': 'Description for Client 3'},
+    ]
+    context = {'clients': mock_clients}
+    return render(request, 'users/client_list.html', context)
+
 
 @login_required
 def add_client(request):
@@ -224,6 +173,10 @@ def add_client(request):
             new_client = form.save(commit=False)
             # Set the user field to the currently logged-in user
             new_client.user = request.user
+
+            # 
+
+
             # Now save the model instance to the database
             new_client.save()
             return redirect('client-list')

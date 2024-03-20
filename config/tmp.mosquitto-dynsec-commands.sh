@@ -22,9 +22,9 @@ cat << EOF
 			"command": "setDefaultACLAccess",
 			"acls":[
 				{ "acltype": "publishClientSend", "allow": false },
-				{ "acltype": "publishClientReceive", "allow": false },
+				{ "acltype": "publishClientReceive", "allow": true },
 				{ "acltype": "subscribe", "allow": false },
-				{ "acltype": "unsubscribe", "allow": false }
+				{ "acltype": "unsubscribe", "allow": true }
 			]
 		},
 		{
