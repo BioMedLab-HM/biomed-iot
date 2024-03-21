@@ -4,7 +4,7 @@ from django.contrib import messages
 from django.contrib.auth.decorators import login_required
 from django.contrib.auth import authenticate, login
 from .forms import UserRegisterForm, UserUpdateForm, ProfileUpdateForm, UserLoginForm, MqttClientForm
-from .models import NodeRedUserData, MqttClient
+from .models import NodeRedUserData, MqttMetaData, MqttClient
 import docker
 import secrets
 from django.http import JsonResponse
@@ -14,6 +14,7 @@ import string
 from django.db import transaction
 from django.conf import settings
 from .services.nodered_utils import NoderedContainer, update_nodered_nginx_conf
+from .services.mosquitto_utils import MqttMetaDataManager, MqttClientManager, RoleType
 from .services.mosquitto_dynsec import MosquittoDynSec
 
 def register(request):
@@ -21,15 +22,23 @@ def register(request):
         form = UserRegisterForm(request.POST)
         if form.is_valid():
             try:
-                form.save()
-                username = form.cleaned_data.get('username')
+                new_user = form.save()
+                # username = form.cleaned_data.get('username')
 
-                # UNTEN STEHENDES NOCHMAL VERPACKEN in Funktion
-                # created = mqtt_meta_data_manager.create nodered_role()
-                # create nodered_client
-                # if not created:
-                    # messages.error(request, "Failed to create MQTT client for Node-RED. Please contact admin or create one yourself on the 'Devices' page")
+                # Initialize MQTT metadata manager and create metadata for the new user
+                mqtt_meta_data_manager = MqttMetaDataManager(new_user)
+                mqtt_meta_data_manager.create_nodered_role()
+                mqtt_meta_data_manager.create_device_role()
+
+                # Initialize MQTT client manager for creating Node-RED and example device clients
+                mqtt_client_manager = MqttClientManager(new_user)
+
+                # Create a MQTT client for Node-RED (e.g., with a fixed textname "Automation Tool Credentials")
+                mqtt_client_manager.create_client(textname="Automation Tool Credentials", role_type=RoleType.NODERED.value)
                 
+                # Create a MQTT client for an example device
+                mqtt_client_manager.create_client(textname="Example Device", role_type=RoleType.DEVICE.value)
+
                 messages.success(request, f'Your account has been created! You are now able to log in')
                 return redirect('login')
             except Exception as e:
@@ -260,7 +269,7 @@ def nodered_manager(request):
                 # Update the NoderedContainer instance with the new nodered_data
                 nodered_container.name = nodered_data.container_name
                 nodered_container.access_token = nodered_data.access_token
-            # if nodered_container.state == 'none':
+            # TODO: statt den Zeilen oben: if nodered_container.state == 'none':
                 # Proceed to create the container
                 nodered_container.create()
 

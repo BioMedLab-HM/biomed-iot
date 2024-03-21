@@ -100,6 +100,7 @@ class NoderedContainer():
         except KeyError:
             self.port = '' 
 
+
 def update_nodered_nginx_conf(instance):
     print("update_nodered_nginx_conf() ausgeführt")  # TODO: Später entfernen bzw durch log ersetzen
     # Logic to update Nginx configuration

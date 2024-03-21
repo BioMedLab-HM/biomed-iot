@@ -1,3 +1,4 @@
+import secrets
 from django.db import models
 from django.contrib.auth.models import AbstractUser, BaseUserManager  # User (if Django standard User model shall be used)
 from PIL import Image
@@ -97,7 +98,7 @@ class NodeRedUserData(models.Model):
                 return new_name
 
 
-class MqttUserMetaData(models.Model):
+class MqttMetaData(models.Model):
     user = models.OneToOneField(settings.AUTH_USER_MODEL, on_delete=models.CASCADE, primary_key=True)
     user_topic_id = models.CharField(max_length=6, unique=True)
     nodered_role_name = models.CharField(max_length=14, unique=True)
@@ -113,7 +114,7 @@ class MqttUserMetaData(models.Model):
             new_user_topic_id = ''.join(random.choice(string.ascii_letters + string.digits) for _ in range(6))  # change to lowercase and numbers
             new_nodered_role_name = 'nodered-' + new_user_topic_id
             new_device_role_name = 'device-' + new_user_topic_id
-            if not MqttUserMetaData.objects.filter(user_topic_id=new_user_topic_id).exists():
+            if not MqttMetaData.objects.filter(user_topic_id=new_user_topic_id).exists():
                 return new_user_topic_id,  new_nodered_role_name, new_device_role_name
 
 
@@ -122,6 +123,7 @@ class MqttClient(models.Model):
     username = models.CharField(max_length=20, unique=True)
     password = models.CharField(max_length=30, default="")
     textname = models.CharField(max_length=30, blank=True, default="")
+    rolename = models.CharField(max_length=14, blank=True, default="")
 
     def __str__(self):
         return self.username
@@ -133,3 +135,9 @@ class MqttClient(models.Model):
             new_name = ''.join(random.choice(string.ascii_letters + string.digits) for _ in range(20))
             if not MqttClient.objects.filter(username=new_name).exists():
                 return new_name
+        return None
+
+    @staticmethod
+    def generate_password():
+        new_password = secrets.token_urlsafe(22)  # equals approx. 20 characters
+        return new_password
