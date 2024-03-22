@@ -27,7 +27,7 @@ urlpatterns = [
     # path('o/', include('oauth2_provider.urls', namespace='oauth2_provider')),
     # path('auth/callback/', views.oauth_callback, name='oauth_callback'),
 
-    path('client-list/', user_views.client_list, name='client-list'),
+    path('devices/', user_views.devices, name='devices'),
     path('add-client/', user_views.add_client, name='add-client'),
     path('modify-client/<str:client_username>/', user_views.modify_client, name='modify-client'),
     path('delete-client/<str:client_username>/', user_views.delete_client, name='delete-client'),

@@ -14,8 +14,7 @@ import string
 from django.db import transaction
 from django.conf import settings
 from .services.nodered_utils import NoderedContainer, update_nodered_nginx_conf
-from .services.mosquitto_utils import MqttMetaDataManager, MqttClientManager, RoleType
-from .services.mosquitto_dynsec import MosquittoDynSec
+from .services.mosquitto_utils import MqttClientManager, RoleType
 
 def register(request):
     if request.method == 'POST':
@@ -97,66 +96,51 @@ def set_timezone(request):
 
 
 @login_required
-def client_list(request):
-    '''
-    dynsec = MosquittoDynSec('','')
+def devices(request):
+    """ 
+    For inexperienced user, MQTT-Clients are called devices since each client is usually linked to a device
+    although theoretically, one could use more than one client on one device. 
+    For technical correctness, the term client is used here.
+    """
+    print(f'in "devices view"')
+    mqtt_client_manager = MqttClientManager(request.user)
 
     if request.method == 'POST':
-        textname_form = MqttClientForm(request.POST)
-        if 'add' in request.POST:
-            if textname_form.is_valid():
-
-                rolename = request.user  # All mqtt clients shall have the same role
-                client_username = MqttClient.generate_unique_username()
-                client_password = secrets.token_urlsafe(22)
-                user_topic_id = ''  # TODO: müsste einmal in der DB (bei Registration) als id festgelegt werden und zwar für in/<user_topic_id> und out/<user_topic_id> . D.h. z.B. im MqttClient Model.
-                user_in_topic = f'in/{user_topic_id}/#'
-                user_out_topic = f'out/{user_topic_id}/#'
-                role_acls=[{"acltype": "publishClientSend", "topic": {user_in_topic}, "priority": -1, "allow": True},
-                           {"acltype": "subscribePattern", "topic": {user_in_topic}, "priority": -1, "allow": True},
-                           {"acltype": "subscribePattern", "topic": {user_out_topic}, "priority": -1, "allow": True},
-                           {"acltype": "subscribePattern", "topic": {user_out_topic}, "priority": -1, "allow": True}]
-
-                # Save data to Mosquitto Dynamic Security Plugin
-                success = dynsec.create_role(rolename, textname="Subscriber Role",acls=role_acls)
-                success = dynsec.create_client(client_username, client_password, textname=textname_form.textname, rolename=rolename)
-                
-                if success:
-                    mqtt_client = textname_form.save(commit=False)  # Create an instance without saving to the DB
-                    mqtt_client.username = client_username  # Manually set additional fields
-                    mqtt_client.password = client_password
-                    mqtt_client.save()  # Now save everything to the DB
-                    messages.success(request, 'Client successfully added.')
-                else:
-                    messages.error(request, 'Failed to add client.')
-                return redirect('device-list')
-
-        elif 'rename' in request.POST:
+        new_device_form = MqttClientForm(request.POST)
+        if request.POST.get('action') == 'create':
+            print(f'in "create"')
+            if new_device_form.is_valid():
+                print(f'form is valid')
+                new_textname = new_device_form.cleaned_data['textname']
+                print(f'New Textname from form = {new_textname}')
+                mqtt_client_manager.create_client(textname=new_textname, role_type=RoleType.DEVICE.value)
+                print('after create client')
+                messages.success(request, f'Device with name "{new_textname}" successfully created.')
+                return redirect('devices')
+            else:
+                messages.error(request, 'Device name is not valid. Max. 30 characters!')
+                return redirect('devices')
+        elif 'modify' in request.POST:
             # Rename client logic
             pass
 
         elif 'delete' in request.POST:
-            # Delete client logic
+            # username = # a way to get client_username
+            # mqtt_client_manager.delete_client(client_username)
             pass
 
     else:
-        form = MqttClientForm()
+        pass 
+    
+    new_device_form = MqttClientForm()
 
-    clients = MqttClient.objects.filter(user=request.user)
+    # get Node-RED client data (credentials + textname)
+    nodered_client_data = mqtt_client_manager.get_nodered_client()
+    # get list of all device clients
+    device_clients_data = mqtt_client_manager.get_device_clients()
 
-    context = {'clients': clients, 'form': form}
-    return render(request, 'users/client_list.html', context)
-'''
-
-    # Filter clients by the current user and pass to the template
-    clients = MqttClient.objects.filter(user=request.user)
-    mock_clients = [
-        {'client_username': 'user1', 'client_id': '001', 'textname': 'Client 1', 'textdescription': 'Description for Client 1'},
-        {'client_username': 'user2', 'client_id': '002', 'textname': 'Client 2', 'textdescription': 'Description for Client 2'},
-        {'client_username': 'user3', 'client_id': '003', 'textname': 'Client 3', 'textdescription': 'Description for Client 3'},
-    ]
-    context = {'clients': mock_clients}
-    return render(request, 'users/client_list.html', context)
+    context = {'nodered_client': nodered_client_data, 'device_clients': device_clients_data, 'form': new_device_form}
+    return render(request, 'users/devices.html', context)
 
 
 @login_required

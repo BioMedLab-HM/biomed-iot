@@ -98,14 +98,16 @@ WSGI_APPLICATION = 'dj_iotree.wsgi.application'
 # https://docs.djangoproject.com/en/4.2/ref/settings/#databases
 DATABASES = {
     'default': {
-        # 'ENGINE': 'django.db.backends.sqlite3',
-        # 'NAME': BASE_DIR / 'db.sqlite3',
-        "ENGINE": config['postgres']['ENGINE'],
-        'NAME': config['postgres']['NAME'],  # the database name
-        'USER': config['postgres']['USER'],
-        'PASSWORD': config['postgres']['PASSWORD'],
-        'HOST': config['postgres']['HOST'],
-        'PORT': config['postgres']['PORT'],
+        'ENGINE': 'django.db.backends.sqlite3',
+        'NAME': BASE_DIR / 'db.sqlite3',
+        
+        # uncomment for postgres in production use
+        # "ENGINE": config['postgres']['ENGINE'],
+        # 'NAME': config['postgres']['NAME'],  # the database name
+        # 'USER': config['postgres']['USER'],
+        # 'PASSWORD': config['postgres']['PASSWORD'],
+        # 'HOST': config['postgres']['HOST'],
+        # 'PORT': config['postgres']['PORT'],
     }
 }
 

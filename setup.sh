@@ -393,7 +393,8 @@ do_install() {
     dynsec_admin_pass=$(LC_ALL=C tr -dc 'A-Za-z0-9_!@#$%^&*()-' < /dev/urandom | head -c 20 | xargs)
     mosquitto_ctrl dynsec init /var/lib/mosquitto/dynamic-security.json $dynsec_admin_name $dynsec_admin_pass
     # Set file permissions, see https://stackoverflow.com/questions/71197601/prevent-systemctl-restart-mosquitto-service-from-resetting-dynamic-security
-    chown mosquitto /var/lib/mosquitto/dynamic-security.json
+    # ALT: chown mosquitto /var/lib/mosquitto/dynamic-security.json
+    chown mosquitto:mosquitto /etc/mosquitto/dynamic-security.json # works
     chmod 700 /var/lib/mosquitto/dynamic-security.json
 
     # Add Clients and Roles to dynamic-security.json

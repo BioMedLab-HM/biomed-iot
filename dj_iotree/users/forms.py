@@ -39,7 +39,10 @@ class ProfileUpdateForm(forms.ModelForm):
         fields = ['image']
 
 
-class MqttClientForm(forms.ModelForm):
-    class Meta:
-        model = MqttClient
-        fields = ['textname']
+class MqttClientForm(forms.Form):
+    textname = forms.CharField(label='Device Name', max_length=30, required=True)
+
+# class MqttClientForm(forms.ModelForm):
+#     class Meta:
+#         model = MqttClient
+#         fields = ['textname']
