@@ -23,22 +23,6 @@ def register(request):
         if form.is_valid():
             try:
                 new_user = form.save()
-                # username = form.cleaned_data.get('username')
-
-                # Initialize MQTT metadata manager and create metadata for the new user
-                mqtt_meta_data_manager = MqttMetaDataManager(new_user)
-                mqtt_meta_data_manager.create_nodered_role()
-                mqtt_meta_data_manager.create_device_role()
-
-                # Initialize MQTT client manager for creating Node-RED and example device clients
-                mqtt_client_manager = MqttClientManager(new_user)
-
-                # Create a MQTT client for Node-RED (e.g., with a fixed textname "Automation Tool Credentials")
-                mqtt_client_manager.create_client(textname="Automation Tool Credentials", role_type=RoleType.NODERED.value)
-                
-                # Create a MQTT client for an example device
-                mqtt_client_manager.create_client(textname="Example Device", role_type=RoleType.DEVICE.value)
-
                 messages.success(request, f'Your account has been created! You are now able to log in')
                 return redirect('login')
             except Exception as e:
@@ -69,6 +53,8 @@ def user_login(request):
 def profile(request):
     if request.method == 'POST':
         u_form = UserUpdateForm(request.POST, instance=request.user)
+        
+        # p_form: Profile form commented out because contains only image which is currently not used
         # p_form = ProfileUpdateForm(request.POST,
         #                            request.FILES,
         #                            instance=request.user.profile) # FILES = Image
