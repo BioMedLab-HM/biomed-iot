@@ -33,7 +33,7 @@
                     <ul class="navbar-nav ms-auto mb-2 mb-lg-0">
                         <li class="nav-item"><a class="nav-link {% is_active 'core-home' %}" aria-current="page" href="{% url 'core-home' %}">Get started</a></li>
                         {% if user.is_authenticated %}
-                            <li class="nav-item"><a class="nav-link" href="{% url 'devices' %}">Devices</a></li>
+                            <li class="nav-item"><a class="nav-link {% starts_with 'devices' %}" href="{% url 'devices' %}">Devices</a></li>
                             <li class="nav-item"><a class="nav-link {% starts_with 'nodered' %}" href="{% url 'nodered-manager' %}">Automate</a></li>
                             <li class="nav-item"><a class="nav-link {% starts_with 'data' %}" href="{% url 'data-explorer' %}">Data Explorer</a></li>
                             <li class="nav-item"><a class="nav-link {% starts_with 'grafana' %}" href="{% url 'grafana-embedded' %}">Visualize</a></li>

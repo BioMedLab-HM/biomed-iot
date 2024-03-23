@@ -20,6 +20,9 @@ allow_anonymous false
 listener 1884 localhost
 allow_anonymous false
 
+# Replace the clientid that a client connected with its username
+use_username_as_clientid true
+
 # Autosave broker in-memory database to disk 
 autosave_interval 300  
 

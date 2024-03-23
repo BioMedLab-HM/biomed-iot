@@ -305,7 +305,6 @@ do_install() {
     sudo -u postgres psql -c "GRANT USAGE, CREATE ON SCHEMA public TO dj_iotree_user;"
 
     # Django setup
-    # TODO: Mosquitto muss vorher installiert werden wegen dynamic security Plugin!!
     django_secret = get_rand_str_of_length 50
     runuser -u $linux_user -- python3 -m venv $setup_dir/dj_iotree/dj_venv
     source $setup_dir/dj_iotree/dj_venv/bin/activate
@@ -327,8 +326,8 @@ do_install() {
     sudo systemctl enable gunicorn.socket
 
     # install and configure nginx according to selected setup scheme
-    apt install -y nginx libnginx-mod-stream
-    # TODO: execute config stream sh files for mqtt through nginx
+    apt install -y nginx
+
     if [[ $setup_scheme == "TLS_WITH_DOMAIN" ]]; then
         # TODO: TLS-Setup mit Domain testen (use: "sudo nginx -t" to check for syntax errors)
         printf "\nInstalling packages for '$setup_scheme' scheme. Further user input may be neccessary\n" >&2
@@ -394,6 +393,7 @@ do_install() {
     dynsec_admin_pass=$(LC_ALL=C tr -dc 'A-Za-z0-9_!@#$%^&*()-' < /dev/urandom | head -c 20 | xargs)
     mosquitto_ctrl dynsec init /var/lib/mosquitto/dynamic-security.json $dynsec_admin_name $dynsec_admin_pass
     # Set file permissions, see https://stackoverflow.com/questions/71197601/prevent-systemctl-restart-mosquitto-service-from-resetting-dynamic-security
+    # Old, not working: chown mosquitto /var/lib/mosquitto/dynamic-security.json
     chown mosquitto:mosquitto /var/lib/mosquitto/dynamic-security.json # works
     chmod 700 /var/lib/mosquitto/dynamic-security.json
 
@@ -404,6 +404,8 @@ do_install() {
     mqtt_in_to_db_pw=$(LC_ALL=C tr -dc 'A-Za-z0-9_!@#$%^&*()-' < /dev/urandom | head -c 20 | xargs)
     mqtt_out_to_db_user=$(LC_ALL=C tr -dc 'A-Za-z0-9_!@#$%^&*()-' < /dev/urandom | head -c 10 | xargs)
     mqtt_out_to_db_pw=$(LC_ALL=C tr -dc 'A-Za-z0-9_!@#$%^&*()-' < /dev/urandom | head -c 20 | xargs)
+    client_name_for_website_admin=$(LC_ALL=C tr -dc 'A-Za-z0-9_!@#$%^&*()-' < /dev/urandom | head -c 10 | xargs)
+    client_pw_for_website_admin=$(LC_ALL=C tr -dc 'A-Za-z0-9_!@#$%^&*()-' < /dev/urandom | head -c 20 | xargs)
 
     dynsec_commands=$(bash $setup_dir/config/tmp.mosquitto-dynsec-commands.sh \
         $dj_mqtt_controle_user \
@@ -411,9 +413,17 @@ do_install() {
         $mqtt_in_to_db_user \
         $mqtt_in_to_db_pw \
         $mqtt_out_to_db_user \
-        $mqtt_out_to_db_pw)
+        $mqtt_out_to_db_pw \
+        $client_name_for_website_admin \
+        $client_pw_for_website_admin)
 
     mosquitto_pub -u $dynsec_admin_name -P $dynsec_admin_pass -h localhost -t '$CONTROL/dynamic-security/v1' -m "$dynsec_commands" -d
+    
+    # TODO: Hier, Python-Logik um mqtt Client für admin-Nutzer der Webseite in PostgresDB zu schreiben
+    source $setup_dir/dj_iotree/dj_venv/bin/activate
+    DJADMIN_MQTT_CLIENT_TO_DB_SCRIPT="$(bash $django_admin_name $client_name_for_website_admin $client_pw_for_website_admin $setup_dir/config/output_djadmin_mqtt_client_to_db_script.sh)"
+    echo $DJADMIN_MQTT_CLIENT_TO_DB_SCRIPT | runuser -u $linux_user -- $setup_dir/dj_iotree/dj_venv/bin/python $setup_dir/dj_iotree/manage.py shell
+    deactivate
 
     # Create config file for mosquitto to include into mosquitto.conf
     if [[ $setup_scheme == "NO_TLS" ]]; then

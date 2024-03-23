@@ -37,11 +37,4 @@ server {
     # location files for nodered container instances
     include /etc/nginx/conf.d/nodered_locations/*;
 }
-# Optional: Uncomment to direct MQTT traffic through nginx as reverse proxy
-# stream {
-#     server {
-#         listen 1883;
-#         proxy_pass localhost:1883;
-#     }
-# }
 EOF

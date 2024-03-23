@@ -17,6 +17,9 @@ listener 1883
 # Only allow clients to connect with known credentials
 allow_anonymous false
 
+# Replace the clientid that a client connected with its username
+use_username_as_clientid true
+
 # Autosave broker in-memory database to disk 
 autosave_interval 300  
 

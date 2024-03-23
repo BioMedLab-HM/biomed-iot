@@ -138,7 +138,7 @@ class MqttClientManager():
                 textname = "Node-RED MQTT Credentials"
                 rolename = mqtt_meta_data.nodered_role_name
 
-            roles = {"rolename": rolename, "priority": -1}
+            roles = [{"rolename": rolename, "priority": -1}]
             
             # Create the MQTT client in the mosquitto dynamic security plugin
             dynsec = MosquittoDynSec(self.dynsec_username, self.dynsec_password)
