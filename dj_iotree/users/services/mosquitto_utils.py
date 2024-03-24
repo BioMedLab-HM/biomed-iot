@@ -199,10 +199,14 @@ class MqttClientManager():
             if success:
                 mqtt_client.delete()
                 print(f"MQTT client {client_username} deleted successfully.")
+                return True
             else:
                 print(f"Failed to delete MQTT client {client_username} from dynamic security system.")
         except MqttClient.DoesNotExist:
             print(f"MQTT client {client_username} not found for the user.")
+        
+        return False
+    
 
     def get_device_clients(self):
         """

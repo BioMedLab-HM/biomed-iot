@@ -1,0 +1,134 @@
+{% extends "core/base.html" %}
+{% load crispy_forms_tags %}
+{% block content %}
+<div class="container">
+    <h1>Devices</h1>
+    <p class="lead">Manage credentials for your MQTT devices.</p>
+    
+    <div class="card mb-3">
+        <div class="card-body">
+            <h5 class="card-title">Use the following credentials to send and receive MQTT messages in Node-RED</h5>
+            <div class="table-responsive">
+                <table class="table">
+                    <thead>
+                        <tr>
+                            <th scope="col">Name</th>
+                            <th scope="col">Username</th>
+                            <th scope="col">Password</th>
+                        </tr>
+                    </thead>
+                    <tbody>
+                        <tr>
+                            <td>{{ nodered_client.textname }}</td>
+                            <td>{{ nodered_client.username }}</td>
+                            <td>{{ nodered_client.password }}</td>
+                        </tr>
+                    </tbody>
+                </table>
+            </div>
+        </div>
+    </div>
+    <div style="margin-bottom: 2rem;"></div>
+    <hr>
+    <form method="post" class="mb-3">
+        {% csrf_token %}
+        <div class="form-group row">
+            <div class="col-md-9 col-12">
+                <input type="text" class="form-control" id="id_textname" name="textname" placeholder="New Device Name (max. 30 characters)" maxlength="{{ form.textname.field.max_length }}" required>
+            </div>
+            <div class="col-md-3 col-12">
+                <button type="submit" class="btn btn-primary mt-md-0 mt-2 w-100" name="action" value="create">Create Device</button>
+            </div>
+        </div>
+    </form>
+    {% if device_clients %}
+        <div style="margin-bottom: 2rem;"></div>
+        <div class="card">
+            <div class="card-body">
+                <h5 class="card-title">Your Devices</h5>
+                <div class="table-responsive">
+                    <table class="table">
+                        <thead>
+                            <tr>
+                                <th scope="col">Name</th>
+                                <th scope="col">Username</th>
+                                <th scope="col">Password</th>
+                            </tr>
+                        </thead>
+                        <tbody>
+                            {% for device in device_clients %}
+                                <tr>
+                                    <td>{{ device.textname }}</td>
+                                    <td>{{ device.username }}</td>
+                                    <td>{{ device.password }}</td>
+                                </tr>
+                            {% endfor %}
+                        </tbody>
+                    </table>
+                </div>
+            </div>
+        </div>
+    {% else %}
+        <p>No devices found.</p>
+    {% endif %}
+</div>
+
+{% endblock content %}
+
+{% block extra_css %}
+<style>
+
+    .card {
+        border: 1px solid #E7F1FF; /* Dark blue border */
+        background-color: #E7F1FF; /* Light blue background */
+        /* box-shadow: 0 2px 4px rgba(0, 123, 255, .3); Optional: Adds a subtle shadow with a blue tint */
+    }
+    .scroll-indicator::before {
+        content: '';
+        position: absolute;
+        top: 0;
+        right: 0;
+        bottom: 0;
+        width: 10px;
+        /* background: linear-gradient(to right, transparent, #f7f7f7); */
+    }
+
+    .scroll-indicator::after {
+        content: '';
+        position: absolute;
+        top: 0;
+        left: 0;
+        bottom: 0;
+        width: 10px;
+        /* background: linear-gradient(to left, transparent, #f7f7f7); */
+    }
+
+    .table-responsive {
+        position: relative;
+    }
+</style>
+{% endblock %}
+
+{% block extra_js %}
+<script>
+document.addEventListener("DOMContentLoaded", function() {
+    const tableContainer = document.querySelector('.table-responsive');
+    const table = tableContainer.querySelector('table');
+
+    function updateScrollIndicator() {
+        if (table.offsetWidth > tableContainer.offsetWidth) {
+            tableContainer.classList.add('scroll-indicator');
+        } else {
+            tableContainer.classList.remove('scroll-indicator');
+        }
+    }
+
+    // Initial check
+    updateScrollIndicator();
+
+    // Check on window resize
+    window.addEventListener('resize', updateScrollIndicator);
+});
+</script>
+{% endblock %}
+

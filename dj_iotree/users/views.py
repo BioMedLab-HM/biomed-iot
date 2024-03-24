@@ -14,7 +14,7 @@ import string
 from django.db import transaction
 from django.conf import settings
 from .services.nodered_utils import NoderedContainer, update_nodered_nginx_conf
-from .services.mosquitto_utils import MqttClientManager, RoleType
+from .services.mosquitto_utils import MqttMetaDataManager, MqttClientManager, RoleType
 
 def register(request):
     if request.method == 'POST':
@@ -120,48 +120,38 @@ def devices(request):
             else:
                 messages.error(request, 'Device name is not valid. Max. 30 characters!')
                 return redirect('devices')
+            
         elif 'modify' in request.POST:
             # Rename client logic
             pass
 
-        elif 'delete' in request.POST:
-            # username = # a way to get client_username
-            # mqtt_client_manager.delete_client(client_username)
-            pass
+        elif request.POST.get('device_username'):
+            client_username = request.POST.get('device_username')
+            print(f'delete device ({client_username}) case')
+            success = mqtt_client_manager.delete_client(client_username)
+            print(success)
+            if success:
+                messages.success(request, f'Device with username "{client_username}" successfully deleted.')
+                return redirect('devices')
+            else:
+                messages.error(request, 'Failed to delete the device. Please try again.')
+                return redirect('devices')
 
-    else:
-        pass 
+    mqtt_meta_data_manager = MqttMetaDataManager(request.user)
+    in_topic = f"in/{mqtt_meta_data_manager.metadata.user_topic_id}/#"
+    out_topic = f"out/{mqtt_meta_data_manager.metadata.user_topic_id}/#"
     
     new_device_form = MqttClientForm()
+    nodered_client_data = mqtt_client_manager.get_nodered_client()  # get Node-RED client credentials + textname
+    device_clients_data = mqtt_client_manager.get_device_clients()  # get list of all device clients
 
-    # get Node-RED client data (credentials + textname)
-    nodered_client_data = mqtt_client_manager.get_nodered_client()
-    # get list of all device clients
-    device_clients_data = mqtt_client_manager.get_device_clients()
-
-    context = {'nodered_client': nodered_client_data, 'device_clients': device_clients_data, 'form': new_device_form}
+    context = {'in_topic': in_topic, 
+               'out_topic': out_topic, 
+               'nodered_client': nodered_client_data, 
+               'device_clients': device_clients_data, 
+               'form': new_device_form}
     return render(request, 'users/devices.html', context)
 
-
-@login_required
-def add_client(request):
-    if request.method == 'POST':
-        form = MqttClientForm(request.POST)
-        if form.is_valid():
-            # Instead of directly saving the form, save it to a model instance without committing to the database yet
-            new_client = form.save(commit=False)
-            # Set the user field to the currently logged-in user
-            new_client.user = request.user
-
-            # 
-
-
-            # Now save the model instance to the database
-            new_client.save()
-            return redirect('client-list')
-    else:
-        form = MqttClientForm()
-    return render(request, 'users/add_client.html', {'form': form})
 
 @login_required
 def modify_client(request, client_username):

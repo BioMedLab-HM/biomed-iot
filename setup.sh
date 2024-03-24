@@ -280,6 +280,7 @@ do_install() {
     ufw allow ssh # port 22
     ufw allow 80, 
     ufw allow 443/tcp # ports: 22 (SSH), 80 (HTTP), 443 (HTTPS)
+    sudo ufw allow 1883/tcp  # for MQTT
     ufw enable  # activate ufw and automatically start on system boot
     # TODO: optional in fail2ban jail.local: 
         # [nginx-limit-req] 

@@ -4,6 +4,7 @@
 :root {
     --new-navbar-padding: 0rem; /*  Adjust this value to match the actual height of your navbar */
     --navbar-total-height: 40px; /* Total height of the navbar */
+    --bs-primary: #2C3E50;
 }
 
 /* Navbar adjustments */
@@ -20,6 +21,12 @@
 .navbar-nav .nav-link {
     padding: 0.25rem 0;
 }
+
+/* Custom Navbar Background Color */
+.navbar-dark.bg-primary {
+    background-color: #2C3E50 !important;
+}
+
 
 /* iframe container to fill the rest of the viewport height */
 .iframe-container {
@@ -65,12 +72,12 @@ button,
           appearance: none; /* Standard syntax */
 
   /* Add your custom styles */
-  background-color: #007bff; /* Bootstrap primary button color */
+  background-color: #2A477E; /* Bootstrap primary button color #007bff */
   color: white;
   border: none;
   padding: .375rem .75rem; /* Bootstrap default padding */
   border-radius: .25rem; /* Bootstrap default border-radius */
   font-size: 1rem; /* Bootstrap default font size */
-  line-height: 1.5; /* Bootstrap default line height */
+  line-height: 1.5s; /* Bootstrap default line height */
   transition: color .15s ease-in-out, background-color .15s ease-in-out, border-color .15s ease-in-out, box-shadow .15s ease-in-out; /* Smooth transition for hover effects */
 }
