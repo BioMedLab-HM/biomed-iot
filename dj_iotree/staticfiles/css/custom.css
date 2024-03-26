@@ -11,6 +11,10 @@
 .navbar {
     padding-top: var(--new-navbar-padding);
     padding-bottom: var(--new-navbar-padding);
+    position: -webkit-sticky; /* For Safari */
+    position: sticky;
+    top: 0;
+    z-index: 10000; /* Ensure navbar is above other content */
 }
 
 .navbar-toggler {
@@ -27,6 +31,16 @@
     background-color: #2C3E50 !important;
 }
 
+.upper-background {
+    background-color: #2C3E50;
+    color: white;
+    padding: 15px;
+    border-radius: 5px;
+}
+
+.lower-background {
+    margin-top: 20px;
+}
 
 /* iframe container to fill the rest of the viewport height */
 .iframe-container {

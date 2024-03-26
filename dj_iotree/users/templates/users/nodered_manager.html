@@ -38,51 +38,36 @@
                 <button type="submit" class="btn btn-danger" name="action" value="stop">Stop Node-RED</button>
             </div>
         {% elif container_state == 'starting' %}
-            <div class="alert alert-info" role="alert">
-                <p>Node-RED is starting up. Please wait... </p>
+            <div class="alert alert-info text-center d-flex justify-content-center align-items-center" role="alert" style="flex-direction: column;">
+                <p>Node-RED is starting up. Please wait...</p>
                 <div class="spinner-border" role="status">
                     <span class="sr-only"></span>
                 </div>
             </div>
-            <!-- <script>
-                setTimeout(function(){
-                    window.location.reload(1);
-                }, 5000);
-            </script> -->
-            <script>
-                // Call the function to check container status after the page loads
-                document.addEventListener('DOMContentLoaded', function() {checkNoderedStatus();});
-        
-                function checkNoderedStatus() {
-                    fetch('{% url "nodered-status-check" %}')  //  path to the status checking endpoint
-                        .then(response => response.json())
-                        .then(data => {
-                            if(data.status == "running") {
-                                window.location.href = "{% url 'nodered-embedded' %}";  // Redirect when running
-                            } else {
-                                setTimeout(checkNoderedStatus, 2000);  // Recheck after 2 seconds
-                            }
-                        })
-                        .catch(error => console.error('Error checking container status:', error));
-                }
-                </script>
         {% endif %}
     </form>
 </div>
 {% endblock %}
 
 {% block extra_css %}
-<style>
-    .upper-background {
-        background-color: #2C3E50; /* Replace with your desired color */
-        color: white; /* Assuming you want light text on the darker background */
-        padding: 20px; /* Add some spacing around your content */
-    }
+{% endblock %}
 
-    .lower-background {
-        background-color: #FFFFFF; /* Explicitly set to white */
-        color: 222222; /* Default, but explicitly set for clarity */
-        padding: 20px; /* Consistent spacing with the upper section */
+{% block extra_js %}
+<script>
+    // Call the function to check container status after the page loads
+    document.addEventListener('DOMContentLoaded', function() {checkNoderedStatus();});
+
+    function checkNoderedStatus() {
+        fetch('{% url "nodered-status-check" %}')  //  path to the status checking endpoint
+            .then(response => response.json())
+            .then(data => {
+                if(data.status == "running") {
+                    window.location.href = "{% url 'nodered-embedded' %}";  // Redirect when running
+                } else {
+                    setTimeout(checkNoderedStatus, 2000);  // Recheck after 2 seconds
+                }
+            })
+            .catch(error => console.error('Error checking container status:', error));
     }
-</style>
+    </script>
 {% endblock %}

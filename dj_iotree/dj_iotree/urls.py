@@ -28,6 +28,7 @@ urlpatterns = [
     # path('auth/callback/', views.oauth_callback, name='oauth_callback'),
 
     path('devices/', user_views.devices, name='devices'),
+    path('code-examples/', user_views.code_examples, name='code-examples'),
 
     path('nodered-manager/', user_views.nodered_manager, name='nodered-manager'),
     path('nodered-embedded/', user_views.nodered_embedded, name='nodered-embedded'),

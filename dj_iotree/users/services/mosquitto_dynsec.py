@@ -97,13 +97,13 @@ class MosquittoDynSec:
     def on_connect(self, client, userdata, flags, rc):
         self.client.subscribe(self.response_topic, qos=2)
         if rc == 0:
-            #print("Connected with result code " + str(rc))
+            print("Connected with result code " + str(rc))
             pass
         else:
             print(f"Failed to connect, return code: {rc}\n")
 
     def on_subscribe(self, client, userdata, mid, granted_qos):
-        #print("Subscribed to topic")
+        print("Subscribed to topic")
         # Signal successful subscription
         self.subscription_event.set()
     

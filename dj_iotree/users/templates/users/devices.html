@@ -28,7 +28,7 @@
                             <td>{{ nodered_client.password }}</td>
                             <td>
                                 <!-- Copy device credentials button -->
-                                <button class="copy-button" data-clipboard-text="u: {{ nodered_client.username }}  p: {{nodered_client.password}}">Copy</button>
+                                <button class="copy-button" data-clipboard-text="username = {{ nodered_client.username }};  password = {{nodered_client.password}}">Copy</button>
                             </td>
                         </tr>
                     </tbody>
@@ -132,17 +132,6 @@
 
 {% block extra_css %}
 <style>
-    .upper-background {
-        background-color: #2C3E50; /* Replace with your desired color */
-        color: white; /* Assuming you want light text on the darker background */
-        padding: 20px; /* Add some spacing around your content */
-    }
-
-    .lower-background {
-        background-color: #FFFFFF; /* Explicitly set to white */
-        color: 222222; /* Default, but explicitly set for clarity */
-        padding: 20px; /* Consistent spacing with the upper section */
-    }
 
     .card {
         border: 1px solid #E7F1FF; /* Dark blue border */

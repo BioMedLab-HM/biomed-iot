@@ -21,8 +21,12 @@
         <link href="{% static 'css/styles.css' %}" rel="stylesheet" />
         <!-- Additional Custom CSS -->
         <link href="{% static 'css/custom.css' %}" rel="stylesheet" />
+        
+        <!-- Reserved for individual styles and scripts in a template -->
         {% block extra_css %}{% endblock %}
         {% block extra_js %}{% endblock %}
+
+        <!-- Alternatively use a Content Delivery Network for Bootstrap -->
         <!-- <link href="https://cdn.jsdelivr.net/npm/bootstrap@5.3.2/dist/css/bootstrap.min.css" rel="stylesheet" integrity="sha384-EVSTQN3/azprG1Anm3QDgpJLIm9Nao0Yz1ztcQTwFspd3yD65VohhpuuCOmLASjC" crossorigin="anonymous"> -->
     </head>
     <body>
@@ -35,7 +39,13 @@
                     <ul class="navbar-nav ms-auto mb-2 mb-lg-0">
                         <li class="nav-item"><a class="nav-link {% is_active 'core-home' %}" aria-current="page" href="{% url 'core-home' %}">Get started</a></li>
                         {% if user.is_authenticated %}
-                            <li class="nav-item"><a class="nav-link {% starts_with 'devices' %}" href="{% url 'devices' %}">Devices</a></li>
+                            <li class="nav-item dropdown">
+                                <a class="nav-link dropdown-toggle {% is_active 'devices' 'code-examples' %}" id="navbarDropdown" href="#" role="button" data-bs-toggle="dropdown" aria-expanded="false">Devices</a>
+                                <ul class="dropdown-menu dropdown-menu-end" aria-labelledby="navbarDropdown">
+                                    <li><a class="dropdown-item" href="{% url 'devices' %}">My Devices</a></li>
+                                    <li><a class="dropdown-item" href="{% url 'code-examples' %}">Code Examples</a></li>
+                                </ul>
+                            </li>
                             <li class="nav-item"><a class="nav-link {% starts_with 'nodered' %}" href="{% url 'nodered-manager' %}">Automate</a></li>
                             <li class="nav-item"><a class="nav-link {% starts_with 'data' %}" href="{% url 'data-explorer' %}">Data Explorer</a></li>
                             <li class="nav-item"><a class="nav-link {% starts_with 'grafana' %}" href="{% url 'grafana-embedded' %}">Visualize</a></li>

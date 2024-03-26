@@ -15,6 +15,7 @@ from django.db import transaction
 from django.conf import settings
 from .services.nodered_utils import NoderedContainer, update_nodered_nginx_conf
 from .services.mosquitto_utils import MqttMetaDataManager, MqttClientManager, RoleType
+from .services.code_loader import load_code_examples
 
 def register(request):
     if request.method == 'POST':
@@ -149,8 +150,17 @@ def devices(request):
                'out_topic': out_topic, 
                'nodered_client': nodered_client_data, 
                'device_clients': device_clients_data, 
-               'form': new_device_form}
+               'form': new_device_form,
+               'title': "Devices"}
     return render(request, 'users/devices.html', context)
+
+
+@login_required
+def code_examples(request):
+    examples_content = load_code_examples()
+
+    context = {'examples': examples_content}
+    return render(request, 'users/code_examples.html', context)
 
 
 @login_required

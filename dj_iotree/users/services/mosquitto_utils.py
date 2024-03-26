@@ -106,7 +106,7 @@ class MqttMetaDataManager():
 @unique
 class RoleType(Enum):
     """ 
-    Used for MqttClientManager. Prevents the use of 'magic values'.
+    Used for MqttClientManager. Prevents the use of 'magic values' in various functions.
     Example usage in a view: 
         mqtt_client_manager = MqttClientManager(request.user)
         mqtt_client_manager.create_client(self, textname="New MQTT Device", role_type=RoleType.DEVICE.value)
@@ -132,9 +132,9 @@ class MqttClientManager():
         # Retrieve the MQTT meta data for the user to get the device role name
         try:
             mqtt_meta_data = MqttMetaData.objects.get(user=self.user)
-            if role_type == "device":
+            if role_type == RoleType.DEVICE.value:
                 rolename = mqtt_meta_data.device_role_name
-            elif role_type == "nodered":
+            elif role_type == RoleType.NODERED.value:
                 textname = "Node-RED MQTT Credentials"
                 rolename = mqtt_meta_data.nodered_role_name
 

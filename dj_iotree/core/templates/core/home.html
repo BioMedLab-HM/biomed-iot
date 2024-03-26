@@ -2,43 +2,23 @@
 
 {% block content %}
 <div class="upper-background">
-    <div class="container">
-        <h1>Welcome to IoTree42</h1>
-        <p class="lead">Your journey to smart IoT management starts here.</p>
-    </div>
+    <h1>Welcome to IoTree42</h1>
+    <p class="lead">Your journey to smart IoT management starts here.</p>
 </div>
 <div class="lower-background">
-    <div class="container mt-4">
-        <ol class="styled-list">
-            <li><strong>Add and Set Up New IoT Devices:</strong> Begin by <a href="{% url 'devices' %}">registering your devices</a> to enable monitoring and management.</li>
-            <li><strong><a href="{% url 'nodered-manager' %}">Automate</a> with Node-RED:</strong> Link your sensors and actuators with intuitive Node-RED flows to create smart automation scripts.</li>
-            <li><strong>Save Data:</strong> Securely store your devices' data into the database directly within Node-RED.</li>
-            <li><strong>Explore Your Data:</strong> Navigate to the <a href="#">"My Data"</a> page to access your data in a structured tree view or download it for analysis.</li>
-            <li><strong>Visualize Data:</strong> Visit the <a href="#">"Visualize"</a> page to craft dynamic visualizations of your IoT data.</li>
-        </ol>
-        <p>For additional support, our comprehensive <a href="{% url 'core-about' %}">Manual</a> includes FAQs and extensive documentation.</p>
-    </div>
+    <ol class="styled-list">
+        <li><strong>Add and Set Up New IoT Devices:</strong> Begin by <a href="{% url 'devices' %}">registering your devices</a> to enable monitoring and management.</li>
+        <li><strong><a href="{% url 'nodered-manager' %}">Automate</a> with Node-RED:</strong> Link your sensors and actuators with intuitive Node-RED flows to create smart automation scripts.</li>
+        <li><strong>Save Data:</strong> Securely store your devices' data into the database directly within Node-RED.</li>
+        <li><strong>Explore Your Data:</strong> Navigate to the <a href="#">"My Data"</a> page to access your data in a structured tree view or download it for analysis.</li>
+        <li><strong>Visualize Data:</strong> Visit the <a href="#">"Visualize"</a> page to craft dynamic visualizations of your IoT data.</li>
+    </ol>
+    <p>For additional support, our comprehensive <a href="{% url 'core-about' %}">Manual</a> includes FAQs and extensive documentation.</p>
 </div>
 {% endblock content %}
 
 {% block extra_css %}
 <style>
-    .upper-background {
-        background-color: #2C3E50; /* Replace with your desired color */
-        color: white;
-        padding: 20px 0; /* Top and bottom padding only */
-    }
-
-    .lower-background {
-        background-color: #FFFFFF; /* Explicitly set to white */
-        color: #333; /* Dark text for readability */
-        padding: 20px 0; /* Top and bottom padding only */
-    }
-
-    .container {
-        padding: 0 15px; /* Side paddings, adjust accordingly */
-    }
-
     .styled-list {
         padding-left: 20px;
         list-style-position: inside;
