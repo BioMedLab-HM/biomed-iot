@@ -8,69 +8,30 @@
     <!-- More content here. -->
 </div>
 <div class="lower-background">
-    <div class="card card-primary mb-3">
+    <!-- New section for in_topic and out_topic information -->
+    <div class="card card-secondary mb-3">
         <div class="card-body">
-            <h5 class="card-title">Credentials for Node-RED MQTT messaging.</h5>
-            <div class="table-responsive">
-                <table class="table">
-                    <thead>
-                        <tr>
-                            <th scope="col">Name</th>
-                            <th scope="col">Username</th>
-                            <th scope="col">Password</th>
-                            <th scope="col"></th> <!-- Added column for actions -->
-                        </tr>
-                    </thead>
-                    <tbody>
-                        <tr>
-                            <td>{{ nodered_client.textname }}</td>
-                            <td>{{ nodered_client.username }}</td>
-                            <td>{{ nodered_client.password }}</td>
-                            <td>
-                                <!-- Copy device credentials button -->
-                                <button class="copy-button" data-clipboard-text="username = {{ nodered_client.username }};  password = {{nodered_client.password}}">Copy</button>
-                            </td>
-                        </tr>
-                    </tbody>
-                </table>
+            <h5 class="card-title">MQTT Topic Patterns</h5>
+            <div class="row align-items-center mb-2"> <!-- Added mb-2 for spacing -->
+                <div class="col-12 col-md-5 col-lg-3 col-xl-3">
+                    <p class="mb-0">Send Data To (In-Topic):</p>
+                </div>
+                <div class="col-9 col-md-4">
+                    <input type="text" id="inTopicField" class="form-control" value="{{ in_topic }}" readonly>
+                </div>
+            </div>
+        
+            <div class="row align-items-center"> <!-- New row for separation -->
+                <div class="col-12 col-md-5 col-lg-3 col-xl-3">
+                    <p class="mb-0">Receive Data From (Out-Topic):</p>
+                </div>
+                <div class="col-9 col-md-4">
+                    <input type="text" id="outTopicField" class="form-control" value="{{ out_topic }}" readonly>
+                </div>
             </div>
         </div>
     </div>
     <div style="margin-bottom: 1.5rem;"></div>
-    <!-- <hr> -->
-        <!-- New section for in_topic and out_topic information -->
-        <div class="card card-secondary mb-3">
-            <div class="card-body">
-                <h5 class="card-title">MQTT Topic Patterns</h5>
-                    <div class="row align-items-center mb-2"> <!-- Added mb-2 for spacing -->
-                        <div class="col-12 col-md-5 col-lg-3 col-xl-3">
-                            <p class="mb-0">Send Data To (In-Topic):</p>
-                        </div>
-                        <div class="col-9 col-md-4">
-                            <input type="text" id="inTopicField" class="form-control" value="{{ in_topic }}" readonly>
-                        </div>
-                        <div class="col-2">
-                            <button class="copy-button btn-primary" data-clipboard-text="{{ in_topic }}">Copy</button>
-                        </div>
-                    </div>
-                
-                    <div class="row align-items-center"> <!-- New row for separation -->
-                        <div class="col-12 col-md-5 col-lg-3 col-xl-3">
-                            <p class="mb-0">Receive Data From (Out-Topic):</p>
-                        </div>
-                        <div class="col-9 col-md-4">
-                            <input type="text" id="outTopicField" class="form-control" value="{{ out_topic }}" readonly>
-                        </div>
-                        <div class="col-2">
-                            <button class="copy-button btn-primary" data-clipboard-text="{{ out_topic }}">Copy</button>
-                        </div>
-                    </div>
-            </div>
-        </div>
-    <div style="margin-bottom: 1.5rem;"></div>
-    <!-- <hr> -->
-
-
     {% if device_clients %}
         <!-- <div style="margin-bottom: 2rem;"></div> -->
         <div class="card card-tertiary mb-2">
@@ -226,6 +187,7 @@
 
 {% block extra_js %}
 <script>
+// Scroll indicator script
 document.addEventListener("DOMContentLoaded", function() {
     const tableContainer = document.querySelector('.table-responsive');
     const table = tableContainer.querySelector('table');
@@ -245,6 +207,7 @@ document.addEventListener("DOMContentLoaded", function() {
     window.addEventListener('resize', updateScrollIndicator);
 });
 
+// Copy Button Script
 document.addEventListener('DOMContentLoaded', () => {
     document.querySelectorAll('.copy-button').forEach(button => {
         button.addEventListener('click', function() {

@@ -5,10 +5,33 @@
 <div class="upper-background">
     <!-- Content for the upper part of the page goes here. -->
     <h1>Automation</h1>
-    <p class="lead">Automate between In- and Out-Devices and Save to the Database with Node-RED.</p>
+    <p class="lead">Automate between In- and Out-Devices and Save Data to the Database with Node-RED.</p>
     <!-- More content here. -->
 </div>
-<div class="lower-background">
+<div class="lower-background pb-5">
+    <div class="card mb-3">
+        <div class="card-body">
+            <h5 class="card-title mb-3 mb-md-4">Personal Credentials for Node-RED MQTT Messaging.</h5>
+            <div class="row">
+                <!-- Left column for explanatory text -->
+                <div class="col-lg-5 col-sm-12">
+                    <p><a href="#" onclick="toggleVisibility(); return false;">Show Credentials</a> <br><br> <strong>In Node-RED:</strong> Drag an MQTT node into the flow <br><strong>></strong> double click on it <br><strong>></strong> click edit server (pencil icon) <br><strong>></strong> click on the 'Security' tab <br><strong>></strong> fill in the credentials there</p>
+                </div>
+                <!-- Right column for credentials -->
+                <div class="col-lg-5 col-sm-12">
+                    <!-- Nested structure for username and password fields to ensure they stack on small screens -->
+                    <div class="mb-3">
+                        <label for="usernameField" class="form-label">Username</label>
+                        <input type="password" id="usernameField" class="form-control" value="{{ nodered_client.username }}" readonly>
+                    </div>
+                    <div class="mb-3">
+                        <label for="passwordField" class="form-label">Password</label>
+                        <input type="password" id="passwordField" class="form-control" value="{{ nodered_client.password }}" readonly>
+                    </div>
+                </div>
+            </div>
+        </div>
+    </div>
     <form method="post">
         {% csrf_token %}
         {% if container_state == 'none' %}
@@ -27,11 +50,12 @@
                 <button type="submit" class="btn btn-primary" name="action" value="restart">Restart Node-RED</button>
             </div>
         {% elif container_state == 'running' %}
-            <div class="alert alert-success" role="alert">
+            <div class="alert alert-success mb-3" role="alert">
                 <p>Your Node-RED is running and working.</p>
                 <p>Open Node-RED now and edit your flows</p>
                 <button type="submit" class="btn btn-info" name="action" value="run">Open Node-RED</button>
             </div>
+            <!-- <div style="margin-bottom: 1.5rem;"></div> -->
             <!-- <hr> -->
             <div class="alert alert-danger" role="alert">
                 <p>Stop Node-RED to pause your flows and give back resources to the server.</p>
@@ -50,10 +74,107 @@
 {% endblock %}
 
 {% block extra_css %}
+<style>
+
+    .card {
+        border: 1px solid #E7F1FF; /* Dark blue border */
+        background-color: #E7F1FF; /* Light blue background */
+        /* box-shadow: 0 2px 4px rgba(140, 140, 140, 0.3); */
+    }
+
+    table tr:nth-child(even) {
+        background-color: #f2f2f2; /* Light grey for even rows */
+    }
+
+    table tr:nth-child(odd) {
+        background-color: #ffffff; /* White for odd rows */
+    }
+
+    /* Top row rounded corners */
+    table tr:first-child th:first-child {
+        border-top-left-radius: 10px;
+    }
+    table tr:first-child th:last-child {
+        border-top-right-radius: 10px;
+    }
+
+    /* Bottom row rounded corners */
+    table tr:last-child td:first-child {
+        border-bottom-left-radius: 10px;
+    }
+    table tr:last-child td:last-child {
+        border-bottom-right-radius: 10px;
+    }
+
+    .card-body .table thead tr {
+        background-color: #34495E;
+        color: white;
+    }
+
+    .scroll-indicator::before {
+        content: '';
+        position: absolute;
+        top: 0;
+        right: 0;
+        bottom: 0;
+        width: 10px;
+        /* background: linear-gradient(to right, transparent, #f7f7f7); */
+    }
+
+    .scroll-indicator::after {
+        content: '';
+        position: absolute;
+        top: 0;
+        left: 0;
+        bottom: 0;
+        width: 10px;
+        /* background: linear-gradient(to left, transparent, #f7f7f7); */
+    }
+
+    .table-responsive {
+        position: relative;
+        margin-bottom: -1rem;
+    }
+
+    .copy-button {
+        cursor: pointer;
+        background: #5D6D7E; /* transparent; */
+        border: none;
+        font-size: 1rem;
+        transition: background 0.2s; /* Smooth transition for background color */
+    }
+
+    .copy-button:hover {
+        background: #CCCCCC; /* Lighter shade for hover */
+    }
+</style>
 {% endblock %}
 
 {% block extra_js %}
 <script>
+    function toggleVisibility() {
+        var usernameField = document.getElementById("usernameField");
+        var passwordField = document.getElementById("passwordField");
+        var link = event.target; // Get the clicked link
+
+        // Function to hide credentials
+        function hideCredentials() {
+            usernameField.type = "password";
+            passwordField.type = "password";
+            link.textContent = "Show Credentials";
+        }
+
+        // Only show if currently hidden
+        if (usernameField.type === "password") {
+            usernameField.type = "text";
+            passwordField.type = "text";
+            //link.textContent = "Hide Credentials";
+
+            // Set a timeout to revert back to password type after 10 seconds
+            setTimeout(hideCredentials, 10000); // 10000 milliseconds = 10 seconds
+        }
+    }
+
     // Call the function to check container status after the page loads
     document.addEventListener('DOMContentLoaded', function() {checkNoderedStatus();});
 
@@ -69,5 +190,48 @@
             })
             .catch(error => console.error('Error checking container status:', error));
     }
-    </script>
+
+
+// Scroll indicator script
+document.addEventListener("DOMContentLoaded", function() {
+    const tableContainer = document.querySelector('.table-responsive');
+    const table = tableContainer.querySelector('table');
+
+    function updateScrollIndicator() {
+        if (table.offsetWidth > tableContainer.offsetWidth) {
+            tableContainer.classList.add('scroll-indicator');
+        } else {
+            tableContainer.classList.remove('scroll-indicator');
+        }
+    }
+
+    // Initial check
+    updateScrollIndicator();
+
+    // Check on window resize
+    window.addEventListener('resize', updateScrollIndicator);
+});
+
+// Copy Button Script
+document.addEventListener('DOMContentLoaded', () => {
+    document.querySelectorAll('.copy-button').forEach(button => {
+        button.addEventListener('click', function() {
+            const text = this.getAttribute('data-clipboard-text');
+            const textarea = document.createElement('textarea');
+            textarea.value = text;
+            document.body.appendChild(textarea);
+            textarea.select();
+            try {
+                const successful = document.execCommand('copy');
+                const msg = successful ? 'successful' : 'unsuccessful';
+                console.log('Fallback: Copying text command was ' + msg);
+            } catch (err) {
+                console.error('Fallback: Unable to copy', err);
+            }
+            document.body.removeChild(textarea);
+        });
+    });
+});
+</script>
 {% endblock %}
+

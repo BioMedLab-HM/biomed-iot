@@ -143,12 +143,10 @@ def devices(request):
     out_topic = f"out/{mqtt_meta_data_manager.metadata.user_topic_id}/#"
     
     new_device_form = MqttClientForm()
-    nodered_client_data = mqtt_client_manager.get_nodered_client()  # get Node-RED client credentials + textname
     device_clients_data = mqtt_client_manager.get_device_clients()  # get list of all device clients
 
     context = {'in_topic': in_topic, 
-               'out_topic': out_topic, 
-               'nodered_client': nodered_client_data, 
+               'out_topic': out_topic,
                'device_clients': device_clients_data, 
                'form': new_device_form,
                'title': "Devices"}
@@ -164,37 +162,9 @@ def code_examples(request):
 
 
 @login_required
-def modify_client(request, client_username):
-    client = get_object_or_404(MqttClient, pk=client_username)
-    if request.method == 'POST':
-        form = MqttClientForm(request.POST, instance=client)
-        if form.is_valid():
-            form.save()
-            return redirect('client-list')
-    else:
-        form = MqttClientForm(instance=client)
-    return render(request, 'users/modify_client.html', {'form': form, 'client': client})
-
-@login_required
-def delete_client(request, client_username):
-    client = get_object_or_404(MqttClient, pk=client_username)
-    if request.method == 'POST':
-        # If the 'delete' action is confirmed
-        if 'confirm_delete' in request.POST:
-            client.delete()
-            return redirect('client-list')
-        else:
-            # If any other action, just redirect back to the client list
-            return redirect('client-list')
-    else:
-        # Render a confirmation page/template
-        return render(request, 'users/delete_client.html', {'client': client})
-        
-
-@login_required
 def nodered_manager(request):
     context = {}
-    
+
     with transaction.atomic():
         try:
             # Attempt to create NodeRedUserData with a unique container name
@@ -225,7 +195,7 @@ def nodered_manager(request):
                 # Store the container name in the session.
                 request.session['container_name'] = nodered_container.name
 
-                return redirect('nodered-embedded')
+                return redirect('nodered-manager')
             else:
                 messages.info(request, f'Cannot start Node-RED. Node-RED is {nodered_container.state}.')
         
@@ -272,7 +242,9 @@ def nodered_manager(request):
                 messages.info(request, f'Cannot stop Node-RED. Node-RED is {nodered_container.state}.')
     
     nodered_container.determine_state()
-    context['container_state'] = nodered_container.state
+    mqtt_client_manager = MqttClientManager(request.user)
+    nodered_client_data = mqtt_client_manager.get_nodered_client()  # get Node-RED client credentials + textname
+    context = {'container_state': nodered_container.state, 'nodered_client': nodered_client_data}
 
     if nodered_container.state == 'unavailable':
         messages.error(request, f'Unable to start Node-RED. Please try again or contact the site admin.')
