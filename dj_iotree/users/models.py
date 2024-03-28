@@ -138,6 +138,16 @@ class MqttClient(models.Model):
         return None
 
     @staticmethod
-    def generate_password():
-        new_password = secrets.token_urlsafe(22)  # equals approx. 20 characters
+    def generate_password(length=30):
+        # Define the characters to use in the password
+        characters = string.ascii_letters + string.digits # This includes uppercase, lowercase, and digits
+        # Generate the password using a list comprehension and join it into a string
+        new_password = ''.join(secrets.choice(characters) for _ in range(length))
         return new_password
+    
+    # not using this version anymore since it also uses "-" symbols 
+    # which make it harder to highlight with double-click in the password field 
+    # @staticmethod
+    # def generate_password():
+    #     new_password = secrets.token_urlsafe(22)  # equals approx. 20 characters
+    #     return new_password

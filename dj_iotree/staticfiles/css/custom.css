@@ -4,7 +4,7 @@
 :root {
     --new-navbar-padding: 0rem; /*  Adjust this value to match the actual height of your navbar */
     --navbar-total-height: 40px; /* Total height of the navbar */
-    --bs-primary: #2C3E50;
+    --bs-primary: #1B4F72;
 }
 
 /* Navbar adjustments */
@@ -27,15 +27,15 @@
 }
 
 /* Custom Navbar Background Color */
-.navbar-dark.bg-primary {
-    background-color: #2C3E50 !important;
+.navbar-dark .bg-primary {
+    background-color: #000  !important; /* #2C3E50*/
 }
 
 .upper-background {
-    background-color: #2C3E50;
+    background-color: #3498DB;
     color: white;
     padding: 15px;
-    border-radius: 5px;
+    /* border-radius: 5px; */
 }
 
 .lower-background {

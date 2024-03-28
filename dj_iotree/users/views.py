@@ -139,14 +139,16 @@ def devices(request):
                 return redirect('devices')
 
     mqtt_meta_data_manager = MqttMetaDataManager(request.user)
-    in_topic = f"in/{mqtt_meta_data_manager.metadata.user_topic_id}/#"
-    out_topic = f"out/{mqtt_meta_data_manager.metadata.user_topic_id}/#"
+    topic_id = mqtt_meta_data_manager.metadata.user_topic_id
+    in_topic = f"in/{topic_id}/your/subtopic"
+    out_topic = f"out/{topic_id}/your/subtopic"
     
     new_device_form = MqttClientForm()
     device_clients_data = mqtt_client_manager.get_device_clients()  # get list of all device clients
 
     context = {'in_topic': in_topic, 
                'out_topic': out_topic,
+               'topic_id': topic_id,
                'device_clients': device_clients_data, 
                'form': new_device_form,
                'title': "Devices"}
