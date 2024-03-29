@@ -1,7 +1,29 @@
 {% extends "core/base.html" %}
 {% load crispy_forms_tags %}
 {% block content %}
-    <div class="content-section">
+    <div class="content-section d-flex justify-content-center">
+        <form method="POST" class="form-custom-width">
+            {% csrf_token %}
+            <fieldset class="form-group">
+                <legend class="border-bottom mb-4">Log In</legend>
+                {{ form|crispy }}
+            </fieldset>
+            <div class="form-group">
+                <button class="btn btn-outline-info" type="submit">Login</button>
+                <small class="text-muted ml-2">
+                    <a href="{% url 'password_reset' %}">Forgot Password?</a>
+                </small>
+            </div>
+        </form>
+        <div class="border-top pt-3 mt-4">
+            <small class="text-muted">
+                Need An Account? <a href="{% url 'register' %}">Sign Up Now</a>
+            </small>
+        </div>
+    </div>
+
+    <!-- Old Version -->
+    <!-- <div class="content-section">
         <form method="POST">
             {% csrf_token %}
             <fieldset class="form-group">
@@ -20,5 +42,21 @@
                 Need An Account? <a class="ml-2" href="{% url 'register' %}">Sign Up Now</a>
             </small>
         </div>
-    </div>
+    </div> -->
 {% endblock content %}
+
+{% block extra_css %}
+<style>
+    .content-section {
+        width: 100%;
+        display: flex;
+        flex-direction: column; /* Richtet Kinder vertikal aus */
+        align-items: center; /* Zentriert Kinder horizontal */
+    }
+
+    .form-custom-width {
+        max-width: 600px; /* Maximale Breite des Formulars */
+        width: 100%; /* Erlaubt dem Formular, sich innerhalb des max-width zu dehnen */
+    }
+</style>
+{% endblock extra_css %}

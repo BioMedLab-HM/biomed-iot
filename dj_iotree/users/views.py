@@ -51,6 +51,7 @@ def user_login(request):
 
 @login_required
 def profile(request):
+    context = {}
     if request.method == 'POST':
         u_form = UserUpdateForm(request.POST, instance=request.user)
         
@@ -68,7 +69,8 @@ def profile(request):
         u_form = UserUpdateForm(instance=request.user)
         # p_form = ProfileUpdateForm(instance=request.user.profile)
 
-    context = {
+    page_title = "Your User Profile"
+    context = {'title': page_title,
         'u_form': u_form,
         # 'p_form': p_form
     }
@@ -159,13 +161,15 @@ def devices(request):
 def code_examples(request):
     examples_content = load_code_examples()
 
-    context = {'examples': examples_content}
+    page_title = "Code Examples"
+    context = {'title': page_title, 'examples': examples_content}
     return render(request, 'users/code_examples.html', context)
 
 
 @login_required
 def nodered_manager(request):
     context = {}
+    page_title = "Node-RED Automation - Connect Devices, Control & Save Data"
 
     with transaction.atomic():
         try:
@@ -246,7 +250,8 @@ def nodered_manager(request):
     nodered_container.determine_state()
     mqtt_client_manager = MqttClientManager(request.user)
     nodered_client_data = mqtt_client_manager.get_nodered_client()  # get Node-RED client credentials + textname
-    context = {'container_state': nodered_container.state, 'nodered_client': nodered_client_data}
+
+    context = {'title': page_title, 'container_state': nodered_container.state, 'nodered_client': nodered_client_data}
 
     if nodered_container.state == 'unavailable':
         messages.error(request, f'Unable to start Node-RED. Please try again or contact the site admin.')
@@ -267,7 +272,7 @@ def nodered_embedded(request):
     container_name = request.session.get('container_name')
     # If no container name in session, redirect to manager view.
     if not container_name:
-        messages.info(request, f'Reloading the Node-RED page brings you back to the Node-RED Manager page!')
+        messages.info(request, f'Reloading Node-RED brings you back here.')
         return redirect('nodered-manager')
 
     # Clear the container_name from the session after retrieving it
@@ -275,7 +280,7 @@ def nodered_embedded(request):
     # going through 'nodered_manager' will fail the container_name check next time
     del request.session['container_name']
 
-    context = {'container_name': container_name}
+    context = {'container_name': container_name, 'thin_navbar': True}
     return render(request, 'users/nodered_embedded.html', context)
 
 @login_required
@@ -295,9 +300,15 @@ def nodered_status_check(request):
 @login_required
 def data_explorer(request):
     context = {}
+
+    page_title = "Data Explorer"
+    context = {'title': page_title}
     return render(request, 'users/data_explorer.html', context)
 
 @login_required
 def grafana_embedded(request):
     context = {}
+
+    page_title = "Grafana"
+    context = {'title': page_title, 'thin_navbar': True}
     return render(request, 'users/grafana_embedded.html', context)

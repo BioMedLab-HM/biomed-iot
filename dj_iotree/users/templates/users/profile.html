@@ -1,34 +1,30 @@
 {% extends "core/base.html" %}
 {% load crispy_forms_tags %}
 {% block content %}
-<div class="upper-background">
-  <!-- Content for the upper part of the page goes here. -->
-  <h1>User Profile</h1>
-  <p class="lead">See, Manage or Delete your Profile</p>
-</div>
-<div class="lower-background">
-  <div class="card card-primary mb-3">
-    <div class="container">
-      <div class="content-section">
-        <div class="media">
-          <!-- <img class="rounded-circle account-img" src="{{ user.profile.image.url }}"> -->
-          <div class="media-body">
-            <h2 class="account-heading">{{ user.username }}</h2>
-            <p class="text-secondary">{{ user.email }}</p>
-          </div>
-        </div>
-        <form method="POST" enctype="multipart/form-data">
-          {% csrf_token %}
-          <fieldset class="form-group">
-              <legend class="border-bottom mb-4">Profile Info</legend>
-              {{ u_form|crispy }}
-              <!-- {{ p_form|crispy }} -->
-          </fieldset>
-          <!-- <div class="form-group">
-              <button class="btn btn-outline-info" type="submit">Update</button>
-          </div> -->
-        </form>
+<div class="card mb-3">
+  <div class="card-header">
+      <h4 class="my-0 font-weight-normal">Hello {{ user.username }}</h4>
+  </div>
+  <div class="card-body">
+    <div class="row">
+      <div class="media">
+        <!-- <img class="rounded-circle account-img" src="{{ user.profile.image.url }}"> -->
+        <!-- <div class="media-body">
+          <h2 class="account-heading">{{ user.username }}</h2>
+          <p class="text-secondary">{{ user.email }}</p>
+        </div> -->
       </div>
+      <form method="POST" enctype="multipart/form-data">
+        {% csrf_token %}
+        <fieldset class="form-group">
+            <legend class="border-bottom mb-4">Profile Info</legend>
+            {{ u_form|crispy }}
+            <!-- {{ p_form|crispy }} -->
+        </fieldset>
+        <!-- <div class="form-group">
+            <button class="btn btn-outline-info" type="submit">Update</button>
+        </div> -->
+      </form>
     </div>
   </div>
 </div>

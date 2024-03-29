@@ -4,42 +4,16 @@
 :root {
     --new-navbar-padding: 0rem; /*  Adjust this value to match the actual height of your navbar */
     --navbar-total-height: 40px; /* Total height of the navbar */
-    --bs-primary: #1B4F72;
+    --bs-primary: #164361;  /* before: #1B4F72 */
+    --upper-background-color: #3192d2;  /* before #2d89c6 */
 }
+/* vibrant blue: #3498DB */
+/* Leichtes Grau mit bläulichem Unterton: #E9ECEF*/
 
-/* Navbar adjustments */
-.navbar {
-    padding-top: var(--new-navbar-padding);
-    padding-bottom: var(--new-navbar-padding);
-    position: -webkit-sticky; /* For Safari */
-    position: sticky;
-    top: 0;
-    z-index: 10000; /* Ensure navbar is above other content */
-}
-
-.navbar-toggler {
-    padding: 0.15rem;
-    font-size: 0.9rem;
-}
-
-.navbar-nav .nav-link {
-    padding: 0.25rem 0;
-}
-
-/* Custom Navbar Background Color */
-.navbar-dark .bg-primary {
-    background-color: #000  !important; /* #2C3E50*/
-}
-
-.upper-background {
-    background-color: #3498DB;
-    color: white;
-    padding: 15px;
-    /* border-radius: 5px; */
-}
-
-.lower-background {
-    margin-top: 20px;
+body, html{
+    height: 100%;
+    margin: 0;
+    padding: 0;  /* neu */
 }
 
 /* iframe container to fill the rest of the viewport height */
@@ -58,6 +32,80 @@ iframe {
     border: none; /* Remove the border */
 }
 
+/* Navbar adjustments */
+.navbar {
+    padding-top: var(--new-navbar-padding);
+    padding-bottom: var(--new-navbar-padding);
+    position: -webkit-sticky; /* For older Safari versions */
+    position: sticky;
+    top: 0;
+    z-index: 10000; /* Ensure navbar is above other content */
+}
+
+/* .navbar-toggler {
+    padding: 0.15rem;
+    font-size: 0.9rem;
+}
+
+.navbar-nav .nav-link {
+    padding: 0.25rem 0;
+} */
+
+/* Custom Navbar Background Color */
+.navbar-dark.bg-primary {
+    background-color: var(--bs-primary) !important; /* #2C3E50*/
+}
+
+.navbar-brand {
+    padding-top: 6px;
+    margin-right: 20px;
+    font-size: 2.1rem;
+    font-weight: bold; /* or 700 */
+}
+
+/* style="font-size: smaller; margin-top: 0px; margin-bottom: 0px;" */
+.navbar_brand_subtext {
+    color: #50B0F0;
+    font-size: 0.8rem;
+    font-weight: 350; /* 400 is regular */
+    margin-top: 3px;
+    margin-bottom: 0px;
+    line-height: 1.3;
+}
+
+.thin-navbar .navbar {
+    padding-top: 0;
+    padding-bottom: 0;
+}
+/* Anpassung für den Navbar-Brand, falls nötig */
+.thin-navbar .navbar-brand {
+    font-size: 1rem;
+}
+
+.upper-background {
+    background-color: var(--upper-background-color);
+    color: white;
+    padding: 7px;
+    /* border-radius: 5px; */
+}
+
+.lower-background {
+    /* margin-top: 20px; */
+    padding-top: 1px;
+    background-color: #E9ECEF;
+}
+
+.card {
+    background-color: #FFF;
+    /* border: 1px solid #555; 1px solid #E9ECEF */
+    /* box-shadow: 0 2px 4px 0 rgba(0,0,0,0.2);  0 4px 8px 0 rgba(0,0,0,0.2); */
+}
+
+.card-header {
+    color: black;
+    background-color: #d2e2f1;   /* #5A8DBE #b4dbff #c7e4ff #d2e2f1*/
+}
+
 /* Other container styles */
 .form-container {
     /* Remove the height here if .form-container should just be centered inside .iframe-container */
@@ -70,12 +118,13 @@ iframe {
     margin-top: 0px;
 }
 
-body, html {
-    height: 100%;
-    margin: 0;
+.alternating-item-odd .form-control {
+    background-color: #f6f7f9; /* Farbe für ungerade Elemente */
 }
 
-/* Design Elements */
+.alternating-item-even .form-control {
+    background-color: #d2e2f1; /* Farbe für gerade Elemente E9ECEF*/
+}
 
 button,
 [type=button],
@@ -86,7 +135,7 @@ button,
           appearance: none; /* Standard syntax */
 
   /* Add your custom styles */
-  background-color: #2A477E; /* Bootstrap primary button color #007bff */
+  background-color: var(--bs-primary);  /*#2A477E;*/ /* Bootstrap primary button color #007bff */
   color: white;
   border: none;
   padding: .375rem .75rem; /* Bootstrap default padding */
@@ -94,4 +143,31 @@ button,
   font-size: 1rem; /* Bootstrap default font size */
   line-height: 1.5s; /* Bootstrap default line height */
   transition: color .15s ease-in-out, background-color .15s ease-in-out, border-color .15s ease-in-out, box-shadow .15s ease-in-out; /* Smooth transition for hover effects */
+}
+
+.styled-list {
+    padding-left: 20px;
+    list-style-position: inside;
+}
+
+.styled-list li {
+    margin-bottom: 1rem;
+    padding-left: 1.2rem; /* Give space for list number */
+    text-align: left;
+    line-height: 1.6;
+    list-style-type: decimal; /* For ordered list styling */
+    font-size: 1.2rem; /* Larger font size for list items */
+}
+
+.styled-list li strong {
+    color: #2C3E50; /* Dark blue for emphasis, matching the header */
+}
+
+.styled-list a {
+    color: #007bff; /* Bootstrap primary link color, or choose your own */
+    text-decoration: none; /* Optional: Removes underline from links */
+}
+
+.styled-list a:hover {
+    text-decoration: underline; /* Optional: Underline on hover for links */
 }

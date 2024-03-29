@@ -3,20 +3,43 @@ from django.http import HttpResponse
 
 
 def home(request):
-    return render(request, 'core/home.html')
+    context = {}
+
+    page_title = "Home"
+    context = {'title': page_title}
+    return render(request, 'core/home.html', context)
 
 def about(request):
-    return render(request, 'core/about.html', {'title': 'About'})
+    context = {}
+
+    page_title = "About"
+    context = {'title': page_title}
+    return render(request, 'core/about.html', context)
 
 def contact_us(request):
-    return render(request, 'core/contact_us.html', {'title': 'Contact Us'})
+    context = {}
+
+    page_title = "Contact Us"
+    context = {'title': page_title}
+    return render(request, 'core/contact_us.html', context)
 
 def legal_notice(request):
-    return render(request, 'core/legal_notice.html', {'title': 'Legal Notice'})
+    context = {}
+
+    page_title = "Legal Notice"
+    context = {'title': page_title}
+    return render(request, 'core/legal_notice.html', context)
 
 def privacy_policy(request):
-    return render(request, 'core/privacy_policy.html', {'title': 'Privacy Policy'})
+    context = {}
+
+    page_title = "Privacy Policy"
+    context = {'title': page_title}
+    return render(request, 'core/privacy_policy.html', context)
 
 def manual(request):
     context = {}
+
+    page_title = "FAQ and Manual"
+    context = {'title': page_title}
     return render(request, 'core/manual.html', context)

@@ -1,14 +1,7 @@
 {% extends "core/base.html" %}
-<!-- Node-RED Manager -->
+<!-- Code Examples -->
 
 {% block content %}
-<div class="upper-background">
-    <!-- Content for the upper part of the page goes here. -->
-    <h1>Code Examples</h1>
-    <p class="lead">Use these code examples for a quick start.</p>
-</div>
-<div class="lower-background">
-    <!-- Content for the lower part of the page goes here. -->
     {% for key, example in examples.items %}
     <div class="card mt-3">
         <div class="card-header d-flex justify-content-between align-items-center">
@@ -20,8 +13,6 @@
         </div>
     </div>
     {% endfor %}
-    
-</div>
 {% endblock %}
 
 {% block extra_css %}
@@ -44,25 +35,26 @@ code {
 
 {% block extra_js %}
 <script>
-document.addEventListener('DOMContentLoaded', () => {
-    document.querySelectorAll('.copy-text').forEach(link => {
-        link.addEventListener('click', function(e) {
-            e.preventDefault(); // Prevent the default link behavior
-            const text = this.getAttribute('data-clipboard-text');
-            const textarea = document.createElement('textarea');
-            textarea.value = text;
-            document.body.appendChild(textarea);
-            textarea.select();
-            try {
-                const successful = document.execCommand('copy');
-                const msg = successful ? 'successful' : 'unsuccessful';
-                console.log('Copying text command was ' + msg);
-            } catch (err) {
-                console.error('Oops, unable to copy', err);
-            }
-            document.body.removeChild(textarea);
+    // Copy code script
+    document.addEventListener('DOMContentLoaded', () => {
+        document.querySelectorAll('.copy-text').forEach(link => {
+            link.addEventListener('click', function(e) {
+                e.preventDefault(); // Prevent the default link behavior
+                const text = this.getAttribute('data-clipboard-text');
+                const textarea = document.createElement('textarea');
+                textarea.value = text;
+                document.body.appendChild(textarea);
+                textarea.select();
+                try {
+                    const successful = document.execCommand('copy');
+                    const msg = successful ? 'successful' : 'unsuccessful';
+                    console.log('Copying text command was ' + msg);
+                } catch (err) {
+                    console.error('Oops, unable to copy', err);
+                }
+                document.body.removeChild(textarea);
+            });
         });
     });
-});
 </script>
 {% endblock %}

@@ -2,86 +2,74 @@
 <!-- Node-RED Manager -->
 
 {% block content %}
-<div class="upper-background">
-    <!-- Content for the upper part of the page goes here. -->
-    <h1>Automation</h1>
-    <p class="lead">Automate between In- and Out-Devices and Save Data to the Database with Node-RED.</p>
-    <!-- More content here. -->
-</div>
-<div class="lower-background pb-5">
-    <div class="card mb-3">
-        <div class="card-body">
-            <h5 class="card-title mb-3 mb-md-4">Personal Credentials for Node-RED MQTT Messaging.</h5>
-            <div class="row">
-                <!-- Left column for explanatory text -->
-                <div class="col-lg-5 col-sm-12">
-                    <p><a href="#" onclick="toggleVisibility(); return false;">Show Credentials</a> <br><br> <strong>In Node-RED:</strong> Drag an MQTT node into the flow <br><strong>></strong> double click on it <br><strong>></strong> click edit server (pencil icon) <br><strong>></strong> click on the 'Security' tab <br><strong>></strong> fill in the credentials there</p>
-                </div>
-                <!-- Right column for credentials -->
-                <div class="col-lg-5 col-sm-12">
-                    <!-- Nested structure for username and password fields to ensure they stack on small screens -->
-                    <div class="mb-3">
-                        <label for="usernameField" class="form-label">Username</label>
-                        <input type="password" id="usernameField" class="form-control" value="{{ nodered_client.username }}" readonly>
+
+<form method="post">
+    {% csrf_token %}
+    {% if container_state == 'none' %}
+        <div class="alert alert-primary" role="alert">
+            <p>Use Node-RED to:</p>
+            <ul>
+                <li>Automate tasks by connecting sensors and actuators through MQTT messages</li>
+                <li>Store data into the Database</li>
+            </ul>
+            <button type="submit" class="btn btn-success" name="action" value="create">Start with Node-RED</button>
+        </div>
+    {% elif container_state == 'stopped' %}
+        <div class="alert alert-warning" role="alert">
+            <p>Your Node-RED is currently stopped. Your flows are not running.</p>
+            <p>Restart Node-RED to let it work again</p>
+            <button type="submit" class="btn btn-primary" name="action" value="restart">Restart Node-RED</button>
+        </div>
+    {% elif container_state == 'running' %}
+        <div class="alert alert-success mb-3" role="alert">
+            <p>Your Node-RED is running and working.</p>
+            <p>Open Node-RED now and edit your flows</p>
+            <button type="submit" class="btn btn-info" name="action" value="run">Open Node-RED</button>
+        </div>
+        <div class="card mb-3">
+            <div class="card-header">
+                <h4 class="my-0 font-weight-normal">Personal Credentials for Node-RED MQTT Messaging.</h4>
+            </div>
+            <div class="card-body">
+                <div class="row">
+                    <!-- Left column for explanatory text -->
+                    <div class="col-lg-5 col-sm-12">
+                        <p><a href="#" onclick="toggleVisibility(); return false;">Show Credentials</a> <br><br> <strong>In Node-RED:</strong> Drag an MQTT node into the flow <br><strong>></strong> double click on it <br><strong>></strong> click edit server (pencil icon) <br><strong>></strong> click on the 'Security' tab <br><strong>></strong> fill in the credentials there</p>
                     </div>
-                    <div class="mb-3">
-                        <label for="passwordField" class="form-label">Password</label>
-                        <input type="password" id="passwordField" class="form-control" value="{{ nodered_client.password }}" readonly>
+                    <!-- Right column for credentials -->
+                    <div class="col-lg-5 col-sm-12">
+                        <!-- Nested structure for username and password fields to ensure they stack on small screens -->
+                        <div class="mb-3">
+                            <label for="usernameField" class="form-label">Username</label>
+                            <input type="password" id="usernameField" class="form-control" value="{{ nodered_client.username }}" readonly>
+                        </div>
+                        <div class="mb-3">
+                            <label for="passwordField" class="form-label">Password</label>
+                            <input type="password" id="passwordField" class="form-control" value="{{ nodered_client.password }}" readonly>
+                        </div>
                     </div>
                 </div>
             </div>
         </div>
-    </div>
-    <form method="post">
-        {% csrf_token %}
-        {% if container_state == 'none' %}
-            <div class="alert alert-primary" role="alert">
-                <p>Use Node-RED to:</p>
-                <ul>
-                    <li>Automate tasks by connecting sensors and actuators through MQTT messages</li>
-                    <li>Store data into the Database</li>
-                </ul>
-                <button type="submit" class="btn btn-success" name="action" value="create">Start with Node-RED</button>
+        <!-- <div style="margin-bottom: 1.5rem;"></div> -->
+        <!-- <hr> -->
+        <div class="alert alert-danger" role="alert">
+            <p>Stop Node-RED to pause your flows and give back resources to the server.</p>
+            <button type="submit" class="btn btn-danger" name="action" value="stop">Stop Node-RED</button>
+        </div>
+    {% elif container_state == 'starting' %}
+        <div class="alert alert-info text-center d-flex justify-content-center align-items-center" role="alert" style="flex-direction: column;">
+            <p>Node-RED is starting up. Please wait...</p>
+            <div class="spinner-border" role="status">
+                <span class="sr-only"></span>
             </div>
-        {% elif container_state == 'stopped' %}
-            <div class="alert alert-warning" role="alert">
-                <p>Your Node-RED is currently stopped. Your flows are not running.</p>
-                <p>Restart Node-RED to let it work again</p>
-                <button type="submit" class="btn btn-primary" name="action" value="restart">Restart Node-RED</button>
-            </div>
-        {% elif container_state == 'running' %}
-            <div class="alert alert-success mb-3" role="alert">
-                <p>Your Node-RED is running and working.</p>
-                <p>Open Node-RED now and edit your flows</p>
-                <button type="submit" class="btn btn-info" name="action" value="run">Open Node-RED</button>
-            </div>
-            <!-- <div style="margin-bottom: 1.5rem;"></div> -->
-            <!-- <hr> -->
-            <div class="alert alert-danger" role="alert">
-                <p>Stop Node-RED to pause your flows and give back resources to the server.</p>
-                <button type="submit" class="btn btn-danger" name="action" value="stop">Stop Node-RED</button>
-            </div>
-        {% elif container_state == 'starting' %}
-            <div class="alert alert-info text-center d-flex justify-content-center align-items-center" role="alert" style="flex-direction: column;">
-                <p>Node-RED is starting up. Please wait...</p>
-                <div class="spinner-border" role="status">
-                    <span class="sr-only"></span>
-                </div>
-            </div>
-        {% endif %}
-    </form>
-</div>
+        </div>
+    {% endif %}
+</form>
 {% endblock %}
 
 {% block extra_css %}
 <style>
-
-    .card {
-        border: 1px solid #E7F1FF; /* Dark blue border */
-        background-color: #E7F1FF; /* Light blue background */
-        /* box-shadow: 0 2px 4px rgba(140, 140, 140, 0.3); */
-    }
-
     table tr:nth-child(even) {
         background-color: #f2f2f2; /* Light grey for even rows */
     }
@@ -192,46 +180,46 @@
     }
 
 
-// Scroll indicator script
-document.addEventListener("DOMContentLoaded", function() {
-    const tableContainer = document.querySelector('.table-responsive');
-    const table = tableContainer.querySelector('table');
+    // Scroll indicator script
+    document.addEventListener("DOMContentLoaded", function() {
+        const tableContainer = document.querySelector('.table-responsive');
+        const table = tableContainer.querySelector('table');
 
-    function updateScrollIndicator() {
-        if (table.offsetWidth > tableContainer.offsetWidth) {
-            tableContainer.classList.add('scroll-indicator');
-        } else {
-            tableContainer.classList.remove('scroll-indicator');
-        }
-    }
-
-    // Initial check
-    updateScrollIndicator();
-
-    // Check on window resize
-    window.addEventListener('resize', updateScrollIndicator);
-});
-
-// Copy Button Script
-document.addEventListener('DOMContentLoaded', () => {
-    document.querySelectorAll('.copy-button').forEach(button => {
-        button.addEventListener('click', function() {
-            const text = this.getAttribute('data-clipboard-text');
-            const textarea = document.createElement('textarea');
-            textarea.value = text;
-            document.body.appendChild(textarea);
-            textarea.select();
-            try {
-                const successful = document.execCommand('copy');
-                const msg = successful ? 'successful' : 'unsuccessful';
-                console.log('Fallback: Copying text command was ' + msg);
-            } catch (err) {
-                console.error('Fallback: Unable to copy', err);
+        function updateScrollIndicator() {
+            if (table.offsetWidth > tableContainer.offsetWidth) {
+                tableContainer.classList.add('scroll-indicator');
+            } else {
+                tableContainer.classList.remove('scroll-indicator');
             }
-            document.body.removeChild(textarea);
+        }
+
+        // Initial check
+        updateScrollIndicator();
+
+        // Check on window resize
+        window.addEventListener('resize', updateScrollIndicator);
+    });
+
+    // Copy Button Script
+    document.addEventListener('DOMContentLoaded', () => {
+        document.querySelectorAll('.copy-button').forEach(button => {
+            button.addEventListener('click', function() {
+                const text = this.getAttribute('data-clipboard-text');
+                const textarea = document.createElement('textarea');
+                textarea.value = text;
+                document.body.appendChild(textarea);
+                textarea.select();
+                try {
+                    const successful = document.execCommand('copy');
+                    const msg = successful ? 'successful' : 'unsuccessful';
+                    console.log('Fallback: Copying text command was ' + msg);
+                } catch (err) {
+                    console.error('Fallback: Unable to copy', err);
+                }
+                document.body.removeChild(textarea);
+            });
         });
     });
-});
 </script>
 {% endblock %}
 
