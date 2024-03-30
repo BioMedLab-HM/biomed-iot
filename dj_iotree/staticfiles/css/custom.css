@@ -92,13 +92,13 @@ iframe {
 .lower-background {
     /* margin-top: 20px; */
     padding-top: 1px;
-    background-color: #E9ECEF;
+    background-color: #fAfCfE;  /* before #E9ECEF */
 }
 
 .card {
     background-color: #FFF;
     /* border: 1px solid #555; 1px solid #E9ECEF */
-    /* box-shadow: 0 2px 4px 0 rgba(0,0,0,0.2);  0 4px 8px 0 rgba(0,0,0,0.2); */
+    box-shadow: 0 2px 4px 0 rgba(0,0,0,0.2);  /* 0 4px 8px 0 rgba(0,0,0,0.2); */
 }
 
 .card-header {
