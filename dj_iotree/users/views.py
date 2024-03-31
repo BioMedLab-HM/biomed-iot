@@ -173,6 +173,7 @@ def nodered_manager(request):
 
     with transaction.atomic():
         try:
+            print('try')
             # Attempt to create NodeRedUserData with a unique container name
             nodered_data, created = NodeRedUserData.objects.get_or_create(
                 user=request.user,
@@ -181,10 +182,13 @@ def nodered_manager(request):
                     'access_token': secrets.token_urlsafe(22)
                 }
             )
+            print(f'Nodered Model Created: {created}')
         except IntegrityError:
             # TODO: log error
-            pass
+            print('IntegrityError')
+            print(f'Nodered Model Created: {created}')
 
+        print(f'nodered_data object: {nodered_data}')
         nodered_container = NoderedContainer(nodered_data)
         nodered_container.determine_state()
 
@@ -206,23 +210,26 @@ def nodered_manager(request):
                 messages.info(request, f'Cannot start Node-RED. Node-RED is {nodered_container.state}.')
         
         elif action == 'create':
-            if nodered_container.get_existing_container() is None:
-                # Generate completely new data if no container is found
-                nodered_data.container_name = NodeRedUserData.generate_unique_container_name()
-                nodered_data.access_token = secrets.token_urlsafe(22)
-                nodered_data.save()
+            # if nodered_container.get_existing_container() is None:
+            #     # Generate completely new data if no container is found
+            #     nodered_data.container_name = NodeRedUserData.generate_unique_container_name()
+            #     nodered_data.access_token = secrets.token_urlsafe(22)
+            #     nodered_data.save()
             
-                # Update the NoderedContainer instance with the new nodered_data
-                nodered_container.name = nodered_data.container_name
-                nodered_container.access_token = nodered_data.access_token
-            # TODO: statt den Zeilen oben: if nodered_container.state == 'none':
+            #     # Update the NoderedContainer instance with the new nodered_data
+            #     nodered_container.name = nodered_data.container_name
+            #     nodered_container.access_token = nodered_data.access_token
+            # TODO: obere Zeilen löschen spätestens 2 Wochen nach Ostern: 
+            if nodered_container.state == 'none':
+                print("Container state is 'none'")
                 # Proceed to create the container
                 nodered_container.create()
+                print("Container created")
 
                 # After creation, update the database with the new port
                 update_nodered_data_container_port(nodered_data, nodered_container)
                 update_nodered_nginx_conf(nodered_data)
-
+                print("container port and nginx conf updated")
                 # Store the container name in the session.
                 request.session['container_name'] = nodered_container.name
             else:
@@ -285,6 +292,7 @@ def nodered_embedded(request):
 
 @login_required
 def nodered_status_check(request):
+    """ Called by JS function checkNoderedStatus() in nodered_manager.html """
     print('nodered_status_check: Started handling request')
     # Attempt to retrieve the container name from the session.
     container_name = request.session.get('container_name')

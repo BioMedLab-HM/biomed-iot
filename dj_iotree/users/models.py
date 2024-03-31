@@ -82,19 +82,23 @@ class Profile(models.Model):
 class NodeRedUserData(models.Model):
     user = models.OneToOneField(settings.AUTH_USER_MODEL, on_delete=models.CASCADE, primary_key=True)
     container_name = models.CharField(max_length=30, unique=True)
-    container_port = models.CharField(max_length=5, default=0, unique=True)  # since highest possible port number has five digits (65535)
+    container_port = models.CharField(max_length=5, unique=True)  # since highest possible port number has five digits (65535)
     access_token = models.CharField(max_length=100)
     # later maybe add data from the container like flows, dashboards and list of installed nodered plugins
 
+    # default=0 for container_port creates conflicts with other users who still have default 0
     def __str__(self):
         return self.container_name
 
     @staticmethod
     def generate_unique_container_name():
+        print('Generate unique container name function')
         max_attempts = 1000
         for _ in range(max_attempts):
+            print('attempting to generate in Generate unique container name function')
             new_name = ''.join(random.choice(string.ascii_letters + string.digits) for _ in range(20))
             if not NodeRedUserData.objects.filter(container_name=new_name).exists():
+                print(f'Returning in Generate unique container name function. New name is: {new_name}')
                 return new_name
 
 

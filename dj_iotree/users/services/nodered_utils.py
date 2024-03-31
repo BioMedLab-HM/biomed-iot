@@ -57,7 +57,6 @@ class NoderedContainer():
                     name=self.name
                 )
                 self.determine_port()
-                # self.state = 'running'  # unpassend hier
             except (docker.errors.ContainerError, docker.errors.ImageNotFound) as e:
                 # Log error
                 self.container = None
