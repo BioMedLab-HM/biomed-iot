@@ -427,17 +427,60 @@ do_install() {
     fi
     systemctl restart mosquitto.service
 
-    # InfluxDB (https://docs.influxdata.com/influxdb/v2.7/install/?t=Linux)
-    wget https://dl.influxdata.com/influxdb/releases/influxdb2-2.7.0-amd64.deb
-    dpkg -i influxdb2-2.7.0-amd64.deb
+
+    # InfluxDB for Ubuntu/Debian AMD64 (https://docs.influxdata.com/influxdb/v2.7/install/?t=Linux)
+    # or: https://docs.influxdata.com/influxdb/v2/install/?t=Linux
+    curl -O https://dl.influxdata.com/influxdb/releases/influxdb2_2.7.5-1_amd64.deb
+    dpkg -i influxdb2_2.7.5-1_amd64.deb
+    service influxdb start
+    # test if running: sudo service influxdb status
+    # Install Influx CLI
+    # https://docs.influxdata.com/influxdb/v2/tools/influx-cli/?t=Linux
+    wget https://dl.influxdata.com/influxdb/releases/influxdb2-client-2.7.3-linux-amd64.tar.gz
+    tar xvzf ./influxdb2-client-2.7.3-linux-amd64.tar.gz
+    cp ./influx /usr/local/bin/
     # TODO: InfluxDB configuration
+    # https://docs.influxdata.com/influxdb/v2/get-started/setup/?t=influx+CLI
+    # https://docs.influxdata.com/influxdb/v2/reference/config-options/
+    # Disables sending telemetry data to InfluxData
+    sudo echo 'reporting-disabled = "true"' | sudo tee -a /etc/influxdb/config.toml > /dev/null
+    influx_org_name="iotree42"  # or $projectname instead "iotree42"
+    influx_username=$(LC_ALL=C tr -dc 'A-Za-z0-9_!@#$%^&*()-' < /dev/urandom | head -c 20 | xargs)
+    influx_password=$(LC_ALL=C tr -dc 'A-Za-z0-9_!@#$%^&*()-' < /dev/urandom | head -c 30 | xargs)
+    influx_operator_token=$(LC_ALL=C tr -dc 'A-Za-z0-9_!@#$%^&*()-' < /dev/urandom | head -c 50 | xargs)  # operator token grants full read and write access to all resources in your InfluxDB instance
+    # Setup with admin user. admin's token (=operator token) and an org (https://docs.influxdata.com/influxdb/v2/reference/cli/influx/setup/)
+    influx setup \
+        --username $influx_username \
+        --password $influx_password \
+	    --token $influx_operator_token \
+        --org $influx_org_name \
+        --bucket $influx_username \
+        --force
+    # Get org ID: https://docs.influxdata.com/influxdb/v2/admin/organizations/view-orgs/
+    influx_org_id=$(influx org list | awk '/iotree42/ && NR>1 {print $1}')   # WARUM?
+    # Auth create commands: https://docs.influxdata.com/influxdb/cloud/reference/cli/influx/auth/create/
+    # All access token (All buckets of this org)
+    influx_all_token=$(influx auth create --org $influx_org_name --all-access --description "${influx_org_name}-all-access"| awk 'NR>1 {print $3}')
+    # The creation of buckets as well as read and write tokens for each django user including admin will be generated 
+    # To avoid having to pass the all-access token with each "influx" command:
+    # Manually create a new CLI connection configuration for the All Access token.
+    influx config create \
+        --config-name "$influx_org_name" \
+        --host-url "http://localhost:8086" \
+        --org "$influx_org_name" \
+        --token "$influx_all_token"
+
+    # TODO: write username and password for influx adminuser user as well as
+    #       operator and all access token for adminuser into config.toml
+
 
     # Grafana (https://grafana.com/grafana/download?platform=linux&edition=oss)
     wget https://dl.grafana.com/oss/release/grafana_9.5.2_amd64.deb
     dpkg -i grafana_9.5.2_amd64.deb
     # TODO: Grafana configuration
 
-    # TODO: Docker installation (https://docs.docker.com/engine/install/debian/#install-using-the-repository)
+
+    # Docker installation (https://docs.docker.com/engine/install/debian/#install-using-the-repository)
     # Add Docker's official GPG key:
     sudo apt-get update
     sudo apt-get install ca-certificates curl gnupg
@@ -454,7 +497,7 @@ do_install() {
     sudo apt-get install -y docker-ce docker-ce-cli containerd.io docker-buildx-plugin docker-compose-plugin
     usermod -aG docker $USER
 
-    # TODO: nodered installation
+    # Node-RED installation
     docker pull nodered/node-red  # Container instances can be started later on the website
     # Nginx-configuration directory for Real-time Port Resolution of nodered containers, meaning, port 
     # will be looked up dynamically when clicking on 'nodered' in the website's menu
@@ -467,9 +510,8 @@ do_install() {
         cp $setup_dir/config/tmp.update_nginx_nodered_location_tls.sh $update_nginx_nodered_location_path
 
     chmod +x /etc/iotree/update_nginx.sh  # TODO: dieses Skript per inotifywait statt djangoskript oder zumindest das "nginx reload"?
-
     # $linux_user ALL=(ALL) NOPASSWD: $update_nginx_nodered_location_path  # TODO: eher nicht notwendig, da dieses setup-script bereits mit sudo ausgeführt werden konnte?
-
+    # TODO: secret key authentication functionality, limited and custom nodes (influxDB node) in docker image
 
 
     # TODO start/restart/status check: mosquitto, grafana-server, influxdb, ... bei Bedarf, sonst vorher bei den einzelnen Installationen
