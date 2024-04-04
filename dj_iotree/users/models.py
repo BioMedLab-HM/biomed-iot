@@ -82,7 +82,8 @@ class Profile(models.Model):
 class NodeRedUserData(models.Model):
     user = models.OneToOneField(settings.AUTH_USER_MODEL, on_delete=models.CASCADE, primary_key=True)
     container_name = models.CharField(max_length=30, unique=True)
-    container_port = models.CharField(max_length=5, unique=True)  # since highest possible port number has five digits (65535)
+    # container_port can be set to null (None in python) to avoid integrity error due to UNIQUE constraint failure
+    container_port = models.CharField(max_length=5, unique=True, null=True, blank=True)  # highest possible port number has five digits (65535)
     access_token = models.CharField(max_length=100)
     # later maybe add data from the container like flows, dashboards and list of installed nodered plugins
 

@@ -315,7 +315,16 @@ do_install() {
     $setup_dir/dj_iotree/dj_venv/bin/python $setup_dir/dj_iotree/manage.py migrate
     DJANGO_SUPERUSER_SCRIPT="from users.models import CustomUser; CustomUser.objects.create_superuser('$django_admin_name', '$django_admin_email', '$django_admin_pass')"
     echo $DJANGO_SUPERUSER_SCRIPT | runuser -u $linux_user -- $setup_dir/dj_iotree/dj_venv/bin/python $setup_dir/dj_iotree/manage.py shell
-    $setup_dir/dj_iotree/dj_venv/bin/python $setup_dir/dj_iotree/manage.py collectstatic --noinput
+    # Deploy static files
+    # see: https://docs.djangoproject.com/en/5.0/howto/static-files/ 
+    # and https://forum.djangoproject.com/t/django-and-nginx-permission-issue-on-ubuntu/26804
+    mkdir -p /var/www/iotree42/static/
+    chown www-data:www-data /var/www/iotree42/static/
+    usermod -aG www-data $linux_user
+    chmod 2775 /var/www/iotree42/static/
+    # $setup_dir/dj_iotree/dj_venv/bin/python $setup_dir/dj_iotree/manage.py collectstatic --noinput
+    # perform collectstatic  under user "www-data" to avoid 
+    -u www-data $setup_dir/dj_iotree/dj_venv/bin/python $setup_dir/dj_iotree/manage.py collectstatic --noinput
     deactivate
 
 # install server relevant packages
@@ -457,21 +466,24 @@ do_install() {
         --bucket $influx_username \
         --force
     # Get org ID: https://docs.influxdata.com/influxdb/v2/admin/organizations/view-orgs/
-    influx_org_id=$(influx org list | awk '/iotree42/ && NR>1 {print $1}')   # WARUM?
+    influx_org_id=$(influx org list | awk '/iotree42/ && NR>1 {print $1}')
     # Auth create commands: https://docs.influxdata.com/influxdb/cloud/reference/cli/influx/auth/create/
-    # All access token (All buckets of this org)
+    # All-access token (Read and Write access to all buckets of this org)
     influx_all_token=$(influx auth create --org $influx_org_name --all-access --description "${influx_org_name}-all-access"| awk 'NR>1 {print $3}')
     # The creation of buckets as well as read and write tokens for each django user including admin will be generated 
     # To avoid having to pass the all-access token with each "influx" command:
-    # Manually create a new CLI connection configuration for the All Access token.
+    # Manually create a new CLI connection configuration for the all-access token.
     influx config create \
         --config-name "$influx_org_name" \
         --host-url "http://localhost:8086" \
         --org "$influx_org_name" \
         --token "$influx_all_token"
 
-    # TODO: write username and password for influx adminuser user as well as
-    #       operator and all access token for adminuser into config.toml
+    # Test if really necessary in case influxdb installation changes permissions
+    chmod 755 ./dj_iotree/staticfiles  # or for user directory alltogether
+    # TODO: programmatically write into config.toml: username, password, and bucket for for influx adminuser, 
+    #       operator-token,
+    #       orgname, org-id and its all-access token
 
 
     # Grafana (https://grafana.com/grafana/download?platform=linux&edition=oss)

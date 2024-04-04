@@ -198,7 +198,7 @@ def nodered_manager(request):
         if action == 'run':
             if nodered_container.state == 'running':
                 nodered_container.determine_port()
-                if nodered_data.container_port != nodered_container.port:
+                if nodered_data.container_port != nodered_container.port:  # in case container was not restarted by user action but for example during server reboot
                     update_nodered_data_container_port(nodered_data, nodered_container)
                     update_nodered_nginx_conf(nodered_data)
                 
@@ -210,16 +210,6 @@ def nodered_manager(request):
                 messages.info(request, f'Cannot start Node-RED. Node-RED is {nodered_container.state}.')
         
         elif action == 'create':
-            # if nodered_container.get_existing_container() is None:
-            #     # Generate completely new data if no container is found
-            #     nodered_data.container_name = NodeRedUserData.generate_unique_container_name()
-            #     nodered_data.access_token = secrets.token_urlsafe(22)
-            #     nodered_data.save()
-            
-            #     # Update the NoderedContainer instance with the new nodered_data
-            #     nodered_container.name = nodered_data.container_name
-            #     nodered_container.access_token = nodered_data.access_token
-            # TODO: obere Zeilen löschen spätestens 2 Wochen nach Ostern: 
             if nodered_container.state == 'none':
                 print("Container state is 'none'")
                 # Proceed to create the container
@@ -265,13 +255,29 @@ def nodered_manager(request):
         
     return render(request, 'users/nodered_manager.html', context)
 
+from django.db import transaction
+
 def update_nodered_data_container_port(nodered_data, nodered_container):
-    if nodered_container.port is not None:
-        nodered_data.container_port = nodered_container.port
-    else:
-        # Clear the port in nodered_data if the container is stopped or port is not available
-        nodered_data.container_port = ''
-    nodered_data.save()
+    with transaction.atomic():  # protection against race condition (even though unlikely) 
+        # Identify and lock the conflicting row -> second protection against race condition (even though unlikely)
+        conflicting_users = NodeRedUserData.objects.select_for_update().exclude(
+            user=nodered_data.user
+        ).filter(
+            container_port=nodered_container.port
+        )
+
+        for user_data in conflicting_users:
+            user_data.container_port = None  # Set to None to avoid UNIQUE constraint failure
+            user_data.save()
+
+        # Now, safely update the current user's port
+        if nodered_container.port is not None:
+            nodered_data.container_port = nodered_container.port
+        else:
+            # Clear the port in nodered_data if the container is stopped or port is not available
+            nodered_data.container_port = ''
+        nodered_data.save()
+
 
 @login_required
 def nodered_embedded(request):

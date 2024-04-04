@@ -98,10 +98,11 @@ WSGI_APPLICATION = 'dj_iotree.wsgi.application'
 # https://docs.djangoproject.com/en/4.2/ref/settings/#databases
 DATABASES = {
     'default': {
+        # uncomment for sqlite (in development)
         'ENGINE': 'django.db.backends.sqlite3',
         'NAME': BASE_DIR / 'db.sqlite3',
         
-        # uncomment for postgres in production use
+        # uncomment for postgres (in production)
         # "ENGINE": config['postgres']['ENGINE'],
         # 'NAME': config['postgres']['NAME'],  # the database name
         # 'USER': config['postgres']['USER'],
@@ -180,19 +181,19 @@ USE_TZ = True
 # Static files (CSS, JavaScript, Images)
 # https://docs.djangoproject.com/en/4.2/howto/static-files/
 
-# TODO: static files; not for production use, see "Deploying static files" (https://docs.djangoproject.com/en/4.2/howto/static-files/)
+# see "Deploying static files" (https://docs.djangoproject.com/en/5.0/howto/static-files/)
+# also see: https://forum.djangoproject.com/t/django-and-nginx-permission-issue-on-ubuntu/26804
 STATIC_URL = '/static/'
 STATICFILES_DIRS = [BASE_DIR / 'static']  # for development
-STATIC_ROOT = BASE_DIR / 'staticfiles'  # for production
+STATIC_ROOT = '/var/www/iotree42/static/'
 
 # TODO: static files; see above
 MEDIA_ROOT = BASE_DIR / 'media'
 MEDIA_URL = '/media/'
 
 LOGIN_REDIRECT_URL = 'core-home'
-# TODO: LOGIN_URL auf admin/login nur vorrübergehend für OAuth setup
 LOGIN_URL = 'login'
-# LOGIN_URL='/admin/login/'
+# LOGIN_URL='/admin/login/' # LOGIN_URL auf admin/login nur vorrübergehend für OAuth setup
 
 EMAIL_BACKEND = 'django.core.mail.backends.smtp.EmailBackend'
 EMAIL_HOST = config['mail']["EMAIL_HOST"]
