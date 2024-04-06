@@ -253,24 +253,18 @@ do_install() {
     
     # TODO: tmp folder + config befehle evtl in separatem block?
     mkdir $setup_dir/tmp  # create temporary folder for config files
-    mkdir /etc/iotree  # folder for project wide config.json file
-    # TODO: build reload3.sh file (bzw. vergleichbares) falls nötig
-    # TODO: building gateway zip file
-
+    mkdir /etc/iotree  # folder for project wide config.toml file
+    # TODO: build gateway zip file
     # Update package lists
     apt update
-
     # TODO: Install/setup NTP deamon (für externe Geräte)
-
     # Install Python-related packages
     apt install -y python3-pip python3-venv python3-dev
-
     # Install neccessary libraries and other software
     # TODO: gpg + implementierung der Verschlüsselung der config.json
     apt install -y curl inotify-tools zip adduser git
     apt install -y libopenjp2-7 libtiff6 libfontconfig1
 
-    # TODO: venv für mqtttodb Skript installieren (evtl an anderer Stelle)
 
     # Install server security packages fail2ban and ufw
     apt install -y fail2ban
@@ -290,6 +284,7 @@ do_install() {
     cp $setup_dir/tmp/jail.local /etc/fail2ban/jail.local
     systemctl restart fail2ban
 
+
     # install postgreSQL (https://www.digitalocean.com/community/tutorials/how-to-set-up-django-with-postgres-nginx-and-gunicorn-on-debian-11
     # and https://forum.mattermost.com/t/pq-permission-denied-for-schema-public/14273)
     apt install -y libpq-dev postgresql postgresql-contrib
@@ -304,6 +299,7 @@ do_install() {
     sudo -u postgres psql -c "GRANT ALL PRIVILEGES ON DATABASE dj_iotree_db TO dj_iotree_user;"
     sudo -u postgres psql -c "ALTER DATABASE dj_iotree_db OWNER TO dj_iotree_user;"
     sudo -u postgres psql -c "GRANT USAGE, CREATE ON SCHEMA public TO dj_iotree_user;"
+
 
     # Django setup
     # TODO: Mosquitto muss vorher installiert werden wegen dynamic security Plugin!!
@@ -595,7 +591,7 @@ do_install() {
         printf "--> The server can be reached at: http://$server_ip/ \n" >&2
     fi
     
-    # ask user to reboot
+    # print: ask user to reboot
 
     printf "\n\n\n ### FINISHED INSTALLATION OF IOTREE42 ### \n\n\n"
 
