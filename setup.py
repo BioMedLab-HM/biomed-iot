@@ -1,5 +1,3 @@
-
-
 """
 TODO: Kurzer Überblick über den Code
 TODO: Kommentare im Code ergänzen/optimieren
@@ -11,20 +9,12 @@ import sys
 import random
 import string
 import socket
-
-# Log file path
-LOG_FILE = 'installation.log'
-# Open the log file globally so it can be accessed throughout the script
-log = open(LOG_FILE_PATH, 'a')
-
-def run_bash(command):
-    """Executes a Bash command in the subprocess and logs its output."""
-    try:
-        output = subprocess.run(command, shell=True, check=True, stdout=log_file, stderr=subprocess.STDOUT, text=True)
-        log.write(output))
-    except subprocess.CalledProcessError as e:
-        log.write(f"Error executing command: {e.cmd}\nOutput:\n{e.output}")
-        sys.exit(1)
+import platform
+import re
+from setup_files.setup_utils import get_linux_user, get_setup_dir, get_random_string, run_bash, log
+from setup_files.install_01_basic_apt_packages import install_basic_apt_packages
+from setup_files.install_02_server_security import install_server_security
+from setup_files.install_03_postgres import install_postgres
 
 
 def print_logo_header():
@@ -45,48 +35,68 @@ For installation on a Raspberry Pi, use a PiBakery image on GitHub:
 # TODO: <insert link here>
 """
     print(logo_header)
-    log.write(logo_header + '\n')
+    log(logo_header + '\n')
 
 
 def is_supported_cpu_architecture():
     """Check system's CPU architecture."""
     cpu_architecture = platform.machine()
     if "amd64" not in cpu_architecture and "x86_64" not in cpu_architecture:
-        msg = f"Your system architecture '{cpu_architecture}' is not supported. \
-                Only amd64 or x86_64 is supported.\nExiting Setup"
+        msg = (f"Your system architecture '{cpu_architecture}' is not "
+            "supported. Only amd64 or x86_64 is supported.\nExiting Setup"
+        )
         print(msg)
-        log.write(msg)
+        log(msg)
         sys.exit(1)
 
 
-def is_running_with_sudo():
+def is_running_with_sudo_or_exit_setup():
     """Ensure the script is run with sudo."""
     if os.geteuid() != 0:
         msg = "This script must be run with sudo. Exiting setup"
         print(msg)
-        log.write(msg)
+        log(msg)
         sys.exit(1)
+
+def get_linux_codename():
+    """Extract the VERSION_CODENAME from /etc/os-release."""
+    try:
+        with open("/etc/os-release", "r") as file:
+            for line in file:
+                if line.startswith("VERSION_CODENAME"):
+                    codename = line.strip().split('=')[1].replace('"', '')
+                    log("Linux Codename: " + codename)
+                    return codename
+    except FileNotFoundError:
+        msg = "The os-release file was not found."
+        print(msg)
+        log(msg)
+        return None
 
 
 def get_setup_scheme():
     """Determine the setup scheme based on user input."""
-    print(f"\nTLS (Transport Layer Security) encrypts the data between your server and its users and gateways \
-            (using https), ensuring the data remains private and secure. It is highly recommended for most \
-            installations.\n However, if you're setting up a development environment, running tests or you're \
-            in a controlled and isolated environment where encryption isn't a priority and even have limited \
-            system resources (older Raspberry Pi), you might consider running without TLS (using http).\n")
-
-    chosen_scheme = "TLS_NO_DOMAIN"  # Default scheme
-    answer = input("Do you want to install IoTree42 with TLS? (Y/n, default is Y): ").strip().lower()
-    if answer == 'n':
-        chosen_scheme = "NO_TLS"
-    else:
-        # If TLS is chosen, ask about the domain
-        domain_answer = input("Is the server using a domain (e.g. example.com)? (y/N, default is N): ").strip().lower()
+    print(f"\nTLS (Transport Layer Security) encrypts the data between your "
+        "server and its users and gateways (using https), ensuring the data "
+        "remains private and secure. It is highly recommended for most "
+        "installations.\nHowever, if you're setting up a development "
+        "environment, running tests or you're in a controlled and isolated "
+        "environment where encryption isn't a priority and even have limited "
+        "system resources (older Raspberry Pi), you might consider running "
+        "without TLS (using http).\n"
+    )
+    chosen_scheme = "NO_TLS"  # Default scheme without TLS encryption
+    answer = input("Shall your IoTree42 use TLS encryption for MQTT messages? "
+                    "(Y/n, default is n): ").strip().lower()
+    if answer == 'y':
+        chosen_scheme = "TLS_NO_DOMAIN"
+        # Ask about the domain
+        domain_answer = input("Is the server using a domain name like "
+                        "'example.com')? (y/N, default is N): ").strip().lower()
         if domain_answer == 'y':
             chosen_scheme = "TLS_DOMAIN"
     
-    log.write(chosen_scheme)
+    log("Chosen setup scheme: " + chosen_scheme)
     return chosen_scheme
 
 
@@ -100,18 +110,10 @@ def confirm_proceed(question_to_ask):
         elif user_answer == 'n':
             msg ="You declined to proceed. Exiting setup."
             print(msg)
-            log.write(msg)
+            log(msg)
             sys.exit(1)  # Exit the script with an error code
         else:
             print("Invalid response. Please enter 'Y' or 'N'.")
-
-
-def random_string_of_length(string_length):
-    # Define the characters to include in the random string
-    characters = string.ascii_letters + string.digits  # + "_!@#$%^&*()-"
-    # Generate a random string of the specified length
-    rand_str = ''.join(random.choice(characters) for _ in range(string_length))
-    return rand_str
 
 
 def get_confirmed_text_input(input_prompt):
@@ -129,37 +131,162 @@ def get_confirmed_text_input(input_prompt):
         elif input_text == confirmation:
             return input_text
         else:
-            print("First input and confirmation do not match. Please try again.")
+            print("Your inputs do not match. Please try again.")
+
+
+def prompt_for_password(required_length=12):
+    """
+    Parameters:
+    - required_length (int): The minimum required length of the password.
+    Returns:
+    - str: The user-provided password that meets the criteria.
+    """
+    password_pattern = re.compile(r"""
+    (?=.*[A-Z])     # at least one uppercase letter
+    (?=.*[a-z])     # at least one lowercase letter
+    (?=.*\d)        # at least one digit
+    (?=.*[!@#$%%&*()_+\-=\[\]{}|;:'"<>,.?/]) # at least one special character
+    .{%d,}          # at least required_length characters
+    """ % required_length, re.VERBOSE)
+
+    while True:
+        password = get_confirmed_text_input("Enter and remember a safe "
+            f"password (min length {required_length}) for your IoTree42 admin "
+            "user\nIt must contain at least one uppercase letter, one lowercase "
+            "letter, one digit and one special character from "
+            "!@#$%&*()_+-=[]}{|;:<>/?,")
+        if password_pattern.match(password):
+            return password
+        else:
+            print("Password does not meet the criteria.\n")
 
 
 def get_domain(setup_scheme):
     domain = ""
-    if setup_scheme == "TLS_WITH_DOMAIN":
-        domain = input("Enter the domain name (e.g., 'example.com') without leading 'www.': ").strip()
+    if setup_scheme == "TLS_DOMAIN":
+        domain = input("Enter the domain name (e.g., 'example.com') "
+                        "without leading 'www.': ").strip()
+    log("Entered Domain: " + domain)
     return domain
 
 
-def install_basic_packages():
-    """Install basic packages."""
-    run_bash("apt update && apt install -y package-name")
+def get_credentials_for_pw_reset():
+    question = ("\nDo you want to Enter the credentials for the website's "
+        "password reset function?\nYou can add the credentials for the "
+        "website's password reset function later in /etc/iotree/settings.toml")
+    while True:
+        user_answer = input(f"{question} (y/n): ").strip().lower()
+        if user_answer == 'y':
+            pwreset_email = get_confirmed_text_input("Enter the email address "
+                "for the website's password reset function")
+            pwreset_pass = get_confirmed_text_input("Enter the password "
+                "for the website's password reset function")
+            msg = "Credentials for password reset functions have been entered"
+            break
+        elif user_answer == 'n':
+            msg = "No credentials for password reset function have been entered"
+            pwreset_email = ""
+            pwreset_pass = ""
+            break
+        else:
+            print("Invalid response. Please enter 'Y' or 'N'.")
+    print(msg)
+    log(msg)
+    return pwreset_email, pwreset_pass
 
-# Function definitions for other tasks...
 
-def do_install():
-    """Main installation function."""
-    print_logo_header()
-    is_supported_cpu_architecture()
-    confirm_proceed("Do you want to proceed with the installation? This will update your system and install necessary packages.")
-    is_running_with_sudo()
+def create_directories():
+    # Create a temporary folder for config files within setup_dir
+    tmp_dir = os.path.join(setup_dir, "tmp")
+    os.makedirs(tmp_dir, exist_ok=True)
+    log("Directory tmp created. Path: " + tmp_dir)
 
+    # Create a folder for the project-wide config.toml file
+    config_dir = "/etc/iotree"
+    os.makedirs(config_dir, exist_ok=True)
+    log("Directory /etc/iotree created. Path: " + config_dir)
+
+
+def main():
+    """ 
+    MAIN INSTALLATION FUNCTION
+        Content:
+        - "DO SOME PRE-CHECKS"
+        - "ASK FOR USER INPUT"
+        - "INSTALLATION OF SOFTWARE"
+          see setup files in sub directory "setup_files" 
+        - "FINAL INFORMATION OUTPUT FOR THE USER"
+    """
+
+    linux_codename = get_linux_codename()
     hostname = socket.gethostname()
     internal_ip = socket.gethostbyname(hostname)
+    linux_user = get_linux_user()
+    setup_dir = get_setup_dir()
+    django_admin_name = None
+    django_admin_pass = None
+    django_admin_email = None
+    pwreset_email = None
+    pwreset_email_pass = None
     domain = None
-    if setup_scheme == "TLS_WITH_DOMAIN":
-        domain = input("Enter the domain name (e.g., 'example.com') without leading 'www.': ").strip()
+    setup_scheme = None
+
+    print_logo_header()
     
-    # More installation steps...
-    # For complex bash commands, use run_bash() function
+    """ DO SOME PRE-CHECKS """
+    is_supported_cpu_architecture()
+    is_running_with_sudo_or_exit_setup()
+    print("\nTo make sure your system is up to date, run 'sudo apt update' and "
+        "'sudo apt upgrade' before setup.\n")
+    confirm_proceed("Do you want to proceed? Otherwise please update, upgrade "
+        "and reboot - then start setup again.")
+
+
+    """ ASK FOR USER INPUT """
+    setup_scheme = get_setup_scheme()
+
+    if setup_scheme == "TLS_WITH_DOMAIN":
+        domain = input("Enter the domain name (e.g., 'example.com') without "
+            "leading 'www.': ").strip()
+
+    domain = get_domain(setup_scheme)
+
+    django_admin_name = get_confirmed_text_input("Enter and remember a safe "
+        "username for your website admin user and mosquitto-admin")
+
+    print("Enter and remember a safe password (>= 12 characters) "
+        "for your IoTree42 admin user")
+    django_admin_pass = prompt_for_password(12)
+
+    django_admin_email = get_confirmed_text_input("Enter email address for "
+        "your website's admin user")
+
+    pwreset_email, pwreset_pass = get_credentials_for_pw_reset()
+    
+
+    """ INSTALLATION OF SOFTWARE """
+
+    print("\nThis will install Iotree42 with server installation scheme: "
+        f"{setup_scheme}")
+    confirm_proceed("Do you want to proceed with the installation of IoTree42, "
+        "including necessary packages and services?")
+    msg = (f"\nStarting installation of IoTree42 for user '{linux_user}'. "
+        "Please do not interrupt!\n"
+    )
+    print(msg)
+    log(msg)
+    
+    # TODO: build gateway zip file
+
+    # create_directories()
+    # install_basic_apt_packages()
+    # install_security_packages()
+    # install_postgres()
+    
+
+    """ FINAL INFORMATION OUTPUT FOR THE USER """
+    # TBD
+
 
 if __name__ == "__main__":
-    do_install()
+    main()

@@ -56,7 +56,7 @@ get_setup_scheme() {
     printf "\nTLS (Transport Layer Security) encrypts the data between your server and its users and gateways (using https), ensuring the data remains private and secure. It is highly recommended for most installations.\n" >&2
     printf "However, if you're setting up a development environment, running tests or you're in a controlled and isolated environment where encryption isn't a priority and even have limited system ressources (older Raspberry Pi), you might consider running without TLS (using http).\n" >&2
 
-    # Ask the user for their choice
+    # Ask the user for to choose
     read -p "Do you want to install IoTree42 with TLS? (Y/n, default is Y): " answer
 
     # If the answer is a lowercase or uppercase 'n', then set the scheme to 'NO_TLS'
@@ -279,7 +279,6 @@ do_install() {
     # TODO: optional in fail2ban jail.local: 
         # [nginx-limit-req] 
         # enabled = true # falls Mosquitto nicht hinter nginx; `ngx_http_limit_req_module` benötigt, siehe jail.
-    mkdir $setup_dir/config  # TODO: WHAT??? WHY???
     bash $setup_dir/config/tmp.jail.local.sh > $setup_dir/tmp/jail.local
     cp $setup_dir/tmp/jail.local /etc/fail2ban/jail.local
     systemctl restart fail2ban
