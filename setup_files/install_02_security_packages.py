@@ -1,10 +1,8 @@
-import os
-import subprocess
 from .setup_utils import run_bash, get_setup_dir
 
-LOG_02 = "install_security_packages.log"
+SECURITY_INSTALL_LOG_FILE_NAME = "install_security_packages.log"
 
-def install_server_security():
+def install_security_packages():
     commands = [
         # Install ufw
         "apt install -y ufw",
@@ -29,4 +27,4 @@ def install_server_security():
         "systemctl restart fail2ban"
     ]
     for command in commands:
-        run_bash(command, LOG_02)
+        run_bash(command, SECURITY_INSTALL_LOG_FILE_NAME)

@@ -1,8 +1,8 @@
 from .setup_utils import run_bash, get_random_string
 
-MOSQUITTO_INSTALL_LOG_FILE_NAME = "install_mosquitto.log"
+GRAFANA_INSTALL_LOG_FILE_NAME = "install_grafana.log"
 
-def install_mosquitto():
+def install_grafana():
     """
     
     """
@@ -13,4 +13,4 @@ def install_mosquitto():
     ]
 
     for command in commands:
-        run_bash(command, MOSQUITTO_INSTALL_LOG_FILE_NAME)
+        run_bash(command, GRAFANA_INSTALL_LOG_FILE_NAME)

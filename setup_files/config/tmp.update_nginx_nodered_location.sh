@@ -3,12 +3,11 @@
 # Define update script for updating nodered container location in nginx server block
 # https://hobbytronics.pk/node-red-nginx-reverse-proxy/
 
-# Parameters: $1 - Path Segment, $2 - Port
-
 CONTAINER_NAME=$1
 PORT=$2
 NGINX_CONF_PATH="/etc/nginx/conf.d/nodered_locations/$CONTAINER_NAME.conf"
 
+# Create the directory if it doesn't exist
 mkdir -p /etc/nginx/conf.d/nodered_locations/
 
 # Create or overwrite the Nginx configuration for the given path segment
@@ -31,5 +30,5 @@ location ~* ^/admin/(.+\.(css|js)) {
   }
 EOF
 
-# Reload Nginx
+# Reload Nginx to apply changes
 sudo nginx -s reload

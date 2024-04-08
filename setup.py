@@ -6,15 +6,16 @@ TODO: Kommentare im Code ergänzen/optimieren
 import os
 import subprocess
 import sys
-import random
-import string
 import socket
 import platform
 import re
 from setup_files.setup_utils import get_linux_user, get_setup_dir, get_random_string, run_bash, log
+from setup_files.write_config_file import write_config_file
 from setup_files.install_01_basic_apt_packages import install_basic_apt_packages
-from setup_files.install_02_server_security import install_server_security
-from setup_files.install_03_postgres import install_postgres
+from setup_files.install_02_security_packages import install_security_packages
+from dev.iotree42.setup_files.install_08_postgres import install_postgres
+from setup_files.install_03_docker  import install_docker
+from setup_files.install_04_nodered import install_nodered
 
 
 def print_logo_header():
@@ -58,21 +59,6 @@ def is_running_with_sudo_or_exit_setup():
         log(msg)
         sys.exit(1)
 
-def get_linux_codename():
-    """Extract the VERSION_CODENAME from /etc/os-release."""
-    try:
-        with open("/etc/os-release", "r") as file:
-            for line in file:
-                if line.startswith("VERSION_CODENAME"):
-                    codename = line.strip().split('=')[1].replace('"', '')
-                    log("Linux Codename: " + codename)
-                    return codename
-    except FileNotFoundError:
-        msg = "The os-release file was not found."
-        print(msg)
-        log(msg)
-        return None
-
 
 def get_setup_scheme():
     """Determine the setup scheme based on user input."""
@@ -87,12 +73,12 @@ def get_setup_scheme():
     )
     chosen_scheme = "NO_TLS"  # Default scheme without TLS encryption
     answer = input("Shall your IoTree42 use TLS encryption for MQTT messages? "
-                    "(Y/n, default is n): ").strip().lower()
+        "(Y/n, default is n): ").strip().lower()
     if answer == 'y':
         chosen_scheme = "TLS_NO_DOMAIN"
         # Ask about the domain
         domain_answer = input("Is the server using a domain name like "
-                        "'example.com')? (y/N, default is N): ").strip().lower()
+            "'example.com')? (y/N, default is N): ").strip().lower()
         if domain_answer == 'y':
             chosen_scheme = "TLS_DOMAIN"
     
@@ -152,9 +138,10 @@ def prompt_for_password(required_length=12):
     while True:
         password = get_confirmed_text_input("Enter and remember a safe "
             f"password (min length {required_length}) for your IoTree42 admin "
-            "user\nIt must contain at least one uppercase letter, one lowercase "
-            "letter, one digit and one special character from "
-            "!@#$%&*()_+-=[]}{|;:<>/?,")
+            "user\nIt must contain at least one uppercase letter, one "
+            "lowercase letter, one digit and one special character from "
+            "!@#$%&*()_+-=[]}{|;:<>/?,"
+        )
         if password_pattern.match(password):
             return password
         else:
@@ -197,14 +184,14 @@ def get_credentials_for_pw_reset():
 
 def create_directories():
     # Create a temporary folder for config files within setup_dir
-    tmp_dir = os.path.join(setup_dir, "tmp")
+    tmp_dir = os.path.join(get_setup_dir(), "setup_files", "tmp")
     os.makedirs(tmp_dir, exist_ok=True)
-    log("Directory tmp created. Path: " + tmp_dir)
+    log("Directory 'setup_files/tmp' created. Path: " + tmp_dir)
 
     # Create a folder for the project-wide config.toml file
     config_dir = "/etc/iotree"
     os.makedirs(config_dir, exist_ok=True)
-    log("Directory /etc/iotree created. Path: " + config_dir)
+    log("Directory '/etc/iotree' created. Path: " + config_dir)
 
 
 def main():
@@ -218,7 +205,6 @@ def main():
         - "FINAL INFORMATION OUTPUT FOR THE USER"
     """
 
-    linux_codename = get_linux_codename()
     hostname = socket.gethostname()
     internal_ip = socket.gethostbyname(hostname)
     linux_user = get_linux_user()
@@ -235,31 +221,34 @@ def main():
     
     """ DO SOME PRE-CHECKS """
     is_supported_cpu_architecture()
+
     is_running_with_sudo_or_exit_setup()
-    print("\nTo make sure your system is up to date, run 'sudo apt update' and "
-        "'sudo apt upgrade' before setup.\n")
+
+    print("\nTo make sure your system is up to date, run 'sudo apt update' "
+        "and 'sudo apt upgrade' before setup.\n"
+    )
     confirm_proceed("Do you want to proceed? Otherwise please update, upgrade "
-        "and reboot - then start setup again.")
+        "and reboot - then start setup again."
+    )
 
 
     """ ASK FOR USER INPUT """
     setup_scheme = get_setup_scheme()
 
-    if setup_scheme == "TLS_WITH_DOMAIN":
-        domain = input("Enter the domain name (e.g., 'example.com') without "
-            "leading 'www.': ").strip()
-
     domain = get_domain(setup_scheme)
 
     django_admin_name = get_confirmed_text_input("Enter and remember a safe "
-        "username for your website admin user and mosquitto-admin")
+        "username for your website admin user and mosquitto-admin"
+    )
 
     print("Enter and remember a safe password (>= 12 characters) "
-        "for your IoTree42 admin user")
+        "for your IoTree42 admin user"
+    )
     django_admin_pass = prompt_for_password(12)
 
     django_admin_email = get_confirmed_text_input("Enter email address for "
-        "your website's admin user")
+        "your website's admin user"
+    )
 
     pwreset_email, pwreset_pass = get_credentials_for_pw_reset()
     
@@ -267,9 +256,11 @@ def main():
     """ INSTALLATION OF SOFTWARE """
 
     print("\nThis will install Iotree42 with server installation scheme: "
-        f"{setup_scheme}")
-    confirm_proceed("Do you want to proceed with the installation of IoTree42, "
-        "including necessary packages and services?")
+        f"{setup_scheme}"
+    )
+    confirm_proceed("Do you want to proceed with the installation of "
+        "IoTree42, including necessary packages and services?"
+    )
     msg = (f"\nStarting installation of IoTree42 for user '{linux_user}'. "
         "Please do not interrupt!\n"
     )
@@ -279,13 +270,54 @@ def main():
     # TODO: build gateway zip file
 
     # create_directories()
-    # install_basic_apt_packages()
-    # install_security_packages()
-    # install_postgres()
     
+    # install_basic_apt_packages()
+    log("Basic apt packages installed")
+    
+    # install_security_packages()
+    log("Security Packages installed")
+
+    # install_docker()
+    log("Docker installed")
+
+    # nodered_config_data = install_nodered(setup_scheme)
+    log("Node-RED installed")
+
+    # TODO: install_influxdb(setup_scheme)
+    log("InfluxDB installed")
+
+    # TODO: install_grafana()
+    log("Grafana installed")
+
+    # TODO: install_mosquitto(setup_scheme)
+    log("Mosquitto Broker installed")
+
+    # postgres_config_data = install_postgres()
+    log("PostgreSQL database installed")
+
+    # TODO: install_django()
+    log("Django installed")
+
+    # TODO: install_gunicorn()
+    log("Gunicorn installed")
+
+    # TODO: install_nginx()
+    log("NGINX installed")
+
+
+    """WRITE CONFIG FILE"""
+    # TODO: verketten der dicts aus den Returnwerten der installationsroutinen
+    values = {
+        
+    }
+
+    destination = '/etc/iotree/config.toml'
+    write_config_file(values, destination)
+
 
     """ FINAL INFORMATION OUTPUT FOR THE USER """
     # TBD
+    # set pw reset credentials in config.toml
 
 
 if __name__ == "__main__":

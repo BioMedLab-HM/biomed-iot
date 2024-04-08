@@ -1,0 +1,36 @@
+from .setup_utils import run_bash, get_random_string
+
+
+POSTGRESS_INSTALL_LOG_FILE_NAME = "install_postgres.log"
+
+db_name = "iotree_db_" + get_random_string(10)
+username = "iotree_user_" + get_random_string(10)
+password = get_random_string(50)
+
+def install_postgres():
+    """
+    install postgreSQL (https://www.digitalocean.com/community/tutorials/how-to-set-up-django-with-postgres-nginx-and-gunicorn-on-debian-11
+    and https://forum.mattermost.com/t/pq-permission-denied-for-schema-public/14273)
+    """
+    commands = [
+        "apt install -y libpq-dev postgresql postgresql-contrib",
+        f'sudo -u postgres psql -c "CREATE DATABASE {db_name};"',
+        
+        f'sudo -u postgres psql -c "CREATE USER {username} WITH PASSWORD \'{password}\';"',
+        f'sudo -u postgres psql -c "ALTER ROLE {username} SET client_encoding TO \'utf8\';"',
+        f'sudo -u postgres psql -c "ALTER ROLE {username} SET default_transaction_isolation TO \'read committed\';"',
+        f'sudo -u postgres psql -c "ALTER ROLE {username} SET timezone TO \'UTC\';"',
+        f'sudo -u postgres psql -c "GRANT ALL PRIVILEGES ON DATABASE {db_name} TO {username};"',
+        f'sudo -u postgres psql -c "ALTER DATABASE {db_name} OWNER TO {username};"',
+        f'sudo -u postgres psql -c "GRANT USAGE, CREATE ON SCHEMA public TO {username};"'
+    ]
+
+    for command in commands:
+        run_bash(command, POSTGRESS_INSTALL_LOG_FILE_NAME)
+
+    config_data = {
+        "POSTGRES_NAME": db_name,
+        "POSTGRES_USER": username,
+        "POSTGRES_PASSWORD": password
+    }
+    return config_data

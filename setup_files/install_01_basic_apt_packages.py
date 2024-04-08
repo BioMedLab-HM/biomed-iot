@@ -1,7 +1,7 @@
 from .setup_utils import run_bash
 import os
 
-LOG_01 = "install_01_basic_apt_packages.log"
+APT_INSTALL_LOG_FILE_NAME = "install_01_basic_apt_packages.log"
 
 def install_basic_apt_packages():
     commands = [
@@ -11,4 +11,4 @@ def install_basic_apt_packages():
         "apt install -y libopenjp2-7 libtiff6 libfontconfig1",
     ]
     for command in commands:
-        run_bash(command, LOG_01)
+        run_bash(command, APT_INSTALL_LOG_FILE_NAME)
