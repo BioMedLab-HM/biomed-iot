@@ -39,16 +39,20 @@ For installation on a Raspberry Pi, use a PiBakery image on GitHub:
     log(logo_header + '\n')
 
 
-def is_supported_cpu_architecture():
+def get_and_check_cpu_architecture():
     """Check system's CPU architecture."""
+    supported_architectures = ["amd64", "x86_64", "arm64", "aarch64"]
     cpu_architecture = platform.machine()
-    if "amd64" not in cpu_architecture and "x86_64" not in cpu_architecture:
+    if cpu_architecture.lower() not in supported_architectures:
         msg = (f"Your system architecture '{cpu_architecture}' is not "
-            "supported. Only amd64 or x86_64 is supported.\nExiting Setup"
+            "supported. Only "amd64", "x86_64", "arm64"or  "aarch64" is "
+            "supported.\nExiting Setup"
         )
         print(msg)
         log(msg)
         sys.exit(1)
+    
+    return cpu_architecture
 
 
 def is_running_with_sudo_or_exit_setup():
@@ -220,7 +224,7 @@ def main():
     print_logo_header()
     
     """ DO SOME PRE-CHECKS """
-    is_supported_cpu_architecture()
+    arch = get_and_check_cpu_architecture()
 
     is_running_with_sudo_or_exit_setup()
 
@@ -283,13 +287,13 @@ def main():
     # nodered_config_data = install_nodered(setup_scheme)
     log("Node-RED installed")
 
-    # TODO: install_influxdb(setup_scheme)
+    # TODO: install_influxdb(arch)
     log("InfluxDB installed")
 
-    # TODO: install_grafana()
+    # TODO: install_grafana(arch)
     log("Grafana installed")
 
-    # TODO: install_mosquitto(setup_scheme)
+    # TODO: install_mosquitto(setup_scheme, arch)
     log("Mosquitto Broker installed")
 
     # postgres_config_data = install_postgres()

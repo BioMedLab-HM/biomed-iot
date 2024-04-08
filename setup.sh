@@ -443,7 +443,7 @@ do_install() {
     wget https://dl.influxdata.com/influxdb/releases/influxdb2-client-2.7.3-linux-amd64.tar.gz
     tar xvzf ./influxdb2-client-2.7.3-linux-amd64.tar.gz
     cp ./influx /usr/local/bin/
-    # TODO: InfluxDB configuration
+    # InfluxDB configuration
     # https://docs.influxdata.com/influxdb/v2/get-started/setup/?t=influx+CLI
     # https://docs.influxdata.com/influxdb/v2/reference/config-options/
     # Disables sending telemetry data to InfluxData
