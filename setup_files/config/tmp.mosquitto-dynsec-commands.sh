@@ -7,10 +7,10 @@ MQTT_IN_TO_DB_USER=$3
 MQTT_IN_TO_DB_PW=$4
 MQTT_OUT_TO_DB_USER=$5
 MQTT_OUT_TO_DB_PW=$6
-USER_FOR_WEBSITE_ADMIN=$7
-PW_FOR_WEBSITE_ADMIN=$8
 
-# Define dynamic-security.json template
+# Define dynamic-security.json commands
+# see: https://github.com/eclipse/mosquitto/blob/master/plugins/dynamic-security/README.md
+# For general information about the Mosquitto dynamic security plugin, 
 # see: https://mosquitto.org/documentation/dynamic-security/
 
 # TODO: ggf. Priorities von -1 auf 1 setzen?
@@ -84,53 +84,6 @@ cat << EOF
 			]
 		},
 		{
-			"command": "createRole",
-			"rolename": "$USER_FOR_WEBSITE_ADMIN",
-			"acls": [
-				{
-					"acltype":	"publishClientSend",
-					"topic":	"input/$USER_FOR_WEBSITE_ADMIN/#",
-					"priority":	1,
-					"allow":	true
-				}, {
-					"acltype":	"publishClientReceive",
-					"topic":	"input/$USER_FOR_WEBSITE_ADMIN/#",
-					"priority":	1,
-					"allow":	true
-				}, {
-					"acltype":	"subscribePattern",
-					"topic":	"input/$USER_FOR_WEBSITE_ADMIN/#",
-					"priority":	1,
-					"allow":	true
-				}, {
-					"acltype":	"unsubscribePattern",
-					"topic":	"input/$USER_FOR_WEBSITE_ADMIN/#",
-					"priority":	1,
-					"allow":	true
-				}, {
-					"acltype":	"publishClientSend",
-					"topic":	"output/$USER_FOR_WEBSITE_ADMIN/#",
-					"priority":	1,
-					"allow":	true
-				}, {
-					"acltype":	"publishClientReceive",
-					"topic":	"output/$USER_FOR_WEBSITE_ADMIN/#",
-					"priority":	1,
-					"allow":	true
-				}, {
-					"acltype":	"subscribePattern",
-					"topic":	"output/$USER_FOR_WEBSITE_ADMIN/#",
-					"priority":	1,
-					"allow":	true
-				}, {
-					"acltype":	"unsubscribePattern",
-					"topic":	"output/$USER_FOR_WEBSITE_ADMIN/#",
-					"priority":	1,
-					"allow":	true
-				}
-			]
-		},
-		{
 			"command": "createClient",
 			"username": "$DJ_MQTT_CONTROLE_USER",
 			"password": "$DJ_MQTT_CONTROLE_PW",
@@ -155,15 +108,6 @@ cat << EOF
 			"textname": "mqttOutToDB",
 			"roles": [
 				{ "rolename": "mqttOutToDB", "priority": -1 }
-			]
-		},
-		{
-			"command": "createClient",
-			"username": "$USER_FOR_WEBSITE_ADMIN",
-			"password": "$PW_FOR_WEBSITE_ADMIN",
-			"textname": "websiteUser",
-			"roles": [
-				{ "rolename": "$USER_FOR_WEBSITE_ADMIN", "priority": -1 }
 			]
 		}
 	]

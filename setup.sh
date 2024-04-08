@@ -425,7 +425,8 @@ do_install() {
         bash $setup_dir/config/tmp.mosquitto-no-tls.conf.sh $dynsec_plugin_path > $setup_dir/tmp/mosquitto-no-tls.conf
         cp $setup_dir/tmp/mosquitto-no-tls.conf /etc/mosquitto/conf.d  # conf.d is a directory for custom conf files to include
     else 
-        # https://www.google.com/search?client=safari&rls=en&q=mosquitto+self+certificate+tls&ie=UTF-8&oe=UTF-8
+        # Use conf file that includes listener on port 1884 for TLS secured 
+        # external connections (through nginx as reverse proxy)
         bash $setup_dir/config/tmp.mosquitto-tls.conf.sh $dynsec_plugin_path > $setup_dir/tmp/mosquitto-tls.conf
         cp $setup_dir/tmp/mosquitto-tls.conf /etc/mosquitto/conf.d
     fi

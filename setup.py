@@ -287,7 +287,7 @@ def main():
     # nodered_config_data = install_nodered(setup_scheme)
     log("Node-RED installed")
 
-    # TODO: install_influxdb(arch)
+    # install_influxdb(arch)
     log("InfluxDB installed")
 
     # TODO: install_grafana(arch)

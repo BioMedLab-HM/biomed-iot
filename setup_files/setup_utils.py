@@ -1,6 +1,7 @@
 """Utility functions for the setup process"""
 
 import os
+import platform
 import sys
 import random
 import string
