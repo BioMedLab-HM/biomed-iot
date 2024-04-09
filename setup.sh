@@ -333,9 +333,8 @@ do_install() {
 
     # install and configure nginx according to selected setup scheme
     apt install -y nginx libnginx-mod-stream
-    # TODO: execute config stream sh files for mqtt through nginx
     if [[ $setup_scheme == "TLS_WITH_DOMAIN" ]]; then
-        # TODO: TLS-Setup mit Domain testen (use: "sudo nginx -t" to check for syntax errors)
+        # TODO: test TLS-Setup with Domain (use: "sudo nginx -t" to check for syntax errors)
         printf "\nInstalling packages for '$setup_scheme' scheme. Further user input may be neccessary\n" >&2
         apt install -y openssl  # some names still use ssl
         apt install -y certbot python3-certbot-nginx
@@ -350,11 +349,15 @@ do_install() {
         certbot --nginx --rsa-key-size 2048 -d $domain -d www.$domain  # default: 2048 bit; higher values may cost server performance.
         # Certbot's systemd timer auto-renews certificates within 30 days of expiration twice daily.
         # Certbot adds a systemd timer that runs twice a day and automatically renews any certificate that’s within thirty days of expiration.
+        
+        bash $setup_dir/config/tmp.nginx-stream-tls_domain.conf.sh $domain > $setup_dir/tmp/tmp.nginx-stream-tls_domain.conf
+        cp $setup_dir/tmp/tmp.nginx-stream-tls_domain.conf /etc/nginx/conf.d/stream.conf
+        
         systemctl restart nginx  # restart Nginx to implement changes
 
     elif [[ $setup_scheme != "TLS_NO_DOMAIN" ]]; then
         # https://www.digitalocean.com/community/tutorials/how-to-create-a-self-signed-ssl-certificate-for-nginx-on-debian-10 
-        # TODO: TLS-Setup mit Selbstzertifikat testen (use: sudo nginx -t)
+        # TODO: test TLS-Setup with self-certificate  (use: sudo nginx -t)
         printf "\nInstalling packages and doing configurations for '$setup_scheme' scheme. This can take some time.\n" >&2
         apt install -y openssl
 
@@ -374,12 +377,16 @@ do_install() {
         cp $setup_dir/tmp/tmp.self-signed.conf /etc/nginx/snippets/self-signed.conf  # Configuration snippet for TLS key and cert.
         cp $setup_dir/tmp/tmp.tls-params.conf /etc/nginx/snippets/tls-params.conf # Configuration snippet to define TLS settings
         
+        cp $setup_dir/tmp.nginx-stream-tls.conf /etc/nginx/conf.d/stream.conf
+        
         systemctl restart nginx  # restart Nginx to implement changes
 
     else  # setup_scheme == "NO_TLS"
         bash $setup_dir/config/tmp.nginx-iotree-no-tls.sh $setup_dir $server_ip $machine_name > $setup_dir/tmp/nginx-iotree-no-tls.conf
         cp $setup_dir/tmp/nginx-iotree-no-tls.conf /etc/nginx/sites-available/
         ln -s /etc/nginx/sites-available/nginx-iotree-no-tls.conf /etc/nginx/sites-enabled
+
+        cp $setup_dir/tmp.nginx-stream-no-tls.conf /etc/nginx/conf.d/stream.conf
         
         systemctl restart nginx  # restart Nginx to implement changes
     fi

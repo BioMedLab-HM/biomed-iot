@@ -1,8 +1,6 @@
 """Utility functions for the setup process"""
 
 import os
-import platform
-import sys
 import random
 import string
 import subprocess
@@ -59,12 +57,16 @@ def run_bash(command):
         return f"Error executing command: {e.cmd}\nOutput:\n{e.stderr}\n"  
 
 
-def get_random_string(string_length):
+def get_random_string(string_length, incl_symbols=False):
     """
     Define the characters to include in the random string
-    with no symbols for easy copy paste
+    Leave incl_symbols to False (no symbols in password) for easy copy paste
+    but make passwords etc. longer for security.
     """
-    characters = string.ascii_letters + string.digits  
+    symbols = "!@#$%&*()_+-=[]}{|;:<>/?"
+    characters = string.ascii_letters + string.digits
+    if incl_symbols:
+        characters += symbols
     # Generate a random string of the specified length
     rand_str = ''.join(random.choice(characters) for _ in range(string_length))
     return rand_str

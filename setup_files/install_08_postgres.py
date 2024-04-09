@@ -37,6 +37,8 @@ def install_postgres():
     config_data = {
         "POSTGRES_NAME": db_name,
         "POSTGRES_USER": username,
-        "POSTGRES_PASSWORD": password
+        "POSTGRES_PASSWORD": password,
+        "POSTGRES_HOST": "127.0.0.1",
+        "POSTGRES_PORT": "5432",
     }
     return config_data

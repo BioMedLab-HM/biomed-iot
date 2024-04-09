@@ -9,7 +9,7 @@ def install_grafana():
     
 
     commands = [
-        ''
+        'echo "Grafana installation not yet implemented"'
     ]
 
     for command in commands:
@@ -17,7 +17,9 @@ def install_grafana():
         log(output, GRAFANA_INSTALL_LOG_FILE_NAME)
 
     config_data = {
-
+        "GRAFANA_HOST": "localhost",
+        "GRAFANA_PORT": 3000,
+        "GRAFANA_ORG_NAME": "iotree42",
     }
     
     return config_data

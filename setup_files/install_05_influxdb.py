@@ -90,15 +90,18 @@ def install_influxdb(architecture):
     influx_all_access_token = run_bash(f"influx auth create --org {influx_org_name} --all-access --description '{influx_org_name}-all-access' | awk 'NR>1 {{print $3}}'", INFLUXDB_INSTALL_LOG_FILE_NAME).strip()
 
     config_data = {
+        "INFLUX_HOST": "localhost",
+        "INFLUX_PORT": 8086,
         "INFLUX_ADMIN_USERNAME": influx_username,
         "INFLUX_ADMIN_PASSWORD": influx_password,
         "INFLUX_ADMIN_BUCKET": influx_username,
         "INFLUX_ORG_NAME": influx_org_name,
         "INFLUX_ORG_ID": influx_org_id,
         "INFLUX_OPERATOR_TOKEN": influx_operator_token,
-        "INFLUX_ALL_ACCESS_TOKEN": influx_all_access_token
+        "INFLUX_ALL_ACCESS_TOKEN": influx_all_access_token,
     }
 
+    log("InfluxDB installation done", INFLUXDB_INSTALL_LOG_FILE_NAME)
     # Test if really necessary in case influxdb installation changes permissions
     # chmod 755 ./dj_iotree/staticfiles  # or for user directory alltogether
     return config_data

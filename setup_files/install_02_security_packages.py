@@ -29,3 +29,4 @@ def install_security_packages():
     for command in commands:
         output = run_bash(command)
         log(output, SECURITY_INSTALL_LOG_FILE_NAME)
+        

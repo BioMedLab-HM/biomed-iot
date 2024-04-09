@@ -12,7 +12,6 @@ from django.db import IntegrityError
 import random
 import string
 from django.db import transaction
-from django.conf import settings
 from .services.nodered_utils import NoderedContainer, update_nodered_nginx_conf
 from .services.mosquitto_utils import MqttMetaDataManager, MqttClientManager, RoleType
 from .services.code_loader import load_code_examples

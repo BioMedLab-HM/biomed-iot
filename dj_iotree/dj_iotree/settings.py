@@ -15,15 +15,20 @@ import json
 import tomllib
 from pathlib import Path
 from django.db.backends.postgresql.psycopg_any import IsolationLevel
+from .config.app_config import AppConfig
 
-# TODO: config befüllen
+
 # TODO: Optional config verschlüsseln
-with open("/etc/iotree/config.toml", "rb") as f:
-    config = tomllib.load(f)
+config_path = "/etc/iotree/config.toml"
+config = AppConfig(config_path)
+
+# TODO: Alter Configzugrifef entfernen (auch Nodered und MQTT Manager)
+# with open("/etc/iotree/config.toml", "rb") as f:
+#     config = tomllib.load(f)
 
 # Data from config.toml for other modules
-MOSQUITTO_SETTINGS = config['mosquitto']
-NODERED_SETTINGS = config['nodered']
+# MOSQUITTO_SETTINGS = config['mosquitto']
+# NODERED_SETTINGS = config['nodered']
 
 
 # Build paths inside the project like this: BASE_DIR / 'subdir'.
@@ -34,12 +39,16 @@ BASE_DIR = Path(__file__).resolve().parent.parent
 # See https://docs.djangoproject.com/en/4.2/howto/deployment/checklist/
 
 # SECURITY WARNING: keep the secret key used in production secret!
-SECRET_KEY = config['django']['SECRET_KEY']
+SECRET_KEY = config.django_secret_key # ['django']['DJANGO_SECRET_KEY']
 
 # SECURITY WARNING: don't run with debug turned on in production!
 DEBUG = True  # TODO: set False before deployment
 
-ALLOWED_HOSTS = [config['host']['IP'], config['host']['DOMAIN'], "localhost", "127.0.0.1"]
+ALLOWED_HOSTS = [config.ip, # ['host']['IP'], 
+                 config.hostname, # ['host']['HOSTNAME'], 
+                 config.domain, # ['host']['DOMAIN'], 
+                 "localhost",
+                 "127.0.0.1"]
 
 
 # Application definition
@@ -103,12 +112,12 @@ DATABASES = {
         'NAME': BASE_DIR / 'db.sqlite3',
         
         # uncomment for postgres (in production)
-        # "ENGINE": config['postgres']['ENGINE'],
-        # 'NAME': config['postgres']['NAME'],  # the database name
-        # 'USER': config['postgres']['USER'],
-        # 'PASSWORD': config['postgres']['PASSWORD'],
-        # 'HOST': config['postgres']['HOST'],
-        # 'PORT': config['postgres']['PORT'],
+        'ENGINE': 'django.db.backends.postgresql',
+        'NAME': config.postgres_name, # ['postgres']['POSTGRES_NAME'],  # the database name
+        'USER': config.postgres_user, # ['postgres']['POSTGRES_USER'],
+        'PASSWORD': config.postgres_password, # ['postgres']['POSTGRES_PASSWORD'],
+        'HOST': config.postgres_host, # ['postgres']['POSTGRES_HOST'],
+        'PORT': config.postgres_port, # ['postgres']['POSTGRES_PORT'],
     }
 }
 
@@ -196,11 +205,11 @@ LOGIN_URL = 'login'
 # LOGIN_URL='/admin/login/' # LOGIN_URL auf admin/login nur vorrübergehend für OAuth setup
 
 EMAIL_BACKEND = 'django.core.mail.backends.smtp.EmailBackend'
-EMAIL_HOST = config['mail']["EMAIL_HOST"]
-EMAIL_PORT = config['mail']["EMAIL_PORT"]
+EMAIL_HOST = config.reset_email_host # ['mail']["RES_EMAIL_HOST"]
+EMAIL_PORT = config.reset_email_port #['mail']["RES_EMAIL_PORT"]
 EMAIL_USE_TLS = True
-EMAIL_HOST_PASSWORD = config['mail']["SENDING_PASS"]
-EMAIL_HOST_USER = config['mail']["SENDING_MAIL"]
+EMAIL_HOST_PASSWORD = config.reset_email_password # ['mail']["RES_EMAIL_PASSWORD"]
+EMAIL_HOST_USER = config.reset_email_address # ['mail']["RES_EMAIL_ADDRESS"]
 
 
 # Default primary key field type

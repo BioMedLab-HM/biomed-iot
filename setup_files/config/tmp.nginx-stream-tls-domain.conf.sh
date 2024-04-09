@@ -1,12 +1,5 @@
 #!/bin/sh
 
-# TODO: 
-# - Ergänzungen bei Gunicorn?
-# - location /media/ ...
-# - ggf. Grafana?
-# - weitere Dienste?
-# - Prüfen ob include snippets NACH Ergänzungen durch certbot stattfinden
-
 # Get passed parameter
 DOMAIN=$1
 

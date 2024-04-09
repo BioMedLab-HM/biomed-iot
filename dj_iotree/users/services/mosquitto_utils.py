@@ -19,8 +19,8 @@ class MqttMetaDataManager():
     def __init__(self, user):
         self.user = user
         self.metadata = self._get_or_create_mqtt_meta_data()
-        self.dynsec_username = settings.MOSQUITTO_SETTINGS["DYNSEC_USER"]
-        self.dynsec_password = settings.MOSQUITTO_SETTINGS["DYNSEC_PASSWORD"]
+        self.dynsec_username = settings.config.dynsec_control_user # MOSQUITTO_SETTINGS["DYNSEC_USER"]
+        self.dynsec_password = settings.config.dynsec_control_pw  # MOSQUITTO_SETTINGS["MOSQUITTO_DYNSEC_PASSWORD"]
 
     def _get_or_create_mqtt_meta_data(self):
         """
@@ -121,8 +121,8 @@ class MqttClientManager():
     """
     def __init__(self, user):
         self.user = user
-        self.dynsec_username = settings.MOSQUITTO_SETTINGS["DYNSEC_USER"]
-        self.dynsec_password = settings.MOSQUITTO_SETTINGS["DYNSEC_PASSWORD"]
+        self.dynsec_username = settings.config.dynsec_control_user # MOSQUITTO_SETTINGS["DYNSEC_USER"]
+        self.dynsec_password = settings.config.dynsec_control_pw # MOSQUITTO_SETTINGS["DYNSEC_PASSWORD"]
 
     def create_client(self, textname="New Device", role_type=None):
         # Generate a unique username and password for the MQTT client

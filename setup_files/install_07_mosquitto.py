@@ -6,8 +6,8 @@ def install_mosquitto(setup_dir, setup_scheme):
     # Generate random credentials
     dynsec_admin_name = get_random_string(10)
     dynsec_admin_pass = get_random_string(50)
-    dj_mqtt_controle_user = get_random_string(10)
-    dj_mqtt_controle_pw = get_random_string(50)
+    dynsec_control_user = get_random_string(10)
+    dynsec_control_pw = get_random_string(50)
     mqtt_in_to_db_user = get_random_string(10)
     mqtt_in_to_db_pw = get_random_string(50)
     mqtt_out_to_db_user = get_random_string(10)
@@ -34,7 +34,7 @@ def install_mosquitto(setup_dir, setup_scheme):
     config_path = get_conf_path()
     dynsec_command_script = f"{config_path}/tmp.mosquitto-dynsec-commands.sh"
     dynsec_commands = (f"bash {dynsec_command_script} " 
-                      f"{dj_mqtt_controle_user} {dj_mqtt_controle_pw} " 
+                      f"{dynsec_control_user} {dynsec_control_pw} " 
                       f"{mqtt_in_to_db_user} {mqtt_in_to_db_pw} " 
                       f"{mqtt_out_to_db_user} {mqtt_out_to_db_pw}"
     )
@@ -66,14 +66,14 @@ def install_mosquitto(setup_dir, setup_scheme):
         "MOSQUITTO_PORT": 1883,
         "DYNSEC_TOPIC": "$CONTROL/dynamic-security/v1",
         "DYNSEC_RESPONSE_TOPIC": "$CONTROL/dynamic-security/v1/response",
-        "DYNSEC_ADMIN": dynsec_admin_name,
-        "DYNSEC_ADMIN_PASS": dynsec_admin_pass,
-        "DJ_MQTT_CONTROLE_USER": dj_mqtt_controle_user,
-        "DJ_MQTT_CONTROLE_PW": dj_mqtt_controle_pw,
+        "DYNSEC_ADMIN_USER": dynsec_admin_name,
+        "DYNSEC_ADMIN_PW": dynsec_admin_pass,
+        "DYNSEC_CONTROL_USER": dynsec_control_user,
+        "DYNSEC_CONTROL_PW": dynsec_control_pw,
         "MQTT_IN_TO_DB_USER": mqtt_in_to_db_user,
         "MQTT_IN_TO_DB_PW": mqtt_in_to_db_pw,
         "MQTT_OUT_TO_DB_USER": mqtt_out_to_db_user,
         "MQTT_OUT_TO_DB_PW": mqtt_out_to_db_pw
     }
-
+    log("Mosquitto installation done", MOSQUITTO_INSTALL_LOG_FILE_NAME)
     return config_data
