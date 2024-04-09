@@ -35,21 +35,6 @@ def get_linux_codename():
         print(msg)
         log(msg)
         return None
-    
-def get_and_check_cpu_architecture():
-    """Check system's CPU architecture."""
-    supported_architectures = ["amd64", "x86_64", "arm64", "aarch64"]
-    cpu_architecture = platform.machine()
-    if cpu_architecture.lower() not in supported_architectures:
-        msg = (f"Your system architecture '{cpu_architecture}' is not "
-            "supported. Only "amd64", "x86_64", "arm64"or  "aarch64" is "
-            "supported.\nExiting Setup"
-        )
-        print(msg)
-        log(msg)
-        sys.exit(1)
-    
-    return cpu_architecture
 
 # Get the directory where this script is located
   # base_dir = os.path.dirname(os.path.abspath(__file__))
@@ -63,13 +48,16 @@ def log(message, log_file_name='main.log'):
         with open(log_file_path, 'a') as file:
             file.write(message + '\n')
 
-def run_bash(command, log_file_name='main.log'):
-    """Execute a Bash command and log its output to a specified log file."""
+def run_bash(command):
+    """Execute a Bash command and return its output or an error message."""
     try:
-        subprocess.run(command, shell=True, check=True, stdout=log_file, stderr=subprocess.STDOUT, text=True)
+        result = subprocess.run(command, shell=True, check=True, capture_output=True, text=True)
+        # Return the standard output of the command
+        return result.stdout 
     except subprocess.CalledProcessError as e:
-        log(f"Error executing command: {e.cmd}\nOutput:\n{e.output}\n")
-        raise
+        # Return the standard error output
+        return f"Error executing command: {e.cmd}\nOutput:\n{e.stderr}\n"  
+
 
 def get_random_string(string_length):
     """

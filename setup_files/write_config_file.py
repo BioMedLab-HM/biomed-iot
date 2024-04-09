@@ -48,6 +48,7 @@ def write_config_file(values, destination):
         INFLUX_ALL_ACCESS_TOKEN = "{INFLUX_ALL_ACCESS_TOKEN}"
 
         [grafana]
+        GRAFANA_ORG_NAME = "{GRAFANA_ORG_NAME}"
         """.format(**values)
 
     with open(destination, 'w') as config_file:

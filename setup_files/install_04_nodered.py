@@ -1,4 +1,4 @@
-from .setup_utils import run_bash, get_conf_path
+from .setup_utils import run_bash, log, get_conf_path
 
 NODERED_INSTALL_LOG_FILE_NAME = "install_nodered.log"
 
@@ -35,7 +35,8 @@ def install_nodered(setup_scheme):
     ]
 
     for command in commands:
-        run_bash(command, NODERED_INSTALL_LOG_FILE_NAME)
+        output = (command)
+        log(output, NODERED_INSTALL_LOG_FILE_NAME)
 
     full_script_path = f'{script_path}/{script_name}'
     config_data = {"SERVERBLOCK_CREATE_SCRIPT_PATH":full_script_path}

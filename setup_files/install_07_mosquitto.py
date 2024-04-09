@@ -1,4 +1,4 @@
-from setup_utils import run_bash, get_random_string, get_conf_path
+from setup_utils import run_bash, log, get_random_string, get_conf_path
 
 MOSQUITTO_INSTALL_LOG_FILE_NAME = "install_mosquitto.log"
 
@@ -27,7 +27,8 @@ def install_mosquitto(setup_dir, setup_scheme):
     ]
 
     for command in commands:
-        run_bash(command, MOSQUITTO_INSTALL_LOG_FILE_NAME)
+        output = run_bash(command)
+        log(output, MOSQUITTO_INSTALL_LOG_FILE_NAME)
 
     # Add Clients and Roles to dynamic-security.json using a prepared script
     config_path = get_conf_path()
@@ -37,22 +38,28 @@ def install_mosquitto(setup_dir, setup_scheme):
                       f"{mqtt_in_to_db_user} {mqtt_in_to_db_pw} " 
                       f"{mqtt_out_to_db_user} {mqtt_out_to_db_pw}"
     )
-    run_bash(dynsec_commands, MOSQUITTO_INSTALL_LOG_FILE_NAME)
+    run_bash(dynsec_commands)
+    log("dynsec_commands sent", MOSQUITTO_INSTALL_LOG_FILE_NAME)
 
     # Configure Mosquitto for TLS or non-TLS
-    conf_script = ("tmp.mosquitto-tls.conf.sh" if setup_scheme != "NO_TLS" \
-        else "tmp.mosquitto-no-tls.conf.sh")
+    if setup_scheme == "NO_TLS":
+        conf_script = "tmp.mosquitto-no-tls.conf.sh"
+        file_name = "mosquitto-no-tls.conf"
+    else:
+        conf_script = "tmp.mosquitto-tls.conf.sh"
+        file_name = "mosquitto-tls.conf"
     
     conf_command = (f"bash {config_path}/{conf_script} > "
-                    f"{setup_dir}/setup_files/tmp/mosquitto.conf")
-    run_bash(conf_command, MOSQUITTO_INSTALL_LOG_FILE_NAME)
+                    f"{setup_dir}/setup_files/tmp/{file_name}")
+    output = run_bash(conf_command)
+    log(output, MOSQUITTO_INSTALL_LOG_FILE_NAME)
 
-    run_bash(f"cp {setup_dir}/tmp/mosquitto.conf /etc/mosquitto/conf.d/", 
-        MOSQUITTO_INSTALL_LOG_FILE_NAME
-    )
+    out = run_bash(f"cp {setup_dir}/setup_files/tmp/{file_name} /etc/mosquitto/conf.d/")
+    log(out, MOSQUITTO_INSTALL_LOG_FILE_NAME)
 
     # Restart Mosquitto to apply configurations
-    run_bash("systemctl restart mosquitto.service", MOSQUITTO_INSTALL_LOG_FILE_NAME)
+    output = run_bash("systemctl restart mosquitto.service")
+    log(output, MOSQUITTO_INSTALL_LOG_FILE_NAME)
 
     config_data = {
         "MOSQUITTO_HOST": "localhost",

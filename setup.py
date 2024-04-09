@@ -18,6 +18,8 @@ from setup_files.install_03_docker  import install_docker
 from setup_files.install_04_nodered import install_nodered
 
 
+MAIN_INSTALL_LOG_FILE_NAME = "main.log"
+
 def print_logo_header():
     logo_header = """
 ******************************************
@@ -44,9 +46,9 @@ def get_and_check_cpu_architecture():
     supported_architectures = ["amd64", "x86_64", "arm64", "aarch64"]
     cpu_architecture = platform.machine()
     if cpu_architecture.lower() not in supported_architectures:
-        msg = (f"Your system architecture '{cpu_architecture}' is not "
-            "supported. Only "amd64", "x86_64", "arm64"or  "aarch64" is "
-            "supported.\nExiting Setup"
+        msg = (f'Your system architecture "{cpu_architecture}" is not '
+            'supported. Only "amd64", "x86_64", "arm64"or  "aarch64" is '
+            'supported.\nExiting Setup'
         )
         print(msg)
         log(msg)
@@ -215,9 +217,9 @@ def main():
     setup_dir = get_setup_dir()
     django_admin_name = None
     django_admin_pass = None
-    django_admin_email = None
     pwreset_email = None
-    pwreset_email_pass = None
+    pwreset_email = None
+    pwreset_pass = None
     domain = None
     setup_scheme = None
 
@@ -287,19 +289,19 @@ def main():
     # nodered_config_data = install_nodered(setup_scheme)
     log("Node-RED installed")
 
-    # install_influxdb(arch)
+    # influxdb_config_data = install_influxdb(arch)
     log("InfluxDB installed")
 
-    # TODO: install_grafana(arch)
+    # TODO: grafana_config_data = install_grafana(arch)
     log("Grafana installed")
 
-    # TODO: install_mosquitto(setup_scheme, arch)
+    # mosquitto_config_data = install_mosquitto(setup_scheme, arch)
     log("Mosquitto Broker installed")
 
     # postgres_config_data = install_postgres()
     log("PostgreSQL database installed")
 
-    # TODO: install_django()
+    # TODO: django_config_data = install_django()
     log("Django installed")
 
     # TODO: install_gunicorn()

@@ -1,4 +1,4 @@
-from .setup_utils import run_bash, get_setup_dir
+from .setup_utils import run_bash, log, get_setup_dir
 
 SECURITY_INSTALL_LOG_FILE_NAME = "install_security_packages.log"
 
@@ -27,4 +27,5 @@ def install_security_packages():
         "systemctl restart fail2ban"
     ]
     for command in commands:
-        run_bash(command, SECURITY_INSTALL_LOG_FILE_NAME)
+        output = run_bash(command)
+        log(output, SECURITY_INSTALL_LOG_FILE_NAME)

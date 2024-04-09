@@ -1,4 +1,4 @@
-from setup_utils import run_bash, get_random_string
+from setup_utils import run_bash, log, get_random_string
 
 INFLUXDB_INSTALL_LOG_FILE_NAME = "install_influxdb.log"
 
@@ -78,10 +78,11 @@ def install_influxdb(architecture):
     installation_commands.append(config_command)
 
     for command in installation_commands:
-        run_bash(command, INFLUXDB_INSTALL_LOG_FILE_NAME)
+        output = run_bash(command)
+        log(output, INFLUXDB_INSTALL_LOG_FILE_NAME)
 
     # Retrieve organization ID
-    influx_org_id = run_bash("influx org list | awk '/iotree42/ && NR>1 {print $1}'", INFLUXDB_INSTALL_LOG_FILE_NAME).strip()
+    influx_org_id = run_bash("influx org list | awk '/iotree42/ && NR>1 {print $1}'").strip()
 
     # Auth create commands: 
     # https://docs.influxdata.com/influxdb/cloud/reference/cli/influx/auth/create/
