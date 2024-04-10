@@ -5,7 +5,7 @@ from django.db import IntegrityError
 import secrets
 from django.contrib import messages
 from enum import Enum, unique
-from dev.iotree42.dj_iotree.dj_iotree.config_loader import config
+from dj_iotree.config_loader import config
 
 
 class MqttMetaDataManager():

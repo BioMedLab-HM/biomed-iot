@@ -1,6 +1,6 @@
 # Utility functions for Nodered
 import subprocess
-from dev.iotree42.dj_iotree.dj_iotree.config_loader import config
+from dj_iotree.config_loader import config
 from . import server_utils
 import docker
 

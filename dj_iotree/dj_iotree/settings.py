@@ -14,7 +14,7 @@ import os
 import json
 from pathlib import Path
 from django.db.backends.postgresql.psycopg_any import IsolationLevel
-from dev.iotree42.dj_iotree.dj_iotree.config_loader import config
+from dj_iotree.config_loader import config
 
 
 # Build paths inside the project like this: BASE_DIR / 'subdir'.
