@@ -1,6 +1,6 @@
 # Utility functions for Nodered
 import subprocess
-from django.conf import settings
+from dev.iotree42.dj_iotree.dj_iotree.config_loader import config
 from . import server_utils
 import docker
 
@@ -108,7 +108,7 @@ def update_nodered_nginx_conf(instance):
 
     # Path to the server block create script
     # Could be replaced by a python script
-    script_path = settings.config.serverblock_create_script_path # NODERED_SETTINGS['SERVERBLOCK_CREATE_SCRIPT_PATH']
+    script_path = config.nodered.server_block_create_script_path
 
     # Call the script with sudo
     print("jetzt kommt die Ausführung des Bash scriptes")
@@ -133,7 +133,7 @@ def del_nodered_nginx_conf(instance):
 
     # Path to the server block create script.
     # Could be replaced by a python script
-    script_path = settings.config.serverblock_create_script_path # NODERED_SETTINGS['SERVERBLOCK_CREATE_SCRIPT_PATH']
+    script_path = config.nodered.serverblock_create_script_path # NODERED_SETTINGS['SERVERBLOCK_CREATE_SCRIPT_PATH']
 
     command = ['sudo', 'rm', script_path, container_name]
     result = subprocess.run(

@@ -8,7 +8,7 @@ logger.debug("This is a test debug message.")
 class UsernameAuthBackend(ModelBackend):
     """
     Custom authentication backend. Allows users to log in using their username.
-    Created because of CustomUser model.
+    Created for CustomUser model.
     """
     def authenticate(self, request, username=None, password=None, **kwargs):
         """
@@ -41,7 +41,7 @@ class UsernameAuthBackend(ModelBackend):
 class EmailAuthBackend(ModelBackend):
     """
     Custom authentication backend. Allows users to log in using their email address.
-    Also created because of CustomUser model.
+    Created because of CustomUser model.
     """
     def authenticate(self, request, username=None, password=None, **kwargs):
         try:
