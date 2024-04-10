@@ -1,7 +1,7 @@
 # Temporary stuff
 TODO.txt
 tmp/  # automatically created and used during setup
-dj_venv/  # will be created in setup
+dj_iotree/dj_venv/  # will be created in setup
 migrations/
 playground/
 
