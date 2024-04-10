@@ -1,0 +1,11 @@
+{
+    "arduino": {
+      "filename": "arduino_template.cpp",
+      "headline": "Arduino (C++) MQTT Publish Example"
+    },
+    "python": {
+      "filename": "python_template.py",
+      "headline": "Python MQTT Publish Example"
+    }
+  }
+  

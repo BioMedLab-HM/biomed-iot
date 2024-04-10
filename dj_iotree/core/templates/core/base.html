@@ -1,0 +1,29 @@
+{% extends "core/base_parent.html" %}
+
+{% block base_content %}
+<div class="upper-background">
+    <div class="container">
+        <!-- Page Title-->
+        {% if title %}
+            <h2 style="font-weight: 250;">{{ title }}</h2>  <!-- font weight 400 is normal thickness -->
+        {% else %}
+            <h2 style="font-weight: 250; color: transparent">Hello</h2>
+        {% endif %}
+    </div>
+</div>
+<div class="lower-background">
+    <div class="container">
+        <div class="text-left mt-4 pb-4">
+            {% if messages %}
+                {% for message in messages %}
+                    <div class="alert alert-{{ message.tags }}">
+                        {{ message }}
+                    </div>
+                {% endfor %}
+            {% endif %}
+            <!-- Page Content-->
+            {% block content %}{% endblock content %}
+        </div>
+    </div>
+</div>
+{% endblock base_content %}
