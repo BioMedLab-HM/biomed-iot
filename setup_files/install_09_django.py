@@ -1,20 +1,24 @@
 from .setup_utils import get_setup_dir, get_linux_user, run_bash, log, get_random_string
 
 DJANGO_INSTALL_LOG_FILE_NAME = "install_09_django.log"
-linux_user = get_linux_user()
-setup_dir = get_setup_dir()
+
 
 def install_django(django_admin_email, django_admin_name, django_admin_pass, auto_generate_django_admin_credentials):
     """
     Setup Django environment, including virtual environment creation, 
     dependencies installation, migrations, and superuser creation.
     """
+    linux_user = get_linux_user()
+    setup_dir = get_setup_dir()
+
     django_secret = get_random_string(50, incl_symbols=True)
     if auto_generate_django_admin_credentials:
         django_admin_name = "admin-" + get_random_string(4)
         django_admin_pass = (get_random_string(4) + "-" 
                             + get_random_string(4) + "-" 
                             + get_random_string(4))
+
+
 
     # Create the Django virtual environment
     output = run_bash(f"runuser -u {linux_user} -- python3 -m venv {setup_dir}/dj_iotree/dj_venv")

@@ -1,8 +1,11 @@
-from .setup_utils import run_bash, log, get_setup_dir
+from .setup_utils import run_bash, log, get_setup_dir, get_conf_path
 
 SECURITY_INSTALL_LOG_FILE_NAME = "install_02_security_packages.log"
 
 def install_security_packages():
+    setup_dir = get_setup_dir()
+    config_path = get_conf_path()
+
     commands = [
         # Install ufw
         "apt install -y ufw",
@@ -23,8 +26,8 @@ def install_security_packages():
         "systemctl enable fail2ban",
 
         # Configure fail2ban
-        f"bash config/tmp.jail.local.sh > {get_setup_dir()}/tmp/jail.local",
-        f"cp {get_setup_dir()}/tmp/jail.local /etc/fail2ban/jail.local",
+        f"bash {config_path}/tmp.jail.local.sh > {setup_dir}/setup_files/tmp/jail.local",
+        f"cp {setup_dir}/setup_files/tmp/jail.local /etc/fail2ban/jail.local",
 
         # Restart fail2ban to apply any changes
         "systemctl restart fail2ban"

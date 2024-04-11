@@ -22,7 +22,7 @@ import sys
 import socket
 import platform
 import re
-from setup_files.setup_utils import get_linux_user, get_setup_dir, log
+from setup_files.setup_utils import get_linux_user, get_setup_dir, log, set_setup_dir_rights
 from setup_files.write_config_file import write_config_file
 from setup_files.install_01_basic_apt_packages import install_basic_apt_packages
 from setup_files.install_02_security_packages import install_security_packages
@@ -332,7 +332,7 @@ def main():
     print("Grafana installed")
     log("Grafana installed")
 
-    mosquitto_config_data = install_mosquitto(setup_scheme, arch)
+    mosquitto_config_data = install_mosquitto(setup_scheme)
     print("Mosquitto Broker installed")
     log("Mosquitto Broker installed")
 
@@ -340,6 +340,7 @@ def main():
     print("")
     log("PostgreSQL database installed")
 
+    set_setup_dir_rights()
     django_config_data = install_django(django_admin_email, 
                                         django_admin_name, 
                                         django_admin_pass, 
@@ -355,6 +356,7 @@ def main():
     print("NGINX installed")
     log("NGINX installed")
 
+    set_setup_dir_rights()
 
     """WRITE CONFIG FILE"""
     
@@ -368,13 +370,36 @@ def main():
         **django_config_data
     }
 
-    destination = '/etc/iotree/config.toml'
-    write_config_file(all_config_data, destination)
+    config_file_path = '/etc/iotree/config.toml'
+    write_config_file(all_config_data, config_file_path)
 
 
     """ FINAL INFORMATION OUTPUT FOR THE USER """
     # TBD
     # set pw reset credentials in config.toml
+    print("\nThe setup of IoTree42 has successfully completed."
+      "\nAccess your website's admin user credentials in '/etc/iotree/config.toml'.\n")
+
+    
+    msg_no_tls = (f"The website is accessible at http://{ip_address}")
+    msg_tls_no_domain = (f"The website is accessible at https://{ip_address}")
+    msg_tls_domain = (f"The website is accessible at https://{domain}")
+
+    if setup_scheme == "NO_TLS":
+        print(msg_no_tls)
+        log(msg_no_tls)
+    elif setup_scheme == "TLS_NO_DOMAIN":
+        print(msg_tls_no_domain)
+        log(msg_tls_no_domain)
+    else:
+        print(msg_tls_domain)
+        log(msg_tls_domain)
+    
+    print("\nFor detailed information on the installation process, "
+          f"please refer to the log files located in {setup_dir}.\n"
+          f"You can delete the directory 'tmp' in '{setup_dir}/setup_files/'")
+
+    print("\n--- END OF SETUP ---\n\n")
 
 if __name__ == "__main__":
     main()

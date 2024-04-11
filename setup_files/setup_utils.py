@@ -88,3 +88,10 @@ def get_random_string(string_length, incl_symbols=False):
     # Generate a random string of the specified length
     rand_str = ''.join(random.choice(characters) for _ in range(string_length))
     return rand_str
+
+def set_setup_dir_rights():
+    output = run_bash(f"chmod -R 775 {get_setup_dir()}")
+    log(output)
+    linux_user = get_linux_user()
+    output = run_bash(f"chown -R {linux_user}:{linux_user} {get_setup_dir()}")
+    log(output)

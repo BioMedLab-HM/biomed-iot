@@ -8,8 +8,7 @@
 # - Prüfen ob include snippets NACH Ergänzungen durch certbot stattfinden
 
 # Get passed parameter
-SETUP_DIR=$1
-DOMAIN=$2
+DOMAIN=$1
 
 # Define nginx server block template:
 # Certbot updates the server blocks automatically. 
@@ -26,7 +25,7 @@ server {
 
     # location to Django static files
     location /static/ {
-        root $SETUP_DIR/dj_iotree/staticfiles/;
+        alias /var/www/iotree42/static/;
     }
 
     # location and proxy pass to gunicorn server (the Django server)

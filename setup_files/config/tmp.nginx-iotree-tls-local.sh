@@ -8,9 +8,8 @@
 # TODO: change 302 to 301 after successfull testing (bei redirect)
 
 # Get passed parameter
-SETUP_DIR=$1
-IP_ADDRESS=$2
-MACHINE_NAME=$3
+IP_ADDRESS=$1
+MACHINE_NAME=$2
 
 # Define nginx server block template
 cat << EOF
@@ -25,7 +24,7 @@ server {
 
     # location to Django static files
     location /static/ {
-        alias $SETUP_DIR/dj_iotree/staticfiles/;
+        alias /var/www/iotree42/static/;
     }
 
     # location and proxy pass to gunicorn server (the Django server)

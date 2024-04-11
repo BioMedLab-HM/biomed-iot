@@ -22,38 +22,72 @@ def install_influxdb(architecture):
     influx_password = get_random_string(30)
     influx_operator_token = get_random_string(50)
 
+    # installation_commands_amd64 = [
+    #     # Ensure the temp directory exists and enter it
+    #     "mkdir -p ~/influx_install_tmp && cd ~/influx_install_tmp",
+    #     # Download and install InfluxDB
+    #     "curl -LO https://dl.influxdata.com/influxdb/releases/influxdb2_2.7.5-1_amd64.deb",
+    #     "sudo dpkg -i influxdb2_2.7.5-1_amd64.deb",
+    #     "sudo service influxdb start",
+    #     # Download and unpack the InfluxDB client, then move it
+    #     "wget https://dl.influxdata.com/influxdb/releases/influxdb2-client-2.7.3-linux-amd64.tar.gz",
+    #     "tar xvzf influxdb2-client-2.7.3-linux-amd64.tar.gz",
+    #     "sudo cp influx /usr/local/bin/",
+    #     # Cleanup and return to install_dir
+    #     "cd - && rm -rf ~/influx_install_tmp",
+    #     # Disables sending telemetry data to InfluxData
+    #     "echo 'reporting-disabled = \"true\"' | sudo tee -a /etc/influxdb/config.toml > /dev/null",
+    # ]
+
     installation_commands_amd64 = [
         # Ensure the temp directory exists and enter it
-        "mkdir -p ~/influx_install_tmp && cd ~/influx_install_tmp",
+        "mkdir -p ~/influx_install_tmp && cd ~/influx_install_tmp" +
         # Download and install InfluxDB
-        "curl -LO https://dl.influxdata.com/influxdb/releases/influxdb2_2.7.5-1_amd64.deb",
-        "sudo dpkg -i influxdb2_2.7.5-1_amd64.deb",
-        "sudo service influxdb start",
+        "curl -LO https://dl.influxdata.com/influxdb/releases/influxdb2_2.7.5-1_amd64.deb" +
+        "sudo dpkg -i influxdb2_2.7.5-1_amd64.deb" +
+        "sudo service influxdb start" +
         # Download and unpack the InfluxDB client, then move it
-        "wget https://dl.influxdata.com/influxdb/releases/influxdb2-client-2.7.3-linux-amd64.tar.gz",
-        "tar xvzf influxdb2-client-2.7.3-linux-amd64.tar.gz",
-        "sudo cp influx /usr/local/bin/",
+        "wget https://dl.influxdata.com/influxdb/releases/influxdb2-client-2.7.3-linux-amd64.tar.gz" +
+        "tar xvzf influxdb2-client-2.7.3-linux-amd64.tar.gz" +
+        "sudo cp influx /usr/local/bin/"  +
         # Cleanup and return to install_dir
-        "cd - && rm -rf ~/influx_install_tmp",
+        "cd - && rm -rf ~/influx_install_tmp" +
         # Disables sending telemetry data to InfluxData
-        "echo 'reporting-disabled = \"true\"' | sudo tee -a /etc/influxdb/config.toml > /dev/null",
+        "echo 'reporting-disabled = \"true\"' | sudo tee -a /etc/influxdb/config.toml > /dev/null"
     ]
+
+    # installation_commands_arm64 = [
+    #     # Ensure the temp directory exists and enter it
+    #     "mkdir -p ~/influx_install_tmp && cd ~/influx_install_tmp",
+    #     # Download and install InfluxDB
+    #     "curl -LO https://dl.influxdata.com/influxdb/releases/influxdb2_2.7.5-1_arm64.deb",
+    #     "sudo dpkg -i influxdb2_2.7.5-1_arm64.deb",
+    #     "sudo service influxdb start",
+    #     # Download and unpack the InfluxDB client, then move it
+    #     "wget https://dl.influxdata.com/influxdb/releases/influxdb2-client-2.7.3-linux-arm64.tar.gz",
+    #     "tar xvzf influxdb2-client-2.7.3-linux-arm64.tar.gz",
+    #     "cp influx /usr/local/bin/",
+    #     # Cleanup and return to install_dir
+    #     "cd - && rm -rf ~/influx_install_tmp",
+    #     # Disables sending telemetry data to InfluxData
+    #     "echo 'reporting-disabled = \"true\"' | sudo tee -a /etc/influxdb/config.toml > /dev/null",
+    # ]
 
     installation_commands_arm64 = [
         # Ensure the temp directory exists and enter it
-        "mkdir -p ~/influx_install_tmp && cd ~/influx_install_tmp",
+        "mkdir -p ~/influx_install_tmp && cd ~/influx_install_tmp" +
         # Download and install InfluxDB
-        "curl -LO https://dl.influxdata.com/influxdb/releases/influxdb2_2.7.5-1_arm64.deb",
-        "sudo dpkg -i influxdb2_2.7.5-1_arm64.deb",
-        "sudo service influxdb start",
+        "curl -LO https://dl.influxdata.com/influxdb/releases/influxdb2_2.7.5-1_arm64.deb" +
+        "sudo dpkg -i influxdb2_2.7.5-1_arm64.deb" +
+        "sudo service influxdb start" +
         # Download and unpack the InfluxDB client, then move it
-        "wget https://dl.influxdata.com/influxdb/releases/influxdb2-client-2.7.3-linux-arm64.tar.gz",
-        "tar xvzf influxdb2-client-2.7.3-linux-arm64.tar.gz",
-        "sudo cp influx /usr/local/bin/",
+        "wget https://dl.influxdata.com/influxdb/releases/influxdb2-client-2.7.3-linux-arm64.tar.gz" +
+        "tar xvzf influxdb2-client-2.7.3-linux-arm64.tar.gz" +
+        "cp influx /usr/local/bin/" +
         # Cleanup and return to install_dir
-        "cd - && rm -rf ~/influx_install_tmp",
+        "cd - && rm -rf ~/influx_install_tmp" +
         # Disables sending telemetry data to InfluxData
-        "echo 'reporting-disabled = \"true\"' | sudo tee -a /etc/influxdb/config.toml > /dev/null",
+        "echo 'reporting-disabled = \"true\"' | sudo tee -a /etc/influxdb/config.toml > /dev/null"
     ]
 
 
@@ -62,7 +96,7 @@ def install_influxdb(architecture):
     elif architecture in ["arm64", "aarch64"]:
         installation_commands = installation_commands_arm64
 
-    for command in installation_commands:
+    for command in installation_commands:  # loop unnecessary if 
         output = run_bash(command)
         log(output, INFLUXDB_INSTALL_LOG_FILE_NAME)
 

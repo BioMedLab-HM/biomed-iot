@@ -1,8 +1,11 @@
-from .setup_utils import run_bash, log, get_random_string, get_conf_path
+from .setup_utils import run_bash, log, get_random_string, get_setup_dir, get_conf_path
 
 MOSQUITTO_INSTALL_LOG_FILE_NAME = "install_07_mosquitto.log"
 
-def install_mosquitto(setup_dir, setup_scheme):
+def install_mosquitto(setup_scheme):
+    setup_dir = get_setup_dir()
+    config_path = get_conf_path()
+
     # Generate random credentials
     dynsec_admin_name = get_random_string(10)
     dynsec_admin_pass = get_random_string(50)
@@ -31,7 +34,6 @@ def install_mosquitto(setup_dir, setup_scheme):
         log(output, MOSQUITTO_INSTALL_LOG_FILE_NAME)
 
     # Add Clients and Roles to dynamic-security.json using a prepared script
-    config_path = get_conf_path()
     dynsec_command_script = f"{config_path}/tmp.mosquitto-dynsec-commands.sh"
     dynsec_commands = (f"bash {dynsec_command_script} " 
                       f"{dynsec_control_user} {dynsec_control_pw} " 
@@ -50,12 +52,12 @@ def install_mosquitto(setup_dir, setup_scheme):
         conf_script = "tmp.mosquitto-tls.conf.sh"
         file_name = "mosquitto-tls.conf"
     
-    conf_command = (f"bash {config_path}/{conf_script} > "
+    conf_command = (f"bash {config_path}/{conf_script} > " 
                     f"{setup_dir}/setup_files/tmp/{file_name}")
     output = run_bash(conf_command)
     log(output, MOSQUITTO_INSTALL_LOG_FILE_NAME)
 
-    out = run_bash(f"cp {setup_dir}/setup_files/tmp/{file_name} /etc/mosquitto/conf.d/")
+    out = run_bash(f"cp {setup_dir}/setup_files/tmp/{file_name} /etc/mosquitto/conf.d")
     log(out, MOSQUITTO_INSTALL_LOG_FILE_NAME)
 
     # Restart Mosquitto to apply configurations
