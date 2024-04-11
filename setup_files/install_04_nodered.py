@@ -17,8 +17,8 @@ def install_nodered(setup_scheme):
         - update_nginx_nodered_location.sh or nginx reload via inotifywait?
     """
     script_path = "/etc/iotree"
-    tls_script_name = "tmp.update_nginx_nodered_location_tls.sh"
-    non_tls_script_name = "tmp.update_nginx_nodered_location.sh"
+    tls_script_name = "update_nginx_nodered_location_tls.sh"
+    non_tls_script_name = "update_nginx_nodered_location.sh"
     script_name = (
         tls_script_name if setup_scheme in ["TLS_DOMAIN", "TLS_NO_DOMAIN"]
         else non_tls_script_name
@@ -35,7 +35,7 @@ def install_nodered(setup_scheme):
     ]
 
     for command in commands:
-        output = (command)
+        output = run_bash(command)
         log(output, NODERED_INSTALL_LOG_FILE_NAME)
 
     full_script_path = f'{script_path}/{script_name}'

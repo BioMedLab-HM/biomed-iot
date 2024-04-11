@@ -22,7 +22,7 @@ import sys
 import socket
 import platform
 import re
-from setup_files.setup_utils import get_linux_user, get_setup_dir, log, set_setup_dir_rights
+from setup_files.setup_utils import run_bash, get_linux_user, get_setup_dir, log, set_setup_dir_rights
 from setup_files.write_config_file import write_config_file
 from setup_files.install_01_basic_apt_packages import install_basic_apt_packages
 from setup_files.install_02_security_packages import install_security_packages
@@ -236,7 +236,7 @@ def main():
     """
 
     hostname = socket.gethostname()
-    ip_address = socket.gethostbyname(hostname)
+    ip_address = run_bash("ip addr | grep 'state UP' -A2 | tail -n1 | awk '{print $2}' | cut -f1  -d'/'")
     linux_user = get_linux_user()
     setup_dir = get_setup_dir()
     django_admin_name = None

@@ -30,8 +30,10 @@ def install_postgres():
 
     for command in setup_commands:
         run_bash(command, show_output=False)
-        print("Done: sudo -u postgres psql -c '...'")
-
+        msg = "Done: sudo -u postgres psql -c '...'"
+        print(msg)
+        log(msg, POSTGRESS_INSTALL_LOG_FILE_NAME)
+        
     config_data = {
         "POSTGRES_NAME": db_name,
         "POSTGRES_USER": username,
