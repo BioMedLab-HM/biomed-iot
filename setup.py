@@ -20,6 +20,7 @@ import sys
 import socket
 import platform
 import re
+import time
 from setup_files.setup_utils import run_bash, get_linux_user, get_setup_dir, log, set_setup_dir_rights
 from setup_files.write_config_file import write_config_file
 from setup_files.install_01_basic_apt_packages import install_basic_apt_packages
@@ -301,6 +302,9 @@ def main():
     print(msg)
     log(msg)
     
+    # Capture the start time to measure the duration of the setup routine
+    start_time = time.time()
+
     # TODO: build gateway zip file
 
     create_tmp_dir()
@@ -379,13 +383,18 @@ def main():
     config_file_path = '/etc/iotree/config.toml'
     write_config_file(all_config_data, config_file_path)
 
-
+    # Capture the end time
+    end_time = time.time()
+    # Calculate the total time taken
+    setup_duration_total = end_time - start_time
+    num_minutes = setup_duration_seconds // 60
+    num_seconds = setup_duration_total % 60
     """ FINAL INFORMATION OUTPUT FOR THE USER """
     # TBD
     # set pw reset credentials in config.toml
-    print("\n\n\n\nThe setup of IoTree42 has successfully completed."
-      "\nAccess your website's admin user credentials in '/etc/iotree/config.toml'.\n")
-
+    print("\n\n\n\nThe setup of IoTree42 has successfully completed in\n"
+          f"{num_minutes} min and {num_seconds} s.\nAccess your website's "
+          "admin user credentials in '/etc/iotree/config.toml'.\n")
     
     msg_no_tls = (f"The website is accessible at http://{ip_address}")
     msg_tls_no_domain = (f"The website is accessible at https://{ip_address}")
