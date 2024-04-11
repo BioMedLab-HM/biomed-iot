@@ -1,4 +1,4 @@
-from setup_utils import run_bash, log, get_random_string, get_conf_path
+from .setup_utils import run_bash, log, get_random_string, get_conf_path
 
 MOSQUITTO_INSTALL_LOG_FILE_NAME = "install_mosquitto.log"
 

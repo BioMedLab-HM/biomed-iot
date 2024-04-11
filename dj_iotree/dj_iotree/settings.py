@@ -97,7 +97,7 @@ DATABASES = {
         'ENGINE': 'django.db.backends.sqlite3',
         'NAME': BASE_DIR / 'db.sqlite3',
         
-        # uncomment for postgres (in production)
+        # uncomment then 'python manage.py migrate' for postgres (in production)
         # 'ENGINE': 'django.db.backends.postgresql',
         # 'NAME': config.postgres.POSTGRES_NAME,
         # 'USER': config.postgres.POSTGRES_USER,

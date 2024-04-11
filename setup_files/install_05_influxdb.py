@@ -1,4 +1,4 @@
-from setup_utils import run_bash, log, get_random_string
+from .setup_utils import run_bash, log, get_random_string
 
 INFLUXDB_INSTALL_LOG_FILE_NAME = "install_influxdb.log"
 

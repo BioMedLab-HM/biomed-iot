@@ -1,4 +1,4 @@
-from setup_utils import run_bash, log, get_setup_dir
+from .setup_utils import run_bash, log, get_setup_dir
 
 NGINX_INSTALL_LOG_FILE_NAME = "install_nginx.log"
 

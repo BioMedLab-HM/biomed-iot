@@ -1,4 +1,4 @@
-from setup_utils import get_setup_dir, get_linux_user, run_bash, log, get_random_string
+from .setup_utils import get_setup_dir, get_linux_user, run_bash, log, get_random_string
 
 DJANGO_INSTALL_LOG_FILE_NAME = "install_django.log"
 linux_user = get_linux_user()
