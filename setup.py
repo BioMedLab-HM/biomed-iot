@@ -243,7 +243,7 @@ def main():
     django_admin_pass = None
     pwreset_email = None
     pwreset_pass = None
-    domain = None
+    domain = ""
     setup_scheme = None
 
     print_logo_header()
@@ -359,15 +359,22 @@ def main():
     set_setup_dir_rights()
 
     """WRITE CONFIG FILE"""
+
+    host_config_data = {
+        "IP": ip_address,
+        "HOSTNAME": hostname,
+        "DOMAIN": domain,
+    }
     
     all_config_data = {
+        **host_config_data,
         **pw_reset_credentials,
         **nodered_config_data,
         **influxdb_config_data,
         **grafana_config_data,
         **mosquitto_config_data,
         **postgres_config_data,
-        **django_config_data
+        **django_config_data,
     }
 
     config_file_path = '/etc/iotree/config.toml'

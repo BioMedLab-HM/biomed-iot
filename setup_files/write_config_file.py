@@ -6,43 +6,16 @@ def write_config_file(all_config_data, destination):
     TODO: Vervollständigen für Grafana!
     """
     content = """
-        [mail]
-        RES_EMAIL_HOST = "{RES_EMAIL_HOST}"
-        RES_EMAIL_PORT = "{RES_EMAIL_PORT}"
-        RES_EMAIL_ADDRESS = "{RES_EMAIL_ADDRESS}"
-        RES_EMAIL_PASSWORD = "{RES_EMAIL_PASSWORD}"
-
-        [django]
-        DJANGO_SECRET_KEY = "{DJANGO_SECRET_KEY}"
-        DJANGO_ADMIN_MAIL = "{DJANGO_ADMIN_MAIL}"
-        DJANGO_ADMIN_NAME = "{DJANGO_ADMIN_NAME}"
-        DJANGO_ADMIN_PASS = "{DJANGO_ADMIN_PASS}"
-
         [host]
         IP = "{IP}"
         HOSTNAME = "{HOSTNAME}"
         DOMAIN = "{DOMAIN}"
 
-        [postgres]
-        POSTGRES_NAME = "{POSTGRES_NAME}"
-        POSTGRES_USER = "{POSTGRES_USER}"
-        POSTGRES_PASSWORD = "{POSTGRES_PASSWORD}"
-        POSTGRES_HOST = "{POSTGRES_HOST}"
-        POSTGRES_PORT = "{POSTGRES_PORT}"
-
-        [mosquitto]
-        MOSQUITTO_HOST = "{MOSQUITTO_HOST}"
-        MOSQUITTO_PORT = "{MOSQUITTO_PORT}"
-        DYNSEC_TOPIC = "{DYNSEC_TOPIC}"
-        DYNSEC_RESPONSE_TOPIC = "{DYNSEC_RESPONSE_TOPIC}"
-        DYNSEC_ADMIN_USER = "{DYNSEC_ADMIN_USER}"
-        DYNSEC_ADMIN_PW = "{DYNSEC_ADMIN_PW}"
-        DYNSEC_CONTROL_USER = "{DYNSEC_CONTROL_USER}"
-        DYNSEC_CONTROL_PW = "{DYNSEC_CONTROL_PW}"
-        MQTT_IN_TO_DB_USER = "{MQTT_IN_TO_DB_USER}"
-        MQTT_IN_TO_DB_PW = "{MQTT_IN_TO_DB_PW}"
-        MQTT_OUT_TO_DB_USER = "{MQTT_OUT_TO_DB_USER}"
-        MQTT_OUT_TO_DB_PW = "{MQTT_OUT_TO_DB_PW}"
+        [mail]
+        RES_EMAIL_HOST = "{RES_EMAIL_HOST}"
+        RES_EMAIL_PORT = "{RES_EMAIL_PORT}"
+        RES_EMAIL_ADDRESS = "{RES_EMAIL_ADDRESS}"
+        RES_EMAIL_PASSWORD = "{RES_EMAIL_PASSWORD}"
 
         [nodered]
         SERVERBLOCK_CREATE_SCRIPT_PATH = "{SERVERBLOCK_CREATE_SCRIPT_PATH}"
@@ -62,6 +35,33 @@ def write_config_file(all_config_data, destination):
         GRAFANA_HOST: "{GRAFANA_HOST}"
         GRAFANA_PORT: "{GRAFANA_PORT}"
         GRAFANA_ORG_NAME = "{GRAFANA_ORG_NAME}"
+
+        [mosquitto]
+        MOSQUITTO_HOST = "{MOSQUITTO_HOST}"
+        MOSQUITTO_PORT = "{MOSQUITTO_PORT}"
+        DYNSEC_TOPIC = "{DYNSEC_TOPIC}"
+        DYNSEC_RESPONSE_TOPIC = "{DYNSEC_RESPONSE_TOPIC}"
+        DYNSEC_ADMIN_USER = "{DYNSEC_ADMIN_USER}"
+        DYNSEC_ADMIN_PW = "{DYNSEC_ADMIN_PW}"
+        DYNSEC_CONTROL_USER = "{DYNSEC_CONTROL_USER}"
+        DYNSEC_CONTROL_PW = "{DYNSEC_CONTROL_PW}"
+        MQTT_IN_TO_DB_USER = "{MQTT_IN_TO_DB_USER}"
+        MQTT_IN_TO_DB_PW = "{MQTT_IN_TO_DB_PW}"
+        MQTT_OUT_TO_DB_USER = "{MQTT_OUT_TO_DB_USER}"
+        MQTT_OUT_TO_DB_PW = "{MQTT_OUT_TO_DB_PW}"
+
+        [postgres]
+        POSTGRES_NAME = "{POSTGRES_NAME}"
+        POSTGRES_USER = "{POSTGRES_USER}"
+        POSTGRES_PASSWORD = "{POSTGRES_PASSWORD}"
+        POSTGRES_HOST = "{POSTGRES_HOST}"
+        POSTGRES_PORT = "{POSTGRES_PORT}"
+        
+        [django]
+        DJANGO_SECRET_KEY = "{DJANGO_SECRET_KEY}"
+        DJANGO_ADMIN_MAIL = "{DJANGO_ADMIN_MAIL}"
+        DJANGO_ADMIN_NAME = "{DJANGO_ADMIN_NAME}"
+        DJANGO_ADMIN_PASS = "{DJANGO_ADMIN_PASS}"
         """.format(**all_config_data)
 
     with open(destination, 'w') as config_file:
