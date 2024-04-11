@@ -76,7 +76,7 @@ def install_mosquitto(setup_scheme):
         "MQTT_IN_TO_DB_USER": mqtt_in_to_db_user,
         "MQTT_IN_TO_DB_PW": mqtt_in_to_db_pw,
         "MQTT_OUT_TO_DB_USER": mqtt_out_to_db_user,
-        "MQTT_OUT_TO_DB_PW": mqtt_out_to_db_pw
+        "MQTT_OUT_TO_DB_PW": mqtt_out_to_db_pw,
     }
     
     log("Mosquitto installation done", MOSQUITTO_INSTALL_LOG_FILE_NAME)

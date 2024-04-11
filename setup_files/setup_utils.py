@@ -36,9 +36,9 @@ def get_linux_codename():
 
 # Get the directory where this script is located
   # base_dir = os.path.dirname(os.path.abspath(__file__))
-log_dir = os.path.join(get_setup_dir(), "setup_files", "logs")
+log_dir = os.path.join(get_setup_dir(), "setup_files", "setup_logs")
 
-# Ensure the logs directory exists
+# Ensure the setup_logs directory exists
 os.makedirs(log_dir, exist_ok=True)
 
 def log(message, log_file_name='main.log'):

@@ -9,7 +9,7 @@ DOMAIN=$1
 
 cat << EOF
 # Direct MQTT traffic through nginx as reverse proxy
-load_module modules/ngx_stream_module.so;
+#load_module modules/ngx_stream_module.so;
 stream {
     server {
         listen 8883 ssl; # Listen for MQTT over TLS

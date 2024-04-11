@@ -41,7 +41,7 @@ def install_influxdb(architecture):
 
     installation_commands_amd64 = [
         # Ensure the temp directory exists and enter it
-        #"mkdir -p ~/influx_install_tmp && cd ~/influx_install_tmp" +
+        #"mkdir -p ~/influx_install_tmp && cd ~/influx_install_tmp" +  # works only when all commands are concatenated to one command with &&
         # Download and install InfluxDB
         "curl -LO https://dl.influxdata.com/influxdb/releases/influxdb2_2.7.5-1_amd64.deb",
         "sudo dpkg -i influxdb2_2.7.5-1_amd64.deb",
