@@ -90,12 +90,12 @@ def install_influxdb(architecture):
     log(msg, INFLUXDB_INSTALL_LOG_FILE_NAME)
 
     # Retrieve organization ID
-    influx_org_id = run_bash("influx org list | awk '/iotree42/ && NR>1 {print $1}'").strip()
+    influx_org_id = run_bash("influx org list | awk '/iotree42/ && NR>1 {print $1}'", show_output=False).strip()
 
     # Auth create commands: 
     # https://docs.influxdata.com/influxdb/cloud/reference/cli/influx/auth/create/
     # All-access token (Read and Write access to all buckets of this org)
-    influx_all_access_token = run_bash(f"influx auth create --org {influx_org_name} --all-access --description '{influx_org_name}-all-access' | awk 'NR>1 {{print $3}}'", INFLUXDB_INSTALL_LOG_FILE_NAME).strip()
+    influx_all_access_token = run_bash(f"influx auth create --org {influx_org_name} --all-access --description '{influx_org_name}-all-access' | awk 'NR>1 {{print $3}}'", show_output=False).strip()
 
     config_data = {
         "INFLUX_HOST": "localhost",

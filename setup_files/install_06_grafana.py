@@ -2,14 +2,14 @@ from .setup_utils import run_bash, log, get_random_string
 
 GRAFANA_INSTALL_LOG_FILE_NAME = "install_06_grafana.log"
 
-def install_grafana():
+def install_grafana(arch):
     """
     TODO: Implement Grafana setup
     """
     
 
     commands = [
-        'echo "Grafana installation not yet implemented"'
+        f'echo "Grafana installation not yet implemented. arch: {arch}"'
     ]
 
     for command in commands:
