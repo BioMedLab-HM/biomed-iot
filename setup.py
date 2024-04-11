@@ -22,19 +22,19 @@ import sys
 import socket
 import platform
 import re
-from .setup_files.setup_utils import get_linux_user, get_setup_dir, log
-from .setup_files.write_config_file import write_config_file
-from .setup_files.install_01_basic_apt_packages import install_basic_apt_packages
-from .setup_files.install_02_security_packages import install_security_packages
-from .setup_files.install_03_docker  import install_docker
-from .setup_files.install_04_nodered import install_nodered
-from .setup_files.install_05_influxdb import install_influxdb
-from .setup_files.install_06_grafana import install_grafana
-from .setup_files.install_07_mosquitto import install_mosquitto
-from .setup_files.install_08_postgres import install_postgres
-from .setup_files.install_09_django import install_django
-from .setup_files.install_10_gunicorn import install_gunicorn
-from .setup_files.install_11_nginx import install_nginx
+from setup_files.setup_utils import get_linux_user, get_setup_dir, log
+from setup_files.write_config_file import write_config_file
+from setup_files.install_01_basic_apt_packages import install_basic_apt_packages
+from setup_files.install_02_security_packages import install_security_packages
+from setup_files.install_03_docker  import install_docker
+from setup_files.install_04_nodered import install_nodered
+from setup_files.install_05_influxdb import install_influxdb
+from setup_files.install_06_grafana import install_grafana
+from setup_files.install_07_mosquitto import install_mosquitto
+from setup_files.install_08_postgres import install_postgres
+from setup_files.install_09_django import install_django
+from setup_files.install_10_gunicorn import install_gunicorn
+from setup_files.install_11_nginx import install_nginx
 
 def print_logo_header():
     logo_header = """
