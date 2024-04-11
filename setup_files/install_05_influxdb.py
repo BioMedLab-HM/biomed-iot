@@ -53,7 +53,7 @@ def install_influxdb(architecture):
         # Cleanup and return to install_dir
         #"cd - && rm -rf ~/influx_install_tmp" +
         # Disables sending telemetry data to InfluxData
-        echo 'reporting-disabled = true' | sudo tee -a /etc/influxdb/config.toml > /dev/null",
+        "echo 'reporting-disabled = true' | sudo tee -a /etc/influxdb/config.toml > /dev/null",
     ]
 
     # installation_commands_arm64 = [
