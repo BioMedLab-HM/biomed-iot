@@ -19,9 +19,9 @@ def install_nginx(setup_scheme, domain, server_ip, hostname):
         # Configurations for TLS with domain
         commands = [
             "apt install -y openssl certbot python3-certbot-nginx",
-            f"cp {config_path}/tmp.tls-params.conf /etc/nginx/snippets/ssl-params.conf",
-            f"bash {config_path}/tmp.nginx-iotree-tls-domain.sh {setup_dir} {domain} > {setup_dir}/setup_files/tmp/nginx-iotree-tls-domain.conf",
-            f"cp {setup_dir}/setup_files/tmp/nginx-iotree-tls-domain.conf /etc/nginx/sites-available/{domain}",
+            f"cp {config_path}/tmp.ssl-params.conf /etc/nginx/snippets/ssl-params.conf",
+            f"bash {config_path}/tmp.nginx-iotree-tls-domain.sh {setup_dir} {domain} > {setup_dir}/setup_files/tmp/nginx-iotree-tls-domain",
+            f"cp {setup_dir}/setup_files/tmp/nginx-iotree-tls-domain /etc/nginx/sites-available/{domain}",
             f"ln -s /etc/nginx/sites-available/{domain} /etc/nginx/sites-enabled",
             "openssl dhparam -out /etc/nginx/dhparam.pem 2048",
             f"certbot --nginx --rsa-key-size 2048 -d {domain} -d www.{domain}",
@@ -34,21 +34,21 @@ def install_nginx(setup_scheme, domain, server_ip, hostname):
         # TODO: Abfrage bei openssl req erscheint nicht
         commands = [
             "apt install -y openssl",
-            f"cp {setup_dir}/setup_files/tmp/tmp.tls-params.conf /etc/nginx/snippets/ssl-params.conf",
-            f"bash {setup_dir}/config/tmp.nginx-iotree-tls-local.sh {setup_dir} {server_ip} {hostname} > {setup_dir}/setup_files/tmp/nginx-iotree-tls-local.conf",
+            f"cp {setup_dir}/setup_files/tmp/tmp.ssl-params.conf /etc/nginx/snippets/ssl-params.conf",
+            f"bash {config_path}/tmp.nginx-iotree-tls-local.conf.sh {setup_dir} {server_ip} {hostname} > {setup_dir}/setup_files/tmp/nginx-iotree-tls-local.conf",
             f"cp {setup_dir}/setup_files/tmp/nginx-iotree-tls-local.conf /etc/nginx/sites-available/",
-            "ln -s /etc/nginx/sites-available/nginx-iotree-tls-local /etc/nginx/sites-enabled",
+            "ln -s /etc/nginx/sites-available/nginx-iotree-tls-local.conf /etc/nginx/sites-enabled",
             "openssl req -x509 -nodes -days 365 -newkey rsa:2048 -keyout /etc/ssl/private/nginx-iotree.key -out /etc/ssl/certs/nginx-iotree.crt",
             "openssl dhparam -out /etc/nginx/dhparam.pem 2048",
             f"cp {setup_dir}/setup_files/tmp/tmp.self-signed.conf /etc/nginx/snippets/self-signed.conf",
-            f"cp {setup_dir}/setup_files/tmp/tmp.tls-params.conf /etc/nginx/snippets/tls-params.conf",
-            f"cp {setup_dir}/setup_files/tmp.nginx-stream-tls.conf /etc/nginx/conf.d/stream.conf",
+            f"cp {setup_dir}/setup_files/tmp/tmp.ssl-params.conf /etc/nginx/snippets/ssl-params.conf",
+            f"cp {config_path}/tmp.nginx-stream-tls.conf /etc/nginx/conf.d/stream.conf",
         ]
 
     else:
         # Configurations for no TLS
         commands = [
-            f"bash {config_path}/tmp.nginx-iotree-no-tls.sh {setup_dir} {server_ip} {hostname} > {setup_dir}/setup_files/tmp/nginx-iotree-no-tls.conf",
+            f"bash {config_path}/tmp.nginx-iotree-no-tls.conf.sh {setup_dir} {server_ip} {hostname} > {setup_dir}/setup_files/tmp/nginx-iotree-no-tls.conf",
             f"cp {setup_dir}/setup_files/tmp/nginx-iotree-no-tls.conf /etc/nginx/sites-available/",
             "ln -s /etc/nginx/sites-available/nginx-iotree-no-tls.conf /etc/nginx/sites-enabled",
             f"cp {config_path}/tmp.nginx-stream-no-tls.conf /etc/nginx/conf.d/stream.conf",
@@ -58,6 +58,8 @@ def install_nginx(setup_scheme, domain, server_ip, hostname):
     for command in commands:
         output = run_bash(command)
         log(output, NGINX_INSTALL_LOG_FILE_NAME)
+
+    # TODO: Verify configuration with "nginx -t"
 
     # Restart Nginx to implement changes
     restart_output = run_bash("systemctl restart nginx")
