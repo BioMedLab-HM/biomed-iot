@@ -1,7 +1,7 @@
 from .setup_utils import run_bash, log, get_random_string
 
 
-POSTGRESS_INSTALL_LOG_FILE_NAME = "install_postgres.log"
+POSTGRESS_INSTALL_LOG_FILE_NAME = "install_08_postgres.log"
 
 def install_postgres():
     """
@@ -29,10 +29,8 @@ def install_postgres():
     ]
 
     for command in setup_commands:
-        run_bash(command)
-    
-    log("postgress installation and setup commands executed", 
-        POSTGRESS_INSTALL_LOG_FILE_NAME)
+        run_bash(command, show_output=False)
+        print("Done: sudo -u postgres psql -c '...'")
 
     config_data = {
         "POSTGRES_NAME": db_name,
@@ -41,4 +39,6 @@ def install_postgres():
         "POSTGRES_HOST": "127.0.0.1",
         "POSTGRES_PORT": "5432",
     }
+
+    log("postgress installation and setup commands executed", POSTGRESS_INSTALL_LOG_FILE_NAME)
     return config_data

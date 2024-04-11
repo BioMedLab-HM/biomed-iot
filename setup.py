@@ -309,36 +309,50 @@ def main():
     create_config_dir()
     
     install_basic_apt_packages()
+    print("Basic apt packages installed")
     log("Basic apt packages installed")
     
     install_security_packages()
+    print("Security Packages installed")
     log("Security Packages installed")
 
     install_docker()
+    print("Docker installed")
     log("Docker installed")
 
     nodered_config_data = install_nodered(setup_scheme)
+    print("Node-RED installed")
     log("Node-RED installed")
 
     influxdb_config_data = install_influxdb(arch)
+    print("InfluxDB installed")
     log("InfluxDB installed")
 
     grafana_config_data = install_grafana(arch)
+    print("Grafana installed")
     log("Grafana installed")
 
     mosquitto_config_data = install_mosquitto(setup_scheme, arch)
+    print("Mosquitto Broker installed")
     log("Mosquitto Broker installed")
 
     postgres_config_data = install_postgres()
+    print("")
     log("PostgreSQL database installed")
 
-    django_config_data = install_django(django_admin_email)
+    django_config_data = install_django(django_admin_email, 
+                                        django_admin_name, 
+                                        django_admin_pass, 
+                                        auto_generate_django_admin_credentials)
+    print("Django installed")
     log("Django installed")
 
     install_gunicorn()
+    print("Gunicorn installed")
     log("Gunicorn installed")
 
     install_nginx(setup_scheme, domain, ip_address, hostname)
+    print("NGINX installed")
     log("NGINX installed")
 
 

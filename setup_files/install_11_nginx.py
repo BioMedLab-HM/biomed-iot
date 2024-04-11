@@ -1,6 +1,6 @@
 from .setup_utils import run_bash, log, get_setup_dir
 
-NGINX_INSTALL_LOG_FILE_NAME = "install_nginx.log"
+NGINX_INSTALL_LOG_FILE_NAME = "install_11_nginx.log"
 
 def install_nginx(setup_scheme, domain, server_ip, hostname):
     """
@@ -60,4 +60,5 @@ def install_nginx(setup_scheme, domain, server_ip, hostname):
     # Restart Nginx to implement changes
     restart_output = run_bash("systemctl restart nginx")
     log(restart_output, NGINX_INSTALL_LOG_FILE_NAME)
+    
     log("Nginx setup done", NGINX_INSTALL_LOG_FILE_NAME)

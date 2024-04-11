@@ -1,6 +1,6 @@
 from .setup_utils import run_bash, log, get_random_string, get_conf_path
 
-MOSQUITTO_INSTALL_LOG_FILE_NAME = "install_mosquitto.log"
+MOSQUITTO_INSTALL_LOG_FILE_NAME = "install_07_mosquitto.log"
 
 def install_mosquitto(setup_dir, setup_scheme):
     # Generate random credentials
@@ -38,7 +38,8 @@ def install_mosquitto(setup_dir, setup_scheme):
                       f"{mqtt_in_to_db_user} {mqtt_in_to_db_pw} " 
                       f"{mqtt_out_to_db_user} {mqtt_out_to_db_pw}"
     )
-    run_bash(dynsec_commands)
+    run_bash(dynsec_commands, show_output=False)
+    print("dynsec_commands sent")
     log("dynsec_commands sent", MOSQUITTO_INSTALL_LOG_FILE_NAME)
 
     # Configure Mosquitto for TLS or non-TLS
@@ -75,5 +76,6 @@ def install_mosquitto(setup_dir, setup_scheme):
         "MQTT_OUT_TO_DB_USER": mqtt_out_to_db_user,
         "MQTT_OUT_TO_DB_PW": mqtt_out_to_db_pw
     }
+    
     log("Mosquitto installation done", MOSQUITTO_INSTALL_LOG_FILE_NAME)
     return config_data

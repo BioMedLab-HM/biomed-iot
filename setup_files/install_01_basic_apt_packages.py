@@ -13,3 +13,5 @@ def install_basic_apt_packages():
     for command in commands:
         output = run_bash(command)
         log(output, APT_INSTALL_LOG_FILE_NAME)
+
+    log("Basic APT packages installed", APT_INSTALL_LOG_FILE_NAME)

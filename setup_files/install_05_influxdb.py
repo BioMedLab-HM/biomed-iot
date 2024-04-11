@@ -1,6 +1,6 @@
 from .setup_utils import run_bash, log, get_random_string
 
-INFLUXDB_INSTALL_LOG_FILE_NAME = "install_influxdb.log"
+INFLUXDB_INSTALL_LOG_FILE_NAME = "install_05_influxdb.log"
 
 def install_influxdb(architecture):
     """
@@ -62,24 +62,32 @@ def install_influxdb(architecture):
     elif architecture in ["arm64", "aarch64"]:
         installation_commands = installation_commands_arm64
 
-    # Setup with admin user. admin's token (=operator token) and an org 
+    for command in installation_commands:
+        output = run_bash(command)
+        log(output, INFLUXDB_INSTALL_LOG_FILE_NAME)
+
+    # Setup with admin user, admin's token (=operator token) and an org 
     # (https://docs.influxdata.com/influxdb/v2/reference/cli/influx/setup/)
     setup_command = (
         f"influx setup --username {influx_username} --password '{influx_password}' "
         f"--token '{influx_operator_token}' --org {influx_org_name} --bucket {influx_username} --force"
     )
-    installation_commands.append(setup_command)
+
+    run_bash(setup_command, show_output=False)
+    msg = "Done: Setup with admin user, admin's token (=operator token) and an org"
+    print(msg)
+    log(msg, INFLUXDB_INSTALL_LOG_FILE_NAME)
 
     config_command = (
         f"influx config create --config-name \"{influx_org_name}\" "
         f"--host-url \"http://localhost:8086\" --org \"{influx_org_name}\" "
         f"--token \"{influx_operator_token}\""
     )
-    installation_commands.append(config_command)
 
-    for command in installation_commands:
-        output = run_bash(command)
-        log(output, INFLUXDB_INSTALL_LOG_FILE_NAME)
+    run_bash(config_command, show_output=False)
+    msg = "Done: influx config create command"
+    print(msg)
+    log(msg, INFLUXDB_INSTALL_LOG_FILE_NAME)
 
     # Retrieve organization ID
     influx_org_id = run_bash("influx org list | awk '/iotree42/ && NR>1 {print $1}'").strip()

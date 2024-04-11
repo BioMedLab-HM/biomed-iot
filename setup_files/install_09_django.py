@@ -1,19 +1,20 @@
 from .setup_utils import get_setup_dir, get_linux_user, run_bash, log, get_random_string
 
-DJANGO_INSTALL_LOG_FILE_NAME = "install_django.log"
+DJANGO_INSTALL_LOG_FILE_NAME = "install_09_django.log"
 linux_user = get_linux_user()
 setup_dir = get_setup_dir()
 
-def install_django(django_admin_email):
+def install_django(django_admin_email, django_admin_name, django_admin_pass, auto_generate_django_admin_credentials):
     """
     Setup Django environment, including virtual environment creation, 
     dependencies installation, migrations, and superuser creation.
     """
     django_secret = get_random_string(50, incl_symbols=True)
-    django_admin_name = "admin-" + get_random_string(4)
-    django_admin_pass = (get_random_string(4) + "-" 
-                         + get_random_string(4) + "-" 
-                         + get_random_string(4))
+    if auto_generate_django_admin_credentials:
+        django_admin_name = "admin-" + get_random_string(4)
+        django_admin_pass = (get_random_string(4) + "-" 
+                            + get_random_string(4) + "-" 
+                            + get_random_string(4))
 
     # Create the Django virtual environment
     output = run_bash(f"runuser -u {linux_user} -- python3 -m venv {setup_dir}/dj_iotree/dj_venv")
@@ -37,7 +38,9 @@ def install_django(django_admin_email):
         f"runuser -u {linux_user} -- {setup_dir}/dj_iotree/dj_venv/bin/python {setup_dir}/dj_iotree/manage.py shell"
     )
     run_bash(django_superuser_command)
-    log("Django Superuser created", DJANGO_INSTALL_LOG_FILE_NAME)
+    msg = "Django Superuser created"
+    print(msg)
+    log(msg, DJANGO_INSTALL_LOG_FILE_NAME)
 
     # Prepare static files directory and deploy static files
     # see: https://docs.djangoproject.com/en/5.0/howto/static-files/ 
@@ -60,8 +63,7 @@ def install_django(django_admin_email):
     )
     collectstatic_output = run_bash(collect_static_command)
     log(collectstatic_output, DJANGO_INSTALL_LOG_FILE_NAME)
-    log("Django setup done", DJANGO_INSTALL_LOG_FILE_NAME)
-
+    
     config_data = {
         "DJANGO_SECRET_KEY": django_secret,
         "DJANGO_ADMIN_EMAIL": django_admin_email,
@@ -69,4 +71,5 @@ def install_django(django_admin_email):
         "DJANGO_ADMIN_PASS": django_admin_pass,
     }
 
+    log("Django setup done", DJANGO_INSTALL_LOG_FILE_NAME)
     return config_data

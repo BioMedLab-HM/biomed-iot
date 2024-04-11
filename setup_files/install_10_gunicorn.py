@@ -1,6 +1,6 @@
 from .setup_utils import run_bash, log, get_conf_path, get_setup_dir, get_linux_user, get_random_string
 
-GUNICORN_INSTALL_LOG_FILE_NAME = "install_gunicorn.log"
+GUNICORN_INSTALL_LOG_FILE_NAME = "install_10_gunicorn.log"
 
 def install_gunicorn():
     """

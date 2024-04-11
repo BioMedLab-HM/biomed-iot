@@ -1,6 +1,6 @@
 from .setup_utils import run_bash, log, get_linux_codename
 
-DOCKER_INSTALL_LOG_FILE_NAME = "install_docker.log"
+DOCKER_INSTALL_LOG_FILE_NAME = "install_03_docker.log"
 
 def install_docker():
     """
@@ -35,3 +35,6 @@ def install_docker():
     for command in commands:
         output = run_bash(command)
         log(output, DOCKER_INSTALL_LOG_FILE_NAME)
+
+    log("Docker installation done", DOCKER_INSTALL_LOG_FILE_NAME)
+    

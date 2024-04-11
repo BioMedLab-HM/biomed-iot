@@ -46,16 +46,34 @@ def log(message, log_file_name='main.log'):
         with open(log_file_path, 'a') as file:
             file.write(message + '\n')
 
-def run_bash(command):
-    """Execute a Bash command and return its output or an error message."""
-    try:
-        result = subprocess.run(command, shell=True, check=True, capture_output=True, text=True)
-        # Return the standard output of the command
-        return result.stdout 
-    except subprocess.CalledProcessError as e:
-        # Return the standard error output
-        return f"Error executing command: {e.cmd}\nOutput:\n{e.stderr}\n"  
-
+def run_bash(command, show_output=True):
+    """
+    Execute a Bash command, optionally print its output to the console, 
+    and return its output or an error message.
+    """
+    if show_output:
+        process = subprocess.Popen(command, shell=True, stdout=subprocess.PIPE, stderr=subprocess.STDOUT, text=True)
+        stdout = ""
+        while True:
+            output = process.stdout.readline()
+            if output == '' and process.poll() is not None:
+                break
+            if output:
+                print(output.strip())
+                stdout += output
+        exit_code = process.poll()
+        if exit_code == 0:
+            return stdout
+        else:
+            return f"Error executing command: {command}\nOutput:\n{stdout}\n"
+    else:
+        try:
+            result = subprocess.run(command, shell=True, check=True, capture_output=True, text=True)
+            # Return the standard output of the command
+            return result.stdout
+        except subprocess.CalledProcessError as e:
+            # Return the standard error output, which is captured in stdout due to redirect
+            return f"Error executing command: {e.cmd}\nOutput:\n{e.stdout}\n"
 
 def get_random_string(string_length, incl_symbols=False):
     """
