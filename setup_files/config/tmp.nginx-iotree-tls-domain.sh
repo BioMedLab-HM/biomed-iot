@@ -25,7 +25,7 @@ server {
 
     # location to Django static files
     location /static/ {
-        alias /var/www/iotree42/static/;
+        alias /var/www/dj_iotree/static/;
     }
 
     # location and proxy pass to gunicorn server (the Django server)

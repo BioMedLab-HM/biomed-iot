@@ -52,7 +52,7 @@ def install_django(django_admin_email, django_admin_name, django_admin_pass, aut
     # Prepare static files directory and deploy static files
     # see: https://docs.djangoproject.com/en/5.0/howto/static-files/ 
     # and https://forum.djangoproject.com/t/django-and-nginx-permission-issue-on-ubuntu/26804
-    out = run_bash("mkdir -p /var/www/iotree42/static/")
+    out = run_bash("mkdir -p /var/www/dj_iotree/static/")
     log(out, DJANGO_INSTALL_LOG_FILE_NAME)
 
     # Add 'linux_user' to the 'www-data' group
@@ -60,11 +60,11 @@ def install_django(django_admin_email, django_admin_name, django_admin_pass, aut
     log(out, DJANGO_INSTALL_LOG_FILE_NAME)
 
     # Change the group ownership of the directory to 'www-data'
-    out = run_bash("chown :www-data /var/www/iotree42/")  # was www-data:www-data
+    out = run_bash("chown -R rene:www-data /var/www/dj_iotree/")
     log(out, DJANGO_INSTALL_LOG_FILE_NAME)
 
     # Set permissions to allow group members to write
-    out = run_bash("chmod 2775 /var/www/iotree42/")
+    out = run_bash("chmod 2775 /var/www/dj_iotree/")
     log(out, DJANGO_INSTALL_LOG_FILE_NAME)
 
     # Collect static files

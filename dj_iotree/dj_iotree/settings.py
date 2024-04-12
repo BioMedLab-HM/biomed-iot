@@ -28,7 +28,7 @@ BASE_DIR = Path(__file__).resolve().parent.parent
 SECRET_KEY = config.django.DJANGO_SECRET_KEY
 
 # SECURITY WARNING: don't run with debug turned on in production!
-DEBUG = True  # TODO: set False before deployment
+DEBUG = False  # TODO: set False before deployment
 
 ALLOWED_HOSTS = [config.host.IP,
                  config.host.HOSTNAME,
@@ -179,8 +179,8 @@ USE_TZ = True
 # see "Deploying static files" (https://docs.djangoproject.com/en/5.0/howto/static-files/)
 # also see: https://forum.djangoproject.com/t/django-and-nginx-permission-issue-on-ubuntu/26804
 STATIC_URL = '/static/'
-STATICFILES_DIRS = [BASE_DIR / 'static']  # for development
-STATIC_ROOT = '/var/www/iotree42/static/'
+STATICFILES_DIRS = [BASE_DIR / 'static']  # for development server
+STATIC_ROOT = '/var/www/dj_iotree/static/'
 
 # TODO: static files; see above
 MEDIA_ROOT = BASE_DIR / 'media'
