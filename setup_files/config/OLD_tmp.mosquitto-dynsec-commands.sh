@@ -1,10 +1,12 @@
 #!/bin/sh
 
 # Get passed parameter
-MQTT_IN_TO_DB_USER=$1
-MQTT_IN_TO_DB_PW=$2
-MQTT_OUT_TO_DB_USER=$3
-MQTT_OUT_TO_DB_PW=$4
+DJ_MQTT_CONTROLE_USER=$1
+DJ_MQTT_CONTROLE_PW=$2
+MQTT_IN_TO_DB_USER=$3
+MQTT_IN_TO_DB_PW=$4
+MQTT_OUT_TO_DB_USER=$5
+MQTT_OUT_TO_DB_PW=$6
 
 # Define dynamic-security.json commands
 # see: https://github.com/eclipse/mosquitto/blob/master/plugins/dynamic-security/README.md
@@ -23,6 +25,18 @@ cat << EOF
 				{ "acltype": "publishClientReceive", "allow": true },
 				{ "acltype": "subscribe", "allow": false },
 				{ "acltype": "unsubscribe", "allow": true }
+			]
+		},
+		{
+			"command": "createRole",
+			"rolename": "djControle",
+			"acls": [
+				{
+					"acltype": "publishClientSend",
+					"topic": "$CONTROL/dynamic-security/#",
+					"priority": -1,
+					"allow": true
+				}
 			]
 		},
 		{
@@ -67,6 +81,15 @@ cat << EOF
 					"priority":	1,
 					"allow":	true
 				}
+			]
+		},
+		{
+			"command": "createClient",
+			"username": "$DJ_MQTT_CONTROLE_USER",
+			"password": "$DJ_MQTT_CONTROLE_PW",
+			"textname": "djControle",
+			"roles": [
+				{ "rolename": "djControle", "priority": -1 }
 			]
 		},
 		{

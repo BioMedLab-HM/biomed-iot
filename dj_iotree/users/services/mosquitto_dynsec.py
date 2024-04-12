@@ -33,7 +33,8 @@ class MosquittoDynSec:
         port (int): Network port of the MQTT broker.
     """
 
-    def __init__(self, username, password, host="localhost", port=1884):  # 1884 because of nginx rev-proxy
+    # in nginx: listen 1883; proxy_pass localhost:1884;
+    def __init__(self, username, password, host="localhost", port=1884):
         """
         Initializes a new instance of the MosquittoDynSec class.
 
@@ -46,7 +47,7 @@ class MosquittoDynSec:
             password (str): The password of the client that writes to the '$CONTROL/dynamic-security/v1' topic.
             host (str): The hostname or IP address of the MQTT broker. Defaults to "localhost".
             port (int): The network port of the MQTT server. Defaults to 1883.
-        """    
+        """
         self.username = username
         self.password = password
         self.host = host
@@ -59,7 +60,7 @@ class MosquittoDynSec:
 
         # Create MQTT client instance
         # Changes since paho-mqtt 2.0: https://eclipse.dev/paho/files/paho.mqtt.python/html/migrations.html
-        # TODO: Change callbacks to new paho-mqtt 2.0 standard. 
+        # TODO: Change callbacks to new paho-mqtt 2.0 standard.
         # Old callback structure still supported for CallbackAPIVersion.VERSION1
         self.client = mqtt.Client(mqtt.CallbackAPIVersion.VERSION1)
 
@@ -82,19 +83,18 @@ class MosquittoDynSec:
         self.client.connect(self.host, self.port, 60)
         self.client.loop_start()
 
-
     """
     Internal-use functions and callbacks (only used by the class itself)
     """
 
     def on_publish(self, client, userdata, mid):
-        #print(f"Message published with message-id {mid}")
+        # print(f"Message published with message-id {mid}")
         pass
 
     def on_message(self, client, userdata, msg):
-        #print(f"Topic: `{msg.topic}`\nPayload: `{json.loads(msg.payload.decode('utf-8'))}`")
-        self.response_msg = json.loads(msg.payload.decode('utf-8'))
-        #print(f"on_message: self.response_msg = {self.response_msg}")
+        # print(f"Topic: `{msg.topic}`\nPayload: `{json.loads(msg.payload.decode('utf-8'))}`")
+        self.response_msg = json.loads(msg.payload.decode("utf-8"))
+        # print(f"on_message: self.response_msg = {self.response_msg}")
         self.message_received_event.set()  # must be the last line to make sure, the message is stored in self.response_msg
 
     def on_connect(self, client, userdata, flags, rc):
@@ -109,16 +109,16 @@ class MosquittoDynSec:
         print("Subscribed to topic")
         # Signal successful subscription
         self.subscription_event.set()
-    
+
     def _send_command(self, command):
-        #print("_send_command called")
+        # print("_send_command called")
         # Construct and send a command to the control topic
         payload = json.dumps(command)
         # Wait for the subscription to be successful
         self.subscription_event.wait(self.sub_event_timeout_seconds)
-        #print("Now publishing after successful subscription")
+        # print("Now publishing after successful subscription")
         send_code = self.client.publish(self.send_command_topic, payload, qos=2)
-        #print("in _send_command: published")
+        # print("in _send_command: published")
 
         return send_code
 
@@ -143,22 +143,28 @@ class MosquittoDynSec:
         successful = False
         if response is not None:
             # Get command name of the command sent and command in response
-            command_name = command["commands"][0]["command"] # only one command is expected per function call
+            command_name = command["commands"][0][
+                "command"
+            ]  # only one command is expected per function call
             response_command_name = response["responses"][0]["command"]
-            
-            if command_name == response_command_name:  # Check if the expected command is present in the response
+
+            if (
+                command_name == response_command_name
+            ):  # Check if the expected command is present in the response
                 successful = True
-            if 'error' in response['responses'][0]:
+            if "error" in response["responses"][0]:
                 successful = False
-                if 'already' in response['responses'][0]['error']:  # caveat: prone to minterpretation if response messages change in the future
+                if (
+                    "already" in response["responses"][0]["error"]
+                ):  # caveat: prone to minterpretation if response messages change in the future
                     # Known responses containing 'already':
-                        # 'Role already exists'
-                        # 'Group already exists'
-                        # 'Group is already in this role'
-                        # 'Client is already in this group'
-                        # 'ACL with this topic already exists'
+                    # 'Role already exists'
+                    # 'Group already exists'
+                    # 'Group is already in this role'
+                    # 'Client is already in this group'
+                    # 'ACL with this topic already exists'
                     successful = True  # successful = True, since the Dynamic Security Plugin configuration already matches the desired state
-       
+
         return successful
 
     def _execute_command(self, command):
@@ -167,12 +173,17 @@ class MosquittoDynSec:
         success = self._is_response_successful(command, response)
         return success, response, send_code
 
-
     """
     External-use getter- and setter-functions (use these to interact with the Mosquitto Dynamic Security Plugin) 
     """
 
-    def set_default_acl_access(self, publish_client_send_allow, publish_client_receive_allow, subscribe_allow, unsubscribe_allow):
+    def set_default_acl_access(
+        self,
+        publish_client_send_allow,
+        publish_client_receive_allow,
+        subscribe_allow,
+        unsubscribe_allow,
+    ):
         """
         Configures default ACL permissions for MQTT clients (actions, clients can perform if no specific ACLs apply).
 
@@ -187,11 +198,17 @@ class MosquittoDynSec:
                 {
                     "command": "setDefaultACLAccess",
                     "acls": [
-                        {"acltype": "publishClientSend", "allow": publish_client_send_allow},
-                        {"acltype": "publishClientReceive", "allow": publish_client_receive_allow},
+                        {
+                            "acltype": "publishClientSend",
+                            "allow": publish_client_send_allow,
+                        },
+                        {
+                            "acltype": "publishClientReceive",
+                            "allow": publish_client_receive_allow,
+                        },
                         {"acltype": "subscribe", "allow": subscribe_allow},
-                        {"acltype": "unsubscribe", "allow": unsubscribe_allow}
-                    ]
+                        {"acltype": "unsubscribe", "allow": unsubscribe_allow},
+                    ],
                 }
             ]
         }
@@ -204,19 +221,22 @@ class MosquittoDynSec:
 
         :return: see "GETTER-functions return values in Class description"
         """
-        command = {
-            "commands": [
-                {
-                    "command": "getDefaultACLAccess"
-                }
-            ]
-        }
+        command = {"commands": [{"command": "getDefaultACLAccess"}]}
 
         return self._execute_command(command)
 
-    def create_client(self, username, password, clientid=None, textname=None, textdescription=None, groups=None, roles=None):
+    def create_client(
+        self,
+        username,
+        password,
+        clientid=None,
+        textname=None,
+        textdescription=None,
+        groups=None,
+        roles=None,
+    ):
         """
-        Creates a new client in the MQTT broker's dynamic security system 
+        Creates a new client in the MQTT broker's dynamic security system
         with specified credentials, and optionally assigns it client ID, name, description, groups, and roles.
 
         :param username: Username for the new client.
@@ -230,11 +250,7 @@ class MosquittoDynSec:
         """
         command = {
             "commands": [
-                {
-                    "command": "createClient",
-                    "username": username,
-                    "password": password
-                }
+                {"command": "createClient", "username": username, "password": password}
             ]
         }
 
@@ -246,12 +262,18 @@ class MosquittoDynSec:
         if textdescription is not None:
             command["commands"][0]["textdescription"] = textdescription
         if groups:
-            command["commands"][0]["groups"] = [{"groupname": group["groupname"], "priority": group["priority"]} for group in groups]
+            command["commands"][0]["groups"] = [
+                {"groupname": group["groupname"], "priority": group["priority"]}
+                for group in groups
+            ]
         if roles:
-            command["commands"][0]["roles"] = [{"rolename": role["rolename"], "priority": role["priority"]} for role in roles]
+            command["commands"][0]["roles"] = [
+                {"rolename": role["rolename"], "priority": role["priority"]}
+                for role in roles
+            ]
 
         return self._execute_command(command)
-    
+
     def delete_client(self, username):
         """
         Deletes an existing client from the MQTT broker's dynamic security system.
@@ -259,14 +281,7 @@ class MosquittoDynSec:
         :param username: The username of the client to delete.
         :return: see "SETTER-functions return values in Class description"
         """
-        command = {
-            "commands": [
-                {
-                    "command": "deleteClient",
-                    "username": username
-                }
-            ]
-        }
+        command = {"commands": [{"command": "deleteClient", "username": username}]}
 
         return self._execute_command(command)
 
@@ -278,14 +293,7 @@ class MosquittoDynSec:
         :return: see "SETTER-functions return values in Class description"
 
         """
-        command = {
-            "commands": [
-                {
-                    "command": "enableClient",
-                    "username": username
-                }
-            ]
-        }
+        command = {"commands": [{"command": "enableClient", "username": username}]}
 
         return self._execute_command(command)
 
@@ -297,14 +305,7 @@ class MosquittoDynSec:
         :return: see "SETTER-functions return values in Class description"
 
         """
-        command = {
-            "commands": [
-                {
-                    "command": "disableClient",
-                    "username": username
-                }
-            ]
-        }
+        command = {"commands": [{"command": "disableClient", "username": username}]}
 
         return self._execute_command(command)
 
@@ -315,14 +316,7 @@ class MosquittoDynSec:
         :param username: The username of the client to retrieve information about.
         :return: see "GETTER-functions return values in Class description"
         """
-        command = {
-            "commands": [
-                {
-                    "command": "getClient",
-                    "username": username
-                }
-            ]
-        }
+        command = {"commands": [{"command": "getClient", "username": username}]}
 
         return self._execute_command(command)
 
@@ -344,14 +338,23 @@ class MosquittoDynSec:
                     "command": "listClients",
                     "verbose": verbose,
                     "count": count,
-                    "offset": offset
+                    "offset": offset,
                 }
             ]
         }
 
         return self._execute_command(command)
 
-    def modify_client(self, username, clientid=None, password=None, textname=None, textdescription=None, roles=None, groups=None):
+    def modify_client(
+        self,
+        username,
+        clientid=None,
+        password=None,
+        textname=None,
+        textdescription=None,
+        roles=None,
+        groups=None,
+    ):
         """
         Updates the properties and permissions of an existing client in the MQTT broker's dynamic security system.
 
@@ -365,14 +368,7 @@ class MosquittoDynSec:
         :return: see "SETTER-functions return values in Class description"
         """
 
-        command = {
-            "commands": [
-                {
-                    "command": "modifyClient",
-                    "username": username
-                }
-            ]
-        }
+        command = {"commands": [{"command": "modifyClient", "username": username}]}
         # Add optional fields if provided
         if clientid is not None:
             command["commands"][0]["clientid"] = clientid
@@ -383,9 +379,15 @@ class MosquittoDynSec:
         if textdescription is not None:
             command["commands"][0]["textdescription"] = textdescription
         if roles:
-            command["commands"][0]["roles"] = [{"rolename": role["rolename"], "priority": role["priority"]} for role in roles]
+            command["commands"][0]["roles"] = [
+                {"rolename": role["rolename"], "priority": role["priority"]}
+                for role in roles
+            ]
         if groups:
-            command["commands"][0]["groups"] = [{"groupname": group["groupname"], "priority": group["priority"]} for group in groups]
+            command["commands"][0]["groups"] = [
+                {"groupname": group["groupname"], "priority": group["priority"]}
+                for group in groups
+            ]
 
         return self._execute_command(command)
 
@@ -400,18 +402,14 @@ class MosquittoDynSec:
         Example:
             # Assign a new client ID to a user
             set_client_id("john_doe", "johns_device_123")
-            
+
             # Clear an existing client ID from a user
             set_client_id("jane_doe", "")
         """
 
         command = {
             "commands": [
-                {
-                    "command": "setClientId",
-                    "username": username,
-                    "clientid": clientid
-                }
+                {"command": "setClientId", "username": username, "clientid": clientid}
             ]
         }
 
@@ -435,7 +433,7 @@ class MosquittoDynSec:
                 {
                     "command": "setClientPassword",
                     "username": username,
-                    "password": password
+                    "password": password,
                 }
             ]
         }
@@ -453,7 +451,7 @@ class MosquittoDynSec:
 
         This method is useful for dynamically managing client permissions by assigning roles that define a set of access control lists (ACLs).
 
-        Example:            
+        Example:
             # Assign a 'Publisher' role to 'jane_doe' with a higher priority
             add_client_role("jane_doe", "Publisher", priority=10)
         """
@@ -464,7 +462,7 @@ class MosquittoDynSec:
                     "command": "addClientRole",
                     "username": username,
                     "rolename": rolename,
-                    "priority": priority
+                    "priority": priority,
                 }
             ]
         }
@@ -489,7 +487,7 @@ class MosquittoDynSec:
                 {
                     "command": "removeClientRole",
                     "username": username,
-                    "rolename": rolename
+                    "rolename": rolename,
                 }
             ]
         }
@@ -516,7 +514,7 @@ class MosquittoDynSec:
                     "command": "addGroupClient",
                     "groupname": groupname,
                     "username": username,
-                    "priority": priority
+                    "priority": priority,
                 }
             ]
         }
@@ -538,16 +536,12 @@ class MosquittoDynSec:
             create_group("EngineeringTeam", roles=[{"rolename": "Developer", "priority": 1},
                                                    {"rolename": "Reviewer", "priority": 2}])
         """
-        command = {
-            "commands": [
-                {
-                    "command": "createGroup",
-                    "groupname": groupname
-                }
-            ]
-        }
+        command = {"commands": [{"command": "createGroup", "groupname": groupname}]}
         if roles:
-            command["commands"][0]["roles"] = [{"rolename": role["rolename"], "priority": role["priority"]} for role in roles]
+            command["commands"][0]["roles"] = [
+                {"rolename": role["rolename"], "priority": role["priority"]}
+                for role in roles
+            ]
 
         return self._execute_command(command)
 
@@ -561,14 +555,7 @@ class MosquittoDynSec:
         Example:
             delete_group("EngineeringTeam")
         """
-        command = {
-            "commands": [
-                {
-                    "command": "deleteGroup",
-                    "groupname": groupname
-                }
-            ]
-        }
+        command = {"commands": [{"command": "deleteGroup", "groupname": groupname}]}
 
         return self._execute_command(command)
 
@@ -582,14 +569,7 @@ class MosquittoDynSec:
         Example:
             get_group("EngineeringTeam")
         """
-        command = {
-            "commands": [
-                {
-                    "command": "getGroup",
-                    "groupname": groupname
-                }
-            ]
-        }
+        command = {"commands": [{"command": "getGroup", "groupname": groupname}]}
 
         return self._execute_command(command)
 
@@ -611,14 +591,16 @@ class MosquittoDynSec:
                     "command": "listGroups",
                     "verbose": verbose,
                     "count": count,
-                    "offset": offset
+                    "offset": offset,
                 }
             ]
         }
 
         return self._execute_command(command)
 
-    def modify_group(self, groupname, textname=None, textdescription=None, roles=None, clients=None):
+    def modify_group(
+        self, groupname, textname=None, textdescription=None, roles=None, clients=None
+    ):
         """
         Modifies an existing group with new properties, roles, and clients.
 
@@ -634,22 +616,21 @@ class MosquittoDynSec:
                         roles=[{"rolename": "LeadEngineer", "priority": 1}],
                         clients=[{"username": "engineer1", "priority": 1}])
         """
-        command = {
-            "commands": [
-                {
-                    "command": "modifyGroup",
-                    "groupname": groupname
-                }
-            ]
-        }
+        command = {"commands": [{"command": "modifyGroup", "groupname": groupname}]}
         if textname is not None:
             command["commands"][0]["textname"] = textname
         if textdescription is not None:
             command["commands"][0]["textdescription"] = textdescription
         if roles:
-            command["commands"][0]["roles"] = [{"rolename": role["rolename"], "priority": role["priority"]} for role in roles]
+            command["commands"][0]["roles"] = [
+                {"rolename": role["rolename"], "priority": role["priority"]}
+                for role in roles
+            ]
         if clients:
-            command["commands"][0]["clients"] = [{"username": client["username"], "priority": client["priority"]} for client in clients]
+            command["commands"][0]["clients"] = [
+                {"username": client["username"], "priority": client["priority"]}
+                for client in clients
+            ]
 
         return self._execute_command(command)
 
@@ -669,7 +650,7 @@ class MosquittoDynSec:
                 {
                     "command": "removeGroupClient",
                     "groupname": groupname,
-                    "username": username
+                    "username": username,
                 }
             ]
         }
@@ -694,7 +675,7 @@ class MosquittoDynSec:
                     "command": "addGroupRole",
                     "groupname": groupname,
                     "rolename": rolename,
-                    "priority": priority
+                    "priority": priority,
                 }
             ]
         }
@@ -717,7 +698,7 @@ class MosquittoDynSec:
                 {
                     "command": "removeGroupRole",
                     "groupname": groupname,
-                    "rolename": rolename
+                    "rolename": rolename,
                 }
             ]
         }
@@ -735,12 +716,7 @@ class MosquittoDynSec:
             set_anonymous_group("AnonymousUsers")
         """
         command = {
-            "commands": [
-                {
-                    "command": "setAnonymousGroup",
-                    "groupname": groupname
-                }
-            ]
+            "commands": [{"command": "setAnonymousGroup", "groupname": groupname}]
         }
 
         return self._execute_command(command)
@@ -754,13 +730,7 @@ class MosquittoDynSec:
         Example:
             get_anonymous_group()
         """
-        command = {
-            "commands": [
-                {
-                    "command": "getAnonymousGroup"
-                }
-            ]
-        }
+        command = {"commands": [{"command": "getAnonymousGroup"}]}
 
         return self._execute_command(command)
 
@@ -779,14 +749,7 @@ class MosquittoDynSec:
             create_role("BasicSubscriber", textname="Subscriber Role", textdescription="Can subscribe to topics",
                         acls=[{"acltype": "subscribePattern", "topic": "topic/#", "priority": -1, "allow": True}])
         """
-        command = {
-            "commands": [
-                {
-                    "command": "createRole",
-                    "rolename": rolename
-                }
-            ]
-        }
+        command = {"commands": [{"command": "createRole", "rolename": rolename}]}
         if textname is not None:
             command["commands"][0]["textname"] = textname
         if textdescription is not None:
@@ -806,14 +769,7 @@ class MosquittoDynSec:
         Example:
             get_role("BasicSubscriber")
         """
-        command = {
-            "commands": [
-                {
-                    "command": "getRole",
-                    "rolename": rolename
-                }
-            ]
-        }
+        command = {"commands": [{"command": "getRole", "rolename": rolename}]}
 
         return self._execute_command(command)
 
@@ -835,7 +791,7 @@ class MosquittoDynSec:
                     "command": "listRoles",
                     "verbose": verbose,
                     "count": count,
-                    "offset": offset
+                    "offset": offset,
                 }
             ]
         }
@@ -857,14 +813,7 @@ class MosquittoDynSec:
             modify_role("BasicSubscriber", textname="Advanced Subscriber", textdescription="Can subscribe to more topics",
                         acls=[{"acltype": "subscribePattern", "topic": "advanced/topic/#", "priority": -1, "allow": True}])
         """
-        command = {
-            "commands": [
-                {
-                    "command": "modifyRole",
-                    "rolename": rolename
-                }
-            ]
-        }
+        command = {"commands": [{"command": "modifyRole", "rolename": rolename}]}
         if textname is not None:
             command["commands"][0]["textname"] = textname
         if textdescription is not None:
@@ -884,14 +833,7 @@ class MosquittoDynSec:
         Example:
             delete_role("BasicSubscriber")
         """
-        command = {
-            "commands": [
-                {
-                    "command": "deleteRole",
-                    "rolename": rolename
-                }
-            ]
-        }
+        command = {"commands": [{"command": "deleteRole", "rolename": rolename}]}
 
         return self._execute_command(command)
 
@@ -917,7 +859,7 @@ class MosquittoDynSec:
                     "acltype": acltype,
                     "topic": topic,
                     "priority": priority,
-                    "allow": allow
+                    "allow": allow,
                 }
             ]
         }
@@ -942,7 +884,7 @@ class MosquittoDynSec:
                     "command": "removeRoleACL",
                     "rolename": rolename,
                     "acltype": acltype,
-                    "topic": topic
+                    "topic": topic,
                 }
             ]
         }
