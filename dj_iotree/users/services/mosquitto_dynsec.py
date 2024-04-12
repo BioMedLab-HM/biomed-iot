@@ -3,7 +3,20 @@ import paho.mqtt.client as mqtt
 import json
 
 
-class MosquittoDynSec:
+class Singleton(type):
+    """
+    A metaclass that creates a Singleton instance.
+    """
+
+    _instances = {}
+
+    def __call__(cls, *args, **kwargs):
+        if cls not in cls._instances:
+            cls._instances[cls] = super().__call__(*args, **kwargs)
+        return cls._instances[cls]
+
+
+class MosquittoDynSec(metaclass=Singleton):
     """
     Based on commands at https://github.com/eclipse/mosquitto/blob/master/plugins/dynamic-security/README.md
     About Mosquitto Dynamic Security Plugin: https://mosquitto.org/documentation/dynamic-security/
@@ -32,16 +45,6 @@ class MosquittoDynSec:
         host (str): Hostname or IP address of the MQTT broker.
         port (int): Network port of the MQTT broker.
     """
-
-    _instance = None  # Singleton (only one instance)
-
-    # Singleton Pattern to create only one instance
-    def __new__(cls, username, password, host="localhost", port=1884):
-        if cls._instance is None:
-            cls._instance = super(MosquittoDynSec, cls).__new__(cls)
-            # Initialize the instance only once.
-            cls._instance._init(username, password, host, port)
-        return cls._instance
 
     # in nginx: listen 1883; proxy_pass localhost:1884;
     def __init__(self, username, password, host="localhost", port=1884):

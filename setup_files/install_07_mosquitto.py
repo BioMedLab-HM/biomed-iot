@@ -64,7 +64,7 @@ def install_mosquitto(setup_scheme):
     )
     # f"{dynsec_control_user} {dynsec_control_pw} " # removed
 
-    run_bash(dynsec_create_commands, show_output=True) # TODO False !!
+    run_bash(dynsec_create_commands, show_output=False)
     print("dynsec_commands sent")
     log("dynsec_commands sent", MOSQUITTO_INSTALL_LOG_FILE_NAME)
 

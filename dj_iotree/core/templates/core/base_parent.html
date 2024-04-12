@@ -67,7 +67,14 @@
                                 {% if user.is_authenticated %}
                                     <li><a class="dropdown-item" href="{% url 'profile' %}">Profile</a></li>
                                     <li><hr class="dropdown-divider" /></li>
-                                    <li><a class="dropdown-item" href="{% url 'logout' %}">Logout</a></li>
+                                    <!-- Since Django 5.0, logout has to be a POST form instead of a GET request link-->
+                                    <!-- <li><a class="dropdown-item" href="{% url 'logout' %}">Logout</a></li> -->
+                                    <li>
+                                        <form action="{% url 'logout' %}" method="post" style="display: none;" id="logout-form">
+                                            {% csrf_token %}
+                                        </form>
+                                        <a class="dropdown-item" href="#" onclick="document.getElementById('logout-form').submit();">Logout</a>
+                                    </li>
                                 {% else %}
                                     <li><a class="dropdown-item" href="{% url 'login' %}">Login</a></li>
                                     <li><hr class="dropdown-divider" /></li>
