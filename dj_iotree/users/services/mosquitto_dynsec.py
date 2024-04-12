@@ -33,6 +33,16 @@ class MosquittoDynSec:
         port (int): Network port of the MQTT broker.
     """
 
+    _instance = None  # Singleton (only one instance)
+
+    # Singleton Pattern to create only one instance
+    def __new__(cls, username, password, host="localhost", port=1884):
+        if cls._instance is None:
+            cls._instance = super(MosquittoDynSec, cls).__new__(cls)
+            # Initialize the instance only once.
+            cls._instance._init(username, password, host, port)
+        return cls._instance
+
     # in nginx: listen 1883; proxy_pass localhost:1884;
     def __init__(self, username, password, host="localhost", port=1884):
         """
@@ -82,6 +92,22 @@ class MosquittoDynSec:
         # Connect and start MQTT client
         self.client.connect(self.host, self.port, 60)
         self.client.loop_start()
+
+    def __enter__(self):
+        return self
+
+    def __exit__(self, exc_type, exc_val, exc_tb):
+        self.disconnect()
+
+    def disconnect(self):
+        self.client.loop_stop()
+        self.client.disconnect()
+        print("Disconnected MQTT client.")
+
+    # def __del__(self):
+    #     # Clean up
+    #     self.client.loop_stop()
+    #     self.client.disconnect()
 
     """
     Internal-use functions and callbacks (only used by the class itself)
@@ -890,8 +916,3 @@ class MosquittoDynSec:
         }
 
         return self._execute_command(command)
-
-    def __del__(self):
-        # Clean up
-        self.client.loop_stop()
-        self.client.disconnect()
