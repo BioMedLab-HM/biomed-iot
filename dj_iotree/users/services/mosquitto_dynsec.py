@@ -58,7 +58,10 @@ class MosquittoDynSec:
         self.response_msg = None
 
         # Create MQTT client instance
-        self.client = mqtt.Client()
+        # Changes since paho-mqtt 2.0: https://eclipse.dev/paho/files/paho.mqtt.python/html/migrations.html
+        # TODO: Change callbacks to new paho-mqtt 2.0 standard. 
+        # Old callback structure still supported for CallbackAPIVersion.VERSION1
+        self.client = mqtt.Client(mqtt.CallbackAPIVersion.VERSION1)
 
         # Set username and password
         self.client.username_pw_set(self.username, self.password)
