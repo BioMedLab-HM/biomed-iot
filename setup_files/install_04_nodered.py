@@ -16,6 +16,7 @@ def install_nodered(setup_scheme):
             selection (e.g. influxDB node) in docker image
         - update_nginx_nodered_location.sh or nginx reload via inotifywait?
     """
+    config_path = get_conf_path()
     script_path = "/etc/iotree"
     tls_script_name = "update_nginx_nodered_location_tls.sh"
     non_tls_script_name = "update_nginx_nodered_location.sh"
@@ -24,13 +25,13 @@ def install_nodered(setup_scheme):
         else non_tls_script_name
     )
 
-    cp_command = f'cp {get_conf_path}/{script_name} {script_path}'
+    cp_command = f'cp {config_path}/{script_name} {script_path}'
 
     commands = [
         'docker pull nodered/node-red',
-        # Copy update script for nodered container locations in nginx to destiny
+        # Copy update script for nodered container locations in nginx to script_path
         f'{cp_command}',
-        'chmod +x /etc/iotree/update_nginx_nodered_location.sh',
+        f'chmod +x /etc/iotree/{script_name}',
     ]
 
     for command in commands:

@@ -313,6 +313,12 @@ def main():
     create_tmp_dir()
     create_config_dir()
 
+    host_config_data = {
+        "IP": ip_address,
+        "HOSTNAME": hostname,
+        "DOMAIN": domain,
+    }
+
     empty_config_data = generate_empty_config_data()
     write_config_file(empty_config_data)
     
@@ -348,6 +354,18 @@ def main():
     print("")
     log("PostgreSQL database installed")
 
+    # Write current known config data to config.toml; essential for django setup
+    current_config_data = {
+        **host_config_data,
+        **pw_reset_credentials,
+        **nodered_config_data,
+        **influxdb_config_data,
+        **grafana_config_data,
+        **mosquitto_config_data,
+        **postgres_config_data,
+    }
+    write_config_file(current_config_data)
+
     set_setup_dir_rights()
     django_config_data = install_django(django_admin_email, 
                                         django_admin_name, 
@@ -367,12 +385,6 @@ def main():
     set_setup_dir_rights()
 
     """WRITE CONFIG FILE"""
-
-    host_config_data = {
-        "IP": ip_address,
-        "HOSTNAME": hostname,
-        "DOMAIN": domain,
-    }
     
     all_config_data = {
         **host_config_data,
@@ -387,13 +399,8 @@ def main():
    
     write_config_file(all_config_data)
 
-    """ SET OWNER/ACCESS RIGHTS TO FILES """
-
-
-
-    # Capture the end time
+    # Capture the end time and calculate the total time taken for setup.
     end_time = time.time()
-    # Calculate the total time taken
     setup_duration = end_time - start_time
     num_minutes = int(setup_duration // 60)
     num_seconds = setup_duration % 60
@@ -402,6 +409,7 @@ def main():
     """ FINAL INFORMATION OUTPUT FOR THE USER """
     # TBD
     # set pw reset credentials in config.toml
+    print("____________________________")
     print("\n\n\n\nThe setup of IoTree42 has successfully completed in\n"
           f"{num_minutes} min and {num_seconds} s.\nAccess your website's "
           "admin user credentials in '/etc/iotree/config.toml'.\n")
