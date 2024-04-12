@@ -392,7 +392,7 @@ def main():
     end_time = time.time()
     # Calculate the total time taken
     setup_duration = end_time - start_time
-    num_minutes = setup_duration // 60
+    num_minutes = int(setup_duration // 60)
     num_seconds = setup_duration % 60
 
 

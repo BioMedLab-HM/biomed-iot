@@ -28,7 +28,6 @@ def install_nodered(setup_scheme):
 
     commands = [
         'docker pull nodered/node-red',
-        'mkdir /etc/nginx/conf.d/nodered_locations',
         # Copy update script for nodered container locations in nginx to destiny
         f'{cp_command}',
         'chmod +x /etc/iotree/update_nginx_nodered_location.sh',

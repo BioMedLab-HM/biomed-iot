@@ -62,7 +62,11 @@ def install_nginx(setup_scheme, domain, server_ip, hostname):
         output = run_bash(command)
         log(output, NGINX_INSTALL_LOG_FILE_NAME)
 
-    # TODO: Verify configuration with "nginx -t"
+    output = run_bash('mkdir /etc/nginx/conf.d/nodered_locations')
+    log(output, NGINX_INSTALL_LOG_FILE_NAME)
+
+    output = run_bash("nginx -t")
+    log(output, NGINX_INSTALL_LOG_FILE_NAME)
 
     # Restart Nginx to implement changes
     restart_output = run_bash("systemctl restart nginx")

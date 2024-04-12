@@ -45,7 +45,7 @@ def install_django(django_admin_email, django_admin_name, django_admin_pass, aut
     )
     set_setup_dir_rights()
     run_bash(django_superuser_command)
-    msg = "Django Superuser created"
+    msg = "After Attempt to create Django Superuser"
     print(msg)
     log(msg, DJANGO_INSTALL_LOG_FILE_NAME)
 
@@ -58,7 +58,7 @@ def install_django(django_admin_email, django_admin_name, django_admin_pass, aut
     log(out, DJANGO_INSTALL_LOG_FILE_NAME)
     out = run_bash(f"usermod -aG www-data {linux_user}")
     log(out, DJANGO_INSTALL_LOG_FILE_NAME)
-    out = run_bash("chmod 2775 /var/www/iotree42/static/")
+    out = run_bash("chmod 2775 /var/www/iotree42/")
     log(out, DJANGO_INSTALL_LOG_FILE_NAME)
 
     # Collect static files
