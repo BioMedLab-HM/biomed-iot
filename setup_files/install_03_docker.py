@@ -1,4 +1,4 @@
-from .setup_utils import run_bash, log, get_linux_codename
+from .setup_utils import run_bash, log, get_linux_codename, get_linux_user
 
 DOCKER_INSTALL_LOG_FILE_NAME = "install_03_docker.log"
 
@@ -7,6 +7,7 @@ def install_docker():
     # Docker installation (https://docs.docker.com/engine/install/debian/#install-using-the-repository)
     """
     linux_codename = get_linux_codename()
+    linux_user = get_linux_user()
 
     # Preparing the Docker APT repository command
     docker_apt_repo_command = (
@@ -29,7 +30,7 @@ def install_docker():
 
         # Install latest Docker version
         'sudo apt-get install -y docker-ce docker-ce-cli containerd.io docker-buildx-plugin docker-compose-plugin',
-        'usermod -aG docker $USER'
+        f'usermod -aG docker {linux_user}'
     ]
 
     for command in commands:

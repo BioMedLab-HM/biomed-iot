@@ -28,7 +28,7 @@ BASE_DIR = Path(__file__).resolve().parent.parent
 SECRET_KEY = config.django.DJANGO_SECRET_KEY
 
 # SECURITY WARNING: don't run with debug turned on in production!
-DEBUG = False  # TODO: set False before deployment
+DEBUG = True  # TODO: set False before deployment
 
 ALLOWED_HOSTS = [config.host.IP,
                  config.host.HOSTNAME,

@@ -83,7 +83,7 @@ def is_running_with_sudo_or_exit_setup():
 
 def get_setup_scheme():
     """Determine the setup scheme based on user input."""
-    print(f"\nTLS (Transport Layer Security) encrypts the data between your "
+    print("\nTLS (Transport Layer Security) encrypts the data between your "
         "server and its users and gateways (using https), ensuring the data "
         "remains private and secure. It is highly recommended for most "
         "installations.\nHowever, if you're setting up a development "
@@ -301,7 +301,7 @@ def main():
     confirm_proceed("Do you want to proceed with the installation of "
         "IoTree42, including necessary packages and services?"
     )
-    msg = f"\nStarting installation of IoTree42. Please do not interrupt!\n"
+    msg = "\nStarting installation of IoTree42. Please do not interrupt!\n"
     print(msg)
     log(msg)
     
@@ -409,10 +409,11 @@ def main():
     """ FINAL INFORMATION OUTPUT FOR THE USER """
     # TBD
     # set pw reset credentials in config.toml
-    print("____________________________")
-    print("\n\n\n\nThe setup of IoTree42 has successfully completed in\n"
-          f"{num_minutes} min and {num_seconds} s.\nAccess your website's "
-          "admin user credentials in '/etc/iotree/config.toml'.\n")
+    print("\n\n\n\n____________________________")
+    print("\n\nThe setup of IoTree42 has successfully completed in\n"
+          f"{num_minutes} min and {num_seconds} s.")
+    
+    print("\n\nAccess your website's admin user credentials in '/etc/iotree/config.toml'.")
     
     msg_no_tls = (f"The website is accessible at http://{ip_address}")
     msg_tls_no_domain = (f"The website is accessible at https://{ip_address}")
@@ -429,7 +430,7 @@ def main():
         log(msg_tls_domain)
     
     print("\nFor detailed information on the installation process, "
-          f"please refer to the log files located in {setup_dir}.\n"
+          f"please refer to the log files located in {setup_dir}/setup_files/setup_logs.\n"
           f"You can delete the directory 'tmp' in '{setup_dir}/setup_files/'")
 
     print("\n--- END OF SETUP ---\n\n")
