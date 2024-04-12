@@ -201,7 +201,10 @@ def get_credentials_for_pw_reset():
             break
         elif user_answer == 'n':
             msg = "No credentials for password reset function have been entered"
-            pwreset_host, pwreset_port, pwreset_email, pwreset_pass = ""
+            pwreset_host = ""
+            pwreset_port = ""
+            pwreset_email = ""
+            pwreset_pass = ""
             break
         else:
             print("Invalid response. Please enter 'Y' or 'N'.")

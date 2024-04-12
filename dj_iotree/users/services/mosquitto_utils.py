@@ -86,7 +86,8 @@ class MqttMetaDataManager():
         success = False
         if self.metadata != None:
             nodered_role_name = self.metadata.nodered_role_name
-            dynsec = MosquittoDynSec(self.dynsec_username, self.dynsec_password)
+            dynsec = MosquittoDynSec(self.dynsec_username, self.dynsec_password
+            )
             success, _, _ = dynsec.delete_role(nodered_role_name)
         return success
 

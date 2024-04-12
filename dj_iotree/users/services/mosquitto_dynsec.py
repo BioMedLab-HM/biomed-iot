@@ -33,7 +33,7 @@ class MosquittoDynSec:
         port (int): Network port of the MQTT broker.
     """
 
-    def __init__(self, username, password, host="localhost", port=1883):
+    def __init__(self, username, password, host="localhost", port=1884):  # 1884 because of nginx rev-proxy
         """
         Initializes a new instance of the MosquittoDynSec class.
 
