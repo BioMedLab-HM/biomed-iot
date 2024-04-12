@@ -16,20 +16,38 @@ def install_mosquitto(setup_scheme):
     mqtt_out_to_db_user = get_random_string(10)
     mqtt_out_to_db_pw = get_random_string(50)
 
-    commands = [
-        "apt install -y mosquitto mosquitto-clients",
-        # Assuming dynsec plugin is installed in a standard location
-        ("echo 'include_dir /etc/mosquitto/conf.d' >> "
-            "/etc/mosquitto/mosquitto.conf"),
+    # Install mosquitto broker
+    output = run_bash("apt install -y mosquitto mosquitto-clients")
+    log(output, MOSQUITTO_INSTALL_LOG_FILE_NAME)
+
+    # Configure Mosquitto from template config files (for TLS or non-TLS)
+    dynsec_plugin_path = run_bash("whereis mosquitto_dynamic_security.so | awk '{print $2}'")
+
+    if setup_scheme == "NO_TLS":
+        conf_script = "tmp.mosquitto-no-tls.conf.sh"
+        file_name = "mosquitto-no-tls.conf"
+    else:
+        conf_script = "tmp.mosquitto-tls.conf.sh"
+        file_name = "mosquitto-tls.conf"
+    
+    conf_command = (f"bash {config_path}/{conf_script} {dynsec_plugin_path} > {setup_dir}/setup_files/tmp/{file_name}")
+    output = run_bash(conf_command)
+    log(output, MOSQUITTO_INSTALL_LOG_FILE_NAME)
+
+    out = run_bash(f"cp {setup_dir}/setup_files/tmp/{file_name} /etc/mosquitto/conf.d")
+    log(out, MOSQUITTO_INSTALL_LOG_FILE_NAME)
+
+    # Initialize the Mosquitto Dynmic Security Plugin file
+    init_dynsec_commands = [
+        # "echo 'include_dir /etc/mosquitto/conf.d' >> /etc/mosquitto/mosquitto.conf",  # duplicate
         # Initialize and build dynamic-security.json file
-        ("mosquitto_ctrl dynsec init /var/lib/mosquitto/dynamic-security.json "
-            f"{dynsec_admin_name} {dynsec_admin_pass}"),
+        (f"mosquitto_ctrl dynsec init /var/lib/mosquitto/dynamic-security.json {dynsec_admin_name} {dynsec_admin_pass}"),
         # Set file permissions:
         "chown mosquitto:mosquitto /var/lib/mosquitto/dynamic-security.json",
         "chmod 700 /var/lib/mosquitto/dynamic-security.json",
     ]
 
-    for command in commands:
+    for command in init_dynsec_commands:
         output = run_bash(command)
         log(output, MOSQUITTO_INSTALL_LOG_FILE_NAME)
 
@@ -44,26 +62,11 @@ def install_mosquitto(setup_scheme):
     print("dynsec_commands sent")
     log("dynsec_commands sent", MOSQUITTO_INSTALL_LOG_FILE_NAME)
 
-    # Configure Mosquitto for TLS or non-TLS
-    if setup_scheme == "NO_TLS":
-        conf_script = "tmp.mosquitto-no-tls.conf.sh"
-        file_name = "mosquitto-no-tls.conf"
-    else:
-        conf_script = "tmp.mosquitto-tls.conf.sh"
-        file_name = "mosquitto-tls.conf"
-    
-    conf_command = (f"bash {config_path}/{conf_script} > " 
-                    f"{setup_dir}/setup_files/tmp/{file_name}")
-    output = run_bash(conf_command)
-    log(output, MOSQUITTO_INSTALL_LOG_FILE_NAME)
-
-    out = run_bash(f"cp {setup_dir}/setup_files/tmp/{file_name} /etc/mosquitto/conf.d")
-    log(out, MOSQUITTO_INSTALL_LOG_FILE_NAME)
-
     # Restart Mosquitto to apply configurations
     output = run_bash("systemctl restart mosquitto.service")
     log(output, MOSQUITTO_INSTALL_LOG_FILE_NAME)
 
+    # Create dict config data
     config_data = {
         "MOSQUITTO_HOST": "localhost",
         "MOSQUITTO_PORT": 1883,

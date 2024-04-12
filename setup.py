@@ -22,7 +22,7 @@ import platform
 import re
 import time
 from setup_files.setup_utils import run_bash, get_linux_user, get_setup_dir, log, set_setup_dir_rights
-from setup_files.write_config_file import write_config_file
+from setup_files.write_config_file import generate_empty_config_data, write_config_file
 from setup_files.install_01_basic_apt_packages import install_basic_apt_packages
 from setup_files.install_02_security_packages import install_security_packages
 from setup_files.install_03_docker  import install_docker
@@ -309,6 +309,9 @@ def main():
 
     create_tmp_dir()
     create_config_dir()
+
+    empty_config_data = generate_empty_config_data()
+    write_config_file(empty_config_data)
     
     install_basic_apt_packages()
     print("Basic apt packages installed")
@@ -379,16 +382,20 @@ def main():
         **django_config_data,
     }
    
+    write_config_file(all_config_data)
 
-    config_file_path = '/etc/iotree/config.toml'
-    write_config_file(all_config_data, config_file_path)
+    """ SET OWNER/ACCESS RIGHTS TO FILES """
+
+
 
     # Capture the end time
     end_time = time.time()
     # Calculate the total time taken
-    setup_duration_total = end_time - start_time
-    num_minutes = setup_duration_seconds // 60
-    num_seconds = setup_duration_total % 60
+    setup_duration = end_time - start_time
+    num_minutes = setup_duration // 60
+    num_seconds = setup_duration % 60
+
+
     """ FINAL INFORMATION OUTPUT FOR THE USER """
     # TBD
     # set pw reset credentials in config.toml

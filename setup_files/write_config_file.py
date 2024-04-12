@@ -1,11 +1,6 @@
-def write_config_file(all_config_data, destination):
-    """
-    Substitutes variables in content with values (dict) and writes the content
-    into the destination (/etc/iotree/config.toml).
-    
-    TODO: Vervollständigen für Grafana!
-    """
-    content = """
+import re
+
+template = """
 [host]
 IP = "{IP}"
 HOSTNAME = "{HOSTNAME}"
@@ -62,7 +57,24 @@ DJANGO_SECRET_KEY = "{DJANGO_SECRET_KEY}"
 DJANGO_ADMIN_MAIL = "{DJANGO_ADMIN_MAIL}"
 DJANGO_ADMIN_NAME = "{DJANGO_ADMIN_NAME}"
 DJANGO_ADMIN_PASS = "{DJANGO_ADMIN_PASS}"
-        """.format(**all_config_data)
+"""
 
+def generate_empty_config_data():
+    # Use a regular expression to find all instances of "{KEY_NAME}"
+    keys = re.findall(r'\{(.*?)\}', template)
+    # Create a dictionary with each key set to an empty string
+    return {key: "" for key in keys}
+
+
+def write_config_file(all_config_data):
+    """
+    Substitutes variables in content with values (dict) and writes the content
+    into the destination (/etc/iotree/config.toml).
+    
+    TODO: Vervollständigen für Grafana!
+    """
+    content = template.format(**all_config_data)
+
+    destination = '/etc/iotree/config.toml'
     with open(destination, 'w') as config_file:
         config_file.write(content)

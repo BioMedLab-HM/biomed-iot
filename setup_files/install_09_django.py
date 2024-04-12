@@ -63,7 +63,7 @@ def install_django(django_admin_email, django_admin_name, django_admin_pass, aut
 
     # Collect static files
     collect_static_command = (
-        f"runuser -u www-data -- bash -c 'source {setup_dir}/dj_iotree/dj_venv/bin/activate && "
+        f"runuser -u {linux_user} -- bash -c 'source {setup_dir}/dj_iotree/dj_venv/bin/activate && "  # was www-data
         f"{setup_dir}/dj_iotree/dj_venv/bin/python {setup_dir}/dj_iotree/manage.py collectstatic --noinput && "
         f"deactivate'"
     )

@@ -210,7 +210,7 @@ CRISPY_TEMPLATE_PACK = "bootstrap5"
 
 # TODO: NO Logger level "DEBUG" in production!
 # see: https://docs.djangoproject.com/en/5.0/topics/logging/
-LOG_FILE_PATH = os.path.join(BASE_DIR, 'logs', 'debug.log')
+LOG_FILE_PATH = os.path.join(BASE_DIR, 'logging', 'debug.log')
 
 LOGGING = {
     'version': 1,

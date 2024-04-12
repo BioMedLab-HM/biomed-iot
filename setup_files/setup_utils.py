@@ -63,17 +63,17 @@ def run_bash(command, show_output=True):
                 stdout += output
         exit_code = process.poll()
         if exit_code == 0:
-            return stdout
+            return stdout.strip()
         else:
-            return f"Error executing command: {command}\nOutput:\n{stdout}\n"
+            return f"Error executing command: {command}\nOutput:\n{stdout.strip()}\n"
     else:
         try:
             result = subprocess.run(command, shell=True, check=True, capture_output=True, text=True)
             # Return the standard output of the command
-            return result.stdout
+            return result.stdout.strip()
         except subprocess.CalledProcessError as e:
             # Return the standard error output, which is captured in stdout due to redirect
-            return f"Error executing command: {e.cmd}\nOutput:\n{e.stdout}\n"
+            return f"Error executing command: {e.cmd}\nOutput:\n{e.stdout.strip()}\n"
 
 def get_random_string(string_length, incl_symbols=False):
     """
@@ -90,7 +90,7 @@ def get_random_string(string_length, incl_symbols=False):
     return rand_str
 
 def set_setup_dir_rights():
-    output = run_bash(f"chmod -R 775 {get_setup_dir()}")
+    output = run_bash(f"chmod -R 700 {get_setup_dir()}")
     log(output)
     linux_user = get_linux_user()
     output = run_bash(f"chown -R {linux_user}:{linux_user} {get_setup_dir()}")
