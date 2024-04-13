@@ -159,7 +159,7 @@ class MosquittoDynSec(metaclass=Singleton):
         self.subscription_event.wait(self.sub_event_timeout_seconds)
         print("Now publishing after successful subscription")
         send_code = self.client.publish(self.send_command_topic, payload, qos=2)
-        print(f"in _send_command: published". send_code = {send_code})
+        print(f'in _send_command: published". send_code = {send_code}')
 
         return send_code
 

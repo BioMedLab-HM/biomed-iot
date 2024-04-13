@@ -25,7 +25,7 @@ def install_django(django_admin_email, django_admin_name, django_admin_pass, aut
     output = run_bash(f"runuser -u {linux_user} -- python3 -m venv {setup_dir}/dj_iotree/dj_venv")
     log(output, DJANGO_INSTALL_LOG_FILE_NAME)
 
-    # Install requirements (written in one command to keep venv active)
+    # Install requirements and do Db migrations (written in one command to keep venv active)
     requirements_command = (
         f"runuser -u {linux_user} -- bash -c 'source {setup_dir}/dj_iotree/dj_venv/bin/activate && "
         f"pip install -r {setup_dir}/dj_iotree/requirements.txt && "
