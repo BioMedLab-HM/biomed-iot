@@ -1,5 +1,7 @@
 from users.models import MqttMetaData, MqttClient
+
 from .mosquitto_dynsec import MosquittoDynSec
+#from .mosquitto_dynsec import dynsec
 from django.db import transaction
 from django.db import IntegrityError
 from enum import Enum, unique
@@ -17,7 +19,7 @@ class RoleType(Enum):
 
     DEVICE = "device"
     NODERED = "nodered"
-    
+
 
 class MqttMetaDataManager:
     """
@@ -70,9 +72,9 @@ class MqttMetaDataManager:
             nodered_sub_topic = f"in/{self.metadata.user_topic_id}/#"
             nodered_pub_topic = f"out/{self.metadata.user_topic_id}/#"
 
-            #dynsec = MosquittoDynSec(self.dynsec_username, self.dynsec_password)
-            with MosquittoDynSec(self.dynsec_username, self.dynsec_password) as dynsec:
-                success, _, _ = dynsec.create_role(
+            try:
+                dynsec = MosquittoDynSec(self.dynsec_username, self.dynsec_password)
+                success = dynsec.create_role(
                     self.metadata.nodered_role_name,
                     acls=[
                         {
@@ -89,6 +91,9 @@ class MqttMetaDataManager:
                         },
                     ],
                 )
+            finally:
+                dynsec.disconnect()
+
         return success
 
     def create_device_role(self):
@@ -100,10 +105,9 @@ class MqttMetaDataManager:
         if self.metadata is not None:
             device_sub_topic = f"out/{self.metadata.user_topic_id}/#"
             device_pub_topic = f"in/{self.metadata.user_topic_id}/#"
-
-            #dynsec = MosquittoDynSec(self.dynsec_username, self.dynsec_password)
-            with MosquittoDynSec(self.dynsec_username, self.dynsec_password) as dynsec:
-                success, _, _ = dynsec.create_role(
+            try:
+                dynsec = MosquittoDynSec(self.dynsec_username, self.dynsec_password)
+                success = dynsec.create_role(
                     self.metadata.device_role_name,
                     acls=[
                         {
@@ -120,6 +124,9 @@ class MqttMetaDataManager:
                         },
                     ],
                 )
+            finally:
+                dynsec.disconnect()
+
         return success
 
     def delete_nodered_role(self):
@@ -130,9 +137,12 @@ class MqttMetaDataManager:
         success = False
         if self.metadata is not None:
             nodered_role_name = self.metadata.nodered_role_name
-            #dynsec = MosquittoDynSec(self.dynsec_username, self.dynsec_password)
-            with MosquittoDynSec(self.dynsec_username, self.dynsec_password) as dynsec:
-                success, _, _ = dynsec.delete_role(nodered_role_name)
+            try:
+                dynsec = MosquittoDynSec(self.dynsec_username, self.dynsec_password)
+                success = dynsec.delete_role(nodered_role_name)
+            finally:
+                dynsec.disconnect()
+
         return success
 
     def delete_device_role(self):
@@ -143,9 +153,12 @@ class MqttMetaDataManager:
         success = False
         if self.metadata is not None:
             device_role_name = self.metadata.device_role_name
-            #MosquittoDynSec(self.dynsec_username, self.dynsec_password)
-            with MosquittoDynSec(self.dynsec_username, self.dynsec_password) as dynsec:
-                success, _, _ = dynsec.delete_role(device_role_name)
+            try:
+                dynsec = MosquittoDynSec(self.dynsec_username, self.dynsec_password)
+                success = dynsec.delete_role(device_role_name)
+            finally:
+                dynsec.disconnect()
+
         return success
 
 
@@ -176,13 +189,14 @@ class MqttClientManager:
             roles = [{"rolename": rolename, "priority": -1}]
 
             # Create the MQTT client in the mosquitto dynamic security plugin
-            #MosquittoDynSec(self.dynsec_username, self.dynsec_password)
-            with MosquittoDynSec(self.dynsec_username, self.dynsec_password) as dynsec:
-                success, response, _ = dynsec.create_client(
-                new_username, new_password, textname=textname, roles=roles
-            )
-            print(f"Success in MqttClientManager create_client is: {success}")
-            print(f"Response in MqttClientManager create_client is: {response}")
+            try:
+                dynsec = MosquittoDynSec(self.dynsec_username, self.dynsec_password)
+                success = dynsec.create_client(
+                    new_username, new_password, textname=textname, roles=roles
+                )
+            finally:
+                dynsec.disconnect()
+
             if success:
                 # If the MQTT client was successfully created in the dynsec system, save it to the database
                 MqttClient.objects.create(
@@ -212,9 +226,12 @@ class MqttClientManager:
             )
 
             # Next, attempt to modify the client in the dynamic security system
-            #dynsec = MosquittoDynSec(self.dynsec_username, self.dynsec_password)
-            with MosquittoDynSec(self.dynsec_username, self.dynsec_password) as dynsec:
-                success, _, _ = dynsec.modify_client(client_username, textname=textname)
+            try:
+                dynsec = MosquittoDynSec(self.dynsec_username, self.dynsec_password)
+                success = dynsec.modify_client(client_username, textname=textname)
+            finally:
+                dynsec.disconnect()
+
             if success:
                 # If modification in the dynamic security system is successful, update the database
                 mqtt_client.textname = textname
@@ -239,9 +256,11 @@ class MqttClientManager:
             )
 
             # Attempt to delete the client from the dynamic security system
-            #MosquittoDynSec(self.dynsec_username, self.dynsec_password)
-            with MosquittoDynSec(self.dynsec_username, self.dynsec_password) as dynsec:
-                success, _, _ = dynsec.delete_client(client_username)
+            try:
+                dynsec = MosquittoDynSec(self.dynsec_username, self.dynsec_password)
+                success = dynsec.delete_client(client_username)
+            finally:
+                dynsec.disconnect()
 
             if success:
                 mqtt_client.delete()

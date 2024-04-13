@@ -1,10 +1,36 @@
+import queue
 import threading
 import paho.mqtt.client as mqtt
-from paho.mqtt.client import MQTT_ERR_SUCCESS
 import json
+import time
 
 
-class MosquittoDynSec():
+class Singleton(type):
+    """
+    A metaclass that creates a Singleton instance.
+    """
+
+    _instances = {}
+
+    def __call__(cls, *args, **kwargs):
+        # The __call__ method makes the class callable. It's triggered when you attempt
+        # to create an instance of a class using this metaclass.
+
+        if cls not in cls._instances:
+            # If this class hasn't been instantiated yet, create a new instance and
+            # store it in the _instances dictionary. This ensures only one instance
+            # per class.
+
+            cls._instances[cls] = super().__call__(*args, **kwargs)
+            # Creates and stores the unique instance using super to call the parent's
+            # __call__, which actually creates the instance.
+
+        return cls._instances[cls]
+        # Returns the instance from the _instances dict, ensuring all attempts to
+        # instantiate this class result in the same shared instance.
+
+
+class MosquittoDynSec(metaclass=Singleton):
     """
     Based on commands at https://github.com/eclipse/mosquitto/blob/master/plugins/dynamic-security/README.md
     About Mosquitto Dynamic Security Plugin: https://mosquitto.org/documentation/dynamic-security/
@@ -34,8 +60,8 @@ class MosquittoDynSec():
         port (int): Network port of the MQTT broker.
     """
 
-    # in nginx: listen 1883; proxy_pass localhost:1884;
     def __init__(self, username, password, host="localhost", port=1884):
+        # in nginx: listen 1883; proxy_pass localhost:1884;
         """
         Initializes a new instance of the MosquittoDynSec class.
 
@@ -65,15 +91,12 @@ class MosquittoDynSec():
         # Old callback structure still supported for CallbackAPIVersion.VERSION1
         self.client = mqtt.Client(mqtt.CallbackAPIVersion.VERSION1)
 
-        # Set username and password
-        self.client.username_pw_set(self.username, self.password)
-        self.client.reconnect_delay_set(min_delay=1, max_delay=2)
-
         # Events and timeouts
         self.subscription_event = threading.Event()
         self.message_received_event = threading.Event()
         self.sub_event_timeout_seconds = 5
         self.msg_received_timeout_seconds = 10
+        self.should_reconnect = True  # Flag to control reconnection attempts
 
         # Assign callback functions
         self.client.on_connect = self.on_connect
@@ -81,9 +104,26 @@ class MosquittoDynSec():
         self.client.on_message = self.on_message
         self.client.on_publish = self.on_publish
 
-        # Connect and start MQTT client
-        self.client.connect(self.host, self.port, 60)
-        self.client.loop_start()
+        # Set username and password
+        self.client.username_pw_set(self.username, self.password)
+
+        # # Connect and start MQTT client
+        # self.client.connect(self.host, self.port, 60)
+        # self.client.loop_start()
+
+        # Create Queue and Worker thread to handle high load of requests
+        self.command_queue = queue.Queue()
+        self.response_queue = queue.Queue()  # Queue for responses
+        self.worker_thread = threading.Thread(target=self._process_commands)
+        self.worker_thread.daemon = True
+        self.worker_thread.start()
+
+        self.connect()
+        
+
+    """
+    Internal-use functions and callbacks (only used by the class itself)
+    """
 
     # def __enter__(self):
     #     return self
@@ -91,50 +131,75 @@ class MosquittoDynSec():
     # def __exit__(self, exc_type, exc_val, exc_tb):
     #     self.disconnect()
 
-    def disconnect(self):
-        self.client.loop_stop()
-        self.client.disconnect()
-        # print("Disconnected MQTT client.")
+    # def disconnect(self):
+    #     self.client.loop_stop()
+    #     self.client.disconnect()
+    #     print("Disconnected MQTT client.")
 
+    def connect(self):
+        try:
+            self.client.connect(self.host, self.port, 60)
+            self.client.loop_start()
+        except Exception as e:
+            print(f"Connection failed: {e}")
+            self.attempt_reconnect()
 
-    """
-    Internal-use functions and callbacks (only used by the class itself)
-    """
+    def on_disconnect(self, client, userdata, rc):
+        if self.should_reconnect:
+            print("Connection lost, attempting to reconnect...")
+            self.attempt_reconnect()
+            
+    def _process_commands(self):
+        while True:
+            command_info = self.command_queue.get()
+            if command_info is None:
+                # Shutdown signal
+                break
+            command, response_event = command_info
+            # Process command
+            send_code, response = self._send_and_wait_for_response(command)
+            # Put response into response queue and signal completion
+            self.response_queue.put((response_event, response))
+            self.command_queue.task_done()
 
-    def on_publish(self, client, userdata, mid):
-        # print(f"Message published with message-id {mid}")
-        pass
+    def _send_and_wait_for_response(self, command):
+        # This method should encapsulate sending the command and waiting for its response
+        # It's a placeholder for the actual send and response logic
+        send_code = self._send_command(command)
+        response = self._get_response()  # Assume this waits and retrieves the response
+        return send_code, response
 
-    def on_message(self, client, userdata, msg):
-        # print(f"Topic: `{msg.topic}`\nPayload: `{json.loads(msg.payload.decode('utf-8'))}`")
-        self.response_msg = json.loads(msg.payload.decode("utf-8"))
-        # print(f"on_message: self.response_msg = {self.response_msg}")
-        self.message_received_event.set()  # must be the last line to make sure, the message is stored in self.response_msg
+    def queue_command(self, command):
+        # Create an event for this command's response
+        response_event = threading.Event()
+        self.command_queue.put((command, response_event))
+        return response_event  # The caller can wait on this event
 
-    def on_connect(self, client, userdata, flags, rc):
-        self.client.subscribe(self.response_topic, qos=2)
-        if rc == 0:
-            # print("Connected with result code " + str(rc))
-            pass
-        else:
-            # print(f"Failed to connect, return code: {rc}\n")
-            pass
-    
-    def on_subscribe(self, client, userdata, mid, granted_qos):
-        # print("Subscribed to topic")
-        # Signal successful subscription
-        self.subscription_event.set()
-    
-        
+    def get_response_for_event(self, response_event):
+        # Wait for the response to be put in the response queue
+        while True:
+            try:
+                event, response = self.response_queue.get(
+                    timeout=1
+                )  # Adjust timeout as necessary
+                if event == response_event:
+                    return response  # This is the response for the command
+                else:
+                    self.response_queue.put(
+                        (event, response)
+                    )  # Put it back if not the right response
+            except queue.Empty:
+                continue  # Retry if queue is empty
+
     def _send_command(self, command):
         # print("_send_command called")
         # Construct and send a command to the control topic
         payload = json.dumps(command)
         # Wait for the subscription to be successful
         self.subscription_event.wait(self.sub_event_timeout_seconds)
-        # print("Now publishing after successful subscription")
+        print("Now publishing after successful subscription")
         send_code = self.client.publish(self.send_command_topic, payload, qos=2)
-        # print(f'in _send_command: published". send_code = {send_code}')
+        print(f'in _send_command: published". send_code = {send_code}')
 
         return send_code
 
@@ -144,22 +209,22 @@ class MosquittoDynSec():
         event_set = self.message_received_event.wait(self.msg_received_timeout_seconds)
         if event_set:
             response = self.response_msg
-            # print(f"Message received: self.response_msg = {self.response_msg}")
+            print(f"Message received: self.response_msg = {self.response_msg}")
             # After processing the message, clear the event and reset self.reply_message
             self.message_received_event.clear()
             self.response_msg = None  # reset the variable for next request to the Dynamic Security Plugin
         else:
-            # print(f"No message received: self.response_msg = {self.response_msg}")
+            print(f"No message received: self.response_msg = {self.response_msg}")
             self.response_msg = None
             response = self.response_msg
 
         return response
 
-    def _is_response_successful(self, command, response, send_code):
-        # print(f"In '_is_response_successful'. command: {command}, response: {response}")
+    def _is_response_successful(self, command, response):
+        print(f"In '_is_response_successful'. command: {command}, response: {response}")
         # Response codes for Mosquitto on GitHub: https://github.com/search?q=repo%3Aeclipse%2Fmosquitto++%7B%27responses%27&type=code
         successful = False
-        if response is not None and send_code.rc == MQTT_ERR_SUCCESS:
+        if response is not None:
             # Get command name of the command sent and command in response
             command_name = command["commands"][0][
                 "command"
@@ -171,10 +236,12 @@ class MosquittoDynSec():
             ):  # Check if the expected command is present in the response
                 successful = True
             if "error" in response["responses"][0]:
-                # print(f"In 'error' in response['responses'][0]'. Response: {response['responses'][0]}")
+                print(
+                    f"In 'error' in response['responses'][0]'. Response: {response['responses'][0]}"
+                )
                 successful = False
-                if ("already" in response["responses"][0]["error"]):
-                    # print('"already" in response["responses"][0]["error"]')
+                if "already" in response["responses"][0]["error"]:
+                    print('"already" in response["responses"][0]["error"]')
                     # caveat: prone to minterpretation if response messages change in the future
                     # Known responses containing 'already':
                     # 'Role already exists'
@@ -186,15 +253,73 @@ class MosquittoDynSec():
 
         return successful
 
+    def attempt_reconnect(self):
+        max_attempts = 5
+        attempt_count = 0
+
+        while self.should_reconnect and attempt_count < max_attempts:
+            try:
+                self.client.reconnect()
+                print("Successfully reconnected to the MQTT broker.")
+                break  # Exit the loop if reconnect is successful
+            except Exception as e:
+                attempt_count += 1
+                wait_time = min(5 * attempt_count, 30)  # Wait time increases but caps at 30 seconds
+                print(f"Reconnect failed: {e}, retrying in {wait_time} seconds...")
+                time.sleep(wait_time)
+
+    def ensure_connected(self):
+        if not self.client.is_connected():
+            print("Client not connected. Attempting to reconnect...")
+            self.attempt_reconnect()
+
     def _execute_command(self, command):
-        # print(f"In '_execute_command'. command: {command}")
-        send_code = self._send_command(command)  # send_code for debugging
-        # print(f"In '_execute_command'. send_code: {send_code}")
-        response = self._get_response()
-        # print(f"In '_execute_command'. response: {response}")
-        success = self._is_response_successful(command, response, send_code)
-        # print(f"In '_execute_command'. success: {success}")
-        return success, response, send_code
+        self.ensure_connected()
+        response_event = self.queue_command(command)  # Queue the command
+        response = self.get_response_for_event(
+            response_event
+        )  # Wait for and get the response
+        success = self._is_response_successful(command, response)
+        return success
+
+    #     print(f"In '_execute_command'. command: {command}")
+    #     send_code = self._send_command(command)  # send_code for debugging
+    #     print(f"In '_execute_command'. send_code: {send_code}")
+    #     response = self._get_response()
+    #     print(f"In '_execute_command'. response: {response}")
+    #     success = self._is_response_successful(command, response)
+    #     print(f"In '_execute_command'. success: {success}")
+    #     return success, response, send_code
+
+    def on_message(self, client, userdata, msg):
+        print(
+            f"Topic: `{msg.topic}`\nPayload: `{json.loads(msg.payload.decode('utf-8'))}`"
+        )
+        self.response_msg = json.loads(msg.payload.decode("utf-8"))
+        print(f"on_message: self.response_msg = {self.response_msg}")
+        self.message_received_event.set()  # must be the last line to make sure, the message is stored in self.response_msg
+
+    def on_connect(self, client, userdata, flags, rc):
+        self.client.subscribe(self.response_topic, qos=2)
+        if rc == 0:
+            print("Connected with result code " + str(rc))
+            pass
+        else:
+            print(f"Failed to connect, return code: {rc}\n")
+
+    def on_subscribe(self, client, userdata, mid, granted_qos):
+        print("Subscribed to topic")
+        # Signal successful subscription
+        self.subscription_event.set()
+
+    def on_publish(self, client, userdata, mid):
+        print(f"Message published with message-id {mid}")
+        pass
+
+    def shutdown(self):
+        self.command_queue.put(None)
+        self.worker_thread.join()
+        self.disconnect()
 
     """
     External-use getter- and setter-functions (use these to interact with the Mosquitto Dynamic Security Plugin) 
@@ -913,3 +1038,6 @@ class MosquittoDynSec():
         }
 
         return self._execute_command(command)
+
+
+dynsec = MosquittoDynSec("username", "password", "host", 1883)
