@@ -21,6 +21,7 @@ import socket
 import platform
 import re
 import time
+from getpass import getpass
 from setup_files.setup_utils import run_bash, get_linux_user, get_setup_dir, log, set_setup_dir_rights
 from setup_files.write_config_file import generate_empty_config_data, write_config_file
 from setup_files.install_01_basic_apt_packages import install_basic_apt_packages
@@ -123,15 +124,19 @@ def confirm_proceed(question_to_ask):
             print("Invalid response. Please enter 'Y' or 'N'.")
 
 
-def get_confirmed_text_input(input_prompt):
+def get_confirmed_text_input(input_prompt, hidden_input=False):
     """
     Example usage:
-        confirmed_text = get_confirmed_text_input("Enter your password")
+        password = get_confirmed_text_input("Enter your password", hidden_input=True)
     """
     while True:
         print()
-        input_text = input(f"{input_prompt}: ").strip()
-        confirmation = input("Please repeat your entry: ").strip()
+        if hidden_input:
+            input_text = getpass(f"{input_prompt}: ")
+            confirmation = getpass("Please repeat your entry: ")
+        else:
+            input_text = input(f"{input_prompt}: ").strip()
+            confirmation = input("Please repeat your entry: ").strip()
 
         if not input_text:
             print("Nothing entered. Please try again.")
@@ -142,6 +147,7 @@ def get_confirmed_text_input(input_prompt):
 
 
 def prompt_for_password(required_length=12):
+    # unused
     """
     Parameters:
     - required_length (int): The minimum required length of the password.
@@ -161,7 +167,8 @@ def prompt_for_password(required_length=12):
             f"password (min length {required_length}) for your IoTree42 admin "
             "user\nIt must contain at least one uppercase letter, one "
             "lowercase letter, one digit and one special character from "
-            "!@#$%&*()_+-=[]}{|;:<>/?,"
+            "!@#$%&*()_+-=[]}{|;:<>/?,", 
+            hidden_input=True
         )
         if password_pattern.match(password):
             return password
@@ -195,8 +202,7 @@ def get_credentials_for_pw_reset():
                 "for the website's password reset function"
                 )
             pwreset_pass = get_confirmed_text_input("Enter the password "
-                "for the website's password reset function"
-                )
+                "for the website's password reset function", hidden_input=True)
             msg = "Credentials for password reset functions have been entered"
             break
         elif user_answer == 'n':
