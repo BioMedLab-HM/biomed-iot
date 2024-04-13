@@ -6,6 +6,19 @@ from enum import Enum, unique
 from dj_iotree.config_loader import config
 
 
+@unique
+class RoleType(Enum):
+    """
+    Used for MqttClientManager. Prevents the use of 'magic values' in various functions.
+    Example usage in a view:
+        mqtt_client_manager = MqttClientManager(request.user)
+        mqtt_client_manager.create_client(self, textname="New MQTT Device", role_type=RoleType.DEVICE.value)
+    """
+
+    DEVICE = "device"
+    NODERED = "nodered"
+    
+
 class MqttMetaDataManager:
     """
     Manages MQTT metadata for users.
@@ -134,19 +147,6 @@ class MqttMetaDataManager:
             with MosquittoDynSec(self.dynsec_username, self.dynsec_password) as dynsec:
                 success, _, _ = dynsec.delete_role(device_role_name)
         return success
-
-
-@unique
-class RoleType(Enum):
-    """
-    Used for MqttClientManager. Prevents the use of 'magic values' in various functions.
-    Example usage in a view:
-        mqtt_client_manager = MqttClientManager(request.user)
-        mqtt_client_manager.create_client(self, textname="New MQTT Device", role_type=RoleType.DEVICE.value)
-    """
-
-    DEVICE = "device"
-    NODERED = "nodered"
 
 
 class MqttClientManager:

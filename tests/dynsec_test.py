@@ -21,8 +21,8 @@ from mosquitto_dynsec import MosquittoDynSec
 with open("/etc/iotree/config.toml", "rb") as f:
     config = tomllib.load(f)
 
-admin_username = config['mosquitto']['DYNSEC_USER']
-admin_password = config['mosquitto']['DYNSEC_PASSWORD']
+admin_username = config['mosquitto']['DYNSEC_ADMIN_USER']
+admin_password = config['mosquitto']['DYNSEC_ADMIN_PW']
 
 dynsec = MosquittoDynSec(admin_username, admin_password)
 

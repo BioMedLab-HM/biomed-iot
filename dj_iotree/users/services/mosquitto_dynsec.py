@@ -11,9 +11,21 @@ class Singleton(type):
     _instances = {}
 
     def __call__(cls, *args, **kwargs):
+    # The __call__ method makes the class callable. It's triggered when you attempt
+    # to create an instance of a class using this metaclass.
+
         if cls not in cls._instances:
+            # If this class hasn't been instantiated yet, create a new instance and
+            # store it in the _instances dictionary. This ensures only one instance
+            # per class.
+
             cls._instances[cls] = super().__call__(*args, **kwargs)
+            # Creates and stores the unique instance using super to call the parent's
+            # __call__, which actually creates the instance.
+
         return cls._instances[cls]
+        # Returns the instance from the _instances dict, ensuring all attempts to
+        # instantiate this class result in the same shared instance.
 
 
 class MosquittoDynSec(metaclass=Singleton):
@@ -117,13 +129,13 @@ class MosquittoDynSec(metaclass=Singleton):
     """
 
     def on_publish(self, client, userdata, mid):
-        # print(f"Message published with message-id {mid}")
+        print(f"Message published with message-id {mid}")
         pass
 
     def on_message(self, client, userdata, msg):
-        # print(f"Topic: `{msg.topic}`\nPayload: `{json.loads(msg.payload.decode('utf-8'))}`")
+        print(f"Topic: `{msg.topic}`\nPayload: `{json.loads(msg.payload.decode('utf-8'))}`")
         self.response_msg = json.loads(msg.payload.decode("utf-8"))
-        # print(f"on_message: self.response_msg = {self.response_msg}")
+        print(f"on_message: self.response_msg = {self.response_msg}")
         self.message_received_event.set()  # must be the last line to make sure, the message is stored in self.response_msg
 
     def on_connect(self, client, userdata, flags, rc):
@@ -145,9 +157,9 @@ class MosquittoDynSec(metaclass=Singleton):
         payload = json.dumps(command)
         # Wait for the subscription to be successful
         self.subscription_event.wait(self.sub_event_timeout_seconds)
-        # print("Now publishing after successful subscription")
+        print("Now publishing after successful subscription")
         send_code = self.client.publish(self.send_command_topic, payload, qos=2)
-        # print("in _send_command: published")
+        print(f"in _send_command: published". send_code = {send_code})
 
         return send_code
 
@@ -157,6 +169,7 @@ class MosquittoDynSec(metaclass=Singleton):
         event_set = self.message_received_event.wait(self.msg_received_timeout_seconds)
         if event_set:
             response = self.response_msg
+            print(f"Message received: self.response_msg = {self.response_msg}")
             # After processing the message, clear the event and reset self.reply_message
             self.message_received_event.clear()
             self.response_msg = None  # reset the variable for next request to the Dynamic Security Plugin
@@ -168,6 +181,7 @@ class MosquittoDynSec(metaclass=Singleton):
         return response
 
     def _is_response_successful(self, command, response):
+        print(f"In '_is_response_successful'. command: {command}, response: {response}")
         # Response codes for Mosquitto on GitHub: https://github.com/search?q=repo%3Aeclipse%2Fmosquitto++%7B%27responses%27&type=code
         successful = False
         if response is not None:
@@ -182,10 +196,11 @@ class MosquittoDynSec(metaclass=Singleton):
             ):  # Check if the expected command is present in the response
                 successful = True
             if "error" in response["responses"][0]:
+                print(f"In 'error' in response['responses'][0]'. Response: {response['responses'][0]}")
                 successful = False
-                if (
-                    "already" in response["responses"][0]["error"]
-                ):  # caveat: prone to minterpretation if response messages change in the future
+                if ("already" in response["responses"][0]["error"]):
+                    print('"already" in response["responses"][0]["error"]')
+                    # caveat: prone to minterpretation if response messages change in the future
                     # Known responses containing 'already':
                     # 'Role already exists'
                     # 'Group already exists'
@@ -197,9 +212,13 @@ class MosquittoDynSec(metaclass=Singleton):
         return successful
 
     def _execute_command(self, command):
+        print(f"In '_execute_command'. command: {command}")
         send_code = self._send_command(command)  # send_code for debugging
+        print(f"In '_execute_command'. send_code: {send_code}")
         response = self._get_response()
+        print(f"In '_execute_command'. response: {response}")
         success = self._is_response_successful(command, response)
+        print(f"In '_execute_command'. success: {success}")
         return success, response, send_code
 
     """
