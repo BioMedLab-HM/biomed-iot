@@ -244,7 +244,7 @@ def main():
     """
 
     hostname = socket.gethostname()
-    ip_address = run_bash("ip addr | grep 'state UP' -A2 | tail -n1 | awk '{print $2}' | cut -f1  -d'/'")
+    ip_address = run_bash("hostname --all-ip-addresses | awk '{print $1}'")  # unreliable on diff. systems: run_bash("ip addr | grep 'state UP' -A2 | tail -n1 | awk '{print $2}' | cut -f1  -d'/'")
     linux_user = get_linux_user()
     setup_dir = get_setup_dir()
     django_admin_name = None

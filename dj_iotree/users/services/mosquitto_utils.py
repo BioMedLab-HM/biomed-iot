@@ -206,7 +206,8 @@ class MqttClientManager:
                     textname=textname,
                     rolename=rolename,
                 )
-                print(f"MQTT client {new_username} created successfully.")
+                #print(f"MQTT client {new_username} created successfully.")
+                # TODO: prints erscheinen auch in setup-script --> Umstellung auf Logging
             else:
                 print("Failed to create MQTT client in dynamic security system.")
         except MqttMetaData.DoesNotExist:

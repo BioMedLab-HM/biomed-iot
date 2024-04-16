@@ -60,7 +60,7 @@ def install_django(django_admin_email, django_admin_name, django_admin_pass, aut
     log(out, DJANGO_INSTALL_LOG_FILE_NAME)
 
     # Change the group ownership of the directory to 'www-data'
-    out = run_bash("chown -R rene:www-data /var/www/dj_iotree/")
+    out = run_bash(f"chown -R {linux_user}:www-data /var/www/dj_iotree/")
     log(out, DJANGO_INSTALL_LOG_FILE_NAME)
 
     # Set permissions to allow group members to write
