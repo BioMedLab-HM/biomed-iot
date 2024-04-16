@@ -19,32 +19,13 @@ def install_influxdb(architecture):
     user including django admin will be generated on user creation.
     """
     setup_dir = get_setup_dir()
-    influx_files_dir = f'{setup_dir}/tmp/influx_install_files'
+    influx_files_dir = f'{setup_dir}/setup_files/tmp/influx_install_files'
 
     influx_org_name = "iotree42"
     influx_username = get_random_string(20)
     influx_password = get_random_string(30)
     influx_operator_token = get_random_string(50)
 
-    # WORKING VERSION
-    # installation_commands_amd64 = [
-    #     # TODO Test: Ensure the temp directory exists and enter it
-    #     f"mkdir -p {influx_files_dir} && cd {influx_files_dir}" +  # works only when all commands are concatenated to one command with &&
-    #     # Download and install InfluxDB
-    #     "curl -LO https://dl.influxdata.com/influxdb/releases/influxdb2_2.7.5-1_amd64.deb",
-    #     "sudo dpkg -i influxdb2_2.7.5-1_amd64.deb",
-    #     "sudo service influxdb start",
-    #     # Download and unpack the InfluxDB client, then move it
-    #     "wget https://dl.influxdata.com/influxdb/releases/influxdb2-client-2.7.3-linux-amd64.tar.gz",
-    #     "tar xvzf influxdb2-client-2.7.3-linux-amd64.tar.gz",
-    #     "sudo cp influx /usr/local/bin/",
-    #     # Cleanup and return to install_dir
-    #     # f"cd - && rm -rf {influx_files_dir}",
-    #     # Disables sending telemetry data to InfluxData
-    #     "echo 'reporting-disabled = true' | sudo tee -a /etc/influxdb/config.toml > /dev/null",
-    # ]
-
-    # TO TEST VERSION
     installation_commands_amd64 = [
         # TODO Test: Ensure the temp directory exists and enter it
         f"mkdir -p {influx_files_dir} && cd {influx_files_dir} && " +  # works only when all commands are concatenated to one command with &&
@@ -56,31 +37,12 @@ def install_influxdb(architecture):
         "wget https://dl.influxdata.com/influxdb/releases/influxdb2-client-2.7.3-linux-amd64.tar.gz && " +
         "tar xvzf influxdb2-client-2.7.3-linux-amd64.tar.gz && " +
         "sudo cp influx /usr/local/bin/ && " +
-        # Cleanup and return to install_dir
+        # Return to install_dir
         "cd -",
         # Disables sending telemetry data to InfluxData
         "echo 'reporting-disabled = true' | sudo tee -a /etc/influxdb/config.toml > /dev/null",
     ]
 
-    # WORKING VERSION
-    # installation_commands_arm64 = [
-    #     # Ensure the temp directory exists and enter it
-    #     # "mkdir -p ~/influx_install_tmp && cd ~/influx_install_tmp" +
-    #     # Download and install InfluxDB
-    #     "curl -LO https://dl.influxdata.com/influxdb/releases/influxdb2_2.7.5-1_arm64.deb",
-    #     "sudo dpkg -i influxdb2_2.7.5-1_arm64.deb",
-    #     "sudo service influxdb start",
-    #     # Download and unpack the InfluxDB client (CLI), then move it
-    #     "wget https://dl.influxdata.com/influxdb/releases/influxdb2-client-2.7.3-linux-arm64.tar.gz",
-    #     "tar xvzf influxdb2-client-2.7.3-linux-arm64.tar.gz",
-    #     "cp influx /usr/local/bin/",
-    #     # Cleanup and return to install_dir
-    #     # "cd - && rm -rf ~/influx_install_tmp",
-    #     # Disables sending telemetry data to InfluxData
-    #     "echo 'reporting-disabled = true' | sudo tee -a /etc/influxdb/config.toml > /dev/null",
-    # ]
-
-    # TO TEST VERSION
     installation_commands_arm64 = [
         # Ensure the temp directory exists and enter it
         f"mkdir -p {influx_files_dir} && cd {influx_files_dir} && " +
@@ -92,7 +54,7 @@ def install_influxdb(architecture):
         "wget https://dl.influxdata.com/influxdb/releases/influxdb2-client-2.7.3-linux-arm64.tar.gz && " +
         "tar xvzf influxdb2-client-2.7.3-linux-arm64.tar.gz && " +
         "cp influx /usr/local/bin/ && " +
-        # Cleanup and return to install_dir
+        # Eeturn to install_dir
         "cd -",
         # Disables sending telemetry data to InfluxData
         "echo 'reporting-disabled = true' | sudo tee -a /etc/influxdb/config.toml > /dev/null",
@@ -103,7 +65,7 @@ def install_influxdb(architecture):
     elif architecture in ["arm64", "aarch64"]:
         installation_commands = installation_commands_arm64
 
-    for command in installation_commands:  # loop unnecessary if
+    for command in installation_commands:
         output = run_bash(command)
         log(output, INFLUXDB_INSTALL_LOG_FILE_NAME)
 
