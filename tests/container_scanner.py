@@ -1,4 +1,4 @@
-'''
+"""
 This script prints container state and health every second.
 
 While this script is running, test bash commands like in this order:
@@ -8,7 +8,7 @@ While this script is running, test bash commands like in this order:
     sudo docker stop 123456
     sudo docker rm 123456
 After deleting the stopped container with the 'rm'-command, stop this script and analyse its output.
-'''
+"""
 
 import docker
 import time
@@ -23,31 +23,30 @@ while True:
     try:
         # Get the container
         container = client.containers.get(container_name_or_id)
-        
+
         print(f"Monitoring health and status of container: {container_name_or_id}")
 
         # Continuously check the container's health and status
         while True:
             # Reload container information to get updated data
             container.reload()
-            
+
             # Extract health status
             try:
-                container_health = container.attrs['State']['Health']['Status']
+                container_health = container.attrs["State"]["Health"]["Status"]
             except KeyError:
                 container_health = "N/A (No health checks configured)"
-            
+
             # Get general container status
             container_status = container.status
-            
+
             print(f"Container Status: {container_status} | Health: {container_health}")
             time.sleep(1)
-            
 
     except docker.errors.NotFound:
         print(f"Container {container_name_or_id} not found.")
     except Exception as e:
         print(f"An error occurred: {e}")
-    
+
     # Wait for a bit before checking again
     time.sleep(1)

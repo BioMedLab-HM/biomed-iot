@@ -57,9 +57,10 @@ DJANGO_ADMIN_NAME = "{DJANGO_ADMIN_NAME}"
 DJANGO_ADMIN_PASS = "{DJANGO_ADMIN_PASS}"
 """
 
+
 def generate_empty_config_data():
     # Use a regular expression to find all instances of "{KEY_NAME}"
-    keys = re.findall(r'\{(.*?)\}', template)
+    keys = re.findall(r"\{(.*?)\}", template)
     # Create a dictionary with each key set to an empty string
     return {key: "" for key in keys}
 
@@ -76,8 +77,8 @@ def write_config_file(specific_config_data):
     empty_config_data = generate_empty_config_data()
     # Merge specific config data into the template, filling in any missing keys with empty values
     all_config_data = {**empty_config_data, **specific_config_data}
-    
+
     content = template.format(**all_config_data)
-    destination = '/etc/iotree/config.toml'
-    with open(destination, 'w') as config_file:
+    destination = "/etc/iotree/config.toml"
+    with open(destination, "w") as config_file:
         config_file.write(content)

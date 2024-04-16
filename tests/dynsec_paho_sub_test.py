@@ -7,19 +7,21 @@ with open("/etc/iotree/config.toml", "rb") as f:
     config = tomllib.load(f)
 
 # MQTT Broker settings
-BROKER_HOST = config['mosquitto']['BROKER_HOST']
-BROKER_PORT = config['mosquitto']['BROKER_PORT']
-DYNSEC_USER = config['mosquitto']['DYNSEC_USER']
-DYNSEC_PASSWORD = config['mosquitto']['DYNSEC_PASSWORD']
-DYNSEC_TOPIC = config['mosquitto']['DYNSEC_TOPIC']
-DYNSEC_RESPONSE_TOPIC = config['mosquitto']['DYNSEC_RESPONSE_TOPIC']
+BROKER_HOST = config["mosquitto"]["BROKER_HOST"]
+BROKER_PORT = config["mosquitto"]["BROKER_PORT"]
+DYNSEC_USER = config["mosquitto"]["DYNSEC_USER"]
+DYNSEC_PASSWORD = config["mosquitto"]["DYNSEC_PASSWORD"]
+DYNSEC_TOPIC = config["mosquitto"]["DYNSEC_TOPIC"]
+DYNSEC_RESPONSE_TOPIC = config["mosquitto"]["DYNSEC_RESPONSE_TOPIC"]
 
 received_flag = False
 
+
 # Callback function for when the client receives a CONNACK response from the server
 def on_connect(client, userdata, flags, rc):
-    print("Connected with result code "+str(rc))
+    print("Connected with result code " + str(rc))
     client.subscribe(DYNSEC_RESPONSE_TOPIC)  # Subscribe to the topic
+
 
 # Callback function for when a PUBLISH message is received from the server
 def on_message(client, userdata, msg):
@@ -27,6 +29,7 @@ def on_message(client, userdata, msg):
     received_flag = True
     print(f"Received message: {msg.payload.decode()} on topic {msg.topic}")
     client.disconnect()  # Disconnect after receiving a message
+
 
 client = mqtt.Client()
 client.username_pw_set(DYNSEC_USER, DYNSEC_PASSWORD)

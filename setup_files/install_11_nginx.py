@@ -57,7 +57,7 @@ def install_nginx(setup_scheme, domain, server_ip, hostname):
             "ln -s /etc/nginx/modules-available/nginx-stream-no-tls.conf /etc/nginx/modules-enabled",
         ]
 
-    # Execute conditional configurations
+    # Execute conditional configurations¸
     for command in commands:
         output = run_bash(command)
         log(output, NGINX_INSTALL_LOG_FILE_NAME)

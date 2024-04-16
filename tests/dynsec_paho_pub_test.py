@@ -6,21 +6,24 @@ with open("/etc/iotree/config.toml", "rb") as f:
     config = tomllib.load(f)
 
 # MQTT Broker settings
-BROKER_HOST = config['mosquitto']['BROKER_HOST']
-BROKER_PORT = config['mosquitto']['BROKER_PORT']
-DYNSEC_USER = config['mosquitto']['DYNSEC_USER']
-DYNSEC_PASSWORD = config['mosquitto']['DYNSEC_PASSWORD']
-DYNSEC_TOPIC = config['mosquitto']['DYNSEC_TOPIC']
+BROKER_HOST = config["mosquitto"]["BROKER_HOST"]
+BROKER_PORT = config["mosquitto"]["BROKER_PORT"]
+DYNSEC_USER = config["mosquitto"]["DYNSEC_USER"]
+DYNSEC_PASSWORD = config["mosquitto"]["DYNSEC_PASSWORD"]
+DYNSEC_TOPIC = config["mosquitto"]["DYNSEC_TOPIC"]
 MQTT_MESSAGE = '{"commands":[{"command":"getDefaultACLAccess"}]}'
+
 
 def on_publish(client, userdata, mid):
     print(f"Message published with mid {mid}")
+
 
 def on_connect(client, userdata, flags, rc):
     if rc == 0:
         print("Connected to MQTT Broker!")
     else:
         print("Failed to connect, return code %d\n", rc)
+
 
 # Create MQTT client instance
 client = mqtt.Client()

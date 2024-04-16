@@ -1,0 +1,35 @@
+function               	send_code                                 	success 	response
+set_default_acl_access 	(<MQTTErrorCode.MQTT_ERR_SUCCESS: 0>, 2)  	True    	{'responses': [{'command': 'setDefaultACLAccess'}]}
+get_default_acl_access 	(<MQTTErrorCode.MQTT_ERR_SUCCESS: 0>, 3)  	True    	{'responses': [{'command': 'getDefaultACLAccess', 'data': {'acls': [{'acltype': 'publishClientSend', 'allow': False}, {'acltype': 'publishClientReceive', 'allow': False}, {'acltype': 'subscribe', 'allow': False}, {'acltype': 'unsubscribe', 'allow': False}]}}]}
+create_role            	(<MQTTErrorCode.MQTT_ERR_SUCCESS: 0>, 4)  	True    	{'responses': [{'command': 'createRole', 'error': 'Role already exists'}]}
+get_role               	(<MQTTErrorCode.MQTT_ERR_SUCCESS: 0>, 5)  	True    	{'responses': [{'command': 'getRole', 'data': {'role': {'rolename': 'role_name', 'textname': 'role_textname', 'textdescription': 'role_textdescription', 'acls': [{'acltype': 'subscribePattern', 'topic': 'role_topic', 'priority': -1, 'allow': True}]}}}]}
+list_roles             	(<MQTTErrorCode.MQTT_ERR_SUCCESS: 0>, 6)  	True    	{'responses': [{'command': 'listRoles', 'data': {'totalCount': 15, 'roles': ['admin', 'alternative_role_name', 'device-8msJRz', 'device-IVoVpH', 'device-JygJM4', 'device-PxXQMu', 'device-eJZEPa', 'device-nYtOn2', 'nodered-8msJRz', 'nodered-IVoVpH', 'nodered-JygJM4', 'nodered-PxXQMu', 'nodered-eJZEPa', 'nodered-nYtOn2', 'role_name']}}]}
+add_role_acl           	(<MQTTErrorCode.MQTT_ERR_SUCCESS: 0>, 7)  	True    	{'responses': [{'command': 'addRoleACL', 'error': 'ACL with this topic already exists'}]}
+modify_role            	(<MQTTErrorCode.MQTT_ERR_SUCCESS: 0>, 8)  	True    	{'responses': [{'command': 'modifyRole'}]}
+create_group           	(<MQTTErrorCode.MQTT_ERR_SUCCESS: 0>, 9)  	True    	{'responses': [{'command': 'createGroup'}]}
+get_group              	(<MQTTErrorCode.MQTT_ERR_SUCCESS: 0>, 10) 	True    	{'responses': [{'command': 'getGroup', 'data': {'group': {'groupname': 'group_name', 'clients': [], 'roles': [{'rolename': 'role_name', 'priority': 1}]}}}]}
+list_groups            	(<MQTTErrorCode.MQTT_ERR_SUCCESS: 0>, 11) 	True    	{'responses': [{'command': 'listGroups', 'data': {'totalCount': 2, 'groups': ['alternative_group_name', 'group_name']}}]}
+modify_group           	(<MQTTErrorCode.MQTT_ERR_SUCCESS: 0>, 12) 	True    	{'responses': [{'command': 'modifyGroup'}]}
+create_client          	(<MQTTErrorCode.MQTT_ERR_SUCCESS: 0>, 13) 	True    	{'responses': [{'command': 'createClient'}]}
+add_group_client       	(<MQTTErrorCode.MQTT_ERR_SUCCESS: 0>, 14) 	True    	{'responses': [{'command': 'addGroupClient', 'error': 'Client is already in this group'}]}
+add_group_role         	(<MQTTErrorCode.MQTT_ERR_SUCCESS: 0>, 15) 	True    	{'responses': [{'command': 'addGroupRole', 'error': 'Group is already in this role'}]}
+set_client_id          	(<MQTTErrorCode.MQTT_ERR_SUCCESS: 0>, 16) 	True    	{'responses': [{'command': 'setClientId'}]}
+set_client_password    	(<MQTTErrorCode.MQTT_ERR_SUCCESS: 0>, 17) 	True    	{'responses': [{'command': 'setClientPassword'}]}
+add_client_role        	(<MQTTErrorCode.MQTT_ERR_SUCCESS: 0>, 18) 	True    	{'responses': [{'command': 'addClientRole'}]}
+disable_client         	(<MQTTErrorCode.MQTT_ERR_SUCCESS: 0>, 19) 	True    	{'responses': [{'command': 'disableClient'}]}
+enable_client          	(<MQTTErrorCode.MQTT_ERR_SUCCESS: 0>, 20) 	True    	{'responses': [{'command': 'enableClient'}]}
+get_client             	(<MQTTErrorCode.MQTT_ERR_SUCCESS: 0>, 21) 	True    	{'responses': [{'command': 'getClient', 'data': {'client': {'username': 'client_username', 'clientid': 'client_id', 'textname': 'client_textname', 'textdescription': 'client_textdescription', 'roles': [{'rolename': 'role_name'}], 'groups': [{'groupname': 'group_name', 'priority': 1}]}}}]}
+list_clients           	(<MQTTErrorCode.MQTT_ERR_SUCCESS: 0>, 22) 	True    	{'responses': [{'command': 'listClients', 'data': {'totalCount': 23, 'clients': ['2zvBsAiwqQKQebScq7At', '4xRnvhohqMfhGRGZM1bh', '8X2g9ZhnpTmFJ6tWIQcC', 'ALlZgosr2GGTQ5J5nlYK', 'CC6oxyz3lw5UQIeG9TtY', 'EnIw9qj29yCcl1hoIOCI', 'GeiaYHuhu7jV2Ws4IeAy', 'IYHD5YdgvioVCqkx2cdq', 'N4jtGOpv3Oba8877dOza', 'XXLkaI3oUDMKpZV8yomn', 'Y696XjN1Ujp5UAYujsqZ', 'YM05Qh8ogV1ZqcfV5FmL', 'admin', 'client_username', 'cupzEm1A8UtrrGLN2gV9', 'gEbe3UTCZGZgaZzi5LPs', 'i92F7eOHIK62nR13GdSk', 'jclga904BxqiWXPkGp1Y', 'krEL3hTYvcgecluSf1mP', 'mqmjDnmEiHVZU7ralbDt', 'qG4nTGN1tC8ESb1Dzgij', 'shY20WIZPx7fVgppTjTL', 'voSE1MxmpTHrn8isOHsH']}}]}
+modify_client          	(<MQTTErrorCode.MQTT_ERR_SUCCESS: 0>, 23) 	True    	{'responses': [{'command': 'modifyClient'}]}
+remove_client_role     	(<MQTTErrorCode.MQTT_ERR_SUCCESS: 0>, 24) 	True    	{'responses': [{'command': 'removeClientRole'}]}
+remove_group_client    	(<MQTTErrorCode.MQTT_ERR_SUCCESS: 0>, 25) 	True    	{'responses': [{'command': 'removeGroupClient'}]}
+remove_group_role      	(<MQTTErrorCode.MQTT_ERR_SUCCESS: 0>, 26) 	True    	{'responses': [{'command': 'removeGroupRole'}]}
+delete_client          	(<MQTTErrorCode.MQTT_ERR_SUCCESS: 0>, 27) 	True    	{'responses': [{'command': 'deleteClient'}]}
+remove_role_acl        	(<MQTTErrorCode.MQTT_ERR_SUCCESS: 0>, 28) 	True    	{'responses': [{'command': 'removeRoleACL'}]}
+delete_role            	(<MQTTErrorCode.MQTT_ERR_SUCCESS: 0>, 29) 	True    	{'responses': [{'command': 'deleteRole'}]}
+create_role            	(<MQTTErrorCode.MQTT_ERR_SUCCESS: 0>, 30) 	True    	{'responses': [{'command': 'createRole'}]}
+delete_group           	(<MQTTErrorCode.MQTT_ERR_SUCCESS: 0>, 31) 	True    	{'responses': [{'command': 'deleteGroup'}]}
+create_group           	(<MQTTErrorCode.MQTT_ERR_SUCCESS: 0>, 32) 	True    	{'responses': [{'command': 'createGroup', 'error': 'Group already exists'}]}
+create_role            	(<MQTTErrorCode.MQTT_ERR_SUCCESS: 0>, 33) 	True    	{'responses': [{'command': 'createRole', 'error': 'Role already exists'}]}
+set_anonymous_group    	(<MQTTErrorCode.MQTT_ERR_SUCCESS: 0>, 34) 	True    	{'responses': [{'command': 'setAnonymousGroup'}]}
+get_anonymous_group    	(<MQTTErrorCode.MQTT_ERR_SUCCESS: 0>, 35) 	True    	{'responses': [{'command': 'getAnonymousGroup', 'data': {'group': {'groupname': 'alternative_group_name'}}}]}

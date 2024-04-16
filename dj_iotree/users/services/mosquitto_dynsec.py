@@ -85,12 +85,6 @@ class MosquittoDynSec():
         self.client.connect(self.host, self.port, 60)
         self.client.loop_start()
 
-    # def __enter__(self):
-    #     return self
-
-    # def __exit__(self, exc_type, exc_val, exc_tb):
-    #     self.disconnect()
-
     def disconnect(self):
         self.client.loop_stop()
         self.client.disconnect()
@@ -176,7 +170,7 @@ class MosquittoDynSec():
                 if ("already" in response["responses"][0]["error"]):
                     # print('"already" in response["responses"][0]["error"]')
                     # caveat: prone to minterpretation if response messages change in the future
-                    # Known responses containing 'already':
+                    # Known responses containing 'already' on April 16., 2024:
                     # 'Role already exists'
                     # 'Group already exists'
                     # 'Group is already in this role'
