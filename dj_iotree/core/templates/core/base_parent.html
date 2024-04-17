@@ -46,9 +46,19 @@
                                 <ul class="dropdown-menu dropdown-menu-end" aria-labelledby="navbarDropdown">
                                     <li><a class="dropdown-item" href="{% url 'devices' %}">My Devices</a></li>
                                     <li><a class="dropdown-item" href="{% url 'code-examples' %}">Code Examples</a></li>
+                                    <li><a class="dropdown-item" href="{% url 'message-and-topic-structure' %}">Message & Topic Structure</a></li>
                                 </ul>
                             </li>
-                            <li class="nav-item"><a class="nav-link {% starts_with 'nodered' %}" href="{% url 'nodered-manager' %}">Automate</a></li>
+
+                            <li class="nav-item dropdown">
+                                <a class="nav-link dropdown-toggle {% is_active 'nodered' 'noddered-flow-examples' %}" id="navbarDropdown" href="#" role="button" data-bs-toggle="dropdown" aria-expanded="false">Automate</a>
+                                <ul class="dropdown-menu dropdown-menu-end" aria-labelledby="navbarDropdown">
+                                    <li><a class="dropdown-item" href="{% url 'nodered-manager' %}">Nodered</a></li>
+                                    <li><a class="dropdown-item" href="{% url 'noddered-flow-examples' %}">Nodered Flow Examples</a></li>
+                                </ul>
+                            </li>
+                            <!-- <li class="nav-item"><a class="nav-link {% starts_with 'nodered' %}" href="{% url 'nodered-manager' %}">Automate</a></li> -->
+
                             <li class="nav-item"><a class="nav-link {% starts_with 'data' %}" href="{% url 'data-explorer' %}">Data Explorer</a></li>
                             <li class="nav-item"><a class="nav-link {% starts_with 'grafana' %}" href="{% url 'grafana-embedded' %}">Visualize</a></li>
                         {% endif %}

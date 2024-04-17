@@ -1,0 +1,60 @@
+{% extends "core/base.html" %}
+<!-- Code Examples -->
+
+{% block content %}
+    {% for key, example in examples.items %}
+    <div class="card mt-3">
+        <div class="card-header d-flex justify-content-between align-items-center">
+            <span>{{ example.headline }}</span>
+            <a href="#" class="copy-text" data-clipboard-text="{{ example.code }}">Copy Code</a>
+        </div>
+        <div class="card-body">
+            <pre><code>{{ example.code }}</code></pre>
+        </div>
+    </div>
+    {% endfor %}
+{% endblock %}
+
+{% block extra_css %}
+<style>
+
+pre {
+    background-color: #eee;
+    border: 1px solid #ccc;
+    padding: 10px;
+    border-radius: 5px;
+    overflow-x: auto;
+}
+
+code {
+    font-family: monospace;
+    color: #333;
+}
+</style>
+{% endblock %}
+
+{% block extra_js %}
+<script>
+    // Copy code script
+    document.addEventListener('DOMContentLoaded', () => {
+        document.querySelectorAll('.copy-text').forEach(link => {
+            link.addEventListener('click', function(e) {
+                e.preventDefault(); // Prevent the default link behavior
+                const text = this.getAttribute('data-clipboard-text');
+                const textarea = document.createElement('textarea');
+                textarea.value = text;
+                document.body.appendChild(textarea);
+                textarea.select();
+                try {
+                    const successful = document.execCommand('copy');
+                    const msg = successful ? 'successful' : 'unsuccessful';
+                    console.log('Copying text command was ' + msg);
+                } catch (err) {
+                    console.error('Oops, unable to copy', err);
+                }
+                document.body.removeChild(textarea);
+            });
+        });
+    });
+</script>
+{% endblock %}

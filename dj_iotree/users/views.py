@@ -5,12 +5,13 @@ from django.contrib.auth import authenticate, login
 from .forms import UserRegisterForm, UserUpdateForm, UserLoginForm, MqttClientForm
 from .models import NodeRedUserData
 import secrets
+import json
 from django.http import JsonResponse
 from django.db import IntegrityError
 from django.db import transaction
 from .services.nodered_utils import NoderedContainer, update_nodered_nginx_conf
 from .services.mosquitto_utils import MqttMetaDataManager, MqttClientManager, RoleType
-from .services.code_loader import load_code_examples
+from .services.code_loader import load_code_examples, load_nodered_flow_examples
 
 
 def register(request):
@@ -175,6 +176,40 @@ def devices(request):
     }
     return render(request, "users/devices.html", context)
 
+@login_required
+def message_and_topic_structure(request):
+    
+    mqtt_meta_data_manager = MqttMetaDataManager(request.user)
+    topic_id = mqtt_meta_data_manager.metadata.user_topic_id
+    in_topic = f"in/{topic_id}/your/subtopic"
+    out_topic = f"out/{topic_id}/your/subtopic"
+
+
+    message_example = {
+        "temperature": 25.3,
+        "timestamp": 1713341175,
+    }
+    message_example_large = {
+        "temperature": 25.3,
+        "humidity": 50,
+        "sensorX": "text value",
+        "...": "...",
+        "timestamp": 1713341175,
+    }
+
+    message_example_json = json.dumps(message_example, indent=4)
+    message_example_large_json = json.dumps(message_example_large, indent=4)
+    context = {
+        "message_example": message_example_json,
+        "message_example_large": message_example_large_json,
+        "in_topic": in_topic,
+        "out_topic": out_topic,
+        "topic_id": topic_id,
+        "title": "Message & Topic Structure",
+        "thin_navbar": False,
+        }
+    return render(request, "users/message_and_topic_structure.html", context)
+
 
 @login_required
 def code_examples(request):
@@ -296,7 +331,6 @@ def nodered_manager(request):
 
     return render(request, "users/nodered_manager.html", context)
 
-
 def update_nodered_data_container_port(nodered_data, nodered_container):
     with transaction.atomic():  # protection against race condition (even though unlikely)
         # Identify and lock the conflicting row -> second protection against race condition (even though unlikely)
@@ -320,6 +354,18 @@ def update_nodered_data_container_port(nodered_data, nodered_container):
             nodered_data.container_port = ""
         nodered_data.save()
 
+@login_required
+def nodered_flow_examples(request):
+
+    examples_content = load_nodered_flow_examples()
+
+    page_title = "Node-RED Example Flows"
+    context = {
+        "examples": examples_content,
+        "title": page_title, 
+        "thin_navbar": False,
+        }
+    return render(request, "users/nodered_flow_examples.html", context)
 
 @login_required
 def nodered_embedded(request):

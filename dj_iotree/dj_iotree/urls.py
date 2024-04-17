@@ -28,9 +28,11 @@ urlpatterns = [
     # path('auth/callback/', views.oauth_callback, name='oauth_callback'),
 
     path('devices/', user_views.devices, name='devices'),
+    path('message-and-topic-structure/', user_views.message_and_topic_structure, name='message-and-topic-structure'),
     path('code-examples/', user_views.code_examples, name='code-examples'),
 
     path('nodered-manager/', user_views.nodered_manager, name='nodered-manager'),
+    path('noddered-flow-examples/', user_views.nodered_flow_examples, name='noddered-flow-examples'),
     path('nodered-embedded/', user_views.nodered_embedded, name='nodered-embedded'),
     path('nodered-status-check/', user_views.nodered_status_check, name='nodered-status-check'),
 

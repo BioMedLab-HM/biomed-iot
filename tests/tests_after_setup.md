@@ -46,4 +46,4 @@ for credentials, see DJANGO_ADMIN_PASS in config.toml
 
 ### Optional:
 Check files in /home/biomed/iotree42/setup_files/tmp  
-Have all variables inserted correctly?
+Have all variables been inserted correctly?
