@@ -1,0 +1,22 @@
+{% extends "core/base.html" %}
+
+{% block content %}
+
+<form method="post">
+    {% csrf_token %}
+    <div class="alert alert-primary" role="alert">
+        <p>Use Node-RED to:</p>
+        <ul>
+            <li>Automate tasks by connecting sensors and actuators through MQTT messages</li>
+            <li>Store data into the Database</li>
+        </ul>
+        <button type="submit" class="btn btn-success" name="action" value="create">Start with Node-RED</button>
+    </div>
+</form>
+{% endblock %}
+
+{% block extra_css %}
+{% endblock %}
+
+{% block extra_js %}
+{% endblock %}

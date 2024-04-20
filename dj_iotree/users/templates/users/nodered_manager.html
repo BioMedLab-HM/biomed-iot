@@ -54,7 +54,7 @@
         <!-- <div style="margin-bottom: 1.5rem;"></div> -->
         <!-- <hr> -->
         <div class="alert alert-danger" role="alert">
-            <p>Stop Node-RED to pause your flows and give back resources to the server.</p>
+            <p>Kindly stop Node-RED to pause your flows if you don't need them for a while to give back resources to the server.</p>
             <button type="submit" class="btn btn-danger" name="action" value="stop">Stop Node-RED</button>
         </div>
     {% elif container_state == 'starting' %}
@@ -171,7 +171,7 @@
             .then(response => response.json())
             .then(data => {
                 if(data.status == "running") {
-                    window.location.href = "{% url 'nodered-embedded' %}";  // Redirect when running
+                    window.location.href = "{% url 'nodered-embedded' %}";  // Redirect when running // was nodered-embedded
                 } else {
                     setTimeout(checkNoderedStatus, 2000);  // Recheck after 2 seconds
                 }

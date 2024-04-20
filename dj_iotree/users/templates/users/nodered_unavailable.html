@@ -1,0 +1,18 @@
+{% extends "core/base.html" %}
+
+{% block content %}
+<form method="post">
+    {% csrf_token %}
+    <div class="alert alert-danger" role="alert">
+        <p>Node-RED is unavailable. Please try again later or contact the admin of this website</p>
+        <button type="submit" class="btn btn-danger" name="action" value="reload">Try again</button>
+    </div>
+</form>
+{% endblock %}
+
+{% block extra_css %}
+{% endblock %}
+
+{% block extra_js %}
+{% endblock %}
+

@@ -51,8 +51,8 @@ INSTALLED_APPS = [
     'django.contrib.messages',
     'django.contrib.staticfiles',
     # TODO: OAuth ggf. für Grafana und NodeRed/FlowFuse (siehe auch CORS Middleware)
-    'oauth2_provider',
-    'corsheaders',
+    # 'oauth2_provider',
+    # 'corsheaders',
 ]
 
 MIDDLEWARE = [
@@ -63,8 +63,8 @@ MIDDLEWARE = [
     'django.contrib.auth.middleware.AuthenticationMiddleware',
     'django.contrib.messages.middleware.MessageMiddleware',
     'django.middleware.clickjacking.XFrameOptionsMiddleware',
-    'corsheaders.middleware.CorsMiddleware',
-    'users.middleware.TimezoneMiddleware',  # see https://docs.djangoproject.com/en/4.2/topics/i18n/timezones/
+    # 'corsheaders.middleware.CorsMiddleware',
+    # 'users.middleware.TimezoneMiddleware',  # see https://docs.djangoproject.com/en/4.2/topics/i18n/timezones/
     # TODO: Ggf. automatische TZ-Erkennung https://github.com/adamcharnock/django-tz-detect
 ]
 
@@ -143,21 +143,21 @@ AUTH_PASSWORD_VALIDATORS = [
     # {
     #     'NAME': 'django.contrib.auth.password_validation.NumericPasswordValidator',  # unecessary because of custom validators
     # },
-    # {
-    #     'NAME': 'users.password_validation.UpperCaseValidator',  # TODO: activate for production
-    # },
+    {
+        'NAME': 'users.password_validation.UpperCaseValidator',  # activate in production!
+    },
     {
         'NAME': 'users.password_validation.LowerCaseValidator',
     },
-    # {
-    #     'NAME': 'users.password_validation.DigitValidator',  # TODO: activate for production
-    # },
-    # {
-    #     'NAME': 'users.password_validation.SymbolValidator',  # TODO: activate for production
-    #     "OPTIONS": {
-    #         "symbols": "!@#$%&*()_+-=[]}{|;:<>/?",
-    #     },
-    # },
+    {
+        'NAME': 'users.password_validation.DigitValidator',  # activate in production!
+    },
+    {
+        'NAME': 'users.password_validation.SymbolValidator',  # activate in production!
+        "OPTIONS": {
+            "symbols": "!@#$%&*()_+-=[]}{|;:<>/?",
+        },
+    },
 ]
 
 

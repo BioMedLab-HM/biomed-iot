@@ -1,0 +1,76 @@
+{% extends "core/base.html" %}
+
+{% block content %}
+<form method="post">
+    {% csrf_token %}
+    <div class="alert alert-success mb-3" role="alert">
+        <h4>Your Node-RED is running.</h4>
+        <p>Open Node-RED now and edit your flows.</p>
+        <button type="submit" class="btn btn-info" name="action" value="open">Open Node-RED</button>
+        <p style="margin-top: 20px;">Build dashboards for Node-RED to view and control your flows.</p>
+        <button type="button" class="btn btn-info" onclick="window.open('{% url 'nodered-dashboard' %}', '_blank');">Open Nodered Dashboard</button>
+    </div> 
+    <div class="card mb-3">
+        <div class="card-header">
+            <h4 class="my-0 font-weight-normal">Personal Credentials for Node-RED MQTT Nodes.</h4>
+        </div>
+        <div class="card-body">
+            <div class="row">
+                <!-- Left column for explanatory text -->
+                <div class="col-lg-5 col-sm-12">
+                    <p><a href="#" onclick="toggleVisibility(); return false;">Show Credentials</a> <br><br> <strong>In Node-RED:</strong> Drag an MQTT node into the flow <br><strong>></strong> double click on it <br><strong>></strong> click edit server (pencil icon) <br><strong>></strong> click on the 'Security' tab <br><strong>></strong> fill in the credentials there</p>
+                </div>
+                <!-- Right column for credentials -->
+                <div class="col-lg-5 col-sm-12">
+                    <!-- Nested structure for username and password fields to ensure they stack on small screens -->
+                    <div class="mb-3">
+                        <label for="usernameField" class="form-label">Username</label>
+                        <input type="password" id="usernameField" class="form-control" value="{{ nodered_mqtt_client_data.username }}" readonly>
+                    </div>
+                    <div class="mb-3">
+                        <label for="passwordField" class="form-label">Password</label>
+                        <input type="password" id="passwordField" class="form-control" value="{{ nodered_mqtt_client_data.password }}" readonly>
+                    </div>
+                </div>
+            </div>
+        </div>
+    </div>
+    <!-- <div style="margin-bottom: 1.5rem;"></div> -->
+    <!-- <hr> -->
+    <div class="alert alert-danger" role="alert">
+        <p>Kindly stop Node-RED to pause your flows if you don't need them for a while to give back resources to the server.</p>
+        <button type="submit" class="btn btn-danger" name="action" value="stop">Stop Node-RED</button>
+    </div>
+</form>
+{% endblock %}
+
+{% block extra_css %}
+{% endblock %}
+
+{% block extra_js %}
+<script>
+    function toggleVisibility() {
+        var usernameField = document.getElementById("usernameField");
+        var passwordField = document.getElementById("passwordField");
+        var link = event.target; // Get the clicked link
+
+        // Function to hide credentials
+        function hideCredentials() {
+            usernameField.type = "password";
+            passwordField.type = "password";
+            link.textContent = "Show Credentials";
+        }
+
+        // Only show if currently hidden
+        if (usernameField.type === "password") {
+            usernameField.type = "text";
+            passwordField.type = "text";
+            //link.textContent = "Hide Credentials";
+
+            // Set a timeout to revert back to password type after 10 seconds
+            setTimeout(hideCredentials, 10000); // 10000 milliseconds = 10 seconds
+        }
+    }
+</script>
+{% endblock %}
+

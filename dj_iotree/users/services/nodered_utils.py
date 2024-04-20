@@ -97,7 +97,7 @@ class NoderedContainer():
                 self.container.reload()
                 self.port = self.container.attrs['NetworkSettings']['Ports']['1880/tcp'][0]['HostPort']
         except KeyError:
-            self.port = '' 
+            self.port = None  # TODO: delete this comment if working, else revert: was ''
 
 
 def update_nodered_nginx_conf(instance):

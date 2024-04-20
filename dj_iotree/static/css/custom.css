@@ -129,7 +129,8 @@ iframe {
 button,
 [type=button],
 [type=reset],
-[type=submit] {
+[type=submit],
+[type=standard] {
   -webkit-appearance: none; /* Remove native OS styling */
      -moz-appearance: none; /* For Mozilla Firefox */
           appearance: none; /* Standard syntax */

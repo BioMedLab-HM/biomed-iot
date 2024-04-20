@@ -46,7 +46,20 @@ def install_grafana(architecture):
         log(output, GRAFANA_INSTALL_LOG_FILE_NAME)
 
     # TODO: Modify and copy config data?
-    
+
+
+    # NOT starting on installation, please execute the following statements 
+    # to configure grafana to start automatically using systemd
+    commands = [
+        "/bin/systemctl daemon-reload",
+        "/bin/systemctl enable grafana-server",
+        # Start grafana-server by executing
+        "/bin/systemctl start grafana-server",
+    ]
+
+    for command in commands:
+        output = run_bash(command)
+        log(output, GRAFANA_INSTALL_LOG_FILE_NAME)
 
     config_data = {
         "GRAFANA_HOST": "localhost",

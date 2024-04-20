@@ -1,0 +1,9 @@
+{% extends "core/iframe_base.html" %}
+
+{% block iframe_content %}
+<iframe src="/nodered-dashboard/{{ container_name }}" allowfullscreen>
+        
+    <!-- Alternative text -->
+    <p>Your browser does not support iframes.</p>
+</iframe>
+{% endblock iframe_content %}

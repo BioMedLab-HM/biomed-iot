@@ -14,11 +14,9 @@ def install_django(django_admin_email, django_admin_name, django_admin_pass, aut
     django_secret = get_random_string(50, incl_symbols=True)
     if auto_generate_django_admin_credentials:
         django_admin_name = "admin-" + get_random_string(4)
-        django_admin_pass = (get_random_string(4) + "-" 
-                            + get_random_string(4) + "-" 
-                            + get_random_string(4))
-
-
+        django_admin_pass = ("Dj4" + get_random_string(2) + "-" 
+                            + get_random_string(5) + "-" 
+                            + get_random_string(5))
 
     # Create the Django virtual environment
     set_setup_dir_rights()

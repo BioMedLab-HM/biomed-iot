@@ -33,7 +33,11 @@ server {
         proxy_pass http://unix:/run/gunicorn.sock;
     }
 
+    location /ui {
+        return 301 $scheme://$host/nodered-dashboard;
+    }
+
     # location files for nodered container instances
-    include /etc/nginx/conf.d/nodered_locations/*;
+    include /etc/nginx/conf.d/nodered_locations/*.conf;
 }
 EOF
