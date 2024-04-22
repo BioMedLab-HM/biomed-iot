@@ -264,7 +264,7 @@ class MqttClientManager:
                 dynsec.disconnect()
 
             if success:
-                mqtt_client.delete()
+                mqtt_client.delete()  # from database
                 print(f"MQTT client {client_username} deleted successfully.")
                 return True
             else:
@@ -275,6 +275,27 @@ class MqttClientManager:
             print(f"MQTT client {client_username} not found for the user.")
 
         return False
+    
+    def delete_all_clients_for_user(self):
+        """
+        Deletes all MQTT clients for the user from the Mosquitto Dynamic Security Plugin.
+        """
+        # Retrieve all MQTT clients for the user
+        all_clients = MqttClient.objects.filter(user=self.user)
+
+        # Initialize the Mosquitto Dynamic Security client
+        dynsec = MosquittoDynSec(self.dynsec_username, self.dynsec_password)
+
+        try:
+            for client in all_clients:
+                # Attempt to delete each client from the dynamic security system
+                success = dynsec.delete_client(client.username)
+                if success:
+                    print(f"MQTT client {client.username} deleted from dynamic security system successfully.")
+                else:
+                    print(f"Failed to delete MQTT client {client.username} from dynamic security system.")
+        finally:
+            dynsec.disconnect()
 
     def get_device_clients(self):
         """

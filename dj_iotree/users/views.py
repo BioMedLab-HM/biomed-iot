@@ -222,7 +222,6 @@ def code_examples(request):
     return render(request, "users/code_examples.html", context)
 
 
-@login_required
 def get_or_create_nodered_user_data(request):
     with transaction.atomic():
         try:
@@ -491,6 +490,8 @@ def nodered_status_check(request):
 def data_explorer(request):
     context = {}
 
+    # TODO: Implement
+
     page_title = "Data Explorer"
     context = {"title": page_title, "thin_navbar": False}
     return render(request, "users/data_explorer.html", context)
@@ -500,6 +501,6 @@ def data_explorer(request):
 def grafana(request):
     context = {}
 
-    page_title = "Grafana"
+    page_title = "Visualize Data with Grafana"
     context = {"title": page_title, "thin_navbar": True}
     return render(request, "users/grafana.html", context)

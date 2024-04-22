@@ -1,9 +1,17 @@
-{% extends "core/base.html" %}
-{% load crispy_forms_tags %}
-{% block content %}
-<div class="container">
-    <h1>Visualize with Grafana</h1>
-    <p class="lead">Here you can visualize your data</p>
-    <p>...to be implemented in an iframe!</p>
-</div>
-{% endblock content %}
+{% extends "core/iframe_base.html" %}
+
+{% block iframe_content %}
+<iframe src="/grafana/{{ enter_something_like_an_id }}" allowfullscreen>
+        
+    
+
+
+    <!-- TODO -->
+
+
+    
+
+    <!-- Alternative text -->
+    <p>Your browser does not support iframes.</p>
+</iframe>
+{% endblock iframe_content %}

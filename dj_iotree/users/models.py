@@ -84,7 +84,7 @@ class NodeRedUserData(models.Model):
     container_name = models.CharField(max_length=30, unique=True)
     # container_port can be set to null (None in python) to avoid integrity error due to UNIQUE constraint failure
     container_port = models.CharField(max_length=5, unique=True, null=True, blank=True)  # highest possible port number has five digits (65535)
-    access_token = models.CharField(max_length=100)
+    access_token = models.CharField(max_length=50)  # TODO: ggf. hash mit make_password
     # later maybe add data from the container like flows, dashboards and list of installed nodered plugins
 
     # default=0 for container_port creates conflicts with other users who still have default 0
@@ -146,13 +146,43 @@ class MqttClient(models.Model):
     def generate_password(length=30):
         # Define the characters to use in the password
         characters = string.ascii_letters + string.digits # This includes uppercase, lowercase, and digits
-        # Generate the password using a list comprehension and join it into a string
+        # Generate the password using the secrets module with the given set of characters
         new_password = ''.join(secrets.choice(characters) for _ in range(length))
         return new_password
     
-    # not using this version anymore since it also uses "-" symbols 
-    # which make it harder to highlight with double-click in the password field 
-    # @staticmethod
-    # def generate_password():
-    #     new_password = secrets.token_urlsafe(22)  # equals approx. 20 characters
-    #     return new_password
+
+class InfluxUserData(models.Model):
+    user = models.ForeignKey(settings.AUTH_USER_MODEL, on_delete=models.CASCADE)
+    bucket_name = models.CharField(max_length=20, unique=True)
+    bucket_id = models.CharField(max_length=50)
+    bucket_token = models.CharField(max_length=50)
+    bucket_token_id = models.CharField(max_length=50)
+
+    def __str__(self):
+        return self.bucket_name
+
+    @staticmethod
+    def generate_unique_bucket_name():
+        max_attempts = 1000
+        for _ in range(max_attempts):
+            new_name = ''.join(random.choice(string.ascii_letters + string.digits) for _ in range(20))
+            if not InfluxUserData.objects.filter(bucket_name=new_name).exists():
+                return new_name
+        return None
+
+
+class GrafanaUserData(models.Model):
+    user = models.ForeignKey(settings.AUTH_USER_MODEL, on_delete=models.CASCADE)
+    username = models.CharField(max_length=20, unique=True)  # ???????????????????????????????????????????
+    token = models.CharField(max_length=50)
+
+    def __str__(self):
+        return self.username
+
+    @staticmethod
+    def generate_token(length=50):
+        # Define the characters to use in the token
+        characters = string.ascii_letters + string.digits # This includes uppercase, lowercase, and digits
+        # Generate the token using the secrets module with the given set of characters
+        new_token = ''.join(secrets.choice(characters) for _ in range(length))
+        return new_token

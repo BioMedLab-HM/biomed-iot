@@ -71,6 +71,18 @@ class NoderedContainer():
             self.container.restart()
             self.determine_port()
 
+    def delete_container(self):
+        if self.container:
+            self.determine_port()
+            try:
+                self.container.stop()
+                self.container.remove()
+                print(f"Container {self.name} has been deleted.")
+            except docker.errors.NotFound:
+                print(f"Container {self.name} not found.")
+            except Exception as e:
+                print(f"An error occurred: {e}")
+
     def determine_state(self):
         if self.container:
             self.container.reload()
