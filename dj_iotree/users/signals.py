@@ -6,12 +6,12 @@ from .models import CustomUser, Profile, NodeRedUserData  # settings.AUTH_USER_M
 from django.conf import settings
 from .services.mosquitto_utils import MqttMetaDataManager, MqttClientManager, RoleType
 from .services.nodered_utils import NoderedContainer
-from influx_utils import InfluxUserManager
+from .services.influx_utils import InfluxUserManager
 
 @receiver(post_save, sender=settings.AUTH_USER_MODEL)
 def create_profile(sender, instance, created, **kwargs):
     if created:
-        Profile.objects.create(user=instance)  # TODO: acreate?
+        Profile.objects.create(user=instance)
 
 
 @receiver(post_save, sender=settings.AUTH_USER_MODEL)
