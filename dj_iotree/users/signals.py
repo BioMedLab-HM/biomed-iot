@@ -20,7 +20,7 @@ def save_profile(sender, instance, **kwargs):
     
 
 @receiver(post_save, sender=settings.AUTH_USER_MODEL)
-def create_user_mqtt_setup(sender, instance, created, **kwargs):
+def user_mqtt_setup(sender, instance, created, **kwargs):
     if created:
         # Initialize MQTT meta data and create MQTT client access roles
         mqtt_metadata_manager = MqttMetaDataManager(user=instance)
@@ -34,7 +34,7 @@ def create_user_mqtt_setup(sender, instance, created, **kwargs):
 
 
 @receiver(post_save, sender=settings.AUTH_USER_MODEL)
-def create_user_mqtt_setup(sender, instance, created, **kwargs):
+def user_influxdb_setup(sender, instance, created, **kwargs):
     if created:
         influx_user_manager = InfluxUserManager(user=instance)
         influx_user_manager.create_new_influx_user_resources()
