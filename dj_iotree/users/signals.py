@@ -33,6 +33,13 @@ def create_user_mqtt_setup(sender, instance, created, **kwargs):
         mqtt_client_manager.create_client(textname="Example Device", role_type=RoleType.DEVICE.value)
 
 
+@receiver(post_save, sender=settings.AUTH_USER_MODEL)
+def create_user_mqtt_setup(sender, instance, created, **kwargs):
+    if created:
+        influx_user_manager = InfluxUserManager(user=instance)
+        influx_user_manager.create_new_influx_user_resources()
+        
+
 @receiver(pre_delete, sender=settings.AUTH_USER_MODEL)
 def user_delete(sender, instance, **kwargs):
     # Delete Mosquitto user data
