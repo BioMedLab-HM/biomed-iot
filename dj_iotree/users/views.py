@@ -36,7 +36,12 @@ def register(request):
                 )
     else:
         form = UserRegisterForm()
-    return render(request, "users/register.html", {"form": form, "thin_navbar": False})
+
+    page_title = "Register"
+    context = {"form": form, 
+               "title": page_title, 
+               "thin_navbar": False}
+    return render(request, "users/register.html", context)
 
 
 def user_login(request):
@@ -55,7 +60,11 @@ def user_login(request):
     else:
         form = UserLoginForm()
 
-    return render(request, "users/login.html", {"form": form, "thin_navbar": False})
+    page_title = "Login"
+    context = {"form": form, 
+               "title": page_title, 
+               "thin_navbar": False}
+    return render(request, "users/login.html", context)
 
 
 @login_required
@@ -107,7 +116,12 @@ def set_timezone(request):
     else:
         # Convert the dictionary to a list of tuples and sort by city name
         timezones_list = sorted(common_timezones.items(), key=lambda x: x[0])
-        return render(request, "set_timezone.html", {"timezones": timezones_list, "thin_navbar": False})
+
+        page_title = "Register"
+        context = {"timezones": timezones_list, 
+                   "title": page_title, 
+                   "thin_navbar": False}
+        return render(request, "set_timezone.html", context)
 
 
 @login_required
