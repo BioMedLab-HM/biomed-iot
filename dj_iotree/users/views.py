@@ -13,6 +13,10 @@ from .forms import UserRegisterForm, UserUpdateForm, UserLoginForm, MqttClientFo
 from .services.mosquitto_utils import MqttMetaDataManager, MqttClientManager, RoleType
 from .services.nodered_utils import NoderedContainer, update_nodered_nginx_conf
 from .services.code_loader import load_code_examples, load_nodered_flow_examples
+import logging
+
+
+logger = logging.getLogger(__name__)
 
 
 def register(request):

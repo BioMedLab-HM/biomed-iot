@@ -4,9 +4,14 @@ from dj_iotree.config_loader import config
 from influxdb_client import InfluxDBClient, Point, WriteOptions
 from influxdb_client.client.write_api import SYNCHRONOUS
 import requests  # For making HTTP requests to the v1 compatibility endpoint
+import logging
+
+
+logger = logging.getLogger(__name__)
 
 # INFLUX_ALL_ACCESS_TOKEN authorizes to perform create and delete actions within the organization
 INFLUX_ALL_ACCESS_TOKEN = config.influxdb.INFLUX_ALL_ACCESS_TOKEN
+
 
 class InfluxUserManager:
     """
@@ -80,9 +85,10 @@ class InfluxUserManager:
         Returns:
             True if the resources were successfully created and saved; False otherwise.
         """
+        logger.debug("in create_new_influx_user_resources() function")
         bucket, bucket_id = self._create_bucket()
         bucket_token, bucket_token_id = self._create_bucket_token(bucket)  
-
+        logger.debug("created bucket, token with ids")
         # Assuming self.user is the Django user instance associated with these resources
         influx_user_data, created = InfluxUserData.objects.update_or_create(
             user=self.user,
@@ -93,6 +99,7 @@ class InfluxUserManager:
                 'bucket_token_id': bucket_token_id,
             }
         )
+        logger.debug("InfluxUserData saved")
 
         return all([influx_user_data, bucket.id, bucket_token_id])  # True if all values are not None
 

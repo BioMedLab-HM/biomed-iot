@@ -1,12 +1,16 @@
 from django.db.models.signals import post_save, pre_delete
-# from django.contrib.auth.models import User
+# settings.AUTH_USER_MODEL instead of importing the user model directly
 from django.dispatch import receiver
-from .models import CustomUser, Profile, NodeRedUserData  # settings.AUTH_USER_MODEL instead of writing the class name directly
-# from .services.nodered_utils import update_nginx_nodered_conf
+from .models import Profile, NodeRedUserData
 from django.conf import settings
 from .services.mosquitto_utils import MqttMetaDataManager, MqttClientManager, RoleType
 from .services.nodered_utils import NoderedContainer
 from .services.influx_utils import InfluxUserManager
+import logging
+
+
+logger = logging.getLogger(__name__)
+
 
 @receiver(post_save, sender=settings.AUTH_USER_MODEL)
 def create_profile(sender, instance, created, **kwargs):

@@ -1,7 +1,6 @@
 from users.models import MqttMetaData, MqttClient
 
 from .mosquitto_dynsec import MosquittoDynSec
-#from .mosquitto_dynsec import dynsec
 from django.db import transaction
 from django.db import IntegrityError
 from enum import Enum, unique

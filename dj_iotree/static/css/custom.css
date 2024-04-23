@@ -10,7 +10,14 @@
 /* vibrant blue: #3498DB */
 /* Leichtes Grau mit bläulichem Unterton: #E9ECEF*/
 
-body, html{
+body {
+    height: 100%;
+    font-size: 1rem; /* Original 1rem: var(--bs-body-font-size); */
+    margin: 0;
+    padding: 0;  /* neu */
+}
+
+html {
     height: 100%;
     margin: 0;
     padding: 0;  /* neu */
