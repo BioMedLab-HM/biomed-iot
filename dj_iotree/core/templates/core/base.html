@@ -7,7 +7,7 @@
         {% if title %}
             <h2 style="font-weight: 250;">{{ title }}</h2>  <!-- font weight 400 is normal thickness -->
         {% else %}
-            <h2 style="font-weight: 250; color: transparent">Hello</h2>
+            <h2 style="font-weight: 250; color: transparent">IoT4free</h2>
         {% endif %}
     </div>
 </div>
@@ -25,5 +25,14 @@
             {% block content %}{% endblock content %}
         </div>
     </div>
+        <div class="pb-1" id="footer" style="background-color: #f2f2f2; text-align: center; padding: 20px; font-size: 15px; color: #555;">
+            <a href="{% url 'core-about' %}" style="margin-right: 20px; color: #555; text-decoration: none;">About</a>
+            <a href="{% url 'core-legal-notice' %}" style="margin-right: 20px; color: #555; text-decoration: none;">Imprint</a>
+            <a href="{% url 'core-privacy-policy' %}" style="color: #555; text-decoration: none;">Privacy Policy</a>
+            <!-- <hr style="width:20%; margin-left: auto; margin-right: auto;"> -->
+            <p style="margin-top: 0.75rem; color: #555;">Copyright 2024 by René Sesgör</p>
+        </div>
+    </div>
+    
 </div>
 {% endblock base_content %}

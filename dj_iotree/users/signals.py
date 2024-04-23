@@ -57,7 +57,7 @@ def user_delete(sender, instance, **kwargs):
 
     # Delete InfluxDB user data
     influx_user_manager = InfluxUserManager(user=instance)
-    influx_user_manager.create_new_influx_user_resources()
+    influx_user_manager.delete_influx_user_resources()
     
     # Stop and Delete the user's Nodered Container
     nodered_user_data = NodeRedUserData.objects.get(user=instance)

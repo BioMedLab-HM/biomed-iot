@@ -10,9 +10,9 @@
         <meta name="author" content="" />
 
         {% if title %}
-            <title>IoTree42 - {{ title }}</title>
+            <title>IoT4free - {{ title }}</title>
         {% else %}
-            <title>IoTree42</title>
+            <title>IoT4free</title>
         {% endif %}
 
         <!-- Favicon-->
@@ -32,7 +32,7 @@
         <!-- Responsive navbar-->
         <nav class="navbar navbar-expand-lg navbar-dark bg-primary">
             <div class="container">
-                <a class="navbar-brand" href="{% url 'core-home' %}">IoTree42</a>
+                <a class="navbar-brand" href="{% url 'core-home' %}">IoT4free</a>
                 {% if not thin_navbar|default:False %}
                     <p class="d-none d-lg-block navbar_brand_subtext"><strong>Collect data<br>Automate workflows</strong></p>
                 {% endif %}
@@ -42,7 +42,7 @@
                         <li class="nav-item"><a class="nav-link {% is_active 'core-home' %}" aria-current="page" href="{% url 'core-home' %}">Home</a></li>
                         {% if user.is_authenticated %}
                             <li class="nav-item dropdown">
-                                <a class="nav-link dropdown-toggle {% is_active 'devices' 'code-examples' %}" id="navbarDropdown" href="#" role="button" data-bs-toggle="dropdown" aria-expanded="false">Devices</a>
+                                <a class="nav-link dropdown-toggle {% is_active 'devices' 'code-examples' 'message-and-topic-structure' %}" id="navbarDropdown" href="#" role="button" data-bs-toggle="dropdown" aria-expanded="false">Devices</a>
                                 <ul class="dropdown-menu dropdown-menu-end" aria-labelledby="navbarDropdown">
                                     <li><a class="dropdown-item" href="{% url 'devices' %}">My Devices</a></li>
                                     <li><a class="dropdown-item" href="{% url 'code-examples' %}">Code Examples</a></li>
@@ -50,9 +50,9 @@
                                 </ul>
                             </li>
                             <li class="nav-item dropdown">
-                                <a class="nav-link dropdown-toggle {% is_active 'nodered' 'noddered-flow-examples' %}" id="navbarDropdown" href="#" role="button" data-bs-toggle="dropdown" aria-expanded="false">Automate</a>
+                                <a class="nav-link dropdown-toggle {% is_active 'nodered' 'nodered-open' 'nodered-flow-examples' %}" id="navbarDropdown" href="#" role="button" data-bs-toggle="dropdown" aria-expanded="false">Automate</a>
                                 <ul class="dropdown-menu dropdown-menu-end" aria-labelledby="navbarDropdown">
-                                    <li><a class="dropdown-item" href="{% url 'nodered-manager' %}">Nodered</a></li>
+                                    <li><a class="dropdown-item" href="{% url 'nodered-open' %}">Nodered</a></li>
                                     <li><a class="dropdown-item" href="{% url 'nodered-flow-examples' %}">Nodered Flow Examples</a></li>
                                 </ul>
                             </li>
@@ -60,14 +60,14 @@
                             <li class="nav-item"><a class="nav-link {% starts_with 'grafana' %}" href="{% url 'grafana' %}">Visualize</a></li>
                         {% endif %}
                         <li class="nav-item"><a class="nav-link {% is_active 'core-manual' %}" href="{% url 'core-manual' %}">Manual</a></li>
-                        <li class="nav-item dropdown">
+                        <!-- <li class="nav-item dropdown">
                             <a class="nav-link dropdown-toggle {% is_active 'core-about' 'core-legal-notice' 'core-privacy-policy' %}" id="navbarDropdown" href="#" role="button" data-bs-toggle="dropdown" aria-expanded="false">About</a>
                             <ul class="dropdown-menu dropdown-menu-end" aria-labelledby="navbarDropdown">
-                                <li><a class="dropdown-item" href="{% url 'core-about' %}">About IoTree42</a></li>
+                                <li><a class="dropdown-item" href="{% url 'core-about' %}">About IoT4free</a></li>
                                 <li><a class="dropdown-item" href="{% url 'core-legal-notice' %}">Legal Notice</a></li>
                                 <li><a class="dropdown-item" href="{% url 'core-privacy-policy' %}">Privacy Policy</a></li>
                             </ul>
-                        </li>
+                        </li> -->
                         <li class="nav-item dropdown">
                             <a class="nav-link dropdown-toggle {% is_active 'profile' 'logout' 'login' 'register' %}" id="navbarDropdown" href="#" role="button" data-bs-toggle="dropdown" aria-expanded="false">User</a>
                             <ul class="dropdown-menu dropdown-menu-end" aria-labelledby="navbarDropdown">
