@@ -1,5 +1,5 @@
 import json
-import users.models as user_models
+from users.models import InfluxUserData
 from dj_iotree.config_loader import config
 from influxdb_client import InfluxDBClient, Point, WriteOptions
 from influxdb_client.client.write_api import SYNCHRONOUS
@@ -30,7 +30,7 @@ class InfluxUserManager:
         """
         self.user = user
         self.org_id = config.influxdb.INFLUX_ORG_ID
-        self.host = config.influxdb.INFLUX_HOST
+        self.host = config.influxdb.HOST
         self.port = config.influxdb.INFLUX_PORT
         self.url = f"http://{self.host}:{self.port}"
         self.auth_url = f"{self.url}/api/v2/authorizations"
@@ -44,7 +44,7 @@ class InfluxUserManager:
             The created bucket instance.
         """
         bucket = None
-        bucket_name = user_models.InfluxUserData.generate_unique_bucket_name()
+        bucket_name = InfluxUserData.generate_unique_bucket_name()
         bucket = self.client.buckets_api().create_bucket(bucket_name=bucket_name, org=self.org_id)
         return bucket
 
@@ -85,13 +85,12 @@ class InfluxUserManager:
         Returns:
             True if the resources were successfully created and saved; False otherwise.
         """
-        logger.error("in create_new_influx_user_resources() function")
+        logger.debug("in create_new_influx_user_resources() function")
         bucket, bucket_id = self._create_bucket()
-        logger.error(f"bucket: {bucket}; id: {bucket_id}")
         bucket_token, bucket_token_id = self._create_bucket_token(bucket)  
-        logger.error(f"bucket_token: {bucket_token}; id: {bucket_token_id}")
+        logger.debug("created bucket, token with ids")
         # Assuming self.user is the Django user instance associated with these resources
-        influx_user_data, created = user_models.InfluxUserData.objects.update_or_create(
+        influx_user_data, created = InfluxUserData.objects.update_or_create(
             user=self.user,
             defaults={
                 'bucket_name': bucket,
@@ -100,11 +99,9 @@ class InfluxUserManager:
                 'bucket_token_id': bucket_token_id,
             }
         )
-        logger.error(f"user_models.InfluxUserData created?: {created}")
+        logger.debug("InfluxUserData saved")
 
-        success = all([influx_user_data, bucket.id, bucket_token_id])  # True if all values are not None
-        logger.error(f"create_new_influx_user_resources returns '{success}'")
-        return success
+        return all([influx_user_data, bucket.id, bucket_token_id])  # True if all values are not None
 
     def delete_influx_user_resources(self) -> bool:
         """
@@ -118,11 +115,11 @@ class InfluxUserManager:
         model_instance_deleted = False
         
         try:
-            # get bucket_id and bucket_token_id from self.user's user_models.InfluxUserData
-            influx_user_data = user_models.InfluxUserData.objects.get(user=self.user)
+            # get bucket_id and bucket_token_id from self.user's InfluxUserData
+            influx_user_data = InfluxUserData.objects.get(user=self.user)
             bucket_id = influx_user_data.bucket_id
             bucket_token_id = influx_user_data.bucket_token_id
-        except user_models.InfluxUserData.DoesNotExist:
+        except InfluxUserData.DoesNotExist:
             print("Influx user data not found.")
             return False  # No resources to delete if the user data is not found.
 
@@ -144,11 +141,11 @@ class InfluxUserManager:
             print(f"Failed to delete bucket with ID {influx_user_data.bucket_id}")
 
         try:
-            # Delete the user_models.InfluxUserData model instance
+            # Delete the InfluxUserData model instance
             influx_user_data.delete()
             model_instance_deleted = True
         except Exception as e:
-            print(f"Exception occurred while deleting user_models.InfluxUserData model instance: {e}")
+            print(f"Exception occurred while deleting InfluxUserData model instance: {e}")
 
         return all([token_deleted, bucket_deleted, model_instance_deleted])
 

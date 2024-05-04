@@ -213,6 +213,7 @@ CRISPY_TEMPLATE_PACK = "bootstrap5"
 # see: https://docs.djangoproject.com/en/5.0/topics/logging/
 LOG_FILE_PATH = os.path.join(BASE_DIR, 'logging', 'debug.log')
 
+
 LOGGING = {
     'version': 1,
     'disable_existing_loggers': False,
@@ -235,11 +236,11 @@ LOGGING = {
         },
     },
     'loggers': {
-        'django': {
-            'handlers': ['file'],
-            'level': 'DEBUG',
-            'propagate': True,
-        },
+        # 'django': {
+        #     'handlers': ['file'],
+        #     'level': 'DEBUG',
+        #     'propagate': True,
+        # },
         'core': {
             'handlers': ['file'],
             'level': 'DEBUG',

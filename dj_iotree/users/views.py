@@ -23,11 +23,13 @@ def register(request):
     if request.method == "POST":
         form = UserRegisterForm(request.POST)
         if form.is_valid():
+            logger.info("register view: Form is valid")
             try:
                 new_user = form.save()
                 messages.success(
                     request, "Your account has been created! You are now able to log in"
                 )
+                logger.info("register view: before redirect to login page")
                 return redirect("login")
             except Exception:
                 messages.error(
@@ -48,6 +50,7 @@ def user_login(request):
     if request.method == "POST":
         form = UserLoginForm(data=request.POST)
         if form.is_valid():
+            logger.info("user_login view: Form is valid")
             # The 'username' field can be either a username or an email
             user = authenticate(
                 request,
@@ -56,6 +59,7 @@ def user_login(request):
             )
             if user:
                 login(request, user)
+                logger.info("user_login view: before redirect to core-home page")
                 return redirect("core-home")
     else:
         form = UserLoginForm()

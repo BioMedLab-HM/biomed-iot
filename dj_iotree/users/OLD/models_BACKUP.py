@@ -8,47 +8,12 @@ import subprocess
 from django.conf import settings
 import random
 import string
-from .services.influx_utils import InfluxUserManager
-# from .services.grafana_utils import ...
-from .services.mosquitto_utils import MqttMetaDataManager, MqttClientManager, RoleType
-import logging
-
-
-logger = logging.getLogger(__name__)
 
 
 class CustomUserManager(BaseUserManager):
     """
     About custom user models: https://medium.com/@akshatgadodia/the-power-of-customising-django-user-why-you-should-start-early-e9036eae8c6d
     """
-
-    def _post_creation_setup(self, user):
-        """Handle post-user creation setup."""
-        try:
-            Profile.objects.create(user)
-            user.profile.save()
-            logger.INFO(f"Profile saved")
-                        
-            mqtt_metadata_manager = MqttMetaDataManager(user)
-            created_nodered_role = mqtt_metadata_manager.create_nodered_role()
-            created_device_role = mqtt_metadata_manager.create_device_role()
-            logger.info(f"created_nodered_role: {created_nodered_role}; created_device_role: {created_device_role}")
-            print(f"created_nodered_role: {created_nodered_role}; created_device_role: {created_device_role}")
-
-            mqtt_client_manager = MqttClientManager(user)
-            created_nodered_client = mqtt_client_manager.create_client(textname="Automation Tool Credentials", role_type=RoleType.NODERED.value)
-            created_example_client = mqtt_client_manager.create_client(textname="Example Device", role_type=RoleType.DEVICE.value)
-            logger.info(f"created_nodered_client: {created_nodered_client}; created_example_client: {created_example_client}")
-            print(f"created_nodered_client: {created_nodered_client}; created_example_client: {created_example_client}")
-
-            influx_user_manager = InfluxUserManager(user)
-            influx_user_manager.create_new_influx_user_resources()
-
-            # TODO: grafana
-        except Exception as e:
-            logger.error(f"An error occurred during post-creation setup: {e}", exc_info=True)
-            print(f"An error occurred: {e}")
-
     def create_user(self, username, email, password=None, **extra_fields):
         """
         Create and save a user with the given username, email and password.
@@ -57,12 +22,10 @@ class CustomUserManager(BaseUserManager):
             raise ValueError(_('The username field must be set'))
         if not email:
             raise ValueError(_('The email field must be set'))
-        
         email = self.normalize_email(email)
         user = self.model(username=username, email=email, **extra_fields)
         user.set_password(password)
-        user.save(using=self._db)
-        self._post_creation_setup(user)
+        user.save()  # user.save(using=self._db)
         return user
 
     def create_superuser(self, username, email, password=None, **extra_fields):
@@ -78,6 +41,8 @@ class CustomUserManager(BaseUserManager):
         if extra_fields.get('is_superuser') is not True:
             raise ValueError(_('Superuser must have is_superuser=True.'))
 
+        # As you're making username a required field, we add it as an argument.
+        # You can further enforce other required fields in a similar manner.
         return self.create_user(username=username, email=email, password=password, **extra_fields)
 
 

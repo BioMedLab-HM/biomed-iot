@@ -1,10 +1,13 @@
-from users.models import MqttMetaData, MqttClient
-
+import users.models
 from .mosquitto_dynsec import MosquittoDynSec
 from django.db import transaction
 from django.db import IntegrityError
 from enum import Enum, unique
 from dj_iotree.config_loader import config
+import logging
+
+
+logger = logging.getLogger(__name__)
 
 
 @unique
@@ -44,9 +47,9 @@ class MqttMetaDataManager:
         with transaction.atomic():
             try:
                 user_topic_id, nodered_role_name, device_role_name = (
-                    MqttMetaData.generate_unique_mqtt_metadata()
+                    users.models.MqttMetaData.generate_unique_mqtt_metadata()
                 )
-                meta_data, created = MqttMetaData.objects.get_or_create(
+                meta_data, created = users.models.MqttMetaData.objects.get_or_create(
                     user=self.user,
                     defaults={
                         "user_topic_id": user_topic_id,
@@ -173,12 +176,12 @@ class MqttClientManager:
 
     def create_client(self, textname="New Device", role_type=None):
         # Generate a unique username and password for the MQTT client
-        new_username = MqttClient.generate_unique_username()
-        new_password = MqttClient.generate_password()
+        new_username = users.models.MqttClient.generate_unique_username()
+        new_password = users.models.MqttClient.generate_password()
 
         # Retrieve the MQTT meta data for the user to get the device role name
         try:
-            mqtt_meta_data = MqttMetaData.objects.get(user=self.user)
+            mqtt_meta_data = users.models.MqttMetaData.objects.get(user=self.user)
             if role_type == RoleType.DEVICE.value:
                 rolename = mqtt_meta_data.device_role_name
             elif role_type == RoleType.NODERED.value:
@@ -198,7 +201,7 @@ class MqttClientManager:
 
             if success:
                 # If the MQTT client was successfully created in the dynsec system, save it to the database
-                MqttClient.objects.create(
+                users.models.MqttClient.objects.create(
                     user=self.user,
                     username=new_username,
                     password=new_password,
@@ -209,7 +212,7 @@ class MqttClientManager:
                 # TODO: prints erscheinen auch in setup-script --> Umstellung auf Logging
             else:
                 print("Failed to create MQTT client in dynamic security system.")
-        except MqttMetaData.DoesNotExist:
+        except users.models.MqttMetaData.DoesNotExist:
             print("MqttMetaData does not exist for the user.")
         except IntegrityError as e:
             print(f"Database error when creating MQTT client: {e}")
@@ -221,7 +224,7 @@ class MqttClientManager:
         """
         try:
             # Attempt to find the MQTT client in the database
-            mqtt_client = MqttClient.objects.get(
+            mqtt_client = users.models.MqttClient.objects.get(
                 username=client_username, user=self.user
             )
 
@@ -243,7 +246,7 @@ class MqttClientManager:
                 print(
                     f"Failed to modify MQTT client {client_username} in dynamic security system."
                 )
-        except MqttClient.DoesNotExist:
+        except users.models.MqttClient.DoesNotExist:
             print(f"MQTT client {client_username} not found for the user.")
 
     def delete_client(self, client_username):
@@ -251,7 +254,7 @@ class MqttClientManager:
         Deletes an MQTT client from both the database and the dynamic security system.
         """
         try:
-            mqtt_client = MqttClient.objects.get(
+            mqtt_client = users.models.MqttClient.objects.get(
                 username=client_username, user=self.user
             )
 
@@ -270,7 +273,7 @@ class MqttClientManager:
                 print(
                     f"Failed to delete MQTT client {client_username} from dynamic security system."
                 )
-        except MqttClient.DoesNotExist:
+        except users.models.MqttClient.DoesNotExist:
             print(f"MQTT client {client_username} not found for the user.")
 
         return False
@@ -280,7 +283,7 @@ class MqttClientManager:
         Deletes all MQTT clients for the user from the Mosquitto Dynamic Security Plugin.
         """
         # Retrieve all MQTT clients for the user
-        all_clients = MqttClient.objects.filter(user=self.user)
+        all_clients = users.models.MqttClient.objects.filter(user=self.user)
 
         # Initialize the Mosquitto Dynamic Security client
         dynsec = MosquittoDynSec(self.dynsec_username, self.dynsec_password)
@@ -301,14 +304,14 @@ class MqttClientManager:
         Retrieves a list of MQTT device clients associated with the user's device role.
         """
         try:
-            mqtt_meta_data = MqttMetaData.objects.get(user=self.user)
+            mqtt_meta_data = users.models.MqttMetaData.objects.get(user=self.user)
             device_role_name = mqtt_meta_data.device_role_name
             # Filter the clients based on the users 'device_role_name'
-            clients = MqttClient.objects.filter(
+            clients = users.models.MqttClient.objects.filter(
                 user=self.user, rolename=device_role_name
             )
             return clients
-        except MqttMetaData.DoesNotExist:
+        except users.models.MqttMetaData.DoesNotExist:
             print("MqttMetaData not found for the user.")
             return []
 
@@ -317,13 +320,13 @@ class MqttClientManager:
         Retrieves the MQTT Node-RED client associated with the user's nodered role.
         """
         try:
-            mqtt_meta_data = MqttMetaData.objects.get(user=self.user)
+            mqtt_meta_data = users.models.MqttMetaData.objects.get(user=self.user)
             nodered_role_name = mqtt_meta_data.nodered_role_name
             # Filter the clients based on the users 'nodered_role_name'
-            client = MqttClient.objects.filter(
+            client = users.models.MqttClient.objects.filter(
                 user=self.user, rolename=nodered_role_name
             ).first()
             return client
-        except MqttMetaData.DoesNotExist:
+        except users.models.MqttMetaData.DoesNotExist:
             print("MqttMetaData not found for the user.")
             return None
