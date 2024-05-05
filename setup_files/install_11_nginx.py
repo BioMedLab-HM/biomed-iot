@@ -1,3 +1,4 @@
+# ruff: noqa: E501
 from .setup_utils import run_bash, log, get_setup_dir, get_conf_path
 
 NGINX_INSTALL_LOG_FILE_NAME = 'install_11_nginx.log'

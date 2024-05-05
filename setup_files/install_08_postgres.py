@@ -6,7 +6,8 @@ POSTGRESS_INSTALL_LOG_FILE_NAME = 'install_08_postgres.log'
 
 def install_postgres():
 	"""
-	install postgreSQL (https://www.digitalocean.com/community/tutorials/how-to-set-up-django-with-postgres-nginx-and-gunicorn-on-debian-11
+	install postgreSQL
+	(https://www.digitalocean.com/community/tutorials/how-to-set-up-django-with-postgres-nginx-and-gunicorn-on-debian-11
 	and https://forum.mattermost.com/t/pq-permission-denied-for-schema-public/14273)
 	"""
 

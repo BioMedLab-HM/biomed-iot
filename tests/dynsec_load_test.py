@@ -76,7 +76,7 @@ class ClientGetterThread(threading.Thread):
 						success_count += 1
 					total_calls += 1
 				print(
-					f'Thread for {self.username}: \nSuccess: {success},  \nResponse: {response},  \nCode: {send_code}\n\n'
+					f'Thread for {self.username}: \nSuccess: {success}, \nResponse: {response}, \nCode: {send_code}\n\n'
 				)
 			finally:
 				dynsec.disconnect()

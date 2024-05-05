@@ -1,9 +1,8 @@
 import json
 import users.models as user_models
 from biomed_iot.config_loader import config
-from influxdb_client import InfluxDBClient, Point, WriteOptions
-from influxdb_client.client.write_api import SYNCHRONOUS
-import requests  # For making HTTP requests to the v1 compatibility endpoint
+from influxdb_client import InfluxDBClient
+import requests  # For HTTP requests to the v1 compatibility endpoint
 import logging
 
 

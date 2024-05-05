@@ -1,7 +1,6 @@
 # ruff: noqa: E402
 import paho.mqtt.client as mqtt
 import time
-import os
 import tomllib
 
 with open('/etc/biomed-iot/config.toml', 'rb') as f:

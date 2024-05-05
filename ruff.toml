@@ -5,15 +5,20 @@ target-version = "py311"
 # Set the maximum line length to 120.
 line-length = 120
 # In addition to the standard set of exclusions
-extend-exclude = ["migrations", "wsgi.py", "asgi.py"]
+extend-exclude = ["migrations", "wsgi.py", "asgi.py", "OLD", "BACKUP"]
 
 [lint]
 # Add the `line-too-long` rule to the enforced rule set.
-extend-select = ["E501"]
+extend-select = ["E501", "W", "C901"]
+# Exclude rules.
+extend-ignore = ["W191", "W605"]
 # Fix only E rules (see https://docs.astral.sh/ruff/rules/#error-e)
-fixable = ["E"]
+fixable = ["E", "W"]
+# Disable fix rules:
+unfixable = ["C901"]
 
 [format]
 quote-style = "single"
 indent-style = "tab"
 docstring-code-format = true
+docstring-code-line-length = 120

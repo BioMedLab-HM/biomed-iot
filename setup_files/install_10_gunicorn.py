@@ -15,7 +15,7 @@ def install_gunicorn():
 	commands = [
 		# Build gunicorn config files
 		f'bash {conf_dir}/tmp.gunicorn.socket.sh > {setup_dir}/setup_files/tmp/gunicorn.socket',
-		f'bash {conf_dir}/tmp.gunicorn.service.sh {linux_user} {setup_dir} > {setup_dir}/setup_files/tmp/gunicorn.service',
+		f'bash {conf_dir}/tmp.gunicorn.service.sh {linux_user} {setup_dir} > {setup_dir}/setup_files/tmp/gunicorn.service',  # noqa: E501
 		f'cp {setup_dir}/setup_files/tmp/gunicorn.socket /etc/systemd/system/gunicorn.socket',
 		f'cp {setup_dir}/setup_files/tmp/gunicorn.service /etc/systemd/system/gunicorn.service',
 		'systemctl start gunicorn.socket',

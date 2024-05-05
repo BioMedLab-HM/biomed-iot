@@ -42,9 +42,7 @@ def install_mosquitto(setup_scheme):
 	init_dynsec_commands = [
 		# "echo 'include_dir /etc/mosquitto/conf.d' >> /etc/mosquitto/mosquitto.conf",  # duplicate
 		# Initialize and build dynamic-security.json file
-		(
-			f'mosquitto_ctrl dynsec init /var/lib/mosquitto/dynamic-security.json {dynsec_admin_name} {dynsec_admin_pass}'
-		),
+		(f'mosquitto_ctrl dynsec init /var/lib/mosquitto/dynamic-security.json {dynsec_admin_name} {dynsec_admin_pass}'),  # noqa: E501
 		# Set file permissions:
 		'chown mosquitto:mosquitto /var/lib/mosquitto/dynamic-security.json',
 		'chmod 700 /var/lib/mosquitto/dynamic-security.json',

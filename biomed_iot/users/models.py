@@ -8,8 +8,6 @@ from PIL import Image
 from django.utils.translation import (
 	gettext_lazy as _,
 )  # This is for automatic translation in case if it is implemented later
-import os
-import subprocess
 from django.conf import settings
 import random
 import string
@@ -33,7 +31,7 @@ class CustomUserManager(BaseUserManager):
 		try:
 			Profile.objects.create(user)
 			user.profile.save()
-			logger.INFO(f'Profile saved')
+			logger.INFO('Profile saved')
 
 			mqtt_metadata_manager = MqttMetaDataManager(user)
 			created_nodered_role = mqtt_metadata_manager.create_nodered_role()

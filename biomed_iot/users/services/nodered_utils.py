@@ -59,7 +59,7 @@ class NoderedContainer:
 				)
 				self.determine_port()
 			except (docker.errors.ContainerError, docker.errors.ImageNotFound) as e:
-				# Log error
+				print(e)  # TODO: Log Error
 				self.container = None
 
 	def stop(self):

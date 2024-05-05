@@ -28,7 +28,7 @@ def install_influxdb(architecture):
 
 	installation_commands_amd64 = [
 		# TODO Test: Ensure the temp directory exists and enter it
-		f'mkdir -p {influx_files_dir} && cd {influx_files_dir} && '  # works only when all commands are concatenated to one command with &&
+		f'mkdir -p {influx_files_dir} && cd {influx_files_dir} && '  # works only with command-concatenat with &&
 		+
 		# Download and install InfluxDB
 		'curl -LO https://dl.influxdata.com/influxdb/releases/influxdb2_2.7.5-1_amd64.deb && '
@@ -105,7 +105,7 @@ def install_influxdb(architecture):
 	# https://docs.influxdata.com/influxdb/cloud/reference/cli/influx/auth/create/
 	# All-access token (Read and Write access to all buckets of this org)
 	influx_all_access_token = run_bash(
-		f"influx auth create --org {influx_org_name} --all-access --description '{influx_org_name}-all-access' | awk 'NR>1 {{print $3}}'",
+		f"influx auth create --org {influx_org_name} --all-access --description '{influx_org_name}-all-access' | awk 'NR>1 {{print $3}}'",  # noqa: E501
 		show_output=False,
 	).strip()
 

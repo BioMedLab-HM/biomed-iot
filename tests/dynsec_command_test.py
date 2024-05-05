@@ -1,4 +1,4 @@
-# ruff: noqa: E402
+# ruff: noqa: E402, E501
 # Test for correct implementation of the mosquitto_dynsec module
 
 import sys
@@ -242,7 +242,7 @@ success, response = dynsec.get_client(client_username)
 success, response = dynsec.list_clients(verbose=False, count=-1, offset=0)
 success, response = dynsec.modify_client(client_username, clientid=client_id, password=client_password, textname=client_textname, textdescription=client_textdescription, roles=role_name, groups=group_name)
 
-# Revert/Remove Client, Roles and Groups 
+# Revert/Remove Client, Roles and Groups
 success, response = dynsec.remove_client_role(client_username, role_name)
 success, response = dynsec.remove_group_client(group_name, client_username)
 success, response = dynsec.remove_group_role(group_name, role_name)

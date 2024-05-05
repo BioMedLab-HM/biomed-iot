@@ -36,7 +36,7 @@ def install_django(django_admin_email, django_admin_name, django_admin_pass, aut
 	# Create Django superuser
 	django_superuser_command = (
 		f'echo "from users.models import CustomUser; '
-		f"CustomUser.objects.create_superuser('{django_admin_name}', '{django_admin_email}', '{django_admin_pass}')\" | "
+		f"CustomUser.objects.create_superuser('{django_admin_name}', '{django_admin_email}', '{django_admin_pass}')\" | "  # noqa: E501
 		f'runuser -u {linux_user} -- {setup_dir}/biomed_iot/venv/bin/python {setup_dir}/biomed_iot/manage.py shell'
 	)
 	set_setup_dir_rights()

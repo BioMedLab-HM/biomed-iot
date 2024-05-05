@@ -2,8 +2,8 @@ from django import template
 from django.urls import reverse, NoReverseMatch
 
 """
-This Django template code defines custom template tags to help manage navigation menus 
-by highlighting the active link. These tags are used in templates to add an "active" class 
+This Django template code defines custom template tags to help manage navigation menus
+by highlighting the active link. These tags are used in templates to add an "active" class
 to a navigation item if the current request's path matches certain criteria.
 """
 

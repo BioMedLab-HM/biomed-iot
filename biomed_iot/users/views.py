@@ -25,7 +25,7 @@ def register(request):
 		if form.is_valid():
 			logger.info('register view: Form is valid')
 			try:
-				new_user = form.save()
+				new_user = form.save()  # noqa F841
 				messages.success(request, 'Your account has been created! You are now able to log in')
 				logger.info('register view: before redirect to login page')
 				return redirect('login')

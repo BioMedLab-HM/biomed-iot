@@ -11,7 +11,6 @@ https://docs.djangoproject.com/en/4.2/ref/settings/
 """
 
 import os
-import json
 from pathlib import Path
 from django.db.backends.postgresql.psycopg_any import IsolationLevel  # noqa
 from biomed_iot.config_loader import config
@@ -132,7 +131,7 @@ AUTHENTICATION_BACKENDS = [
 	'users.backends.EmailAuthBackend',
 ]
 
-# TODO: Nach setup: 
+# TODO: Nach setup:
 # https://stackoverflow.com/questions/40933006/how-to-increase-expires-in-time-of-a-access-token-in-oauth-provider-toolkit-dj  # noqa
 # OAUTH2_PROVIDER = {
 #     'AUTHORIZATION_CODE_EXPIRE_SECONDS': 60 * 65,

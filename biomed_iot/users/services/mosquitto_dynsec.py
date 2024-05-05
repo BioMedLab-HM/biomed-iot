@@ -102,7 +102,7 @@ class MosquittoDynSec:
 		# print(f"Topic: `{msg.topic}`\nPayload: `{json.loads(msg.payload.decode('utf-8'))}`")
 		self.response_msg = json.loads(msg.payload.decode('utf-8'))
 		# print(f"on_message: self.response_msg = {self.response_msg}")
-		self.message_received_event.set()  # must be the last line to make sure, the message is stored in self.response_msg
+		self.message_received_event.set()  # must be last line to make sure, the message is stored in self.response_msg
 
 	def on_connect(self, client, userdata, flags, rc):
 		self.client.subscribe(self.response_topic, qos=2)
@@ -149,7 +149,8 @@ class MosquittoDynSec:
 
 	def _is_response_successful(self, command, response, send_code):
 		# print(f"In '_is_response_successful'. command: {command}, response: {response}")
-		# Response codes for Mosquitto on GitHub: https://github.com/search?q=repo%3Aeclipse%2Fmosquitto++%7B%27responses%27&type=code
+		# Response codes for Mosquitto on GitHub:
+		# https://github.com/search?q=repo%3Aeclipse%2Fmosquitto++%7B%27responses%27&type=code
 		successful = False
 		if response is not None and send_code.rc == MQTT_ERR_SUCCESS:
 			# Get command name of the command sent and command in response
@@ -185,7 +186,7 @@ class MosquittoDynSec:
 		return success, response, send_code
 
 	"""
-    External-use getter- and setter-functions (use these to interact with the Mosquitto Dynamic Security Plugin) 
+    External-use getter- and setter-functions (use these to interact with the Mosquitto Dynamic Security Plugin)
     """
 
 	def set_default_acl_access(
@@ -449,7 +450,8 @@ class MosquittoDynSec:
 		:param priority: The priority of the role for this client. Defaults to -1, indicating lowest priority.
 		:return: see "SETTER-functions return values in Class description"
 
-		This method is useful for dynamically managing client permissions by assigning roles that define a set of access control lists (ACLs).
+		This method is useful for dynamically managing client permissions by
+		assigning roles that define a set of access control lists (ACLs).
 
 		Example:
 		    # Assign a 'Publisher' role to 'jane_doe' with a higher priority
@@ -803,8 +805,8 @@ class MosquittoDynSec:
 		:return: see "SETTER-functions return values in Class description"
 
 		Example:
-		    modify_role("BasicSubscriber", textname="Advanced Subscriber", textdescription="Can subscribe to more topics",
-		                acls=[{"acltype": "subscribePattern", "topic": "advanced/topic/#", "priority": -1, "allow": True}])
+		    modify_role("BasicSubscriber", textname="Advanced Subscriber", textdescription="Subscribes to more topics",
+		            acls=[{"acltype": "subscribePattern", "topic": "advanced/topic/#", "priority": -1, "allow": True}])
 		"""
 		command = {'commands': [{'command': 'modifyRole', 'rolename': rolename}]}
 		if textname is not None:

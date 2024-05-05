@@ -215,8 +215,10 @@ class MqttClientManager:
 
 	def modify_client(self, client_username, textname='New MQTT Device'):
 		"""
-		Modifies the textname of an existing MQTT client in both the database and the dynamic security system,
-		ensuring that changes are only committed to the database after successful modification in the dynamic security system.
+		Modifies the textname of an existing MQTT client in both the database
+		and the dynamic security system, ensuring that changes are only
+		committed to the database after successful modification in the
+		dynamic security system.
 		"""
 		try:
 			# Attempt to find the MQTT client in the database
