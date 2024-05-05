@@ -4,7 +4,7 @@
 	sudo reboot
 
 ### Check config.toml and get DJANGO_ADMIN_PASS for website login
-	nano /etc/iotree/config.toml
+	nano /etc/biomed-iot/config.toml
 
 ### Website
 Check all functions
@@ -30,7 +30,7 @@ for credentials, see DJANGO_ADMIN_PASS in config.toml
 	sudo nano /var/lib/mosquitto/dynamic-security.json
 
 ### Setup Logs
-	cd /home/<user>/iotree42/setup_files/setup_logs
+	cd /home/<user>/biomed-iot/setup_files/setup_logs
 	ls -al
 	grep -R "Error" .  # search for "Error" or other keywords in log files
 	nano main.log
@@ -45,5 +45,5 @@ for credentials, see DJANGO_ADMIN_PASS in config.toml
 	exit  # to exit psql CLI
 
 ### Optional:
-Check files in /home/biomed/iotree42/setup_files/tmp  
+Check files in /home/biomed/biomed-iot/setup_files/tmp  
 Have all variables been inserted correctly?

@@ -26,8 +26,8 @@ cat << EOF
         "ADMIN_MAIL":"$ADMINMAIL",
         "DJANGO_SECRET_KEY":"$DJANGOKEY",
 
-        "POSTGRES_NAME":"dj_iotree_db",
-        "POSTGRES_USER":"dj_iotree_user",
+        "POSTGRES_NAME":"biomed_iot_db",
+        "POSTGRES_USER":"biomed_iot_user",
         "POSTGRES_PASS":"$POSTGRESPASS"
         
         "BROKER_PORT":1883,

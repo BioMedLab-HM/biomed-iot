@@ -1,0 +1,19 @@
+# Ruff linter settings (see https://docs.astral.sh/ruff/settings/)
+
+# Support Python 3.11+.
+target-version = "py311"
+# Set the maximum line length to 120.
+line-length = 120
+# In addition to the standard set of exclusions
+extend-exclude = ["migrations", "wsgi.py", "asgi.py"]
+
+[lint]
+# Add the `line-too-long` rule to the enforced rule set.
+extend-select = ["E501"]
+# Fix only E rules (see https://docs.astral.sh/ruff/rules/#error-e)
+fixable = ["E"]
+
+[format]
+quote-style = "single"
+indent-style = "tab"
+docstring-code-format = true

@@ -5,7 +5,7 @@ DYNSEC_PLUGIN_PATH=$1
 
 # Define mosquitto-no-tls.conf template
 cat << EOF
-# Mosquitto broker configuration for IoTree42 Platform
+# Mosquitto broker configuration for Biomed IoT Platform
 # Manual for this file, see https://mosquitto.org/man/mosquitto-conf-5.html
 
 # Explicitly disabled when using dynamic security plugin according to mosquitto website manual

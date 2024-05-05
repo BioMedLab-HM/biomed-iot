@@ -1,4 +1,4 @@
-# IoTree42
+# Biomed IoT
 
 An open source IoT platform for data collection, visualization and automation.
 

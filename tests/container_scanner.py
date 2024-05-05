@@ -17,36 +17,36 @@ import time
 client = docker.from_env()
 
 # Specify the name or ID of the container you want to monitor
-container_name_or_id = "123456"
+container_name_or_id = '123456'
 
 while True:
-    try:
-        # Get the container
-        container = client.containers.get(container_name_or_id)
+	try:
+		# Get the container
+		container = client.containers.get(container_name_or_id)
 
-        print(f"Monitoring health and status of container: {container_name_or_id}")
+		print(f'Monitoring health and status of container: {container_name_or_id}')
 
-        # Continuously check the container's health and status
-        while True:
-            # Reload container information to get updated data
-            container.reload()
+		# Continuously check the container's health and status
+		while True:
+			# Reload container information to get updated data
+			container.reload()
 
-            # Extract health status
-            try:
-                container_health = container.attrs["State"]["Health"]["Status"]
-            except KeyError:
-                container_health = "N/A (No health checks configured)"
+			# Extract health status
+			try:
+				container_health = container.attrs['State']['Health']['Status']
+			except KeyError:
+				container_health = 'N/A (No health checks configured)'
 
-            # Get general container status
-            container_status = container.status
+			# Get general container status
+			container_status = container.status
 
-            print(f"Container Status: {container_status} | Health: {container_health}")
-            time.sleep(1)
+			print(f'Container Status: {container_status} | Health: {container_health}')
+			time.sleep(1)
 
-    except docker.errors.NotFound:
-        print(f"Container {container_name_or_id} not found.")
-    except Exception as e:
-        print(f"An error occurred: {e}")
+	except docker.errors.NotFound:
+		print(f'Container {container_name_or_id} not found.')
+	except Exception as e:
+		print(f'An error occurred: {e}')
 
-    # Wait for a bit before checking again
-    time.sleep(1)
+	# Wait for a bit before checking again
+	time.sleep(1)
