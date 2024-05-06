@@ -9,12 +9,13 @@ from django.contrib import messages
 from django.http import JsonResponse
 from django.db import IntegrityError
 from django.db import transaction
-from .models import NodeRedUserData
+from .models import NodeRedUserData, Profile
 from .forms import UserRegisterForm, UserUpdateForm, UserLoginForm, MqttClientForm
 from .services.mosquitto_utils import MqttMetaDataManager, MqttClientManager, RoleType
 from .services.nodered_utils import NoderedContainer, update_nodered_nginx_conf
+from .services.influx_utils import InfluxUserManager
+# from .services.grafana_utils import ...
 from .services.code_loader import load_code_examples, load_nodered_flow_examples
-
 
 logger = logging.getLogger(__name__)
 
@@ -25,15 +26,12 @@ def register(request):
 		if form.is_valid():
 			logger.info('register view: Form is valid')
 			try:
-				new_user = form.save()  # noqa F841
+				form.save()  # noqa F841
 				messages.success(request, 'Your account has been created! You are now able to log in')
-				logger.info('register view: before redirect to login page')
+				logger.info('register view: after post creation setup, before redirect to login page')
 				return redirect('login')
 			except Exception:
-				messages.error(
-					request,
-					'An error occurred while creating your account. Please try again.',
-				)
+				messages.error(request,'An error occurred while creating your account. Please try again.')
 	else:
 		form = UserRegisterForm()
 
@@ -409,11 +407,9 @@ def nodered(request):
 	context = {'container_name': container_name, 'title': page_title, 'thin_navbar': True}
 	return render(request, 'users/nodered.html', context)
 
-
+import subprocess
 @login_required
 def nodered_dashboard(request):
-	page_title = 'Node-RED Dashboard'
-
 	try:
 		nodered_data = NodeRedUserData.objects.get(user=request.user)
 	except ObjectDoesNotExist:
@@ -425,6 +421,22 @@ def nodered_dashboard(request):
 		messages.info(request, 'Start Nodered and UI first.')
 		return redirect('nodered-manager')
 
+	# TODO: Remove dashboard check when dashboard is installed in container by default
+ 	# Check if 'node-red-dashboard' is installed in the Node-RED container
+	try:
+		result = subprocess.check_output(
+			['docker', 'exec', container_name, 'npm', 'list', '-g', 'node-red-dashboard', '--depth=0'],
+			stderr=subprocess.STDOUT
+		).decode('utf-8')
+		if 'node-red-dashboard' not in result:
+			messages.info(request, 'Node-RED Dashboard is not installed. Please install it to proceed.')
+			return redirect('nodered-manager')
+	except subprocess.CalledProcessError as e:
+		logger.info(f'Node-RED dashboard not available/installed. CalledProcessError: {e}')
+		messages.error(request, 'Install Node-RED dashboard first to access it')
+		return redirect('nodered-manager')
+
+	page_title = 'Node-RED Dashboard'
 	context = {
 		'container_name': container_name,
 		'title': page_title,

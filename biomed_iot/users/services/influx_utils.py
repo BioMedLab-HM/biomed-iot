@@ -45,7 +45,12 @@ class InfluxUserManager:
 		bucket = None
 		bucket_name = user_models.InfluxUserData.generate_unique_bucket_name()
 		bucket = self.client.buckets_api().create_bucket(bucket_name=bucket_name, org=self.org_id)
-		return bucket
+		if bucket:
+			return bucket
+		else:
+			logger.error(f'Failed to create bucket: {bucket_name}')
+			raise Exception(f'Failed to create bucket: {bucket_name}')
+		
 
 	def _create_bucket_token(self, bucket):
 		"""
@@ -73,6 +78,7 @@ class InfluxUserManager:
 		else:
 			raise Exception(f'Failed to create token: {response.text}')
 
+
 	def create_new_influx_user_resources(self) -> bool:
 		"""
 		Creates new InfluxDB resources (bucket and token) for the user and stores their data.
@@ -80,25 +86,25 @@ class InfluxUserManager:
 		Returns:
 		    True if the resources were successfully created and saved; False otherwise.
 		"""
-		logger.error('in create_new_influx_user_resources() function')
-		bucket, bucket_id = self._create_bucket()
-		logger.error(f'bucket: {bucket}; id: {bucket_id}')
+		logger.info('in create_new_influx_user_resources() function')
+		bucket = self._create_bucket()
+		logger.info(f'bucket: {bucket.name}; id: {bucket.id}')
 		bucket_token, bucket_token_id = self._create_bucket_token(bucket)
-		logger.error(f'bucket_token: {bucket_token}; id: {bucket_token_id}')
+		logger.info(f'bucket_token: {bucket_token}; id: {bucket_token_id}')
 		# Assuming self.user is the Django user instance associated with these resources
 		influx_user_data, created = user_models.InfluxUserData.objects.update_or_create(
 			user=self.user,
 			defaults={
-				'bucket_name': bucket,
-				'bucket_id': bucket_id,
+				'bucket_name': bucket.name,
+				'bucket_id': bucket.id,
 				'bucket_token': bucket_token,
 				'bucket_token_id': bucket_token_id,
 			},
 		)
-		logger.error(f'user_models.InfluxUserData created?: {created}')
+		logger.info(f'user_models.InfluxUserData created?: {created}')
 
 		success = all([influx_user_data, bucket.id, bucket_token_id])  # True if all values are not None
-		logger.error(f"create_new_influx_user_resources returns '{success}'")
+		logger.info(f"create_new_influx_user_resources returns '{success}'")
 		return success
 
 	def delete_influx_user_resources(self) -> bool:
@@ -127,24 +133,39 @@ class InfluxUserManager:
 			delete_token_url, headers={'Authorization': f'Token {INFLUX_ALL_ACCESS_TOKEN}'}
 		)
 		if delete_token_response.status_code in [204, 200]:
-			print(f"Bucket-token with ID '{influx_user_data.bucket_token_id}' deleted.")
+			print(f"Bucket-token with ID '{bucket_token_id}' deleted.")
 			token_deleted = True
 		else:
 			print(f"Failed to delete bucket-token with ID '{bucket_token_id}")
 
 		# Delete the bucket in InfluxDB
-		delete_bucket_response = self.client.buckets_api().delete_bucket(bucket_id)
-		if delete_bucket_response.status_code in [204, 200]:
-			print(f"Bucket with ID '{influx_user_data.bucket_id}' deleted.")
-			bucket_deleted = True
-		else:
-			print(f'Failed to delete bucket with ID {influx_user_data.bucket_id}')
-
+  		# Attempt to delete the bucket
 		try:
-			# Delete the user_models.InfluxUserData model instance
-			influx_user_data.delete()
-			model_instance_deleted = True
+			self.client.buckets_api().delete_bucket(bucket_id)
+			print(f"Bucket with ID '{bucket_id}' deleted.")
+			bucket_deleted = True
 		except Exception as e:
-			print(f'Exception occurred while deleting user_models.InfluxUserData model instance: {e}')
+			if e.status == 404:  # Bucket not found
+				print("Bucket already deleted or not found.")
+				bucket_deleted = True
+			else:
+				print(f"Failed to delete bucket: {e}")
+				bucket_deleted = False
+
+		# bucket = self.client.buckets_api().find_bucket_by_id(bucket_id)
+		# delete_bucket_response = self.client.buckets_api().delete_bucket(bucket)
+		# if delete_bucket_response is not None:
+		# 	print(f"Bucket with ID '{bucket_id}' deleted. Response: {delete_bucket_response}")
+		# 	bucket_deleted = True
+		# else:
+		# 	print(f'Failed to delete bucket with ID {bucket_id}')
+
+		if bucket_deleted:
+			try:
+				# Delete the user_models.InfluxUserData model instance
+				influx_user_data.delete()
+				model_instance_deleted = True
+			except Exception as e:
+				print(f'Exception occurred while deleting user_models.InfluxUserData model instance: {e}')
 
 		return all([token_deleted, bucket_deleted, model_instance_deleted])

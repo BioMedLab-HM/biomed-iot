@@ -1,21 +1,12 @@
 import secrets
-from django.db import models
-from django.contrib.auth.models import (
-	AbstractUser,
-	BaseUserManager,
-)  # User (if Django standard User model shall be used)
-from PIL import Image
-from django.utils.translation import (
-	gettext_lazy as _,
-)  # This is for automatic translation in case if it is implemented later
-from django.conf import settings
 import random
 import string
-from .services.influx_utils import InfluxUserManager
-
-# from .services.grafana_utils import ...
-from .services.mosquitto_utils import MqttMetaDataManager, MqttClientManager, RoleType
 import logging
+from PIL import Image
+from django.db import models
+from django.contrib.auth.models import AbstractUser, BaseUserManager
+from django.utils.translation import gettext_lazy as _  # for automatic translation in case if it is implemented later
+from django.conf import settings
 
 
 logger = logging.getLogger(__name__)
@@ -25,40 +16,7 @@ class CustomUserManager(BaseUserManager):
 	"""
 	About custom user models: https://medium.com/@akshatgadodia/the-power-of-customising-django-user-why-you-should-start-early-e9036eae8c6d
 	"""
-
-	def _post_creation_setup(self, user):
-		"""Handle post-user creation setup."""
-		try:
-			Profile.objects.create(user)
-			user.profile.save()
-			logger.INFO('Profile saved')
-
-			mqtt_metadata_manager = MqttMetaDataManager(user)
-			created_nodered_role = mqtt_metadata_manager.create_nodered_role()
-			created_device_role = mqtt_metadata_manager.create_device_role()
-			logger.info(f'created_nodered_role: {created_nodered_role}; created_device_role: {created_device_role}')
-			print(f'created_nodered_role: {created_nodered_role}; created_device_role: {created_device_role}')
-
-			mqtt_client_manager = MqttClientManager(user)
-			created_nodered_client = mqtt_client_manager.create_client(
-				textname='Automation Tool Credentials', role_type=RoleType.NODERED.value
-			)
-			created_example_client = mqtt_client_manager.create_client(
-				textname='Example Device', role_type=RoleType.DEVICE.value
-			)
-			logger.info(
-				f'created_nodered_client: {created_nodered_client}; created_example_client: {created_example_client}'
-			)
-			print(f'created_nodered_client: {created_nodered_client}; created_example_client: {created_example_client}')
-
-			influx_user_manager = InfluxUserManager(user)
-			influx_user_manager.create_new_influx_user_resources()
-
-			# TODO: grafana
-		except Exception as e:
-			logger.error(f'An error occurred during post-creation setup: {e}', exc_info=True)
-			print(f'An error occurred: {e}')
-
+  
 	def create_user(self, username, email, password=None, **extra_fields):
 		"""
 		Create and save a user with the given username, email and password.
@@ -72,7 +30,7 @@ class CustomUserManager(BaseUserManager):
 		user = self.model(username=username, email=email, **extra_fields)
 		user.set_password(password)
 		user.save(using=self._db)
-		self._post_creation_setup(user)
+
 		return user
 
 	def create_superuser(self, username, email, password=None, **extra_fields):
@@ -93,7 +51,8 @@ class CustomUserManager(BaseUserManager):
 
 class CustomUser(AbstractUser):
 	"""
-	About custom user models: https://medium.com/@akshatgadodia/the-power-of-customising-django-user-why-you-should-start-early-e9036eae8c6d
+	About custom user models: 
+	https://medium.com/@akshatgadodia/the-power-of-customising-django-user-why-you-should-start-early-e9036eae8c6d
 	username, first_name, last_name, email, is_staff, is_active, date_joined are already present in Abstract User.
 	If you want to unset any of these fields just do <fieldname> = None
 	"""
