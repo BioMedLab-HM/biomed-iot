@@ -1,0 +1,9 @@
+# The following changes need to be made in grafana.ini
+# Consider: https://grafana.com/tutorials/run-grafana-behind-a-proxy/
+
+# set to true if you want to allow browsers to render Grafana in a <frame>, <iframe>, <embed> or <object>. default is false.
+allow_embedding = true
+
+# The full public facing url you use in browser, used for redirects and emails
+# If you use reverse proxy and sub path specify full url (with sub path)
+root_url = http://192.168.2.109/grafana/

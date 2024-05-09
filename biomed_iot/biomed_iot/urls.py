@@ -17,18 +17,21 @@ Including another URLconf
 
 from django.contrib import admin
 from django.contrib.auth import views as auth_views
-from django.urls import path, include
+from django.urls import path, include, re_path
 from django.conf import settings
 from django.conf.urls.static import static
 from users import views as user_views
 
 urlpatterns = [
 	path('admin/', admin.site.urls),
+
 	# path('o/', include('oauth2_provider.urls', namespace='oauth2_provider')),
 	# path('auth/callback/', views.oauth_callback, name='oauth_callback'),
+
 	path('devices/', user_views.devices, name='devices'),
 	path('message-and-topic-structure/', user_views.message_and_topic_structure, name='message-and-topic-structure'),
 	path('code-examples/', user_views.code_examples, name='code-examples'),
+
 	path('nodered-manager/', user_views.nodered_manager, name='nodered-manager'),
 	path('nodered-create/', user_views.nodered_create, name='nodered-create'),
 	path('nodered-wait/', user_views.nodered_wait, name='nodered-wait'),
@@ -39,8 +42,13 @@ urlpatterns = [
 	path('nodered/', user_views.nodered, name='nodered'),
 	path('nodered-dashboard/', user_views.nodered_dashboard, name='nodered-dashboard'),
 	path('nodered-flow-examples/', user_views.nodered_flow_examples, name='nodered-flow-examples'),
+
 	path('data-explorer/', user_views.data_explorer, name='data-explorer'),
-	path('grafana/', user_views.grafana, name='grafana'),
+
+	path('visualize/', user_views.visualize, name='visualize'),
+    path('iframedash/', user_views.iframedash, name='iframedash'),
+    re_path(r'^grafana/(?P<path>.*)$', user_views.GrafanaProxyView.as_view(), name='grafanaproxyview'),
+
 	path('register/', user_views.register, name='register'),
 	path('profile/', user_views.profile, name='profile'),
 	# path('login/', auth_views.LoginView.as_view(template_name='users/login.html'), name='login'),  # Django login view

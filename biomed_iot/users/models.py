@@ -150,16 +150,18 @@ class MqttClient(models.Model):
 		return None
 
 	@staticmethod
-	def generate_password(length=30):
+	def generate_password():
+		length = 30
 		# Define the characters to use in the password
 		characters = string.ascii_letters + string.digits  # This includes uppercase, lowercase, and digits
-		# Generate the password using the secrets module with the given set of characters
+		# The secrets module generates cryptographically strong random tokens which are less predictable then 
+		# common pseudo random generators)  
 		new_password = ''.join(secrets.choice(characters) for index in range(length))
 		return new_password
 
 
 class InfluxUserData(models.Model):
-	user = models.ForeignKey(settings.AUTH_USER_MODEL, on_delete=models.CASCADE)
+	user = models.OneToOneField(settings.AUTH_USER_MODEL, on_delete=models.CASCADE)  # TODO: OneToOneField
 	bucket_name = models.CharField(max_length=20, unique=True)
 	bucket_id = models.CharField(max_length=50)
 	bucket_token = models.CharField(max_length=50)
@@ -171,25 +173,29 @@ class InfluxUserData(models.Model):
 	@staticmethod
 	def generate_unique_bucket_name():
 		max_attempts = 1000
+		name_length = 20
 		for attempt in range(max_attempts):
-			new_name = ''.join(random.choice(string.ascii_letters + string.digits) for index in range(20))
+			characters = string.ascii_letters + string.digits  # This includes uppercase, lowercase, and digits
+			# The secrets module generates cryptographically strong random names which are less predictable then 
+			# common pseudo random generators)  
+			new_name = ''.join(secrets.choice(characters) for index in range(name_length))
 			if not InfluxUserData.objects.filter(bucket_name=new_name).exists():
-				return new_name
+				return new_name  # TODO: also safe the bucket_name
 		return None
 
 
-class GrafanaUserData(models.Model):
-	user = models.ForeignKey(settings.AUTH_USER_MODEL, on_delete=models.CASCADE)
-	username = models.CharField(max_length=20, unique=True)  # ???????????????????????????????????????????
-	token = models.CharField(max_length=50)
+# class GrafanaUserData(models.Model):
+# 	user = models.OneToOneField(settings.AUTH_USER_MODEL, on_delete=models.CASCADE)
+# 	token = models.CharField(max_length=50)
 
-	def __str__(self):
-		return self.username
+# 	def __str__(self):
+# 		return self.username
 
-	@staticmethod
-	def generate_token(length=50):
-		# Define the characters to use in the token
-		characters = string.ascii_letters + string.digits  # This includes uppercase, lowercase, and digits
-		# Generate the token using the secrets module with the given set of characters
-		new_token = ''.join(secrets.choice(characters) for index in range(length))
-		return new_token
+# 	def generate_token(self):
+# 		"""Generate a new token and update the instance's token field."""
+# 		length = 50
+# 		characters = string.ascii_letters + string.digits
+# 		new_token = ''.join(secrets.choice(characters) for _ in range(length))
+# 		self.token = new_token
+# 		self.save()  # Save the updated token to the database
+# 		return new_token

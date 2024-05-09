@@ -8,6 +8,7 @@ from .models import InfluxUserData, MqttClient, MqttMetaData, Profile, NodeRedUs
 from .services.mosquitto_utils import MqttMetaDataManager, MqttClientManager, RoleType  # noqa
 from .services.nodered_utils import NoderedContainer
 from .services.influx_utils import InfluxUserManager
+from .services.grafana_utils import GrafanaUserManager
 
 
 logger = logging.getLogger(__name__)
@@ -20,7 +21,7 @@ logger = logging.getLogger(__name__)
 # 		user = instance
 # 		# try:
 # 		Profile.objects.create(user)
-# 		logger.INFO('Profile saved')
+# 		logger.info('Profile saved')
 
 # 		mqtt_metadata_manager = MqttMetaDataManager(user)
 # 		created_nodered_role = mqtt_metadata_manager.create_nodered_role()
@@ -75,13 +76,24 @@ def user_mqtt_setup(sender, instance, created, **kwargs):
 
 
 @receiver(post_save, sender=settings.AUTH_USER_MODEL)
-def user_influxdb_setup(sender, instance, created, **kwargs):
-    if created:
-        influx_user_manager = InfluxUserManager(user=instance)
-        influx_user_manager.create_new_influx_user_resources()
+def user_influxdb_and_grafana_setup(sender, instance, created, **kwargs):
+	if created:
+		influx_user_manager = InfluxUserManager(user=instance)
+		influx_user_manager.create_new_influx_user_resources()
+
+		# Create Grafana user account
+		logger.info('Signals.py > user_influxdb_and_grafana_setup: after InfluxDB Setup')
+		print('Signals.py > user_influxdb_and_grafana_setup: after InfluxDB Setup')
+		grafana_user_manager = GrafanaUserManager(user=instance)
+		logger.info('Signals.py > user_influxdb_and_grafana_setup: created grafana_user_manager instance')
+		print('Signals.py > user_influxdb_and_grafana_setup: created grafana_user_manager instance')
+		grafana_user_manager.create_user()
+		logger.info('Signals.py > user_influxdb_and_grafana_setup: after grafana_user_manager.create_user()')
+		print('Signals.py > user_influxdb_and_grafana_setup: after grafana_user_manager.create_user()')
 
 # ! DELETE MODELS IN SEPARATE pre_delete SIGNALS CRASHES IF REFERENCE TO CUSTOM USER BUT CUSTOM USER DELETED BEFORE ! #
 ### SOLUTION --> DELETE SERVICES pre_delete CUSTOM USER MODEL
+# TODO: Better? --> No signals but overwrite delete() method in models (same for create())
 
 # @receiver(pre_delete, sender=MqttMetaData)
 # def delete_mqtt_metadata(sender, instance, **kwargs):
@@ -121,10 +133,9 @@ def delete_user_services_data(sender, instance, **kwargs):
 	mqtt_client_manager = MqttClientManager(user=instance)
 	mqtt_client_manager.delete_all_clients_for_user()
 
-	# Delete Grafana user data
-	# TODO: Implement
-	# grafana_user_manager = GrafanaUserManager(user=instance)
-	# grafana_user_manager.delete_user()
+	# Delete Grafana user account
+	grafana_user_manager = GrafanaUserManager(user=instance)
+	grafana_user_manager.delete_user()
 
 	# Delete InfluxDB user data
 	influx_user_manager = InfluxUserManager(user=instance)

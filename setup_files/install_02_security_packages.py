@@ -15,6 +15,7 @@ def install_security_packages():
 		'ufw allow 80',  # for http
 		'ufw allow 443/tcp',  # for https
 		'ufw allow 1883/tcp',  # For MQTT
+		'ufw allow 3000/tcp',  # For Grafana
 		'echo',
 		"echo 'To enable ufw firewall, automatic response to confirmation will be provided.'",
 		"echo 'y' | sudo ufw enable",  # This sends "y" as input to the ufw enable command

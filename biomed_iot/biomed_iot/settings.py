@@ -45,7 +45,8 @@ INSTALLED_APPS = [
 	'django.contrib.sessions',
 	'django.contrib.messages',
 	'django.contrib.staticfiles',
-	# TODO: OAuth ggf. für Grafana und NodeRed/FlowFuse (siehe auch CORS Middleware)
+    'revproxy',
+	# TODO: OAuth ggf. für Grafana und NodeRed (siehe auch CORS Middleware)
 	# 'oauth2_provider',
 	# 'corsheaders',
 ]
@@ -225,6 +226,9 @@ CRISPY_ALLOWED_TEMPLATE_PACKS = 'bootstrap5'
 CRISPY_TEMPLATE_PACK = 'bootstrap5'
 
 # TODO: Hier weitere security settings?
+X_FRAME_OPTIONS = "SAMEORIGIN"
+USE_X_FORWARDED_HOST = True
+CSP_DEFAULT_SRC = ("'self'", "http:", "https:", "'unsafe-inline'", "'unsafe-eval'")
 
 
 # TODO: NO Logger level "DEBUG" in production!
@@ -264,5 +268,15 @@ LOGGING = {
 			'level': 'DEBUG',
 			'propagate': False,
 		},
+        'revproxy': {
+            'handlers': ['file'],
+            'level': 'DEBUG',
+            'propagate': True,
+        },
+        'urllib3': {
+            'handlers': ['file'],
+            'level': 'DEBUG',
+            'propagate': True,
+        },
 	},
 }

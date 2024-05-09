@@ -5,7 +5,7 @@ from .models import CustomUser
 import logging
 
 logger = logging.getLogger(__name__)
-logger.debug('This is a test debug message.')
+logger.debug('In backends.py (Username-/EmailAuthBackend)')
 
 
 class UsernameAuthBackend(ModelBackend):

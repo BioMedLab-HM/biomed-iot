@@ -1,4 +1,6 @@
-from .setup_utils import run_bash, log, get_setup_dir
+import requests
+from requests.auth import HTTPBasicAuth
+from .setup_utils import run_bash, log, get_random_string, get_setup_dir
 
 GRAFANA_INSTALL_LOG_FILE_NAME = 'install_06_grafana.log'
 
@@ -13,6 +15,11 @@ def install_grafana(architecture):
 	"""
 	setup_dir = get_setup_dir()
 	grafana_files_dir = f'{setup_dir}/setup_files/tmp/grafana_install_files'
+	admin_username = 'admin'
+	old_admin_password = admin_username
+	new_admin_password = get_random_string(30)
+	host = run_bash("hostname --all-ip-addresses | awk '{print $1}'")  # 'localhost' is not working
+	port = 3000
 
 	installation_commands_amd64 = [
 		# Ensure the temp directory exists and enter it
@@ -64,11 +71,37 @@ def install_grafana(architecture):
 		output = run_bash(command)
 		log(output, GRAFANA_INSTALL_LOG_FILE_NAME)
 
+	reset_grafana_password(host, port, admin_username, old_admin_password, new_admin_password)
+
 	config_data = {
-		'GRAFANA_HOST': 'localhost',
-		'GRAFANA_PORT': 3000,
-		'GRAFANA_ORG_NAME': 'biomed-iot',
-		# TODO: Weitere Daten?
+		'GRAFANA_HOST': host,
+		'GRAFANA_PORT': port,
+		'GRAFANA_ADMIN_USERNAME': admin_username,
+		'GRAFANA_ADMIN_PASSWORD': new_admin_password,
 	}
 	log('Grafana installation done', GRAFANA_INSTALL_LOG_FILE_NAME)
 	return config_data
+
+
+def reset_grafana_password(host, port, user, old_pw, new_pw):
+	url = f"http://{host}:{port}/api/user/password"
+
+	headers = {'Content-Type': 'application/json'}
+	payload = {
+		"oldPassword": old_pw,
+		"newPassword": new_pw,
+		"confirmNew": new_pw
+	}
+
+	response = requests.put(
+		url,
+		json=payload,
+		headers=headers,
+		auth=HTTPBasicAuth(user, old_pw)
+	)
+
+	if response.status_code == 200:
+		log("Admin password changed successfully.", GRAFANA_INSTALL_LOG_FILE_NAME)
+	else:
+		log(f"Failed to change admin password. Status code: {response.status_code},",
+			f"Response: {response.text}", GRAFANA_INSTALL_LOG_FILE_NAME)

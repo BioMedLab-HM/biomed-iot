@@ -1,15 +1,7 @@
 {% extends "core/iframe_base.html" %}
 
 {% block iframe_content %}
-<iframe src="/grafana/{{ enter_something_like_an_id }}" allowfullscreen>
-        
-    
-
-
-    <!-- TODO -->
-
-
-    
+<iframe src="{% url 'iframedash' %}" allowfullscreen>
 
     <!-- Alternative text -->
     <p>Your browser does not support iframes.</p>
