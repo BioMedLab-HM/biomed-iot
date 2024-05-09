@@ -9,8 +9,8 @@ import json
 
 # Configuration
 url = 'http://localhost:8086'  # e.g., "http://localhost:8086"
-all_access_token = '...'
-org_id = '...'  # Your organization name
+all_access_token = ''
+org_id = ''  # Your organization name
 bucket_name = 'test'
 
 # Initialize client
@@ -18,8 +18,9 @@ client = InfluxDBClient(url=url, token=all_access_token, org=org_id)
 try:
 	# Step 1: Create a new bucket called "test"
 	bucket = client.buckets_api().create_bucket(bucket_name=bucket_name, org=org_id)
-	# bucket = client.buckets_api().find_bucket_by_name(bucket_name)
-	print(f"Bucket '{bucket_name}' created.")
+	print(f"Bucket '{bucket.name}' created.")
+
+	bucket = client.buckets_api().find_bucket_by_name(bucket_name)
 
 	# Step 2: Create a read-write token for the "test" bucket
 	bucket_token = None
@@ -57,6 +58,7 @@ try:
 		print(response.text)
 	else:
 		print('Failed to query data using InfluxQL.')
+
 
 	# Step 5: Delete the data using the /api/v2/delete endpoint
 	delete_url = f'{url}/api/v2/delete?org={org_id}&bucket={bucket_name}'

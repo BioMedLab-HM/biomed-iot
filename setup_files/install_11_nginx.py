@@ -43,8 +43,8 @@ def install_nginx(setup_scheme, domain, server_ip, hostname):
 			'ln -s /etc/nginx/sites-available/nginx-biomed-iot-tls-local.conf /etc/nginx/sites-enabled',
 			'openssl req -x509 -nodes -days 365 -newkey rsa:2048 -keyout /etc/ssl/private/nginx-biomed-iot.key -out /etc/ssl/certs/nginx-biomed-iot.crt',
 			'openssl dhparam -out /etc/nginx/dhparam.pem 2048',
-			f'cp {setup_dir}/setup_files/tmp/tmp.self-signed.conf /etc/nginx/snippets/self-signed.conf',
-			f'cp {setup_dir}/setup_files/tmp/tmp.ssl-params.conf /etc/nginx/snippets/ssl-params.conf',
+			f'cp {config_path}/tmp.self-signed.conf /etc/nginx/snippets/self-signed.conf',
+			f'cp {config_path}/tmp.ssl-params.conf /etc/nginx/snippets/ssl-params.conf',
 			f'cp {config_path}/tmp.nginx-stream-tls.conf /etc/nginx/conf.d/nginx-stream-tls.conf',
 			'ln -s /etc/nginx/modules-available/nginx-stream-tls.conf /etc/nginx/modules-enabled',
 		]
