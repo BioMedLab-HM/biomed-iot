@@ -26,17 +26,17 @@ def load_code(dir_name, config_file_name):
 		examples_config = json.load(file)
 
 	examples_content = {}
-	for key, example in examples_config.items():
+	for example, example_metadata in examples_config.items():
 		try:
-			file_path = os.path.join(examples_path, example['filename'])
+			file_path = os.path.join(examples_path, example_metadata['filename'])
 			with open(file_path, 'r') as example_file:
-				examples_content[key] = {
-					'headline': example['headline'],
+				examples_content[example] = {
+					'headline': example_metadata['headline'],
 					'code': example_file.read(),
 				}
 		except IOError:
-			examples_content[key] = {
-				'headline': example['headline'],
+			examples_content[example] = {
+				'headline': example_metadata['headline'],
 				'code': 'Error loading the example.',
 			}
 

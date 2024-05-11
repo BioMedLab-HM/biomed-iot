@@ -1,9 +1,10 @@
 import json
-import users.models as user_models
-from biomed_iot.config_loader import config
-from influxdb_client import InfluxDBClient
 import requests  # For HTTP requests to the v1 compatibility endpoint
 import logging
+import users.models as user_models
+from biomed_iot.config_loader import config
+from influxdb_client import InfluxDBClient, Point 
+from influxdb_client.client.write_api import SYNCHRONOUS
 
 
 logger = logging.getLogger(__name__)
@@ -43,14 +44,15 @@ class InfluxUserManager:
             The created bucket instance.
         """
         bucket = None
-        bucket_name = user_models.InfluxUserData.generate_unique_bucket_name()  # TODO: self.user.influxuserdata.generate_unique_bucket_name()
+        # TODO instead of next line: self.user.influxuserdata.generate_unique_bucket_name()  --> then test
+        bucket_name = user_models.InfluxUserData.generate_unique_bucket_name()
         bucket = self.client.buckets_api().create_bucket(bucket_name=bucket_name, org=self.org_id)
         if bucket:
             return bucket
         else:
             logger.error(f'Failed to create bucket: {bucket_name}')
             raise Exception(f'Failed to create bucket: {bucket_name}')
-        
+
 
     def _create_bucket_token(self, bucket):
         """
@@ -77,6 +79,11 @@ class InfluxUserManager:
             return (response_json.get('token'), response_json.get('id'))
         else:
             raise Exception(f'Failed to create token: {response.text}')
+        
+    def _write_initial_test_data(self, bucket_name, bucket_token):
+        write_client = InfluxDBClient(url=self.url, token=bucket_token, org=self.org_id).write_api(write_options=SYNCHRONOUS)
+        point = Point('UltimateQuestion').tag('Response', 'DeepThought').field('Answer', 42)
+        write_client.write(bucket=bucket_name, org=self.org_id, record=point)
 
 
     def create_new_influx_user_resources(self) -> bool:
@@ -102,6 +109,8 @@ class InfluxUserManager:
             },
         )
         logger.info(f'user_models.InfluxUserData created?: {created}')
+
+        self._write_initial_test_data(bucket.name, bucket_token)
 
         success = all([influx_user_data, bucket.id, bucket_token_id])  # True if all values are not None
         logger.info(f"create_new_influx_user_resources returns '{success}'")

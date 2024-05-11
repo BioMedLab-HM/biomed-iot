@@ -1,3 +1,10 @@
+#!/bin/sh
+
+# Get passed parameter
+DOMAIN=$1
+
+# Define gunicorn.service template
+cat << EOF
 ##################### Grafana Configuration Example #####################
 #
 # Everything has defaults so you only need to uncomment things you want to
@@ -39,13 +46,13 @@ protocol = http
 ;min_tls_version = ""
 
 # The ip address to bind to, empty will bind to all interfaces
-http_addr = 192.168.2.109
+;http_addr = 
 
-# The http port  to use
+# The http port to use
 http_port = 3000
 
 # The public facing domain name used to access grafana from a browser
-domain = 192.168.2.109
+domain = $DOMAIN
 
 # Redirect to correct domain if host header does not match domain
 # Prevents DNS rebinding attacks
@@ -520,10 +527,10 @@ default_theme = light
 ;token_rotation_interval_minutes = 10
 
 # Set to true to disable (hide) the login form, useful if you use OAuth, defaults to false
-disable_login_form = true
+disable_login_form = true  # true
 
 # Set to true to disable the sign out link in the side menu. Useful if you use auth.proxy or auth.jwt, defaults to false
-disable_signout_menu = true
+disable_signout_menu = true  # true
 
 # URL to redirect the user to after sign out
 ;signout_redirect_url =
@@ -1653,3 +1660,4 @@ max_connections = 0
 [public_dashboards]
 # Set to false to disable public dashboards
 ;enabled = true
+EOF

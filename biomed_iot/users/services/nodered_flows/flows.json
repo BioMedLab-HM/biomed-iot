@@ -35,12 +35,12 @@
         "influxdb": "6ca8bde.9eb2f44",
         "precision": "",
         "retentionPolicy": "",
-        "name": "Write to testbucket",
+        "name": "Write to bucket",
         "database": "",
         "precisionV18FluxV20": "s",
         "retentionPolicyV18Flux": "",
         "org": "biomed-iot",
-        "bucket": "testbucket",
+        "bucket": "user_bucket_name",
         "x": 710,
         "y": 100,
         "wires": []
@@ -67,7 +67,7 @@
         "type": "mqtt in",
         "z": "d3f3e87db40f23f2",
         "name": "",
-        "topic": "",  # TODO: "in/<id>/temp" with personal topic id
+        "topic": "in/topic_id/temperature",
         "qos": "2",
         "datatype": "auto-detect",
         "broker": "4440ee1d27092426",
@@ -90,7 +90,7 @@
         "type": "mqtt out",
         "z": "d3f3e87db40f23f2",
         "name": "",
-        "topic": "",  # TODO: "out/<id>/heating" with personal topic id
+        "topic": "out/topic_id/heating",
         "qos": "2",
         "retain": "",
         "respTopic": "",
@@ -165,11 +165,11 @@
         "port": "8086",
         "protocol": "https",
         "database": "new_db",
-        "name": "testbucket",
+        "name": "user_bucket_name",
         "usetls": true,
         "tls": "f7f39f4e.896ae",
         "influxdbVersion": "2.0",
-        "url": "",  # TODO: "http://IP/DOMAIN:8086"
+        "url": "http://localhost:8086",
         "timeout": "",
         "rejectUnauthorized": false
     },
@@ -177,7 +177,7 @@
         "id": "4440ee1d27092426",
         "type": "mqtt-broker",
         "name": "",
-        "broker": "",  # TODO: "IP/DOMAIN"
+        "broker": "server_ip_or_domain",
         "port": "1883",
         "clientid": "",
         "autoConnect": true,

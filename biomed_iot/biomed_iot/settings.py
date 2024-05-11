@@ -35,52 +35,52 @@ ALLOWED_HOSTS = [config.host.IP, config.host.HOSTNAME, config.host.DOMAIN, 'loca
 # Application definition
 
 INSTALLED_APPS = [
-	'core.apps.CoreConfig',
-	'users.apps.UsersConfig',  # 'users',
-	'crispy_forms',
-	'crispy_bootstrap5',
-	'django.contrib.admin',
-	'django.contrib.auth',
-	'django.contrib.contenttypes',
-	'django.contrib.sessions',
-	'django.contrib.messages',
-	'django.contrib.staticfiles',
+    'core.apps.CoreConfig',
+    'users.apps.UsersConfig',  # 'users',
+    'crispy_forms',
+    'crispy_bootstrap5',
+    'django.contrib.admin',
+    'django.contrib.auth',
+    'django.contrib.contenttypes',
+    'django.contrib.sessions',
+    'django.contrib.messages',
+    'django.contrib.staticfiles',
     'revproxy',
-	# TODO: OAuth ggf. für Grafana und NodeRed (siehe auch CORS Middleware)
-	# 'oauth2_provider',
-	# 'corsheaders',
+    # TODO: OAuth ggf. für Grafana und NodeRed (siehe auch CORS Middleware)
+    # 'oauth2_provider',
+    # 'corsheaders',
 ]
 
 MIDDLEWARE = [
-	'django.middleware.security.SecurityMiddleware',
-	'django.contrib.sessions.middleware.SessionMiddleware',
-	'django.middleware.common.CommonMiddleware',
-	'django.middleware.csrf.CsrfViewMiddleware',
-	'django.contrib.auth.middleware.AuthenticationMiddleware',
-	'django.contrib.messages.middleware.MessageMiddleware',
-	'django.middleware.clickjacking.XFrameOptionsMiddleware',
-	# 'corsheaders.middleware.CorsMiddleware',
-	# 'users.middleware.TimezoneMiddleware',  # see https://docs.djangoproject.com/en/4.2/topics/i18n/timezones/
-	# TODO: Ggf. automatische TZ-Erkennung https://github.com/adamcharnock/django-tz-detect
+    'django.middleware.security.SecurityMiddleware',
+    'django.contrib.sessions.middleware.SessionMiddleware',
+    'django.middleware.common.CommonMiddleware',
+    'django.middleware.csrf.CsrfViewMiddleware',
+    'django.contrib.auth.middleware.AuthenticationMiddleware',
+    'django.contrib.messages.middleware.MessageMiddleware',
+    'django.middleware.clickjacking.XFrameOptionsMiddleware',
+    # 'corsheaders.middleware.CorsMiddleware',
+    # 'users.middleware.TimezoneMiddleware',  # see https://docs.djangoproject.com/en/4.2/topics/i18n/timezones/
+    # TODO: Ggf. automatische TZ-Erkennung https://github.com/adamcharnock/django-tz-detect
 ]
 
 ROOT_URLCONF = 'biomed_iot.urls'
 
 TEMPLATES = [
-	{
-		'BACKEND': 'django.template.backends.django.DjangoTemplates',
-		'DIRS': [],
-		'APP_DIRS': True,
-		'OPTIONS': {
-			'context_processors': [
-				'django.template.context_processors.debug',
-				'django.template.context_processors.request',
-				'django.contrib.auth.context_processors.auth',
-				'django.contrib.messages.context_processors.messages',
-				'users.context_processors.default_title',  # Custom context processsor
-			],
-		},
-	},
+    {
+        'BACKEND': 'django.template.backends.django.DjangoTemplates',
+        'DIRS': [],
+        'APP_DIRS': True,
+        'OPTIONS': {
+            'context_processors': [
+                'django.template.context_processors.debug',
+                'django.template.context_processors.request',
+                'django.contrib.auth.context_processors.auth',
+                'django.contrib.messages.context_processors.messages',
+                'users.context_processors.default_title',  # Custom context processsor
+            ],
+        },
+    },
 ]
 
 WSGI_APPLICATION = 'biomed_iot.wsgi.application'
@@ -89,47 +89,47 @@ WSGI_APPLICATION = 'biomed_iot.wsgi.application'
 # Database
 # https://docs.djangoproject.com/en/4.2/ref/settings/#databases
 DATABASES = {
-	'default': {
-		# uncomment for sqlite (in development)
-		'ENGINE': 'django.db.backends.sqlite3',
-		'NAME': BASE_DIR / 'db.sqlite3',
-		# uncomment then 'python manage.py migrate' for postgres (in production)
-		# 'ENGINE': 'django.db.backends.postgresql',
-		# 'NAME': config.postgres.POSTGRES_NAME,
-		# 'USER': config.postgres.POSTGRES_USER,
-		# 'PASSWORD': config.postgres.POSTGRES_PASSWORD,
-		# 'HOST': config.postgres.POSTGRES_HOST,
-		# 'PORT': config.postgres.POSTGRES_PORT,
-	}
+    'default': {
+        # uncomment for sqlite (in development)
+        'ENGINE': 'django.db.backends.sqlite3',
+        'NAME': BASE_DIR / 'db.sqlite3',
+        # uncomment then 'python manage.py migrate' for postgres (in production)
+        # 'ENGINE': 'django.db.backends.postgresql',
+        # 'NAME': config.postgres.POSTGRES_NAME,
+        # 'USER': config.postgres.POSTGRES_USER,
+        # 'PASSWORD': config.postgres.POSTGRES_PASSWORD,
+        # 'HOST': config.postgres.POSTGRES_HOST,
+        # 'PORT': config.postgres.POSTGRES_PORT,
+    }
 }
 # Database
 # https://docs.djangoproject.com/en/5.0/ref/settings/#databases
 if DEBUG:
-	DATABASES = {
-		'default': {
-			'ENGINE': 'django.db.backends.sqlite3',
-			'NAME': BASE_DIR / 'db.sqlite3',
-		}
-	}
+    DATABASES = {
+        'default': {
+            'ENGINE': 'django.db.backends.sqlite3',
+            'NAME': BASE_DIR / 'db.sqlite3',
+        }
+    }
 else:
-	DATABASES = {
-		'default': {
-			'ENGINE': 'django.db.backends.postgresql',
-			'NAME': config.postgres.POSTGRES_NAME,
-			'USER': config.postgres.POSTGRES_USER,
-			'PASSWORD': config.postgres.POSTGRES_PASSWORD,
-			'HOST': config.postgres.POSTGRES_HOST,
-			'PORT': config.postgres.POSTGRES_PORT,
-		}
-	}
+    DATABASES = {
+        'default': {
+            'ENGINE': 'django.db.backends.postgresql',
+            'NAME': config.postgres.POSTGRES_NAME,
+            'USER': config.postgres.POSTGRES_USER,
+            'PASSWORD': config.postgres.POSTGRES_PASSWORD,
+            'HOST': config.postgres.POSTGRES_HOST,
+            'PORT': config.postgres.POSTGRES_PORT,
+        }
+    }
 
 
 AUTH_USER_MODEL = 'users.CustomUser'
 
 AUTHENTICATION_BACKENDS = [
-	# commented out to disallow login with username because username may be shared with other users
-	# 'users.backends.UsernameAuthBackend',
-	'users.backends.EmailAuthBackend',
+    # commented out to disallow login with username because username may be shared with other users
+    # 'users.backends.UsernameAuthBackend',
+    'users.backends.EmailAuthBackend',
 ]
 
 # TODO: Nach setup:
@@ -147,37 +147,37 @@ AUTHENTICATION_BACKENDS = [
 # https://docs.djangoproject.com/en/4.2/ref/settings/#auth-password-validators
 
 AUTH_PASSWORD_VALIDATORS = [
-	{
-		'NAME': 'django.contrib.auth.password_validation.UserAttributeSimilarityValidator',
-	},
-	{
-		'NAME': 'django.contrib.auth.password_validation.MinimumLengthValidator',
-		'OPTIONS': {
-			'min_length': 12,
-		},
-	},
-	{
-		'NAME': 'django.contrib.auth.password_validation.CommonPasswordValidator',
-	},
-	# unecessary because of custom validators
-	# {
-	#     'NAME': 'django.contrib.auth.password_validation.NumericPasswordValidator',
-	# },
-	{
-		'NAME': 'users.password_validation.UpperCaseValidator',  # activate in production!
-	},
-	{
-		'NAME': 'users.password_validation.LowerCaseValidator',
-	},
-	{
-		'NAME': 'users.password_validation.DigitValidator',  # activate in production!
-	},
-	{
-		'NAME': 'users.password_validation.SymbolValidator',  # activate in production!
-		'OPTIONS': {
-			'symbols': '!@#$%&*()_+-=[]}{|;:<>/?',
-		},
-	},
+    {
+        'NAME': 'django.contrib.auth.password_validation.UserAttributeSimilarityValidator',
+    },
+    {
+        'NAME': 'django.contrib.auth.password_validation.MinimumLengthValidator',
+        'OPTIONS': {
+            'min_length': 12,
+        },
+    },
+    {
+        'NAME': 'django.contrib.auth.password_validation.CommonPasswordValidator',
+    },
+    # unecessary because of custom validators
+    # {
+    #     'NAME': 'django.contrib.auth.password_validation.NumericPasswordValidator',
+    # },
+    {
+        'NAME': 'users.password_validation.UpperCaseValidator',  # activate in production!
+    },
+    {
+        'NAME': 'users.password_validation.LowerCaseValidator',
+    },
+    {
+        'NAME': 'users.password_validation.DigitValidator',  # activate in production!
+    },
+    {
+        'NAME': 'users.password_validation.SymbolValidator',  # activate in production!
+        'OPTIONS': {
+            'symbols': '!@#$%&*()_+-=[]}{|;:<>/?',
+        },
+    },
 ]
 
 
@@ -186,7 +186,7 @@ AUTH_PASSWORD_VALIDATORS = [
 
 LANGUAGE_CODE = 'en-us'
 
-TIME_ZONE = 'UTC'
+TIME_ZONE = 'Europe/Berlin'  # 'UTC'
 
 USE_I18N = True  # Internationalization framework, enabling support for multiple languages
 
@@ -237,37 +237,37 @@ LOG_FILE_PATH = os.path.join(BASE_DIR, 'logging', 'debug.log')
 
 
 LOGGING = {
-	'version': 1,
-	'disable_existing_loggers': False,
-	'formatters': {
-		'verbose': {
-			'format': '{levelname} {asctime} {module} {message}',
-			'style': '{',
-		},
-		'simple': {
-			'format': '{levelname} {message}',
-			'style': '{',
-		},
-	},
-	'handlers': {
-		'file': {'level': 'DEBUG', 'class': 'logging.FileHandler', 'filename': LOG_FILE_PATH, 'formatter': 'verbose'},
-	},
-	'loggers': {
-		# 'django': {
-		#     'handlers': ['file'],
-		#     'level': 'DEBUG',
-		#     'propagate': True,
-		# },
-		'core': {
-			'handlers': ['file'],
-			'level': 'DEBUG',
-			'propagate': False,
-		},
-		'users': {
-			'handlers': ['file'],
-			'level': 'DEBUG',
-			'propagate': False,
-		},
+    'version': 1,
+    'disable_existing_loggers': False,
+    'formatters': {
+        'verbose': {
+            'format': '{levelname} {asctime} {module} {message}',
+            'style': '{',
+        },
+        'simple': {
+            'format': '{levelname} {message}',
+            'style': '{',
+        },
+    },
+    'handlers': {
+        'file': {'level': 'DEBUG', 'class': 'logging.FileHandler', 'filename': LOG_FILE_PATH, 'formatter': 'verbose'},
+    },
+    'loggers': {
+        # 'django': {
+        #     'handlers': ['file'],
+        #     'level': 'DEBUG',
+        #     'propagate': True,
+        # },
+        'core': {
+            'handlers': ['file'],
+            'level': 'DEBUG',
+            'propagate': False,
+        },
+        'users': {
+            'handlers': ['file'],
+            'level': 'DEBUG',
+            'propagate': False,
+        },
         'revproxy': {
             'handlers': ['file'],
             'level': 'DEBUG',
@@ -278,5 +278,5 @@ LOGGING = {
             'level': 'DEBUG',
             'propagate': True,
         },
-	},
+    },
 }

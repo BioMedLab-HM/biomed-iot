@@ -9,15 +9,15 @@ DOMAIN=$1
 
 cat << EOF
 # Direct MQTT traffic through nginx as reverse proxy
-#load_module modules/ngx_stream_module.so;
+#load_module modules/ngx_stream_module.so;  # is already loaded by default
 stream {
     server {
         listen 8883 ssl; # Listen for MQTT over TLS
         proxy_pass localhost:1885; # Forward to Mosquitto's listener
 
         # IMPORTANT: Please check if the following two lines contain  the correct file path to the actual files after installation
-        # ssl_certificate /etc/letsencrypt/live/$DOMAIN/fullchain.pem;
-        # ssl_certificate_key /etc/letsencrypt/live/$DOMAIN/privkey.pem;
+        ssl_certificate /etc/letsencrypt/live/$DOMAIN/fullchain.pem;
+        ssl_certificate_key /etc/letsencrypt/live/$DOMAIN/privkey.pem;
 
         include snippets/tls-params.conf;   # contains additional params
     }

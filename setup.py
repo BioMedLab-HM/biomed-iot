@@ -279,7 +279,7 @@ def main():
 	print_logo_header()
 
 	""" DO PRE-CHECKS """
-	arch = get_and_check_cpu_architecture()
+	architecture = get_and_check_cpu_architecture()
 
 	is_running_with_sudo_or_exit_setup()
 
@@ -335,6 +335,7 @@ def main():
 		'IP': ip_address,
 		'HOSTNAME': hostname,
 		'DOMAIN': domain,
+		'TLS': "true" if setup_scheme != 'NO_TLS' else "false"
 	}
 
 	empty_config_data = generate_empty_config_data()
@@ -356,11 +357,11 @@ def main():
 	print('Node-RED installed')
 	log('Node-RED installed')
 
-	influxdb_config_data = install_influxdb(arch)
+	influxdb_config_data = install_influxdb(architecture)
 	print('InfluxDB installed')
 	log('InfluxDB installed')
 
-	grafana_config_data = install_grafana(arch)
+	grafana_config_data = install_grafana(architecture, domain)
 	print('Grafana installed')
 	log('Grafana installed')
 

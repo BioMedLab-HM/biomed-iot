@@ -1,23 +1,23 @@
+import requests
 import secrets
 import json
 import logging
-import requests
+import subprocess
+from datetime import datetime
+from django.utils import timezone
 from django.contrib.auth.decorators import login_required
 from django.utils.decorators import method_decorator
 from django.core.exceptions import ObjectDoesNotExist
 from django.contrib.auth import authenticate, login
 from django.shortcuts import render, redirect
 from django.contrib import messages
-from django.http import JsonResponse, HttpResponse
+from django.http import JsonResponse, HttpResponse  # noqa: F401
 from django.db import IntegrityError
 from django.db import transaction
-from urllib3 import PoolManager, Retry, Timeout
-from .models import NodeRedUserData, Profile
-from .forms import UserRegisterForm, UserUpdateForm, UserLoginForm, MqttClientForm
+from .models import NodeRedUserData, Profile  # noqa: F401
+from .forms import UserRegisterForm, UserUpdateForm, UserLoginForm, MqttClientForm, DeleteDataForm
 from .services.mosquitto_utils import MqttMetaDataManager, MqttClientManager, RoleType
 from .services.nodered_utils import NoderedContainer, update_nodered_nginx_conf
-from .services.influx_utils import InfluxUserManager
-# from .services.grafana_utils import ...
 from .services.code_loader import load_code_examples, load_nodered_flow_examples
 from biomed_iot.config_loader import config
 from revproxy.views import ProxyView
@@ -295,6 +295,9 @@ def nodered_manager(request):
         return redirect('nodered-wait')
 
     elif nodered_container.state == 'running':
+        if not nodered_container.nodered_data.is_configured:
+            nodered_container.configure_nodered_and_restart(request.user)
+            redirect('nodered-wait')
         return redirect('nodered-open')
 
     else:
@@ -374,6 +377,7 @@ def nodered_open(request):
     context = {
         'title': page_title,
         'nodered_mqtt_client_data': nodered_mqtt_client_data,
+        'influxdb_token': request.user.influxuserdata.bucket_token,
         'thin_navbar': False,
     }
     return render(request, 'users/nodered_open.html', context)
@@ -412,7 +416,7 @@ def nodered(request):
     context = {'container_name': container_name, 'title': page_title, 'thin_navbar': True}
     return render(request, 'users/nodered.html', context)
 
-import subprocess
+
 @login_required
 def nodered_dashboard(request):
     try:
@@ -424,21 +428,6 @@ def nodered_dashboard(request):
 
     if not container_name:
         messages.info(request, 'Start Nodered and UI first.')
-        return redirect('nodered-manager')
-
-    # TODO: Remove dashboard check when dashboard is installed in container by default
-    # Check if 'node-red-dashboard' is installed in the Node-RED container
-    try:
-        result = subprocess.check_output(
-            ['docker', 'exec', container_name, 'npm', 'list', '-g', 'node-red-dashboard', '--depth=0'],
-            stderr=subprocess.STDOUT
-        ).decode('utf-8')
-        if 'node-red-dashboard' not in result:
-            messages.info(request, 'Node-RED Dashboard is not installed. Please install it to proceed.')
-            return redirect('nodered-manager')
-    except subprocess.CalledProcessError as e:
-        logger.info(f'Node-RED dashboard not available/installed. CalledProcessError: {e}')
-        messages.error(request, 'Install Node-RED dashboard first to access it')
         return redirect('nodered-manager')
 
     page_title = 'Node-RED Dashboard'
@@ -474,11 +463,11 @@ def update_nodered_data_container_port(nodered_data, nodered_container):
 
 @login_required
 def nodered_flow_examples(request):
-    examples_content = load_nodered_flow_examples()
+    nodered_flow_examples = load_nodered_flow_examples()
 
     page_title = 'Node-RED Example Flows'
     context = {
-        'examples': examples_content,
+        'examples': nodered_flow_examples,
         'title': page_title,
         'thin_navbar': False,
     }
@@ -500,13 +489,84 @@ def nodered_status_check(request):
     return JsonResponse({'status': status})
 
 
-@login_required
-def data_explorer(request):
-    # TODO: Implement
+from django.contrib.auth.decorators import login_required
+from django.shortcuts import render, redirect
+from django.contrib import messages
+import requests
+from .forms import DeleteDataForm  # Ensure this is imported from the correct module
+from influxdb_client import InfluxDBClient
+from influxdb_client.client.flux_table import FluxRecord
 
-    page_title = 'Data Explorer'
-    context = {'title': page_title, 'thin_navbar': False}
-    return render(request, 'users/data_explorer.html', context)
+@login_required
+def manage_data(request):
+    def get_measurements():
+        bucket_name = request.user.influxuserdata.bucket_name
+        url = f"http://{config.influxdb.INFLUX_HOST}:{config.influxdb.INFLUX_PORT}"
+        token = request.user.influxuserdata.bucket_token
+        org_id = config.influxdb.INFLUX_ORG_ID
+
+        # Create a client and query to fetch measurements
+        client = InfluxDBClient(url=url, token=token, org=org_id)
+        query_api = client.query_api()
+        query = f'from(bucket: "{bucket_name}")' 
+        + '|> range(start: 1970-01-01T00:00:00Z) '
+        + '|> keep(columns: ["_measurement"]) '
+        + '|> distinct(column: "_measurement")'
+
+        result = query_api.query(query=query)
+
+        # Flatten output tables into list of measurements
+        measurements = [row.values["_value"] for table in result for row in table]
+
+        client.close()
+        return measurements
+
+    if request.method == 'POST':
+        form = DeleteDataForm(get_measurements(), request.POST)
+        if form.is_valid():
+            measurement = form.cleaned_data["measurement"]
+            tags = form.cleaned_data["tags"]
+            start_time = form.cleaned_data["start_time"]
+            end_time = form.cleaned_data["end_time"]
+
+            # Build the predicate string based on tags
+            tags_predicate = " AND ".join([f'{key}="{value}"' for key, value in tags.items()])
+            predicate = f'_measurement="{measurement}"'
+            if tags:
+                predicate += f" AND {tags_predicate}"
+
+            # Prepare data for the delete request
+            delete_data = {
+                'start': start_time,
+                'stop': end_time,
+                'predicate': predicate
+            }
+
+            # Configure the request to InfluxDB
+            url = f"http://{config.influxdb.INFLUX_HOST}:{config.influxdb.INFLUX_PORT}"
+            org_id = config.influxdb.INFLUX_ORG_ID
+            bucket_name = request.user.influxuserdata.bucket_name
+            bucket_token = request.user.influxuserdata.bucket_token
+            delete_url = f'{url}/api/v2/delete?org={org_id}&bucket={bucket_name}'
+            delete_headers = {'Authorization': f'Token {bucket_token}', 'Content-Type': 'application/json'}
+
+            # Execute the delete request
+            response = requests.post(delete_url, headers=delete_headers, json=delete_data)
+            if response.status_code == 204:
+                messages.success(request, 'Delete command completed successfully. Any existing data matching your'
+                                 + 'criteria has been removed.')
+            else:
+                messages.error(request, f'Failed to delete data: {response.text}')
+            return redirect('manage-data')
+    else:
+        form = DeleteDataForm(get_measurements())
+
+    context = {
+        'title': 'Data Explorer',
+        'form': form,
+        'thin_navbar': False
+    }
+    return render(request, 'users/manage_data.html', context)
 
 
 @login_required
@@ -516,7 +576,7 @@ def visualize(request):
     return render(request, 'users/visualize.html', context)
 
 @login_required
-def iframedash(request):
+def get_grafana(request):
     return redirect('/grafana/')
 
 # methode for reverse proxy to grafana with auto login and user validation

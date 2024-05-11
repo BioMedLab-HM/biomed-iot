@@ -8,28 +8,46 @@
         <p>Open Node-RED now and edit your flows.</p>
         <button type="submit" class="btn btn-info" name="action" value="open">Open Node-RED</button>
         <p style="margin-top: 20px;">Build dashboards for Node-RED to view and control your flows.</p>
-        <button type="button" class="btn btn-info" onclick="window.open('{% url 'nodered-dashboard' %}', '_blank');">Open Nodered Dashboard</button>
+        <!-- Ensure this is within a Django HTML template file -->
+        <button type="button" class="btn btn-info" data-url="{% url 'nodered-dashboard' %}" id="openDashboard">
+            Open Nodered Dashboard
+        </button>
+
     </div> 
     <div class="card mb-3">
         <div class="card-header">
-            <h4 class="my-0 font-weight-normal">Personal Credentials for Node-RED MQTT Nodes.</h4>
+            <h4 class="my-0 font-weight-normal">Personal Credentials for Node-RED MQTT- and InfluxDB-Nodes.</h4>
         </div>
         <div class="card-body">
             <div class="row">
                 <!-- Left column for explanatory text -->
                 <div class="col-lg-5 col-sm-12">
-                    <p><a href="#" onclick="toggleVisibility(); return false;">Show Credentials</a> <br><br> <strong>In Node-RED:</strong> Drag an MQTT node into the flow <br><strong>></strong> double click on it <br><strong>></strong> click edit server (pencil icon) <br><strong>></strong> click on the 'Security' tab <br><strong>></strong> fill in the credentials there</p>
+                    <p>
+                        <a href="#" onclick="toggleVisibility(); return false;">Show Credentials</a>
+                        &nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;
+                        <a href="#" class="copy-text">Copy All Credentials</a><br><br> 
+                        <strong>In Node-RED:</strong> Drag an MQTT/InfluxDB node into the flow <br>
+                        <strong>></strong> double click on it <br>
+                        <strong>></strong> click edit server (pencil icon) <br>
+                        <strong>></strong> click on the 'Security' tab <br>
+                        <strong>></strong> fill in the credentials there <br><br>
+                        <i>Tip: Temporarily paste the credentials into a textfile.</i>
+                    </p>
                 </div>
                 <!-- Right column for credentials -->
                 <div class="col-lg-5 col-sm-12">
                     <!-- Nested structure for username and password fields to ensure they stack on small screens -->
                     <div class="mb-3">
-                        <label for="usernameField" class="form-label">Username</label>
+                        <label for="usernameField" class="form-label">MQTT-Username</label>
                         <input type="password" id="usernameField" class="form-control" value="{{ nodered_mqtt_client_data.username }}" readonly>
                     </div>
                     <div class="mb-3">
-                        <label for="passwordField" class="form-label">Password</label>
+                        <label for="passwordField" class="form-label">MQTT-Password</label>
                         <input type="password" id="passwordField" class="form-control" value="{{ nodered_mqtt_client_data.password }}" readonly>
+                    </div>
+                    <div class="mb-3">
+                        <label for="tokenField" class="form-label">InfluxDB Read/Write Token</label>
+                        <input type="password" id="tokenField" class="form-control" value="{{ influxdb_token }}" readonly>
                     </div>
                 </div>
             </div>
@@ -49,15 +67,22 @@
 
 {% block extra_js %}
 <script>
+    document.getElementById('openDashboard').addEventListener('click', function() {
+        var url = this.getAttribute('data-url');
+        window.open(url, '_blank');
+    });
+
     function toggleVisibility() {
         var usernameField = document.getElementById("usernameField");
         var passwordField = document.getElementById("passwordField");
+        var tokenField = document.getElementById("tokenField");
         var link = event.target; // Get the clicked link
 
         // Function to hide credentials
         function hideCredentials() {
             usernameField.type = "password";
             passwordField.type = "password";
+            tokenField.type = "password";
             link.textContent = "Show Credentials";
         }
 
@@ -65,12 +90,48 @@
         if (usernameField.type === "password") {
             usernameField.type = "text";
             passwordField.type = "text";
+            tokenField.type = "text";
             //link.textContent = "Hide Credentials";
 
             // Set a timeout to revert back to password type after 10 seconds
             setTimeout(hideCredentials, 10000); // 10000 milliseconds = 10 seconds
         }
     }
+    // Copy credentials script
+    document.addEventListener('DOMContentLoaded', () => {
+        // Select the copy link
+        const copyLink = document.querySelector('.copy-text');
+        copyLink.addEventListener('click', function(e) {
+            e.preventDefault(); // Prevent the default link behavior
+
+            // Get the values from the input fields
+            var username = document.getElementById("usernameField").value;
+            var password = document.getElementById("passwordField").value;
+            var token = document.getElementById("tokenField").value;
+
+            // Create a string that concatenates the credentials
+            const credentials = "MQTT-Username: " + username + "\nMQTT-Password: " + password + "\nInfluxDB-Token: " + token;
+
+            // Create a temporary textarea to hold the text to copy
+            const textarea = document.createElement('textarea');
+            textarea.value = credentials;
+            document.body.appendChild(textarea);
+            textarea.select();
+
+            try {
+                const successful = document.execCommand('copy');
+                const msg = successful ? 'Credentials copied' : 'Failed to copy credentials';
+                console.log(msg);
+                alert(msg);
+            } catch (err) {
+                console.error('Oops, unable to copy', err);
+                alert('Failed to copy credentials: ' + err.message);
+            }
+
+            // Clean up the textarea from the body
+            document.body.removeChild(textarea);
+        });
+    });
 </script>
 {% endblock %}
 

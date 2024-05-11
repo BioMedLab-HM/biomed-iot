@@ -49,25 +49,11 @@
                                     <li><a class="dropdown-item" href="{% url 'message-and-topic-structure' %}">Message & Topic Structure</a></li>
                                 </ul>
                             </li>
-                            <li class="nav-item dropdown">
-                                <a class="nav-link dropdown-toggle {% is_active 'nodered' 'nodered-open' 'nodered-flow-examples' %}" id="navbarDropdown" href="#" role="button" data-bs-toggle="dropdown" aria-expanded="false">Automate</a>
-                                <ul class="dropdown-menu dropdown-menu-end" aria-labelledby="navbarDropdown">
-                                    <li><a class="dropdown-item" href="{% url 'nodered-open' %}">Nodered</a></li>
-                                    <li><a class="dropdown-item" href="{% url 'nodered-flow-examples' %}">Nodered Flow Examples</a></li>
-                                </ul>
-                            </li>
-                            <li class="nav-item"><a class="nav-link {% starts_with 'data' %}" href="{% url 'data-explorer' %}">Data Explorer</a></li>
+                            <li class="nav-item"><a class="nav-link {% is_active 'Automate' %}" aria-current="page" href="{% url 'nodered-open' %}">Automate</a></li>
+                            <li class="nav-item"><a class="nav-link {% starts_with 'manage' %}" href="{% url 'manage-data' %}">Manage Data</a></li>
                             <li class="nav-item"><a class="nav-link {% starts_with 'visualize' %}" href="{% url 'visualize' %}">Visualize</a></li>
                         {% endif %}
                         <li class="nav-item"><a class="nav-link {% is_active 'core-manual' %}" href="{% url 'core-manual' %}">Manual</a></li>
-                        <!-- <li class="nav-item dropdown">
-                            <a class="nav-link dropdown-toggle {% is_active 'core-about' 'core-legal-notice' 'core-privacy-policy' %}" id="navbarDropdown" href="#" role="button" data-bs-toggle="dropdown" aria-expanded="false">About</a>
-                            <ul class="dropdown-menu dropdown-menu-end" aria-labelledby="navbarDropdown">
-                                <li><a class="dropdown-item" href="{% url 'core-about' %}">About Biomed IoT</a></li>
-                                <li><a class="dropdown-item" href="{% url 'core-legal-notice' %}">Legal Notice</a></li>
-                                <li><a class="dropdown-item" href="{% url 'core-privacy-policy' %}">Privacy Policy</a></li>
-                            </ul>
-                        </li> -->
                         <li class="nav-item dropdown">
                             <a class="nav-link dropdown-toggle {% is_active 'profile' 'logout' 'login' 'register' %}" id="navbarDropdown" href="#" role="button" data-bs-toggle="dropdown" aria-expanded="false">User</a>
                             <ul class="dropdown-menu dropdown-menu-end" aria-labelledby="navbarDropdown">
@@ -102,6 +88,7 @@
         <!-- Additional JS-->
         <script src="{% static 'js/bare_theme.js' %}"></script>
         <!-- Reserved for individual styles and scripts in a template -->
+
         {% block extra_js %}{% endblock %}
     </body>
 </html>
