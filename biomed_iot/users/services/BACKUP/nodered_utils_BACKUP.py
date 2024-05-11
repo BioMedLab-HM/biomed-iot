@@ -6,7 +6,6 @@ import logging
 import docker
 import tempfile
 from docker.types import Mount
-import requests
 from biomed_iot.config_loader import config
 from . import server_utils
 
@@ -95,7 +94,7 @@ class NoderedContainer:
             except Exception as e:
                 print(f'An error occurred: {e}')
 
-    def copy_json_to_container(self, container, src_path, dest_path):
+    def copy_to_container(self, container, src_path, dest_path):
         # Create a tar archive of the file
         import tarfile
         from io import BytesIO
@@ -107,52 +106,48 @@ class NoderedContainer:
         stream.seek(0)
         container.put_archive(path=os.path.dirname(dest_path), data=stream)
 
-    def update_flows(self, new_flows_json):
-        self.determine_port()
-        node_red_flows_url = f'http://localhost:{self.port}/flows'
-
-        headers = {'Content-Type': 'application/json'}
-        response = requests.post(node_red_flows_url, headers=headers, data=new_flows_json)
-        if response.status_code == 204:
-            logger.info("Flows successfully updated.")
-        else:
-            logger.error("Failed to update flows:", response.status_code, response.text)
-
-    def configure_nodered(self, user):
+    def configure_nodered_and_restart(self, user):
+        logger.info("In configure_nodered_and_restart")
+        # Install required Node-RED nodes
+        self.container.exec_run("npm install node-red-dashboard", workdir='/usr/src/node-red')
+        self.container.exec_run("npm install node-red-contrib-influxdb", workdir='/usr/src/node-red')
+        output = self.container.exec_run("npm install node-red-dashboard", workdir='/usr/src/node-red')
+        (output.output.decode())
+        logger.info("In configure_nodered_and_restart ... AFTER 2x exec_run")
         # Get nodered flows from json file
         file_path = os.path.join(os.path.dirname(__file__), 'nodered_flows', 'flows.json')
         with open(file_path, 'r') as file:
             flows_json = file.read()
 
-        # Replace the placeholder 'topic_id' with the actual user's topic_id in the JSON string
         user_topic_id = user.mqttmetadata.user_topic_id
+
+        # Replace the placeholder 'topic_id' with the actual user's topic_id in the JSON string
         modified_flows_json = flows_json.replace("topic_id", user_topic_id)
 
-        # Replace the placeholder 'user_bucket_name' with the actual user's bucket name in the JSON string
         user_bucket_name = user.influxuserdata.bucket_name
         modified_flows_json = modified_flows_json.replace("user_bucket_name", user_bucket_name)
 
-        # Replace "server_ip_or_domain" with the determined host address based on the configuration
+        # Determine the appropriate host address based on the configuration
         host_address = config.host.DOMAIN if config.host.TLS == "true" and config.host.DOMAIN else config.host.IP
+
+        # Replace "server_ip_or_domain" with the determined host address
         modified_flows_json = modified_flows_json.replace("server_ip_or_domain", host_address)
 
-        # Update flows in Node-RED
-        self.update_flows(modified_flows_json)
-
         # Create a temporary file to save the modified JSON
-        # temp_flow_file = tempfile.NamedTemporaryFile(delete=False, mode='w', suffix='.json')
-        # with temp_flow_file as file:
-        #     file.write(modified_flows_json)
+        temp_flow_file = tempfile.NamedTemporaryFile(delete=False, mode='w', suffix='.json')
+        with temp_flow_file as file:
+            file.write(modified_flows_json)
+        temp_flow_file_path = temp_flow_file.name
 
-        # temp_flow_file_path = temp_flow_file.name
-        # self.copy_json_to_container(self.container, temp_flow_file_path, '/data/flows.json')
+        self.copy_to_container(self.container, temp_flow_file_path, '/data/flows.json')
 
         # Restart Node-RED to apply the configurations
-        # self.container.restart()
-
-        # Allow the nodered_manager to redirect to nodered_open view by setting self.nodered_data.is_configured = True
+        self.container.restart()
+        logger.info("In configure_nodered_and_restart ... AFTER container.restart")
+		# Allow the nodered_manager to redirect to nodered_open view by setting self.nodered_data.is_configured = True
         self.nodered_data.is_configured = True
         self.nodered_data.save()
+        logger.info("In configure_nodered_and_restart ... ENDE")
 
     def determine_state(self):
         if self.container:

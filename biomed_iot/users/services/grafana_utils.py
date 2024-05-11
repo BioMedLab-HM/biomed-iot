@@ -139,7 +139,7 @@ class GrafanaUserManager:
         headers = {'content-type': 'application/json'}
         r = requests.delete(url, headers=headers)
         return r
-    
+
     def _switch_org_main(self):
         url = f"{self.grafana_origin}/api/user/using/1"
         headers = {'content-type': 'application/json'}
@@ -185,4 +185,3 @@ class GrafanaUserManager:
             return True
         except FileExistsError:
             return False
-        

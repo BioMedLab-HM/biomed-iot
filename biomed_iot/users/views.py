@@ -2,9 +2,7 @@ import requests
 import secrets
 import json
 import logging
-import subprocess
-from datetime import datetime
-from django.utils import timezone
+from influxdb_client import InfluxDBClient
 from django.contrib.auth.decorators import login_required
 from django.utils.decorators import method_decorator
 from django.core.exceptions import ObjectDoesNotExist
@@ -21,6 +19,7 @@ from .services.nodered_utils import NoderedContainer, update_nodered_nginx_conf
 from .services.code_loader import load_code_examples, load_nodered_flow_examples
 from biomed_iot.config_loader import config
 from revproxy.views import ProxyView
+
 
 logger = logging.getLogger(__name__)
 
@@ -106,7 +105,6 @@ common_timezones = {
     'New York': 'America/New_York',
 }
 timezones = [('New York', 'America/New_York'), ('London', 'Europe/London')]
-
 
 # Experimental function
 @login_required
@@ -248,6 +246,7 @@ def get_or_create_nodered_user_data(request):
 
 @login_required
 def nodered_manager(request):
+    logger.info("In nodered_manager")
     # Get or create NodeRedUserData and get container state
     nodered_data = get_or_create_nodered_user_data(request)
 
@@ -267,41 +266,52 @@ def nodered_manager(request):
     request.session['container_name'] = nodered_container.name
 
     if request.session.get('open_nodered_requested'):
+        logger.info("In nodered_manager ... IN request.session.get('open_nodered_requested')")
         del request.session['open_nodered_requested']
         return redirect('nodered')
 
     if request.session.get('create_nodered_requested'):
+        logger.info("In nodered_manager ... IN request.session.get('create_nodered_requested')")
         del request.session['create_nodered_requested']
         nodered_container.create()
         nodered_container.determine_state()
 
     if request.session.get('stop_nodered_requested'):
+        logger.info("In nodered_manager ... IN request.session.get('stop_nodered_requested')")
         del request.session['stop_nodered_requested']
         nodered_container.stop()
         nodered_container.determine_state()
 
     if request.session.get('restart_nodered_requested'):
+        logger.info("In nodered_manager ... IN request.session.get('restart_nodered_requested')")
         del request.session['restart_nodered_requested']
         nodered_container.restart()
         nodered_container.determine_state()
 
     if nodered_container.state == 'none':
+        logger.info("nodered_container.state == 'none'")
         return redirect('nodered-create')
 
     elif nodered_container.state == 'stopped':
+        logger.info("nodered_container.state == 'stopped'")
         return redirect('nodered-restart')
 
     elif nodered_container.state == 'starting':
+        logger.info("nodered_container.state == 'starting'")
         return redirect('nodered-wait')
 
     elif nodered_container.state == 'running':
+        logger.info("nodered_container.state == 'running'")
         if not nodered_container.nodered_data.is_configured:
-            nodered_container.configure_nodered_and_restart(request.user)
-            redirect('nodered-wait')
+            logger.info("nodered_container.state == 'running' ... BEFORE configure_nodered_and_restart")
+            nodered_container.configure_nodered(request.user)
+            logger.info("nodered_container.state == 'running' ... AFTER configure_nodered_and_restart")
+            # redirect('nodered-wait')
+        logger.info("nodered_container.state == 'running' AND nodered_container.nodered_data.is_configured")
         return redirect('nodered-open')
 
     else:
-        # nodered_container.state == "unavailable":  # TODO: make it nice code
+        # nodered_container.state == "unavailable":  # TODO: make it nice
         return redirect('nodered-unavailable')
 
 
@@ -489,14 +499,6 @@ def nodered_status_check(request):
     return JsonResponse({'status': status})
 
 
-from django.contrib.auth.decorators import login_required
-from django.shortcuts import render, redirect
-from django.contrib import messages
-import requests
-from .forms import DeleteDataForm  # Ensure this is imported from the correct module
-from influxdb_client import InfluxDBClient
-from influxdb_client.client.flux_table import FluxRecord
-
 @login_required
 def manage_data(request):
     def get_measurements():
@@ -508,10 +510,12 @@ def manage_data(request):
         # Create a client and query to fetch measurements
         client = InfluxDBClient(url=url, token=token, org=org_id)
         query_api = client.query_api()
-        query = f'from(bucket: "{bucket_name}")' 
-        + '|> range(start: 1970-01-01T00:00:00Z) '
-        + '|> keep(columns: ["_measurement"]) '
-        + '|> distinct(column: "_measurement")'
+        query = f'''
+        from(bucket: "{bucket_name}")
+        |> range(start: 1970-01-01T00:00:00Z)
+        |> keep(columns: ["_measurement"])
+        |> distinct(column: "_measurement")
+        '''
 
         result = query_api.query(query=query)
 
@@ -589,8 +593,8 @@ class GrafanaProxyView(ProxyView):
 
     def get_proxy_request_headers(self, request):
         logger.info("In get_proxy_request_headers")
-        logger.info(f'Username: {request.user.username}')
+        logger.debug(f'Username: {request.user.username}')
         headers = super(GrafanaProxyView, self).get_proxy_request_headers(request)
         headers['X-WEBAUTH-USER'] = request.user.username
-        logger.info(f'Headers: {headers}')
+        logger.debug(f'Headers: {headers}')
         return headers

@@ -14,7 +14,7 @@ from django.utils import timezone
 #             timezone.deactivate()
 #         response = self.get_response(request)
 #         return response
-    
+
 # class TimezoneMiddleware:
 # 	def __init__(self, get_response):
 # 		self.get_response = get_response

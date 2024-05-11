@@ -19,7 +19,7 @@
         "initialize": "",
         "finalize": "",
         "libs": [],
-        "x": 420,
+        "x": 460,
         "y": 100,
         "wires": [
             [
@@ -41,7 +41,7 @@
         "retentionPolicyV18Flux": "",
         "org": "biomed-iot",
         "bucket": "user_bucket_name",
-        "x": 710,
+        "x": 740,
         "y": 100,
         "wires": []
     },
@@ -58,7 +58,7 @@
         "targetType": "msg",
         "statusVal": "",
         "statusType": "auto",
-        "x": 710,
+        "x": 750,
         "y": 140,
         "wires": []
     },
@@ -75,7 +75,7 @@
         "rap": true,
         "rh": 0,
         "inputs": 0,
-        "x": 100,
+        "x": 140,
         "y": 220,
         "wires": [
             [
@@ -99,7 +99,7 @@
         "correl": "",
         "expiry": "",
         "broker": "4440ee1d27092426",
-        "x": 710,
+        "x": 770,
         "y": 220,
         "wires": []
     },
@@ -115,7 +115,7 @@
         "initialize": "",
         "finalize": "",
         "libs": [],
-        "x": 420,
+        "x": 460,
         "y": 220,
         "wires": [
             [
@@ -137,7 +137,7 @@
         "targetType": "msg",
         "statusVal": "",
         "statusType": "auto",
-        "x": 700,
+        "x": 740,
         "y": 280,
         "wires": []
     },
@@ -154,7 +154,7 @@
         "targetType": "msg",
         "statusVal": "",
         "statusType": "auto",
-        "x": 380,
+        "x": 420,
         "y": 340,
         "wires": []
     },

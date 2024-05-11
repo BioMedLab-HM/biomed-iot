@@ -3,7 +3,7 @@ import requests  # For HTTP requests to the v1 compatibility endpoint
 import logging
 import users.models as user_models
 from biomed_iot.config_loader import config
-from influxdb_client import InfluxDBClient, Point 
+from influxdb_client import InfluxDBClient, Point
 from influxdb_client.client.write_api import SYNCHRONOUS
 
 
@@ -79,7 +79,7 @@ class InfluxUserManager:
             return (response_json.get('token'), response_json.get('id'))
         else:
             raise Exception(f'Failed to create token: {response.text}')
-        
+
     def _write_initial_test_data(self, bucket_name, bucket_token):
         write_client = InfluxDBClient(url=self.url, token=bucket_token, org=self.org_id).write_api(write_options=SYNCHRONOUS)
         point = Point('UltimateQuestion').tag('Response', 'DeepThought').field('Answer', 42)
