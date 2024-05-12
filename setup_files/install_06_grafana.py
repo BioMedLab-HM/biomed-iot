@@ -16,9 +16,8 @@ def install_grafana(architecture, setup_scheme, ip_address, domain):
     setup_dir = get_setup_dir()
     conf_dir = get_conf_path()
     grafana_files_dir = f'{setup_dir}/setup_files/tmp/grafana_install_files'
-    admin_username = 'admin'
-    old_admin_password = admin_username
-    new_admin_password = get_random_string(30)
+    new_admin_username = "grafana-admin-" + get_random_string(10)
+    new_admin_password = get_random_string(20)
     host = 'localhost'
     port = 3000
 
@@ -75,8 +74,10 @@ def install_grafana(architecture, setup_scheme, ip_address, domain):
     with open(f'{conf_dir}/tmp.grafana.ini', 'r') as file:
         content = file.read()
 
-    config_domain = domain if setup_scheme == "TLS_DOMAIN" else ip_address
-    content = content.replace('domain = DOMAIN_OR_IP', f'domain = {config_domain}')
+    grafana_ini_domain = domain if setup_scheme == "TLS_DOMAIN" else ip_address
+    content = content.replace('DOMAIN_OR_IP', grafana_ini_domain)
+    content = content.replace('ADMIN_USERNAME', new_admin_username)
+    content = content.replace('ADMIN_PASSWORD', new_admin_password)
 
     with open(f'{setup_dir}/setup_files/tmp/grafana.ini', 'w') as file:
         file.write(content)
@@ -85,13 +86,13 @@ def install_grafana(architecture, setup_scheme, ip_address, domain):
     run_bash('cp {setup_dir}/setup_files/tmp/grafana.ini /etc/grafana/')
     run_bash('systemctl restart grafana-server')
 
-    # FIXME: change_grafana_password api command is correct but rejected here. 
+    # TODO: REMOVE since not needed. Admin username and pw will be set in grafana.ini
     # change_grafana_password(host, port, admin_username, old_admin_password, new_admin_password)
 
     config_data = {
         'GRAFANA_HOST': host,
         'GRAFANA_PORT': port,
-        'GRAFANA_ADMIN_USERNAME': admin_username,
+        'GRAFANA_ADMIN_USERNAME': new_admin_username,
         'GRAFANA_ADMIN_PASSWORD': new_admin_password,
     }
     log('Grafana installation done', GRAFANA_INSTALL_LOG_FILE_NAME)
