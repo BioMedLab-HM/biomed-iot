@@ -254,14 +254,12 @@ def main():
 	    - "DO SOME PRE-CHECKS"
 	    - "ASK FOR USER INPUT"
 	    - "INSTALLATION OF SOFTWARE"
-	      see setup files in sub directory "setup_files"
+	      check setup files in sub directory "setup_files"
 	    - "FINAL INFORMATION OUTPUT FOR THE USER"
 	"""
 
 	hostname = socket.gethostname()
-	ip_address = run_bash(
-		"hostname --all-ip-addresses | awk '{print $1}'"
-	) # unreliable: run_bash("ip addr | grep 'state UP' -A2 | tail -n1 | awk '{print $2}' | cut -f1  -d'/'")
+	ip_address = run_bash("hostname --all-ip-addresses | awk '{print $1}'")
 	linux_user = get_linux_user()
 	setup_dir = get_setup_dir()
 	django_admin_name = None

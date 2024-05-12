@@ -40,7 +40,7 @@ def install_django(django_admin_email, django_admin_name, django_admin_pass, aut
 		f'runuser -u {linux_user} -- {setup_dir}/biomed_iot/venv/bin/python {setup_dir}/biomed_iot/manage.py shell'
 	)
 	set_setup_dir_rights()
-	run_bash(django_superuser_command)
+	run_bash(django_superuser_command, show_output=False)
 	msg = 'After Attempt to create Django Superuser'
 	print(msg)
 	log(msg, DJANGO_INSTALL_LOG_FILE_NAME)

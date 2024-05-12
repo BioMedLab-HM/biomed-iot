@@ -57,14 +57,14 @@ def install_grafana(architecture, setup_scheme, ip_address, domain):
         output = run_bash(command)
         log(output, GRAFANA_INSTALL_LOG_FILE_NAME)
 
-        with(f'{conf_dir}/tmp.grafana.ini', 'r') as file:
-            content = file.read()
+    with open(f'{conf_dir}/tmp.grafana.ini', 'r') as file:
+        content = file.read()
 
-        domain = domain if setup_scheme == "TLS_DOMAIN" else ip_address
-        content = content.replace('domain = DOMAIN_OR_IP', f'domain = {domain}')
+    domain = domain if setup_scheme == "TLS_DOMAIN" else ip_address
+    content = content.replace('domain = DOMAIN_OR_IP', f'domain = {domain}')
 
-        with open(f'{setup_dir}/setup_files/tmp/grafana.ini', 'x') as file:
-            file.write(content)
+    with open(f'{setup_dir}/setup_files/tmp/grafana.ini', 'x') as file:
+        file.write(content)
 
     # Configure grafana to start automatically using systemd
     commands = [
