@@ -83,7 +83,7 @@ def install_grafana(architecture, setup_scheme, ip_address, domain):
         file.write(content)
 
     run_bash('cp /etc/grafana/grafana.ini /etc/grafana/grafana.ini.backup')
-    run_bash('cp {setup_dir}/setup_files/tmp/grafana.ini /etc/grafana/')
+    run_bash('cp {setup_dir}/tmp/grafana.ini /etc/grafana/')
     run_bash('systemctl restart grafana-server')
 
     # TODO: REMOVE since not needed. Admin username and pw will be set in grafana.ini
