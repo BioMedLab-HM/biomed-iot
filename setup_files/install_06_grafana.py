@@ -1,4 +1,5 @@
 import requests
+from time import sleep
 from requests.auth import HTTPBasicAuth
 from .setup_utils import run_bash, log, get_random_string, get_setup_dir, get_conf_path
 
@@ -7,8 +8,7 @@ GRAFANA_INSTALL_LOG_FILE_NAME = 'install_06_grafana.log'
 
 def install_grafana(architecture, setup_scheme, ip_address, domain):
     """
-    TODO: Implement Grafana setup
-    Installation procedure for Grafana OSS (Open Source) Version
+    Install Grafana OSS (Open Source) Version based on the provided architecture and setup scheme.
     Download pages:
         https://grafana.com/grafana/download?edition=oss&platform=linux
         https://grafana.com/grafana/download?edition=oss&platform=arm
@@ -57,28 +57,33 @@ def install_grafana(architecture, setup_scheme, ip_address, domain):
         output = run_bash(command)
         log(output, GRAFANA_INSTALL_LOG_FILE_NAME)
 
-    with open(f'{conf_dir}/tmp.grafana.ini', 'r') as file:
-        content = file.read()
-
-    domain = domain if setup_scheme == "TLS_DOMAIN" else ip_address
-    content = content.replace('domain = DOMAIN_OR_IP', f'domain = {domain}')
-
-    with open(f'{setup_dir}/setup_files/tmp/grafana.ini', 'x') as file:
-        file.write(content)
-
     # Configure grafana to start automatically using systemd
     commands = [
-        'cp /etc/grafana/grafana.ini /etc/grafana/grafana.ini.backup'
-        'cp {setup_dir}/setup_files/tmp/grafana.ini /etc/grafana/'
-        '/bin/systemctl daemon-reload',
-        '/bin/systemctl enable grafana-server',
+        'systemctl daemon-reload',
+        'systemctl enable grafana-server',
         # Start grafana-server by executing
-        '/bin/systemctl start grafana-server',
+        'systemctl start grafana-server',
     ]
 
     for command in commands:
         output = run_bash(command)
         log(output, GRAFANA_INSTALL_LOG_FILE_NAME)
+
+    # second try
+    run_bash('echo sleeping for 10 seconds now to let grafana start ')
+    sleep(5)
+    with open(f'{conf_dir}/tmp.grafana.ini', 'r') as file:
+        content = file.read()
+
+    config_domain = domain if setup_scheme == "TLS_DOMAIN" else ip_address
+    content = content.replace('domain = DOMAIN_OR_IP', f'domain = {config_domain}')
+
+    with open(f'{setup_dir}/setup_files/tmp/grafana.ini', 'w') as file:
+        file.write(content)
+
+    run_bash('cp /etc/grafana/grafana.ini /etc/grafana/grafana.ini.backup')
+    run_bash('cp {setup_dir}/setup_files/tmp/grafana.ini /etc/grafana/')
+    run_bash('systemctl restart grafana-server')
 
     # FIXME: change_grafana_password api command is correct but rejected here. 
     # change_grafana_password(host, port, admin_username, old_admin_password, new_admin_password)

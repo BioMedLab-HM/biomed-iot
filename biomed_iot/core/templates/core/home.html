@@ -8,15 +8,13 @@
     <div class="card-body">
         <div class="row">
             <p>
-                Biomed IoT is an open-source IoT platform, designed for collecting and storing sensor data, 
-                as well as facilitating automation between devices.
+                Biomed IoT is an open-source IoT platform, designed for collecting and storing sensor data, as well as automation between devices.
             </p>
             <ol class="styled-list">
-                <li><strong>Add and Set Up New IoT Devices:</strong> Begin by <a href="{% url 'devices' %}">registering your devices</a> to get MQTT credentials for your device</li>
-                <li><strong><a href="{% url 'nodered-manager' %}">Automate</a> with Node-RED:</strong> Link your sensors and actuators with Node-RED flows to create automation scripts.</li>
-                <li><strong>Save Data:</strong> Securely store your devices' data into the time series database (InfluxDB) within Node-RED.</li>
-                <li><strong>Visualize Data:</strong> Visit the <a href="{% url 'visualize' %}">"Visualize"</a> page to visualize and export (csv) your data with Grafana.</li>
-                <li><strong>Manage Data:</strong> Navigate to the <a href="{% url 'manage-data' %}">"Manage Data"</a> page to selectively delete data.</li>
+                <li><strong><a href="{% url 'devices' %}">Devices</a>:</strong> begin by registering your devices to get MQTT credentials for your device</li>
+                <li><strong><a href="{% url 'nodered-manager' %}">Automate</a>:</strong> Link your sensors and actuators with Node-RED flows to create automation scripts. Securely store your devices' data into the time series database (InfluxDB) within Node-RED.</li>
+                <li><strong><a href="{% url 'visualize' %}">"Visualize"</a>:</strong> Visit the 'Visualize' page to visualize and export (csv) your data with Grafana.</li>
+                <li><strong><a href="{% url 'manage-data' %}">Manage Data</a>:</strong> Navigate to the 'Manage Data' page to selectively delete data. More functionality may come.</li>
             </ol>
             <p>For additional support, a comprehensive <a href="{% url 'core-manual' %}">Manual</a> includes FAQs and documentation.</p>
         </div>
