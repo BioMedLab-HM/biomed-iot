@@ -33,13 +33,6 @@ def install_django(django_admin_email, django_admin_name, django_admin_pass, aut
     requirements_install_output = run_bash(requirements_command)
     log(requirements_install_output, DJANGO_INSTALL_LOG_FILE_NAME)
 
-    # TODO: Remove after grafana.ini replacement in grafana installation script is working again
-    GRAFANA_INSTALL_LOG_FILE_NAME = 'install_06_grafana.log'
-    output = run_bash('cp {setup_dir}/setup_files/tmp/grafana.ini /etc/grafana/grafana.ini')
-    log(output, GRAFANA_INSTALL_LOG_FILE_NAME)
-    output = run_bash('systemctl restart grafana-server')
-    log(output, GRAFANA_INSTALL_LOG_FILE_NAME)
-
     # Create Django superuser
     django_superuser_command = (
         f'echo "from users.models import CustomUser; '

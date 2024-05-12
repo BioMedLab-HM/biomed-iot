@@ -1,3 +1,4 @@
+import os
 import requests
 from time import sleep
 from requests.auth import HTTPBasicAuth
@@ -68,22 +69,49 @@ def install_grafana(architecture, setup_scheme, ip_address, domain):
         output = run_bash(command)
         log(output, GRAFANA_INSTALL_LOG_FILE_NAME)
 
-    run_bash('echo sleeping for 5 seconds now to let grafana start ')
-    sleep(5)
-    with open(f'{conf_dir}/tmp.grafana.ini', 'r') as file:
-        content = file.read()
+    # run_bash('echo sleeping for 5 seconds now to let grafana start ')
+    # sleep(5)
+    # with open(f'{conf_dir}/tmp.grafana.ini', 'r') as file:
+    #     content = file.read()
 
-    grafana_ini_domain = domain if setup_scheme == "TLS_DOMAIN" else ip_address
-    content = content.replace('DOMAIN_OR_IP', grafana_ini_domain)
-    content = content.replace('ADMIN_USERNAME', new_admin_username)
-    content = content.replace('ADMIN_PASSWORD', new_admin_password)
+    # grafana_ini_domain = domain if setup_scheme == "TLS_DOMAIN" else ip_address
+    # content = content.replace('DOMAIN_OR_IP', grafana_ini_domain)
+    # content = content.replace('ADMIN_USERNAME', new_admin_username)
+    # content = content.replace('ADMIN_PASSWORD', new_admin_password)
 
-    with open(f'{setup_dir}/setup_files/tmp/grafana.ini', 'w') as file:
-        file.write(content)
+    # with open(f'{setup_dir}/setup_files/tmp/grafana.ini', 'w') as file:
+    #     file.write(content)
+    try:
+        with open(f'{conf_dir}/tmp.grafana.ini', 'r') as file:
+            content = file.read()
+
+        grafana_ini_domain = domain if setup_scheme == "TLS_DOMAIN" else "default_ip"
+        content = content.replace('DOMAIN_OR_IP', grafana_ini_domain)
+        content = content.replace('ADMIN_USERNAME', new_admin_username)
+        content = content.replace('ADMIN_PASSWORD', new_admin_password)
+
+        output_path = f'{setup_dir}/setup_files/tmp/grafana.ini'
+        with open(output_path, 'w') as file:
+            file.write(content)
+        print(f"File successfully created at: {output_path}")  # Confirm file creation
+    except Exception as e:
+        print(f"Error during file handling: {e}")  # Log any errors during file read/write
     
     run_bash('cp /etc/grafana/grafana.ini /etc/grafana/grafana.ini.backup')
-    output = run_bash('cp {setup_dir}/setup_files/tmp/grafana.ini /etc/grafana/grafana.ini')
-    log(output, GRAFANA_INSTALL_LOG_FILE_NAME)
+    # output = run_bash('cp {setup_dir}/setup_files/tmp/grafana.ini /etc/grafana/grafana.ini')
+    # log(output, GRAFANA_INSTALL_LOG_FILE_NAME)
+    source_file = f'{setup_dir}/setup_files/tmp/grafana.ini'
+    destination_file = '/etc/grafana/grafana.ini'
+
+    log(f"Attempting to copy from {source_file} to {destination_file}", GRAFANA_INSTALL_LOG_FILE_NAME)
+    if os.path.exists(source_file):
+        command = f'cp {source_file} {destination_file}'
+        output = run_bash(command)
+        log(f"Copy operation result: {output}", GRAFANA_INSTALL_LOG_FILE_NAME)
+    else:
+        log("Source file grafana.ini does not exist.", GRAFANA_INSTALL_LOG_FILE_NAME)
+
+
     output = run_bash('systemctl restart grafana-server')
     log(output, GRAFANA_INSTALL_LOG_FILE_NAME)
 
