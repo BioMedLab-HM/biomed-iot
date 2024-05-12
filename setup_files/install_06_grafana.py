@@ -68,8 +68,7 @@ def install_grafana(architecture, setup_scheme, ip_address, domain):
         output = run_bash(command)
         log(output, GRAFANA_INSTALL_LOG_FILE_NAME)
 
-    # second try
-    run_bash('echo sleeping for 10 seconds now to let grafana start ')
+    run_bash('echo sleeping for 5 seconds now to let grafana start ')
     sleep(5)
     with open(f'{conf_dir}/tmp.grafana.ini', 'r') as file:
         content = file.read()
@@ -81,9 +80,9 @@ def install_grafana(architecture, setup_scheme, ip_address, domain):
 
     with open(f'{setup_dir}/setup_files/tmp/grafana.ini', 'w') as file:
         file.write(content)
-
+    
     run_bash('cp /etc/grafana/grafana.ini /etc/grafana/grafana.ini.backup')
-    run_bash('cp {setup_dir}/tmp/grafana.ini /etc/grafana/')
+    run_bash('cat {setup_dir}/setup_files/tmp/grafana.ini > /etc/grafana/grafana.ini')
     run_bash('systemctl restart grafana-server')
 
     # TODO: REMOVE since not needed. Admin username and pw will be set in grafana.ini
