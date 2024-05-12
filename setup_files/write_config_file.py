@@ -5,7 +5,7 @@ template = """
 IP = "{IP}"
 HOSTNAME = "{HOSTNAME}"
 DOMAIN = "{DOMAIN}"
-TLS = {TLS_TRUE_FALSE}
+TLS = {TLS}
 
 [mail]
 RES_EMAIL_HOST = "{RES_EMAIL_HOST}"

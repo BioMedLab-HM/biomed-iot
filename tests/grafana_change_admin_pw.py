@@ -3,8 +3,8 @@
 import requests
 from requests.auth import HTTPBasicAuth
 
-old_password = ""
-new_password = ""
+old_password = "Testing123456"
+new_password = "Testing123456!"
 grafana_host = "localhost"
 grafana_port = 3000
 admin_user = "admin"

@@ -80,7 +80,8 @@ def install_grafana(architecture, setup_scheme, ip_address, domain):
         output = run_bash(command)
         log(output, GRAFANA_INSTALL_LOG_FILE_NAME)
 
-    reset_grafana_password(ip_address, port, admin_username, old_admin_password, new_admin_password)
+    # FIXME: change_grafana_password api command is correct but rejected here. 
+    # change_grafana_password(host, port, admin_username, old_admin_password, new_admin_password)
 
     config_data = {
         'GRAFANA_HOST': host,
@@ -92,7 +93,7 @@ def install_grafana(architecture, setup_scheme, ip_address, domain):
     return config_data
 
 
-def reset_grafana_password(host, port, user, old_pw, new_pw):
+def change_grafana_password(host, port, user, old_pw, new_pw):
     url = f"http://{host}:{port}/api/user/password"
 
     headers = {'Content-Type': 'application/json'}

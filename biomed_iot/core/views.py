@@ -28,7 +28,7 @@ def contact_us(request):
 def imprint(request):
 	context = {}
 
-	page_title = 'Legal Notice'
+	page_title = 'Imprint'
 	context = {'title': page_title, 'thin_navbar': False}
 	return render(request, 'core/imprint.html', context)
 

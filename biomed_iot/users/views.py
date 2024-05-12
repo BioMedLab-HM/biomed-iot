@@ -566,7 +566,7 @@ def manage_data(request):
         form = DeleteDataForm(get_measurements())
 
     context = {
-        'title': 'Data Explorer',
+        'title': 'Manage Data',
         'form': form,
         'thin_navbar': False
     }

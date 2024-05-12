@@ -445,6 +445,7 @@ def main():
 		'\nFor detailed information on the installation process, '
 		f'please refer to the log files located in {setup_dir}/setup_files/setup_logs.\n'
 		f"You can delete the directory 'tmp' in '{setup_dir}/setup_files/'"
+		'\nPlease change the grafana admin password'
 	)
 
 	print('\n--- END OF SETUP ---\n\n')

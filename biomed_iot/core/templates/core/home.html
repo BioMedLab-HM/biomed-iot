@@ -3,28 +3,22 @@
 {% block content %}
 <div class="card mb-3">
     <div class="card-header">
-        <h4 class="my-0 font-weight-normal">What is Biomed IoT</h4>
-    </div>
-    <div class="card-body">
-        <div class="row">
-            <p>Lorem ipsum dolor sit amet, consetetur sadipscing elitr, sed diam nonumy eirmod tempor invidunt ut labore et dolore magna aliquyam erat, sed diam voluptua. At vero eos et accusam et justo duo dolores et ea rebum. Stet clita kasd gubergren, no sea takimata sanctus est Lorem ipsum dolor sit amet. Lorem ipsum dolor sit amet, consetetur sadipscing elitr, sed diam nonumy eirmod tempor invidunt ut labore et dolore magna aliquyam erat, sed diam voluptua. At vero eos et accusam et justo duo dolores et ea rebum. Stet clita kasd gubergren, no sea takimata sanctus est Lorem ipsum dolor sit amet.</p>
-        </div>
-    </div>
-</div>
-<div class="card mb-3">
-    <div class="card-header">
         <h4 class="my-0 font-weight-normal">Get startet with Biomed IoT</h4>
     </div>
     <div class="card-body">
         <div class="row">
+            <p>
+                Biomed IoT is an open-source IoT platform, designed for collecting and storing sensor data, 
+                as well as facilitating automation between devices.
+            </p>
             <ol class="styled-list">
-                <li><strong>Add and Set Up New IoT Devices:</strong> Begin by <a href="{% url 'devices' %}">registering your devices</a> to enable monitoring and management.</li>
-                <li><strong><a href="{% url 'nodered-manager' %}">Automate</a> with Node-RED:</strong> Link your sensors and actuators with intuitive Node-RED flows to create smart automation scripts.</li>
-                <li><strong>Save Data:</strong> Securely store your devices' data into the database directly within Node-RED.</li>
-                <li><strong>Explore Your Data:</strong> Navigate to the <a href="{% url 'manage-data' %}">"Manage Data"</a> page to access your data in a structured tree view or download it for analysis.</li>
-                <li><strong>Visualize Data:</strong> Visit the <a href="{% url 'visualize' %}">"Visualize"</a> page to craft dynamic visualizations of your IoT data.</li>
+                <li><strong>Add and Set Up New IoT Devices:</strong> Begin by <a href="{% url 'devices' %}">registering your devices</a> to get MQTT credentials for your device</li>
+                <li><strong><a href="{% url 'nodered-manager' %}">Automate</a> with Node-RED:</strong> Link your sensors and actuators with Node-RED flows to create automation scripts.</li>
+                <li><strong>Save Data:</strong> Securely store your devices' data into the time series database (InfluxDB) within Node-RED.</li>
+                <li><strong>Visualize Data:</strong> Visit the <a href="{% url 'visualize' %}">"Visualize"</a> page to visualize and export (csv) your data with Grafana.</li>
+                <li><strong>Manage Data:</strong> Navigate to the <a href="{% url 'manage-data' %}">"Manage Data"</a> page to selectively delete data.</li>
             </ol>
-            <p>For additional support, our comprehensive <a href="{% url 'core-manual' %}">Manual</a> includes FAQs and extensive documentation.</p>
+            <p>For additional support, a comprehensive <a href="{% url 'core-manual' %}">Manual</a> includes FAQs and documentation.</p>
         </div>
     </div>
 </div>
