@@ -125,28 +125,33 @@ class NoderedContainer:
             flows_json = file.read()
 
         # Replace the placeholder 'topic_id' with the actual user's topic_id in the JSON string
-        user_topic_id = user.mqttmetadata.user_topic_id
-        modified_flows_json = flows_json.replace("topic_id", user_topic_id)
+        modified_flows_json = flows_json.replace("topic_id", user.mqttmetadata.user_topic_id)
 
         # Replace the placeholder 'user_bucket_name' with the actual user's bucket name in the JSON string
-        user_bucket_name = user.influxuserdata.bucket_name
-        modified_flows_json = modified_flows_json.replace("user_bucket_name", user_bucket_name)
+        modified_flows_json = modified_flows_json.replace("user_bucket_name", user.influxuserdata.bucket_name)
 
         # Replace "server_ip_or_domain" with the determined host address based on the configuration
         host_address = config.host.DOMAIN if config.host.TLS == "true" and config.host.DOMAIN else config.host.IP
         modified_flows_json = modified_flows_json.replace("server_ip_or_domain", host_address)
+        
+        # Replace "influxdb-org-name" with the determined InfluxDB organization name based on the configuration
+        modified_flows_json = modified_flows_json.replace("influxdb-org-name", config.influxdb.INFLUX_ORG_NAME)
+
+        # Replace "influxdb-url" with the determined host address and InfluxDB port name based on the configuration
+        server_scheme = "https" if config.host.TLS == "true" else "http"
+        influxdb_url = f"{server_scheme}://{host_address}:{config.influxdb.INFLUX_PORT}"
+        modified_flows_json = modified_flows_json.replace("influxdb-url", influxdb_url)
 
         # Update flows in Node-RED
         self.update_flows(modified_flows_json)
 
+        # TODO: delete this commented-out part when the current way proved to work
         # Create a temporary file to save the modified JSON
         # temp_flow_file = tempfile.NamedTemporaryFile(delete=False, mode='w', suffix='.json')
         # with temp_flow_file as file:
         #     file.write(modified_flows_json)
-
         # temp_flow_file_path = temp_flow_file.name
         # self.copy_json_to_container(self.container, temp_flow_file_path, '/data/flows.json')
-
         # Restart Node-RED to apply the configurations
         # self.container.restart()
 
