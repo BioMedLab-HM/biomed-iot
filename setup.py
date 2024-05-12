@@ -354,7 +354,15 @@ def main():
 	print('InfluxDB installed')
 	log('InfluxDB installed')
 
-	grafana_config_data = install_grafana(architecture, setup_scheme, ip_address, domain)
+	grafana_config_data = install_grafana(
+		architecture, 
+		setup_scheme, 
+		ip_address, 
+		domain,
+		django_admin_email,
+		django_admin_name,
+		django_admin_pass,
+		)
 	print('Grafana installed')
 	log('Grafana installed')
 

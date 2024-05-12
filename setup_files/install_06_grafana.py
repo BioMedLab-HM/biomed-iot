@@ -7,7 +7,14 @@ from .setup_utils import run_bash, log, get_random_string, get_setup_dir, get_co
 GRAFANA_INSTALL_LOG_FILE_NAME = 'install_06_grafana.log'
 
 
-def install_grafana(architecture, setup_scheme, ip_address, domain):
+def install_grafana(
+        architecture, 
+        setup_scheme, 
+        ip_address, 
+        domain, 
+        django_admin_email,
+		django_admin_name,
+		django_admin_pass,):
     """
     Install Grafana OSS (Open Source) Version based on the provided architecture and setup scheme.
     Download pages:
@@ -19,7 +26,7 @@ def install_grafana(architecture, setup_scheme, ip_address, domain):
     grafana_files_dir = f'{setup_dir}/setup_files/tmp/grafana_install_files'
     new_admin_username = "grafana-admin-" + get_random_string(10)
     new_admin_password = get_random_string(20)
-    host = 'localhost'
+    host = domain if setup_scheme == "TLS_DOMAIN" else ip_address
     port = 3000
 
     installation_commands_amd64 = [
@@ -69,26 +76,16 @@ def install_grafana(architecture, setup_scheme, ip_address, domain):
         output = run_bash(command)
         log(output, GRAFANA_INSTALL_LOG_FILE_NAME)
 
-    # run_bash('echo sleeping for 5 seconds now to let grafana start ')
-    # sleep(5)
-    # with open(f'{conf_dir}/tmp.grafana.ini', 'r') as file:
-    #     content = file.read()
-
-    # grafana_ini_domain = domain if setup_scheme == "TLS_DOMAIN" else ip_address
-    # content = content.replace('DOMAIN_OR_IP', grafana_ini_domain)
-    # content = content.replace('ADMIN_USERNAME', new_admin_username)
-    # content = content.replace('ADMIN_PASSWORD', new_admin_password)
-
-    # with open(f'{setup_dir}/setup_files/tmp/grafana.ini', 'w') as file:
-    #     file.write(content)
+    run_bash('echo sleeping for 5 seconds now to let grafana start???')
+    sleep(5)
     try:
         with open(f'{conf_dir}/tmp.grafana.ini', 'r') as file:
             content = file.read()
 
-        grafana_ini_domain = domain if setup_scheme == "TLS_DOMAIN" else "default_ip"
-        content = content.replace('DOMAIN_OR_IP', grafana_ini_domain)
-        content = content.replace('ADMIN_USERNAME', new_admin_username)
-        content = content.replace('ADMIN_PASSWORD', new_admin_password)
+        content = content.replace('DOMAIN_OR_IP', host)
+        content = content.replace('ADMIN_USERNAME', django_admin_name)
+        content = content.replace('ADMIN_PASSWORD', django_admin_pass)
+        content = content.replace('ADMIN_EMAIL', django_admin_email)
 
         output_path = f'{setup_dir}/setup_files/tmp/grafana.ini'
         with open(output_path, 'w') as file:
@@ -116,7 +113,7 @@ def install_grafana(architecture, setup_scheme, ip_address, domain):
     log(output, GRAFANA_INSTALL_LOG_FILE_NAME)
 
     # TODO: REMOVE since not needed. Admin username and pw will be set in grafana.ini
-    # change_grafana_password(host, port, admin_username, old_admin_password, new_admin_password)
+    # change_grafana_password(port, admin_username, old_admin_password, new_admin_password)
 
     config_data = {
         'GRAFANA_HOST': host,
@@ -128,8 +125,8 @@ def install_grafana(architecture, setup_scheme, ip_address, domain):
     return config_data
 
 
-def change_grafana_password(host, port, user, old_pw, new_pw):
-    url = f"http://{host}:{port}/api/user/password"
+def change_grafana_password(port, user, old_pw, new_pw):
+    url = f"http://localhost:{port}/api/user/password"
 
     headers = {'Content-Type': 'application/json'}
     payload = {
