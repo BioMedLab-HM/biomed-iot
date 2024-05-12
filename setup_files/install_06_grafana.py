@@ -93,9 +93,9 @@ def install_grafana(architecture, setup_scheme, ip_address, domain):
         output_path = f'{setup_dir}/setup_files/tmp/grafana.ini'
         with open(output_path, 'w') as file:
             file.write(content)
-        print(f"File successfully created at: {output_path}")  # Confirm file creation
+        log(f"File successfully created at: {output_path}", GRAFANA_INSTALL_LOG_FILE_NAME)
     except Exception as e:
-        print(f"Error during file handling: {e}")  # Log any errors during file read/write
+        log(f"Error during file handling: {e}", GRAFANA_INSTALL_LOG_FILE_NAME)
     
     run_bash('cp /etc/grafana/grafana.ini /etc/grafana/grafana.ini.backup')
     # output = run_bash('cp {setup_dir}/setup_files/tmp/grafana.ini /etc/grafana/grafana.ini')
