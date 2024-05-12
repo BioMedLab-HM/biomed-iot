@@ -7,3 +7,5 @@ allow_embedding = true
 # The full public facing url you use in browser, used for redirects and emails
 # If you use reverse proxy and sub path specify full url (with sub path)
 root_url = http://192.168.2.109/grafana/
+
+TODO: Add other changes

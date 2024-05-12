@@ -5,7 +5,7 @@ from .setup_utils import run_bash, log, get_random_string, get_setup_dir, get_co
 GRAFANA_INSTALL_LOG_FILE_NAME = 'install_06_grafana.log'
 
 
-def install_grafana(architecture, domain):
+def install_grafana(architecture, setup_scheme, ip_address, domain):
     """
     TODO: Implement Grafana setup
     Installation procedure for Grafana OSS (Open Source) Version
@@ -57,11 +57,18 @@ def install_grafana(architecture, domain):
         output = run_bash(command)
         log(output, GRAFANA_INSTALL_LOG_FILE_NAME)
 
+        with(f'{conf_dir}/tmp.grafana.ini', 'r') as file:
+            content = file.read()
+
+        domain = domain if setup_scheme == "TLS_DOMAIN" else ip_address
+        content = content.replace('domain = DOMAIN_OR_IP', f'domain = {domain}')
+
+        with open(f'{setup_dir}/setup_files/tmp/grafana.ini', 'x') as file:
+            file.write(content)
 
     # Configure grafana to start automatically using systemd
     commands = [
-        f'bash {conf_dir}/tmp.grafana.ini.sh {domain} > {setup_dir}/setup_files/tmp/grafana.ini',
-        ' cp /etc/grafana/grafana.ini /etc/grafana/grafana.ini.backup'
+        'cp /etc/grafana/grafana.ini /etc/grafana/grafana.ini.backup'
         'cp {setup_dir}/setup_files/tmp/grafana.ini /etc/grafana/'
         '/bin/systemctl daemon-reload',
         '/bin/systemctl enable grafana-server',

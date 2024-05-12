@@ -356,7 +356,7 @@ def main():
 	print('InfluxDB installed')
 	log('InfluxDB installed')
 
-	grafana_config_data = install_grafana(architecture, domain)
+	grafana_config_data = install_grafana(architecture, setup_scheme, ip_address, domain)
 	print('Grafana installed')
 	log('Grafana installed')
 
