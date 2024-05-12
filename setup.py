@@ -45,22 +45,17 @@ from setup_files.install_11_nginx import install_nginx
 
 def print_logo_header():
 	logo_header = """
-******************************************
-*  _____   _______            _  _ ___   *
-* |_   _| |__   __|          | || |__ \  *
-*   | |  ___ | |_ __ ___  ___| || |_ ) | *
-*   | | / _ \| | '__/ _ \/ _ \__   _/ /  *
-*  _| || (_) | | | |  __/  __/  | |/ /_  *
-* |_____\___/|_|_|  \___|\___|  |_|____| *
-*                                        *
-******************************************
-<<<----      SETUP OF Biomed IoT      --->>>
-<<<----       Version v1.0        --->>>
+ ______   _                           _    _      _______ 
+(____  \ (_)                         | |  | |    (_______)
+ ____)  ) _   ___   ____   _____   __| |  | |  ___   _    
+|  __  ( | | / _ \ |    \ | ___ | / _  |  | | / _ \ | |   
+| |__)  )| || |_| || | | || ____|( (_| |  | || |_| || |   
+|______/ |_| \___/ |_|_|_||_____) \____|  |_| \___/ |_|   
 
-For installation on a Raspberry Pi, you can use a PiBakery image from GitHub:
-# TODO: <insert link here>
+<<<----      Setup of Biomed IoT      --->>>
+<<<----       Version v1.0        --->>>
 """
-	print(logo_header)
+	print('\n' + logo_header + '\n')
 	log(logo_header + '\n')
 
 
