@@ -25,12 +25,12 @@ def contact_us(request):
 	return render(request, 'core/contact_us.html', context)
 
 
-def legal_notice(request):
+def imprint(request):
 	context = {}
 
 	page_title = 'Legal Notice'
 	context = {'title': page_title, 'thin_navbar': False}
-	return render(request, 'core/legal_notice.html', context)
+	return render(request, 'core/imprint.html', context)
 
 
 def privacy_policy(request):

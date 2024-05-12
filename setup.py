@@ -259,7 +259,7 @@ def main():
 	"""
 
 	hostname = socket.gethostname()
-	ip_address = run_bash("hostname --all-ip-addresses | awk '{print $1}'")
+	ip_address = run_bash("hostname --all-ip-addresses | awk '{print $1}'", show_output=False)
 	linux_user = get_linux_user()
 	setup_dir = get_setup_dir()
 	django_admin_name = None
