@@ -113,38 +113,43 @@ class GrafanaUserManager:
         url = f"{self.grafana_origin}/api/datasources"
 
         # Make the first request for InfluxQL
-        r1 = requests.post(url, data=json.dumps(influxql_payload), headers=headers)
+        response1 = requests.post(url, data=json.dumps(influxql_payload), headers=headers)
 
-        # Make the second request for Flux
-        r2 = requests.post(url, data=json.dumps(flux_payload), headers=headers)
+        response2 = requests.post(url, data=json.dumps(flux_payload), headers=headers)
 
-        return r1, r2
+        return response1, response2
 
     def _get_user_id(self):
         url = f"{self.grafana_origin}/api/users/lookup?loginOrEmail={self.username}"
         headers = {'content-type': 'application/json'}
-        r = requests.get(url, headers=headers)
-        content = json.loads(r.text)
-        userid = content["id"]
-        return userid
+        response = requests.get(url, headers=headers)
+        if response.status_code == 200:
+            content = json.loads(response.text)
+            if 'id' in content:
+                return content['id']
+            else:
+                logger.error("ID not found in response:", content)
+        else:
+            logger.error("Error from API:", response.status_code, response.text)
+        return None
 
     def _switch_user_org(self, userid, orgid):
         url = f"{self.grafana_origin}/api/users/{userid}/using/{orgid}"
         headers = {'content-type': 'application/json'}
-        r = requests.post(url,  headers=headers)
-        return r
+        response = requests.post(url,  headers=headers)
+        return response
 
     def _remove_user_from_main_org(self, userid):
         url = f"{self.grafana_origin}/api/orgs/1/users/{userid}"
         headers = {'content-type': 'application/json'}
-        r = requests.delete(url, headers=headers)
-        return r
+        response = requests.delete(url, headers=headers)
+        return response
 
     def _switch_org_main(self):
         url = f"{self.grafana_origin}/api/user/using/1"
         headers = {'content-type': 'application/json'}
-        r = requests.post(url, headers=headers)
-        return r
+        response = requests.post(url, headers=headers)
+        return response
 
     def create_user(self):
         self._make_org()

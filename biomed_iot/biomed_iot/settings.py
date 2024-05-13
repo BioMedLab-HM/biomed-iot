@@ -88,39 +88,34 @@ WSGI_APPLICATION = 'biomed_iot.wsgi.application'
 
 # Database
 # https://docs.djangoproject.com/en/5.0/ref/settings/#databases
-if DEBUG:
-    DATABASES = {
-        'default': {
-            'ENGINE': 'django.db.backends.sqlite3',
-            'NAME': BASE_DIR / 'db.sqlite3',
-        }
+DATABASES = {
+    'default': {
+        'ENGINE': 'django.db.backends.sqlite3',
+        'NAME': BASE_DIR / 'db.sqlite3',
+}
+} if DEBUG else {
+    'default': {
+        'ENGINE': 'django.db.backends.postgresql',
+        'NAME': config.postgres.POSTGRES_NAME,
+        'USER': config.postgres.POSTGRES_USER,
+        'PASSWORD': config.postgres.POSTGRES_PASSWORD,
+        'HOST': config.postgres.POSTGRES_HOST,
+        'PORT': config.postgres.POSTGRES_PORT,
     }
-else:
-    DATABASES = {
-        'default': {
-            'ENGINE': 'django.db.backends.postgresql',
-            'NAME': config.postgres.POSTGRES_NAME,
-            'USER': config.postgres.POSTGRES_USER,
-            'PASSWORD': config.postgres.POSTGRES_PASSWORD,
-            'HOST': config.postgres.POSTGRES_HOST,
-            'PORT': config.postgres.POSTGRES_PORT,
-        }
-    }
+}
 
 
 AUTH_USER_MODEL = 'users.CustomUser'
 
 USE_EMAIL_VERIFICATION = False
-if not USE_EMAIL_VERIFICATION:
-    AUTHENTICATION_BACKENDS = [ # first successful auth backend will authenticate the user
-        # disallow login with username because username may be shared with other users for special purpose in the future
-        # 'users.backends.UsernameAuthBackend',  # Enable login with username + password
-        'users.backends.EmailAuthBackend',  # Enable login with email + password
-    ]
-else:
-    AUTHENTICATION_BACKENDS = [
-        'users.backends.EmailAuthAndVerifiedBackend',  # Enable login with verified email + password
-    ]
+
+AUTHENTICATION_BACKENDS = [  # first successful auth backend will authenticate the user
+    'users.backends.EmailAuthAndVerifiedBackend'  # Login with verified email + password
+] if USE_EMAIL_VERIFICATION else [
+    # 'users.backends.UsernameAuthBackend',  # Login with username + password (disabled for future use of username)
+    'users.backends.EmailAuthBackend'  # Login with email + password
+]
+
 
 # TODO: Nach setup:
 # https://stackoverflow.com/questions/40933006/how-to-increase-expires-in-time-of-a-access-token-in-oauth-provider-toolkit-dj  # noqa
@@ -157,7 +152,7 @@ AUTH_PASSWORD_VALIDATORS = [
         'NAME': 'users.password_validation.UpperCaseValidator',  # activate in production!
     },
     {
-        'NAME': 'users.password_validation.LowerCaseValidator',
+        'NAME': 'users.password_validation.LowerCaseValidator',  # activate in production!
     },
     {
         'NAME': 'users.password_validation.DigitValidator',  # activate in production!
