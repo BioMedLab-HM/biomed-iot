@@ -48,6 +48,6 @@ server {
 
     server_name $DOMAIN www.$DOMAIN;
 
-    return 302 https://$server_name$request_uri;  # redirect to server block with port 443 listener. TODO: change 302 to 301 after successfull testing
+    return 301 https://$server_name$request_uri;  # redirect to server block with port 443 listener. Changed 302 to 301 after successfull testing
 }
 EOF

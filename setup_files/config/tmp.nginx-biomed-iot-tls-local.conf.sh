@@ -34,7 +34,7 @@ server {
     }
 
     location /ui {
-        return 301 $scheme://$host/nodered-dashboard;
+        return 301 \$scheme://\$host/nodered-dashboard;
     }
 
     # location files for nodered container instances
@@ -47,6 +47,6 @@ server {
 
     server_name $IP_ADDRESS $MACHINE_NAME;
 
-    return 302 https://$server_name$request_uri;  # redirect to server block with port 443 listener. TODO: change 302 to 301 after successfull testing
+    return 301 https://\$server_name\$request_uri;  # redirect to server block with port 443 listener. Changed 302 to 301 after successfull testing
 }
 EOF

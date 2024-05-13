@@ -5,7 +5,7 @@
 
 CONTAINER_NAME=$1
 PORT=$2
-NGINX_CONF_PATH="/etc/nginx/conf.d/nodered_locations/$PATH_SEGMENT.conf"
+NGINX_CONF_PATH="/etc/nginx/conf.d/nodered_locations/$CONTAINER_NAME.conf"
 
 # Create the directory if it doesn't exist
 mkdir -p /etc/nginx/conf.d/nodered_locations/
