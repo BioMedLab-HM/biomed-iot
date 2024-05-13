@@ -18,7 +18,7 @@ ST = Bavaria
 L  = Munich
 O  = BiomedLab
 OU = Biomed-IoT
-CN = $MY_HOSTNAME
+CN = $HOSTNAME
 
 [ req_ext ]
 subjectAltName = @alt_names
