@@ -17,8 +17,8 @@ def install_grafana(architecture, setup_scheme, ip_address, domain, admin_email,
     setup_dir = get_setup_dir()
     conf_dir = get_conf_path()
     grafana_files_dir = f'{setup_dir}/setup_files/tmp/grafana_install_files'
-    new_admin_username = "grafana-admin-" + get_random_string(10)
-    new_admin_password = get_random_string(20)
+    # new_admin_username = "grafana-admin-" + get_random_string(10)
+    # new_admin_password = get_random_string(20)
     host = domain if setup_scheme == "TLS_DOMAIN" else ip_address
     port = 3000
 
@@ -113,8 +113,8 @@ def install_grafana(architecture, setup_scheme, ip_address, domain, admin_email,
     config_data = {
         'GRAFANA_HOST': host,
         'GRAFANA_PORT': port,
-        'GRAFANA_ADMIN_USERNAME': new_admin_username,
-        'GRAFANA_ADMIN_PASSWORD': new_admin_password,
+        'GRAFANA_ADMIN_USERNAME': admin_name,
+        'GRAFANA_ADMIN_PASSWORD': admin_pass,
     }
     log('Grafana installation done', GRAFANA_INSTALL_LOG_FILE_NAME)
     return config_data

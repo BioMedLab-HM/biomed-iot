@@ -215,5 +215,15 @@
         "keyname": "",
         "caname": "",
         "verifyservercert": false
+    },
+    {
+        "id": "5af153bd677ef8aa",
+        "type": "comment",
+        "z": "d3f3e87db40f23f2",
+        "name": "How to start",
+        "info": "This Nodered flow serves as an example \nfor a simple automation between a sending \nand a receiving device.\nTo make it work, fill your credentials \ninto an MQTT node and InfluxDB node",
+        "x": 90,
+        "y": 40,
+        "wires": []
     }
 ]
