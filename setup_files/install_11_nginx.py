@@ -21,15 +21,15 @@ def install_nginx(setup_scheme, domain, server_ip, hostname):
         # Configurations for TLS with domain
         commands = [
             'apt install -y openssl certbot python3-certbot-nginx',
-            f'bash {config_path}/tmp.nginx-biomed-iot-tls-domain.sh {domain} > {setup_dir}/setup_files/tmp/nginx-biomed-iot-tls-domain',
-            f'cp {setup_dir}/setup_files/tmp/nginx-biomed-iot-tls-domain /etc/nginx/sites-available/{domain}',
-            f'ln -s /etc/nginx/sites-available/{domain} /etc/nginx/sites-enabled',
+            f'bash {config_path}/tmp.nginx-biomed-iot-tls-domain.conf.sh {domain} > {setup_dir}/setup_files/tmp/nginx-biomed-iot-tls-domain.conf',
+            f'cp {setup_dir}/setup_files/tmp/nginx-biomed-iot-tls-domain.conf /etc/nginx/sites-available/{domain}.conf',
+            f'ln -s /etc/nginx/sites-available/{domain}.conf /etc/nginx/sites-enabled',
             'openssl dhparam -out /etc/nginx/dhparam.pem 2048',
             f'certbot --nginx --rsa-key-size 2048 -d {domain} -d www.{domain}',
-            f'bash {config_path}/tmp.nginx-stream-tls_domain.conf.sh {domain} > {setup_dir}/setup_files/tmp/tmp.nginx-stream-tls_domain.conf',
-            # already in stream server blocks without include necessary
-            # f'cp {setup_dir}/setup_files/tmp/tmp.nginx-stream-tls_domain.conf /etc/nginx/conf.d/nginx-stream-tls_domain.conf',
-            'ln -s /etc/nginx/modules-available/nginx-stream-tls_domain.conf /etc/nginx/modules-enabled',
+            f'cp {config_path}/tmp.ssl-params.conf /etc/nginx/snippets/ssl-params.conf',
+            f'bash {config_path}/tmp.nginx-stream-tls-domain.conf.sh {domain} > {setup_dir}/setup_files/tmp/tmp.nginx-stream-tls-domain.conf',
+            f'cp {setup_dir}/setup_files/tmp/tmp.nginx-stream-tls-domain.conf /etc/nginx/modules-available/nginx-stream-tls-domain.conf',
+            'ln -s /etc/nginx/modules-available/nginx-stream-tls-domain.conf /etc/nginx/modules-enabled',
         ]
 
     elif setup_scheme == 'TLS_NO_DOMAIN':
@@ -44,9 +44,7 @@ def install_nginx(setup_scheme, domain, server_ip, hostname):
             'openssl dhparam -out /etc/nginx/dhparam.pem 2048',
             f'cp {config_path}/tmp.self-signed.conf /etc/nginx/snippets/self-signed.conf',
             f'cp {config_path}/tmp.ssl-params.conf /etc/nginx/snippets/ssl-params.conf',
-            f'cp {config_path}/tmp.stream-ssl-params.conf /etc/nginx/snippets/stream-ssl-params.conf',
-            # already in stream server blocks without include necessary
-            # f'cp {config_path}/tmp.nginx-stream-tls.conf /etc/nginx/modules-enabled/nginx-stream-tls.conf',
+            f'cp {config_path}/tmp.nginx-stream-tls.conf /etc/nginx/modules-available/nginx-stream-tls.conf',
             'ln -s /etc/nginx/modules-available/nginx-stream-tls.conf /etc/nginx/modules-enabled',
         ]
 
