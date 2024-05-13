@@ -8,10 +8,9 @@ from .models import Profile, CustomUser
 from django.utils.translation import gettext_lazy as _
 
 
-class UserLoginForm(AuthenticationForm):  # Use the default authentication form as a base
-    # disallow login with username for username may be shared with other users for special purposes
-    # username = forms.CharField(label="Email")
-    # username = forms.EmailField(label=_("Email"), widget=forms.TextInput(attrs={'autofocus': True}))
+class UserLoginForm(AuthenticationForm):
+    # The 'username' field can be either a username or an email 
+    # depending if UsernameAuthBackend or EmailAuthBackend is used
     username = forms.CharField(label=_('Email'), widget=forms.TextInput(attrs={'autofocus': True}))
 
     error_messages = {

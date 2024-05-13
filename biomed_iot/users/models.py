@@ -56,12 +56,9 @@ class CustomUser(AbstractUser):
     username, first_name, last_name, email, is_staff, is_active, date_joined are already present in Abstract User.
     If you want to unset any of these fields just do <fieldname> = None
     """
-
-    # Add your custom fields here
     objects = CustomUserManager()  # Use CustomUserManager instead of UserManager
     email = models.EmailField(unique=True)  # Only one account per email address
-    # USERNAME_FIELD = 'email'
-    # REQUIRED_FIELDS = ['username']
+    email_confirmed = models.BooleanField(default=False)
 
     def __str__(self):
         return str(self.email)

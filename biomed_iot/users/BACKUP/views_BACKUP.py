@@ -60,12 +60,10 @@ def register(request):
             try:
                 user = form.save()  # noqa F841
                 logger.info('register view: Form is saved')
-                if settings.USE_EMAIL_VERIFICATION:
-                    send_verification_email(user, request)
-                    logger.info('register view: verification email sent')
-                    messages.success(request, 'Your account has been created! Click the link in the confirmation email that was sent to you.')
-                    return redirect('login')
-                messages.success(request, 'Your account has been created! You are now able to log in')
+                send_verification_email(user, request)
+                logger.info('register view: verification email sent')
+                # messages.success(request, 'Your account has been created! You are now able to log in')
+                messages.success(request, 'Your account has been created! Click the link in the confirmation email that was sent to you.')
                 return redirect('login')
             except Exception:
                 if user:

@@ -14,7 +14,8 @@ def install_grafana(
         domain, 
         django_admin_email,
 		django_admin_name,
-		django_admin_pass,):
+		django_admin_pass
+        ):
     """
     Install Grafana OSS (Open Source) Version based on the provided architecture and setup scheme.
     Download pages:
@@ -32,27 +33,19 @@ def install_grafana(
     installation_commands_amd64 = [
         # Ensure the temp directory exists and enter it
         f'mkdir -p {grafana_files_dir} && cd {grafana_files_dir} && '
-        +
-        # TODO: setup routine
         'sudo apt-get install -y adduser libfontconfig1 musl && '
         + 'wget https://dl.grafana.com/oss/release/grafana_10.4.2_amd64.deb && '
         + 'sudo dpkg -i grafana_10.4.2_amd64.deb && '
-        +
-        # Return to install_dir
-        'cd -',
+        + 'cd -',  # Return to install_dir
     ]
 
     installation_commands_arm64 = [
         # Ensure the temp directory exists and enter it
         f'mkdir -p {grafana_files_dir} && cd {grafana_files_dir} && '
-        +
-        # TODO: setup routine
         'sudo apt-get install -y adduser libfontconfig1 musl && '
         + 'wget https://dl.grafana.com/oss/release/grafana_10.4.2_arm64.deb && '
         + 'sudo dpkg -i grafana_10.4.2_arm64.deb && '
-        +
-        # Return to install_dir
-        'cd -',
+        + 'cd -',  # Return to install_dir
     ]
 
     if architecture in ['amd64', 'x86_64']:
@@ -64,10 +57,9 @@ def install_grafana(
         output = run_bash(command)
         log(output, GRAFANA_INSTALL_LOG_FILE_NAME)
 
-    # Configure grafana to start automatically using systemd
     commands = [
         'systemctl daemon-reload',
-        'systemctl enable grafana-server',
+        'systemctl enable grafana-server',  # Configure grafana to start automatically
         # Start grafana-server by executing
         'systemctl start grafana-server',
     ]
@@ -82,6 +74,17 @@ def install_grafana(
         with open(f'{conf_dir}/tmp.grafana.ini', 'r') as file:
             content = file.read()
 
+        print("Replacing content with actual configuration.")
+        log("Replacing content with actual configuration.")
+        print(f"Using host: {host}")
+        log(f"Using host: {host}")
+        print(f"Using admin name: {django_admin_name}")
+        log(f"Using admin name: {django_admin_name}")
+        print(f"Using admin password: {django_admin_pass}")
+        log(f"Using admin password: {django_admin_pass}")
+        print(f"Using admin email: {django_admin_email}")
+        log(f"Using admin email: {django_admin_email}")
+            
         content = content.replace('DOMAIN_OR_IP', host)
         content = content.replace('ADMIN_USERNAME', django_admin_name)
         content = content.replace('ADMIN_PASSWORD', django_admin_pass)
@@ -123,27 +126,3 @@ def install_grafana(
     }
     log('Grafana installation done', GRAFANA_INSTALL_LOG_FILE_NAME)
     return config_data
-
-
-def change_grafana_password(port, user, old_pw, new_pw):
-    url = f"http://localhost:{port}/api/user/password"
-
-    headers = {'Content-Type': 'application/json'}
-    payload = {
-        "oldPassword": old_pw,
-        "newPassword": new_pw,
-        "confirmNew": new_pw
-    }
-
-    response = requests.put(
-        url,
-        json=payload,
-        headers=headers,
-        auth=HTTPBasicAuth(user, old_pw)
-    )
-
-    if response.status_code == 200:
-        log("Admin password changed successfully.", GRAFANA_INSTALL_LOG_FILE_NAME)
-    else:
-        log(f"Failed to change admin password. Status code: {response.status_code},",
-            f"Response: {response.text}", GRAFANA_INSTALL_LOG_FILE_NAME)

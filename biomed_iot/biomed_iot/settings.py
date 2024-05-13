@@ -87,22 +87,6 @@ WSGI_APPLICATION = 'biomed_iot.wsgi.application'
 
 
 # Database
-# https://docs.djangoproject.com/en/4.2/ref/settings/#databases
-DATABASES = {
-    'default': {
-        # uncomment for sqlite (in development)
-        'ENGINE': 'django.db.backends.sqlite3',
-        'NAME': BASE_DIR / 'db.sqlite3',
-        # uncomment then 'python manage.py migrate' for postgres (in production)
-        # 'ENGINE': 'django.db.backends.postgresql',
-        # 'NAME': config.postgres.POSTGRES_NAME,
-        # 'USER': config.postgres.POSTGRES_USER,
-        # 'PASSWORD': config.postgres.POSTGRES_PASSWORD,
-        # 'HOST': config.postgres.POSTGRES_HOST,
-        # 'PORT': config.postgres.POSTGRES_PORT,
-    }
-}
-# Database
 # https://docs.djangoproject.com/en/5.0/ref/settings/#databases
 if DEBUG:
     DATABASES = {
@@ -126,11 +110,17 @@ else:
 
 AUTH_USER_MODEL = 'users.CustomUser'
 
-AUTHENTICATION_BACKENDS = [
-    # commented out to disallow login with username because username may be shared with other users
-    # 'users.backends.UsernameAuthBackend',
-    'users.backends.EmailAuthBackend',
-]
+USE_EMAIL_VERIFICATION = False
+if not USE_EMAIL_VERIFICATION:
+    AUTHENTICATION_BACKENDS = [ # first successful auth backend will authenticate the user
+        # disallow login with username because username may be shared with other users for special purpose in the future
+        # 'users.backends.UsernameAuthBackend',  # Enable login with username + password
+        'users.backends.EmailAuthBackend',  # Enable login with email + password
+    ]
+else:
+    AUTHENTICATION_BACKENDS = [
+        'users.backends.EmailAuthAndVerifiedBackend',  # Enable login with verified email + password
+    ]
 
 # TODO: Nach setup:
 # https://stackoverflow.com/questions/40933006/how-to-increase-expires-in-time-of-a-access-token-in-oauth-provider-toolkit-dj  # noqa
@@ -210,6 +200,7 @@ LOGIN_REDIRECT_URL = 'core-home'
 LOGIN_URL = 'login'
 # LOGIN_URL='/admin/login/' # LOGIN_URL auf admin/login nur vorrübergehend für OAuth setup
 
+# To make smtp with gmail work, force IPv4 at system level. In /etc/gai.conf uncomment: precedence ::ffff:0:0/96  100
 EMAIL_BACKEND = 'django.core.mail.backends.smtp.EmailBackend'
 EMAIL_HOST = config.mail.RES_EMAIL_HOST
 EMAIL_PORT = config.mail.RES_EMAIL_PORT

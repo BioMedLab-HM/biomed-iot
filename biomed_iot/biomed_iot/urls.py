@@ -21,6 +21,7 @@ from django.urls import path, include, re_path
 from django.conf import settings
 from django.conf.urls.static import static
 from users import views as user_views
+# from users.views import CustomLoginView
 
 urlpatterns = [
     path('admin/', admin.site.urls),
@@ -49,11 +50,16 @@ urlpatterns = [
     re_path(r'^grafana/(?P<path>.*)$', user_views.GrafanaProxyView.as_view(), name='grafana-proxy'),
 
     path('register/', user_views.register, name='register'),
+
+    path('verify/<uidb64>/<token>/', user_views.verify_email, name='verify-email'),
+
     path('profile/', user_views.profile, name='profile'),
-    # path('login/', auth_views.LoginView.as_view(template_name='users/login.html'), name='login'),  # Django login view
-    path('login/', user_views.user_login, name='login'),
-    # path('login/', user_views.CustomLoginView.as_view(template_name='users/login.html'), name='login'),
+
+    # path('login/', user_views.user_login, name='login'),
+    path('login/', user_views.CustomLoginView.as_view(template_name='users/login.html'), name='login'),
+    
     path('logout/', auth_views.LogoutView.as_view(template_name='users/logout.html'), name='logout'),
+
     path(
         'password-reset/',
         auth_views.PasswordResetView.as_view(template_name='users/password_reset.html'),
@@ -74,7 +80,9 @@ urlpatterns = [
         auth_views.PasswordResetCompleteView.as_view(template_name='users/password_reset_complete.html'),
         name='password_reset_complete',
     ),
+
     # path('set_timezone/', user_views.set_timezone, name='set_timezone'),
+
     path('', include('core.urls')),
 ]
 
