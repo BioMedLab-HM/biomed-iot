@@ -49,19 +49,6 @@ def install_grafana(architecture, setup_scheme, ip_address, domain, admin_email,
         output = run_bash(command)
         log(output, GRAFANA_INSTALL_LOG_FILE_NAME)
 
-    commands = [
-        'systemctl daemon-reload',
-        'systemctl enable grafana-server',  # Configure grafana to start automatically
-        # Start grafana-server by executing
-        'systemctl start grafana-server',
-    ]
-
-    for command in commands:
-        output = run_bash(command)
-        log(output, GRAFANA_INSTALL_LOG_FILE_NAME)
-
-    run_bash('echo sleep for 5 seconds to let grafana start')
-    sleep(5)
     try:
         with open(f'{conf_dir}/tmp.grafana.ini', 'r') as file:
             content = file.read()
@@ -103,9 +90,18 @@ def install_grafana(architecture, setup_scheme, ip_address, domain, admin_email,
     else:
         log("Source file grafana.ini does not exist.", GRAFANA_INSTALL_LOG_FILE_NAME)
 
+    commands = [
+        'systemctl daemon-reload',
+        'systemctl enable grafana-server',  # Configure grafana to start automatically
+        # Start grafana-server by executing
+        'systemctl start grafana-server',
+    ]
 
-    output = run_bash('systemctl restart grafana-server')
-    log(output, GRAFANA_INSTALL_LOG_FILE_NAME)
+    for command in commands:
+        output = run_bash(command)
+        log(output, GRAFANA_INSTALL_LOG_FILE_NAME)
+    # output = run_bash('systemctl restart grafana-server')
+    # log(output, GRAFANA_INSTALL_LOG_FILE_NAME)
 
     # TODO: REMOVE since not needed. Admin username and pw will be set in grafana.ini
     # change_grafana_password(port, admin_username, old_admin_password, new_admin_password)
