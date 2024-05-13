@@ -19,7 +19,15 @@ stream {
         ssl_certificate /etc/letsencrypt/live/$DOMAIN/fullchain.pem;
         ssl_certificate_key /etc/letsencrypt/live/$DOMAIN/privkey.pem;
 
-        include snippets/tls-params.conf;   # contains additional params
+        # SSL Params
+        ssl_protocols TLSv1.3;                # Use TLSv1.3 (ensure nginx >= 1.13.0; otherwise, opt for TLSv1.2)
+        ssl_prefer_server_ciphers on;         # Prioritize server's cipher order over client's
+        ssl_dhparam /etc/nginx/dhparam.pem;   # Path to Diffie-Hellman param. file for enhanced security. Generate : openssl dhparam -out /etc/nginx/dhparam.pem 4096
+        ssl_ciphers EECDH+AESGCM:EDH+AESGCM;  # Define the list of encryption ciphers the server supports
+        ssl_ecdh_curve secp384r1;             # Specify elliptic curve for ECDH key exchange, ensure nginx >= 1.1.0
+        ssl_session_timeout  10m;             # Time after which SSL sessions expire and renegotiation is required
+        ssl_session_cache shared:SSL:10m;     # Share the SSL session cache across all worker processes for faster SSL handshakes
+        ssl_session_tickets off;              # Disable session tickets for PFS (Perfect Forward Secrecy), ensure nginx >= 1.5.9
     }
 }
 EOF
