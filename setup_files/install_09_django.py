@@ -3,7 +3,7 @@ from .setup_utils import get_setup_dir, get_linux_user, run_bash, log, get_rando
 DJANGO_INSTALL_LOG_FILE_NAME = 'install_09_django.log'
 
 
-def install_django(django_admin_email, django_admin_name, django_admin_pass, auto_generate_django_admin_credentials):
+def install_django(django_admin_email, django_admin_name, django_admin_pass):
     """
     Setup Django environment, including virtual environment creation,
     dependencies installation, migrations, and superuser creation.
@@ -12,9 +12,6 @@ def install_django(django_admin_email, django_admin_name, django_admin_pass, aut
     setup_dir = get_setup_dir()
 
     django_secret = get_random_string(50, incl_symbols=True)
-    if auto_generate_django_admin_credentials:
-        django_admin_name = 'admin-' + get_random_string(5)
-        django_admin_pass = 'Dj4' + get_random_string(2) + '-' + get_random_string(5) + '-' + get_random_string(5)
 
     # Create the Django virtual environment
     set_setup_dir_rights()

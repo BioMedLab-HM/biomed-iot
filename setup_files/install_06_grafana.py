@@ -7,15 +7,7 @@ from .setup_utils import run_bash, log, get_random_string, get_setup_dir, get_co
 GRAFANA_INSTALL_LOG_FILE_NAME = 'install_06_grafana.log'
 
 
-def install_grafana(
-        architecture, 
-        setup_scheme, 
-        ip_address, 
-        domain, 
-        django_admin_email,
-		django_admin_name,
-		django_admin_pass
-        ):
+def install_grafana(architecture, setup_scheme, ip_address, domain, admin_email, admin_name, admin_pass):
     """
     Install Grafana OSS (Open Source) Version based on the provided architecture and setup scheme.
     Download pages:
@@ -68,27 +60,27 @@ def install_grafana(
         output = run_bash(command)
         log(output, GRAFANA_INSTALL_LOG_FILE_NAME)
 
-    run_bash('echo sleeping for 5 seconds now to let grafana start???')
+    run_bash('echo sleep for 5 seconds to let grafana start')
     sleep(5)
     try:
         with open(f'{conf_dir}/tmp.grafana.ini', 'r') as file:
             content = file.read()
 
         print("Replacing content with actual configuration.")
-        log("Replacing content with actual configuration.")
+        log("Replacing content with actual configuration.", GRAFANA_INSTALL_LOG_FILE_NAME)
         print(f"Using host: {host}")
-        log(f"Using host: {host}")
-        print(f"Using admin name: {django_admin_name}")
-        log(f"Using admin name: {django_admin_name}")
-        print(f"Using admin password: {django_admin_pass}")
-        log(f"Using admin password: {django_admin_pass}")
-        print(f"Using admin email: {django_admin_email}")
-        log(f"Using admin email: {django_admin_email}")
+        log(f"Using host: {host}", GRAFANA_INSTALL_LOG_FILE_NAME)
+        print(f"Using admin name: {admin_name}")
+        log(f"Using admin name: {admin_name}", GRAFANA_INSTALL_LOG_FILE_NAME)
+        print(f"Using admin password: {admin_pass}")
+        log(f"Using admin password: {admin_pass}", GRAFANA_INSTALL_LOG_FILE_NAME)
+        print(f"Using admin email: {admin_email}")
+        log(f"Using admin email: {admin_email}", GRAFANA_INSTALL_LOG_FILE_NAME)
             
         content = content.replace('DOMAIN_OR_IP', host)
-        content = content.replace('ADMIN_USERNAME', django_admin_name)
-        content = content.replace('ADMIN_PASSWORD', django_admin_pass)
-        content = content.replace('ADMIN_EMAIL', django_admin_email)
+        content = content.replace('ADMIN_USERNAME', admin_name)
+        content = content.replace('ADMIN_PASSWORD', admin_pass)
+        content = content.replace('ADMIN_EMAIL', admin_email)
 
         output_path = f'{setup_dir}/setup_files/tmp/grafana.ini'
         with open(output_path, 'w') as file:
