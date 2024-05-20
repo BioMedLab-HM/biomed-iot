@@ -42,6 +42,7 @@ urlpatterns = [
     path('nodered-status-check/', user_views.nodered_status_check, name='nodered-status-check'),
     path('nodered/', user_views.nodered, name='nodered'),
     path('nodered-dashboard/', user_views.nodered_dashboard, name='nodered-dashboard'),
+    path('access-nodered/', user_views.access_nodered, name='access-nodered'),  # access-nodered/<str:token>/
 
     path('manage-data/', user_views.manage_data, name='manage-data'),
 

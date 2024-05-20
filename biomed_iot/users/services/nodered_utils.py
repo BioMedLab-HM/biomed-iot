@@ -193,7 +193,9 @@ def update_nodered_nginx_conf(instance):
     # Logic to update Nginx configuration
     container_name = instance.container_name
     port = instance.container_port
-
+    if not container_name and port:
+        return
+    
     # Path to the server block create script
     # Could be replaced by a python script
     script_path = config.nodered.SERVERBLOCK_CREATE_SCRIPT_PATH
@@ -208,7 +210,7 @@ def update_nodered_nginx_conf(instance):
     )
 
     if result.returncode != 0:
-        print('Error:', result.stderr.decode())  # TODO: Später entfernen bzw durch log ersetzen
+        logger.error('Error:', result.stderr.decode())
 
 
 def del_nodered_nginx_conf(instance):

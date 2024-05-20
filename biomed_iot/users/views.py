@@ -10,7 +10,7 @@ from django.core.exceptions import ObjectDoesNotExist
 from django.contrib.auth import authenticate, login
 from django.shortcuts import render, redirect
 from django.contrib import messages
-from django.http import JsonResponse, HttpResponse  # noqa: F401
+from django.http import JsonResponse
 from django.db import IntegrityError
 from django.db import transaction
 from .models import NodeRedUserData, CustomUser, Profile  # noqa: F401
@@ -109,7 +109,7 @@ class CustomLoginView(LoginView):
         login(self.request, user)
         return redirect(self.get_success_url())
 
-
+# TODO: remove user_login view if CustomLoginView proves to be reliant over longer time
 # def user_login(request):
 #     if request.method == 'POST':
 #         form = UserLoginForm(data=request.POST)
@@ -137,10 +137,10 @@ def profile(request):
     if request.method == 'POST':
         u_form = UserUpdateForm(request.POST, instance=request.user)
 
-        # p_form: Profile form commented out because contains only image which is currently not used
+        # p_form: Profile form commented out because it only contains an image which is currently not used
         # p_form = ProfileUpdateForm(request.POST,
-        #                            request.FILES,
-        #                            instance=request.user.profile) # FILES = Image
+        #                            request.FILES,  # FILES is an Image
+        #                            instance=request.user.profile)
         if u_form.is_valid():  # and p_form.is_valid():
             u_form.save()
             # p_form.save()
@@ -162,7 +162,7 @@ def profile(request):
     return render(request, 'users/profile.html', context)
 
 
-# Prepare a map of common locations to timezone choices you wish to offer.
+# Experimental: Prepare a map of common locations to timezone choices you wish to offer.
 common_timezones = {
     'Berlin': 'Europe/Berlin',
     'London': 'Europe/London',
@@ -170,7 +170,7 @@ common_timezones = {
 }
 timezones = [('New York', 'America/New_York'), ('London', 'Europe/London')]
 
-# Experimental function
+# FIXME: Experimental function to determine user time zone
 @login_required
 def set_timezone(request):
     if request.method == 'POST':
@@ -212,7 +212,7 @@ def devices(request):
                 return redirect('devices')
 
         elif 'modify' in request.POST:
-            # Rename client logic
+            # TODO: Optional rename client logic
             pass
 
         elif request.POST.get('device_username'):
@@ -311,7 +311,6 @@ def get_or_create_nodered_user_data(request):
 @login_required
 def nodered_manager(request):
     logger.info("In nodered_manager")
-    # Get or create NodeRedUserData and get container state
     nodered_data = get_or_create_nodered_user_data(request)
 
     nodered_container = NoderedContainer(nodered_data)
@@ -321,7 +320,7 @@ def nodered_manager(request):
         # check port if changed after restart by non-user action
         nodered_container.determine_port()
         if nodered_data.container_port != nodered_container.port:
-            update_nodered_data_container_port(nodered_data, nodered_container)  # TODO: move to NoderedContainer?
+            update_nodered_data_container_port(nodered_data, nodered_container)
             update_nodered_nginx_conf(nodered_data)
 
     # Flag to prohibit direct access to redirect pages
@@ -330,24 +329,20 @@ def nodered_manager(request):
     request.session['container_name'] = nodered_container.name
 
     if request.session.get('open_nodered_requested'):
-        logger.info("In nodered_manager ... IN request.session.get('open_nodered_requested')")
         del request.session['open_nodered_requested']
         return redirect('nodered')
 
     if request.session.get('create_nodered_requested'):
-        logger.info("In nodered_manager ... IN request.session.get('create_nodered_requested')")
         del request.session['create_nodered_requested']
         nodered_container.create()
         nodered_container.determine_state()
 
     if request.session.get('stop_nodered_requested'):
-        logger.info("In nodered_manager ... IN request.session.get('stop_nodered_requested')")
         del request.session['stop_nodered_requested']
         nodered_container.stop()
         nodered_container.determine_state()
 
     if request.session.get('restart_nodered_requested'):
-        logger.info("In nodered_manager ... IN request.session.get('restart_nodered_requested')")
         del request.session['restart_nodered_requested']
         nodered_container.restart()
         nodered_container.determine_state()
@@ -367,15 +362,10 @@ def nodered_manager(request):
     elif nodered_container.state == 'running':
         logger.info("nodered_container.state == 'running'")
         if not nodered_container.nodered_data.is_configured:
-            logger.info("nodered_container.state == 'running' ... BEFORE configure_nodered_and_restart")
             nodered_container.configure_nodered(request.user)
-            logger.info("nodered_container.state == 'running' ... AFTER configure_nodered_and_restart")
-            # redirect('nodered-wait')
-        logger.info("nodered_container.state == 'running' AND nodered_container.nodered_data.is_configured")
         return redirect('nodered-open')
 
-    else:
-        # nodered_container.state == "unavailable":  # TODO: make it nice
+    else:  # e.g. nodered_container.state == "unavailable":
         return redirect('nodered-unavailable')
 
 
@@ -483,11 +473,13 @@ def nodered(request):
     if not request.session.get('container_name'):
         messages.info(request, 'Reloading Node-RED brings you back here.')
         return redirect('nodered-manager')
+    
+    request.session['came_from_nodered_page'] = True
 
-    container_name = request.session.get('container_name')
+    # container_name = request.session.get('container_name')  # TODO: delete if access_nodered works reliantly
     del request.session['container_name']
     page_title = 'Node-RED Flows'
-    context = {'container_name': container_name, 'title': page_title, 'thin_navbar': True}
+    context = {'title': page_title, 'thin_navbar': True}  # 'container_name': container_name,
     return render(request, 'users/nodered.html', context)
 
 
@@ -497,7 +489,7 @@ def nodered_dashboard(request):
         nodered_data = NodeRedUserData.objects.get(user=request.user)
     except ObjectDoesNotExist:
         return redirect('nodered-manager')
-
+    # TODO: write instead: request.user.nodereduserdata.container_name
     container_name = nodered_data.container_name  # request.session.get("container_name")
 
     if not container_name:
@@ -514,8 +506,8 @@ def nodered_dashboard(request):
 
 
 def update_nodered_data_container_port(nodered_data, nodered_container):
-    with transaction.atomic():  # protection against race condition (even though unlikely)
-        # Identify and lock the conflicting row -> second protection against race condition (even though unlikely)
+    with transaction.atomic():  # protection against race condition
+        # Identify and lock the conflicting row
         conflicting_users = (
             NodeRedUserData.objects.select_for_update()
             .exclude(user=nodered_data.user)
@@ -523,15 +515,10 @@ def update_nodered_data_container_port(nodered_data, nodered_container):
         )
 
         for user_data in conflicting_users:
-            user_data.container_port = None  # Set to None to avoid UNIQUE constraint failure
+            user_data.container_port = None  # Set to None and not for example "" to avoid UNIQUE constraint failure
             user_data.save()
 
-        # Now, safely update the current user's port
-        if nodered_container.port is not None:
-            nodered_data.container_port = nodered_container.port
-        else:
-            # Clear the port in nodered_data if the container is stopped or port is not available
-            nodered_data.container_port = ''
+        nodered_data.container_port = nodered_container.port
         nodered_data.save()
 
 
@@ -561,6 +548,20 @@ def nodered_status_check(request):
     status = NoderedContainer.check_container_state_by_name(container_name)
     print('nodered_status_check: Finished handling request')
     return JsonResponse({'status': status})
+
+
+@login_required
+def access_nodered(request):
+    if not request.session.get('came_from_nodered_page'):
+        messages.info(request, 'View Node-RED within the website.')
+        return redirect('nodered-manager')
+    
+    del request.session['came_from_nodered_page']
+    nodered_user_data = request.user.nodereduserdata
+    container_name = nodered_user_data.container_name
+    if container_name is None:
+        return redirect("core-home")
+    return redirect(f"/nodered/{container_name}")
 
 
 @login_required
@@ -647,7 +648,7 @@ def visualize(request):
 def get_grafana(request):
     return redirect('/grafana/')
 
-# methode for reverse proxy to grafana with auto login and user validation
+# method for reverse proxy to grafana with auto login and user validation
 # https://gist.github.com/feroda/c6b8f37e9389753453ebf7658f0590aa
 @method_decorator(login_required, name='dispatch')
 class GrafanaProxyView(ProxyView):
