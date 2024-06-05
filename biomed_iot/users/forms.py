@@ -9,7 +9,7 @@ from django.utils.translation import gettext_lazy as _
 
 
 class UserLoginForm(AuthenticationForm):
-    # The 'username' field can be either a username or an email 
+    # The 'username' field can be either a username or an email
     # depending if UsernameAuthBackend or EmailAuthBackend is used
     username = forms.CharField(label=_('Email'), widget=forms.TextInput(attrs={'autofocus': True}))
 

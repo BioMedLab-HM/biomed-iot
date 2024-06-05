@@ -82,12 +82,12 @@ class Profile(models.Model):
 
 class NodeRedUserData(models.Model):
     user = models.OneToOneField(settings.AUTH_USER_MODEL, on_delete=models.CASCADE, primary_key=True)
-    container_name = models.CharField(max_length=30, unique=True)
+    container_name = models.CharField(max_length=100, unique=True)
     # container_port can be set to null (None in python) to avoid integrity error due to UNIQUE constraint failure
     container_port = models.CharField(
         max_length=5, unique=True, null=True, blank=True
     )  # highest possible port number has five digits (65535)
-    access_token = models.CharField(max_length=50)  # TODO: ggf. hash mit make_password
+    access_token = models.CharField(max_length=120)
     is_configured = models.BooleanField(default=False)
     # later maybe add data from the container like flows, dashboards and list of installed nodered plugins
 
@@ -109,7 +109,7 @@ class NodeRedUserData(models.Model):
 
 class MqttMetaData(models.Model):
     user = models.OneToOneField(settings.AUTH_USER_MODEL, on_delete=models.CASCADE, primary_key=True)
-    user_topic_id = models.CharField(max_length=10, unique=True)
+    user_topic_id = models.CharField(max_length=12, unique=True)
     nodered_role_name = models.CharField(max_length=14, unique=True)
     device_role_name = models.CharField(max_length=14, unique=True)
 
@@ -121,7 +121,7 @@ class MqttMetaData(models.Model):
         max_attempts = 1000
         for attempt in range(max_attempts):
             # Maybe change to lowercase and numbers
-            new_user_topic_id = ''.join(random.choice(string.ascii_letters + string.digits) for index in range(10))
+            new_user_topic_id = ''.join(random.choice(string.ascii_letters + string.digits) for index in range(12))
             new_nodered_role_name = 'nodered-' + new_user_topic_id
             new_device_role_name = 'device-' + new_user_topic_id
             if not MqttMetaData.objects.filter(user_topic_id=new_user_topic_id).exists():

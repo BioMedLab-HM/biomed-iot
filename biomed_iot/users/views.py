@@ -1,3 +1,5 @@
+import datetime
+import jwt
 import requests
 import secrets
 import json
@@ -10,7 +12,7 @@ from django.core.exceptions import ObjectDoesNotExist
 from django.contrib.auth import authenticate, login
 from django.shortcuts import render, redirect
 from django.contrib import messages
-from django.http import JsonResponse
+from django.http import HttpResponse, JsonResponse
 from django.db import IntegrityError
 from django.db import transaction
 from .models import NodeRedUserData, CustomUser, Profile  # noqa: F401
@@ -300,7 +302,7 @@ def get_or_create_nodered_user_data(request):
                 user=request.user,
                 defaults={
                     'container_name': NodeRedUserData.generate_unique_container_name(),
-                    'access_token': secrets.token_urlsafe(22),
+                    'access_token': secrets.token_urlsafe(50),
                 },
             )
         except IntegrityError:
@@ -334,7 +336,7 @@ def nodered_manager(request):
 
     if request.session.get('create_nodered_requested'):
         del request.session['create_nodered_requested']
-        nodered_container.create()
+        nodered_container.create(request.user)
         nodered_container.determine_state()
 
     if request.session.get('stop_nodered_requested'):
@@ -473,7 +475,7 @@ def nodered(request):
     if not request.session.get('container_name'):
         messages.info(request, 'Reloading Node-RED brings you back here.')
         return redirect('nodered-manager')
-    
+
     request.session['came_from_nodered_page'] = True
 
     # container_name = request.session.get('container_name')  # TODO: delete if access_nodered works reliantly
@@ -489,8 +491,8 @@ def nodered_dashboard(request):
         nodered_data = NodeRedUserData.objects.get(user=request.user)
     except ObjectDoesNotExist:
         return redirect('nodered-manager')
-    # TODO: write instead: request.user.nodereduserdata.container_name
-    container_name = nodered_data.container_name  # request.session.get("container_name")
+    # TODO: write and test instead: request.user.nodereduserdata.container_name
+    container_name = nodered_data.container_name  # TODO: remove comment after testing request.session.get("container_name")
 
     if not container_name:
         messages.info(request, 'Start Nodered and UI first.')
@@ -555,13 +557,30 @@ def access_nodered(request):
     if not request.session.get('came_from_nodered_page'):
         messages.info(request, 'View Node-RED within the website.')
         return redirect('nodered-manager')
-    
+
     del request.session['came_from_nodered_page']
     nodered_user_data = request.user.nodereduserdata
     container_name = nodered_user_data.container_name
     if container_name is None:
         return redirect("core-home")
-    return redirect(f"/nodered/{container_name}")
+
+    # Generate a JWT token for the user
+    # payload = {
+    #     'username': request.user.username,
+    #     'exp': datetime.datetime.now(datetime.timezone.utc) + datetime.timedelta(minutes=300)
+    # }
+
+    # token = jwt.encode(payload, nodered_user_data.access_token, algorithm='HS256')
+    # logger.info(f"NodeRED-Token: {token}")
+
+    # Redirect to the Node-RED instance with the token
+    return redirect(f"/nodered/{container_name}")  # /?access_token={token}
+
+    # Redirect to the Node-RED instance with the token in the header
+    # response = HttpResponse(status=302)
+    # response['Location'] = f"/nodered/{container_name}/"
+    # response['Authorization'] = f"Bearer {token}"
+    # return response
 
 
 @login_required

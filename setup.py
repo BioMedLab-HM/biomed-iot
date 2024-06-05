@@ -281,7 +281,7 @@ def main():
 
     """ ASK FOR USER INPUT """
     setup_scheme = get_setup_scheme()
-    
+
     domain = get_domain(setup_scheme)
 
     django_admin_email = get_confirmed_text_input('Enter email address for ' "your website's admin user")
@@ -346,9 +346,9 @@ def main():
     log('InfluxDB installed')
 
     grafana_config_data = install_grafana(
-        architecture, 
-        setup_scheme, 
-        ip_address, 
+        architecture,
+        setup_scheme,
+        ip_address,
         domain,
         django_admin_email,
         django_admin_name,

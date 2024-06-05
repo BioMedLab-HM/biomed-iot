@@ -88,20 +88,19 @@ WSGI_APPLICATION = 'biomed_iot.wsgi.application'
 
 # Database
 # https://docs.djangoproject.com/en/5.0/ref/settings/#databases
-DATABASES = {
+DATABASES = {  # Uncomment the database to use and stay with it
     'default': {
         'ENGINE': 'django.db.backends.sqlite3',
         'NAME': BASE_DIR / 'db.sqlite3',
-}
-} if DEBUG else {
-    'default': {
-        'ENGINE': 'django.db.backends.postgresql',
-        'NAME': config.postgres.POSTGRES_NAME,
-        'USER': config.postgres.POSTGRES_USER,
-        'PASSWORD': config.postgres.POSTGRES_PASSWORD,
-        'HOST': config.postgres.POSTGRES_HOST,
-        'PORT': config.postgres.POSTGRES_PORT,
-    }
+    },
+    # 'default': {
+    #     'ENGINE': 'django.db.backends.postgresql',
+    #     'NAME': config.postgres.POSTGRES_NAME,
+    #     'USER': config.postgres.POSTGRES_USER,
+    #     'PASSWORD': config.postgres.POSTGRES_PASSWORD,
+    #     'HOST': config.postgres.POSTGRES_HOST,
+    #     'PORT': config.postgres.POSTGRES_PORT,
+    # }
 }
 
 

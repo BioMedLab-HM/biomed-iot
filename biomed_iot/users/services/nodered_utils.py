@@ -57,7 +57,7 @@ class NoderedContainer:
         except docker.errors.NotFound:
             return 'not_found'
 
-    def create(self):
+    def create(self, user):
         if self.container is None:  # Only create a new container if one doesn't already exist
             try:
                 self.container = self.docker_client.containers.run(
@@ -67,6 +67,11 @@ class NoderedContainer:
                     ports={'1880/tcp': None},
                     volumes={f'{self.name}-volume': {'bind': '/data', 'mode': 'rw'}},
                     name=self.name,
+                    # environment={
+                    #     # 'NR_USERNAME': user.email,
+                    #     # 'NR_PASSWORD': 'dummy',  # dummy password for session-based auth
+                    #     'SECRET_KEY': self.access_token
+                    # }
                 )
                 self.determine_port()
             except (docker.errors.ContainerError, docker.errors.ImageNotFound) as e:
@@ -133,7 +138,7 @@ class NoderedContainer:
         # Replace "server_ip_or_domain" with the determined host address based on the configuration
         host_address = config.host.DOMAIN if config.host.TLS == "true" and config.host.DOMAIN else config.host.IP
         modified_flows_json = modified_flows_json.replace("server_ip_or_domain", host_address)
-        
+
         # Replace "influxdb-org-name" with the determined InfluxDB organization name based on the configuration
         modified_flows_json = modified_flows_json.replace("influxdb-org-name", config.influxdb.INFLUX_ORG_NAME)
 
@@ -195,7 +200,7 @@ def update_nodered_nginx_conf(instance):
     port = instance.container_port
     if not container_name and port:
         return
-    
+
     # Path to the server block create script
     # Could be replaced by a python script
     script_path = config.nodered.SERVERBLOCK_CREATE_SCRIPT_PATH

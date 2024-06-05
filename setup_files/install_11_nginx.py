@@ -63,7 +63,7 @@ def install_nginx(setup_scheme, domain, server_ip, hostname):
         output = run_bash(command)
         log(output, NGINX_INSTALL_LOG_FILE_NAME)
 
-    # Verify the self-signed certificate 
+    # Verify the self-signed certificate
     if setup_scheme == 'TLS_NO_DOMAIN':
         output = run_bash('openssl x509 -in /etc/ssl/certs/$HOSTNAME.crt -text -noout', show_output=False)
         log(output, NGINX_INSTALL_LOG_FILE_NAME)

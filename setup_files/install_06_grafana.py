@@ -63,7 +63,7 @@ def install_grafana(architecture, setup_scheme, ip_address, domain, admin_email,
         log(f"Using admin password: {admin_pass}", GRAFANA_INSTALL_LOG_FILE_NAME)
         print(f"Using admin email: {admin_email}")
         log(f"Using admin email: {admin_email}", GRAFANA_INSTALL_LOG_FILE_NAME)
-            
+
         content = content.replace('DOMAIN_OR_IP', host)
         content = content.replace('ADMIN_USERNAME', admin_name)
         content = content.replace('ADMIN_PASSWORD', admin_pass)
@@ -75,7 +75,7 @@ def install_grafana(architecture, setup_scheme, ip_address, domain, admin_email,
         log(f"File successfully created at: {output_path}", GRAFANA_INSTALL_LOG_FILE_NAME)
     except Exception as e:
         log(f"Error during file handling: {e}", GRAFANA_INSTALL_LOG_FILE_NAME)
-    
+
     run_bash('cp /etc/grafana/grafana.ini /etc/grafana/grafana.ini.backup')
     # output = run_bash('cp {setup_dir}/setup_files/tmp/grafana.ini /etc/grafana/grafana.ini')
     # log(output, GRAFANA_INSTALL_LOG_FILE_NAME)
