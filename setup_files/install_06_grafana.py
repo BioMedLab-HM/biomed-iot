@@ -1,7 +1,7 @@
 import os
-import requests
+# import requests
+# from requests.auth import HTTPBasicAuth
 from time import sleep
-from requests.auth import HTTPBasicAuth
 from .setup_utils import run_bash, log, get_random_string, get_setup_dir, get_conf_path
 
 GRAFANA_INSTALL_LOG_FILE_NAME = 'install_06_grafana.log'

@@ -77,41 +77,41 @@ module.exports = {
     /** To password protect the Node-RED editor and admin API, the following
      * property can be used. See https://nodered.org/docs/security.html for details.
      */
-    // adminAuth: {
-    //    type: "credentials",
-    //    users: [{
-    //        username: "admin",
-    //        password: "$2b$08$iJ7BVjyKNRg01EqYxOfwcOa4O8uZUx.6K7J7ENJOvNsKjA4OC9HVy",
-    //        permissions: "*"
-    //    }]
-    // },
-
-    // Custom token based authentication
     adminAuth: {
-        type: "credentials",
-        users: [{
-            username: "admin",
-            password: "$2b$08$iJ7BVjyKNRg01EqYxOfwcOa4O8uZUx.6K7J7ENJOvNsKjA4OC9HVy",
-            permissions: "*"
-        }],
-        tokens: function(token) {
-            console.log("Received token:", token);
-            return new Promise(function(resolve, reject) {
-                jwt.verify(token, process.env.SECRET_KEY, (err, decoded) => {
-                    if (err) {
-                        console.log("Token verification failed:", err);
-                        resolve(null);
-                    } else {
-                        console.log("Token verified. User:", user);
-                        // Ensure 'username' and 'permissions' properties are set
-                        var user = { username: decoded.username, permissions: "*" };
-                        resolve(user);
-                    }
-                });
-            });
-        },
-        tokenHeader: "Authorization"
+       type: "credentials",
+       users: [{
+           username: process.env.USERNAME,
+           password: process.env.PASSWORD_HASH,
+           permissions: "*"
+       }]
     },
+
+    // FIXME: Custom token based authentication
+    // adminAuth: {
+    //     type: "credentials",
+    //     users: [{
+    //         username: "admin",
+    //         password: "$2b$08$iJ7BVjyKNRg01EqYxOfwcOa4O8uZUx.6K7J7ENJOvNsKjA4OC9HVy",
+    //         permissions: "*"
+    //     }],
+    //     tokens: function(token) {
+    //         console.log("Received token:", token);
+    //         return new Promise(function(resolve, reject) {
+    //             jwt.verify(token, process.env.SECRET_KEY, (err, decoded) => {
+    //                 if (err) {
+    //                     console.log("Token verification failed:", err);
+    //                     resolve(null);
+    //                 } else {
+    //                     console.log("Token verified. User:", user);
+    //                     // Ensure 'username' and 'permissions' properties are set
+    //                     var user = { username: decoded.username, permissions: "*" };
+    //                     resolve(user);
+    //                 }
+    //             });
+    //         });
+    //     },
+    //     tokenHeader: "Authorization"
+    // },
     // httpAdminMiddleware: authMiddleware,
     // httpNodeMiddleware: authMiddleware,
     

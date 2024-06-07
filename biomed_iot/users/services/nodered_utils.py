@@ -3,8 +3,9 @@ import json
 import os
 import subprocess
 import logging
+import bcrypt
 import docker
-import tempfile
+import tempfile  # was used for: Create a temporary file to save the modified JSON (see below)
 from docker.types import Mount
 import requests
 from biomed_iot.config_loader import config
@@ -56,8 +57,21 @@ class NoderedContainer:
             return state
         except docker.errors.NotFound:
             return 'not_found'
+    
+    def hash_password(self, password):
+        # Generate salt
+        salt = bcrypt.gensalt()
+        # Hash the password
+        hashed = bcrypt.hashpw(password.encode('utf-8'), salt)
+        return hashed.decode('utf-8')
 
     def create(self, user):
+        nodered_username, nodered_password = user.nodereduserdata.generate_credentials()
+        user.nodereduserdata.username = nodered_username
+        user.nodereduserdata.password = nodered_password
+        user.nodereduserdata.save()
+        hashed_password = self.hash_password(nodered_password)
+
         if self.container is None:  # Only create a new container if one doesn't already exist
             try:
                 self.container = self.docker_client.containers.run(
@@ -67,11 +81,11 @@ class NoderedContainer:
                     ports={'1880/tcp': None},
                     volumes={f'{self.name}-volume': {'bind': '/data', 'mode': 'rw'}},
                     name=self.name,
-                    # environment={
-                    #     # 'NR_USERNAME': user.email,
-                    #     # 'NR_PASSWORD': 'dummy',  # dummy password for session-based auth
-                    #     'SECRET_KEY': self.access_token
-                    # }
+                    environment={
+                        'USERNAME': nodered_username,
+                        'PASSWORD_HASH': hashed_password,
+                        # 'SECRET_KEY': self.access_token  # for Token (JWT) based auth
+                    }
                 )
                 self.determine_port()
             except (docker.errors.ContainerError, docker.errors.ImageNotFound) as e:
@@ -113,7 +127,6 @@ class NoderedContainer:
         container.put_archive(path=os.path.dirname(dest_path), data=stream)
 
     def update_flows(self, new_flows_json):
-        self.determine_port()
         node_red_flows_url = f'http://localhost:{self.port}/flows'
 
         headers = {'Content-Type': 'application/json'}
@@ -123,44 +136,51 @@ class NoderedContainer:
         else:
             logger.error("Failed to update flows:", response.status_code, response.text)
 
+    def get_auth_token(self, username, password):
+        url = f"http://localhost:{self.port}/auth/token"  # {config.host.IP}
+        payload = {
+            'client_id': 'node-red-admin',
+            'grant_type': 'password',
+            'scope': '*',
+            'username': username,
+            'password': password
+        }
+        response = requests.post(url, data=payload)
+        response.raise_for_status()
+        return response.json()['access_token']
+
+    def update_flows(self, token, flows_json):
+        url = f"http://localhost:{self.port}/flows"
+        headers = {
+            'Authorization': f"Bearer {token}",
+            'Content-Type': 'application/json'
+        }
+        response = requests.post(url, headers=headers, data=flows_json)
+        response.raise_for_status()
+
     def configure_nodered(self, user):
-        # Get nodered flows from json file
         file_path = os.path.join(os.path.dirname(__file__), 'nodered_flows', 'flows.json')
         with open(file_path, 'r') as file:
             flows_json = file.read()
 
-        # Replace the placeholder 'topic_id' with the actual user's topic_id in the JSON string
         modified_flows_json = flows_json.replace("topic_id", user.mqttmetadata.user_topic_id)
-
-        # Replace the placeholder 'user_bucket_name' with the actual user's bucket name in the JSON string
         modified_flows_json = modified_flows_json.replace("user_bucket_name", user.influxuserdata.bucket_name)
 
-        # Replace "server_ip_or_domain" with the determined host address based on the configuration
         host_address = config.host.DOMAIN if config.host.TLS == "true" and config.host.DOMAIN else config.host.IP
         modified_flows_json = modified_flows_json.replace("server_ip_or_domain", host_address)
-
-        # Replace "influxdb-org-name" with the determined InfluxDB organization name based on the configuration
         modified_flows_json = modified_flows_json.replace("influxdb-org-name", config.influxdb.INFLUX_ORG_NAME)
 
-        # Replace "influxdb-url" with the determined host address and InfluxDB port name based on the configuration
         server_scheme = "https" if config.host.TLS == "true" else "http"
         influxdb_url = f"{server_scheme}://{host_address}:{config.influxdb.INFLUX_PORT}"
         modified_flows_json = modified_flows_json.replace("influxdb-url", influxdb_url)
 
-        # Update flows in Node-RED
-        self.update_flows(modified_flows_json)
+        nodered_username = user.nodereduserdata.username
+        nodered_password = user.nodereduserdata.password
 
-        # TODO: delete this commented-out part when the current way proved to work
-        # Create a temporary file to save the modified JSON
-        # temp_flow_file = tempfile.NamedTemporaryFile(delete=False, mode='w', suffix='.json')
-        # with temp_flow_file as file:
-        #     file.write(modified_flows_json)
-        # temp_flow_file_path = temp_flow_file.name
-        # self.copy_json_to_container(self.container, temp_flow_file_path, '/data/flows.json')
-        # Restart Node-RED to apply the configurations
-        # self.container.restart()
+        self.determine_port()
+        token = self.get_auth_token(nodered_username, nodered_password)
+        self.update_flows(token, modified_flows_json)
 
-        # Allow the nodered_manager to redirect to nodered_open view by setting self.nodered_data.is_configured = True
         self.nodered_data.is_configured = True
         self.nodered_data.save()
 

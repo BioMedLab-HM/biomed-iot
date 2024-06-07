@@ -444,6 +444,8 @@ def nodered_open(request):
         'title': page_title,
         'nodered_mqtt_client_data': nodered_mqtt_client_data,
         'influxdb_token': request.user.influxuserdata.bucket_token,
+        'username': request.user.nodereduserdata.username,
+        'password': request.user.nodereduserdata.password,
         'thin_navbar': False,
     }
     return render(request, 'users/nodered_open.html', context)

@@ -7,6 +7,7 @@ from django.db import models
 from django.contrib.auth.models import AbstractUser, BaseUserManager
 from django.utils.translation import gettext_lazy as _  # for automatic translation in case if it is implemented later
 from django.conf import settings
+from biomed_iot.config_loader import config
 
 
 logger = logging.getLogger(__name__)
@@ -88,6 +89,8 @@ class NodeRedUserData(models.Model):
         max_length=5, unique=True, null=True, blank=True
     )  # highest possible port number has five digits (65535)
     access_token = models.CharField(max_length=120)
+    username = models.CharField(max_length=120, null=True)
+    password = models.CharField(max_length=120, null=True)
     is_configured = models.BooleanField(default=False)
     # later maybe add data from the container like flows, dashboards and list of installed nodered plugins
 
@@ -105,6 +108,15 @@ class NodeRedUserData(models.Model):
             if not NodeRedUserData.objects.filter(container_name=new_name).exists():
                 print(f'Returning in Generate unique container name function. New name is: {new_name}')
                 return new_name
+            
+    @staticmethod
+    def generate_credentials():
+        # Define the characters to use in the password
+        characters = string.ascii_letters + string.digits  # This includes uppercase, lowercase, and digits
+        new_username = ''.join(secrets.choice(characters) for index in range(10))
+        new_password = ''.join(secrets.choice(characters) for index in range(20))
+
+        return new_username, new_password
 
 
 class MqttMetaData(models.Model):

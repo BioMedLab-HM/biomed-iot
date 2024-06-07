@@ -16,7 +16,7 @@
     </div> 
     <div class="card mb-3">
         <div class="card-header">
-            <h4 class="my-0 font-weight-normal">Personal Credentials for Node-RED MQTT- and InfluxDB-Nodes.</h4>
+            <h4 class="my-0 font-weight-normal">Personal Credentials for Node-RED Login and MQTT- and InfluxDB-Nodes.</h4>
         </div>
         <div class="card-body">
             <div class="row">
@@ -49,6 +49,14 @@
                         <label for="tokenField" class="form-label">InfluxDB Read/Write Token</label>
                         <input type="password" id="tokenField" class="form-control" value="{{ influxdb_token }}" readonly>
                     </div>
+                    <div class="mb-3">
+                        <label for="usernameField" class="form-label">Node-RED Login Username</label>
+                        <input type="password" id="noderedUsernameField" class="form-control" value="{{ username }}" readonly>
+                    </div>
+                    <div class="mb-3">
+                        <label for="passwordField" class="form-label">Node-RED Login Password</label>
+                        <input type="password" id="noderedPasswordField" class="form-control" value="{{ password }}" readonly>
+                    </div>
                 </div>
             </div>
         </div>
@@ -76,6 +84,8 @@
         var usernameField = document.getElementById("usernameField");
         var passwordField = document.getElementById("passwordField");
         var tokenField = document.getElementById("tokenField");
+        var noderedUsername = document.getElementById("noderedUsernameField");
+        var noderedPassword = document.getElementById("noderedPasswordField");
         var link = event.target; // Get the clicked link
 
         // Function to hide credentials
@@ -83,6 +93,8 @@
             usernameField.type = "password";
             passwordField.type = "password";
             tokenField.type = "password";
+            noderedUsername.type = "password";
+            noderedPassword.type = "password";
             link.textContent = "Show Credentials";
         }
 
@@ -91,6 +103,8 @@
             usernameField.type = "text";
             passwordField.type = "text";
             tokenField.type = "text";
+            noderedUsername.type = "text";
+            noderedPassword.type = "text";
             //link.textContent = "Hide Credentials";
 
             // Set a timeout to revert back to password type after 10 seconds
@@ -108,9 +122,11 @@
             var username = document.getElementById("usernameField").value;
             var password = document.getElementById("passwordField").value;
             var token = document.getElementById("tokenField").value;
+            var noderedUsername = document.getElementById("noderedUsernameField").value;
+            var noderedPassword = document.getElementById("noderedPasswordField").value;
 
             // Create a string that concatenates the credentials
-            const credentials = "MQTT-Username: " + username + "\nMQTT-Password: " + password + "\nInfluxDB-Token: " + token;
+            const credentials = "MQTT-Username: " + username + "\nMQTT-Password: " + password + "\nInfluxDB-Token: " + token + "\nNode-RED Login Password: " + noderedUsername + "\nNode-RED Login Password: " + noderedPassword;
 
             // Create a temporary textarea to hold the text to copy
             const textarea = document.createElement('textarea');

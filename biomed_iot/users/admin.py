@@ -6,7 +6,7 @@ class ProfileAdmin(admin.ModelAdmin):
     list_display = ('user', 'image')
 
 class NodeRedUserDataAdmin(admin.ModelAdmin):
-    list_display = ('user', 'container_name', 'container_port', 'access_token')
+    list_display = ('user', 'container_name', 'container_port', 'username', 'password', 'access_token')
 
 class MqttClientAdmin(admin.ModelAdmin):
     list_display = ('user', 'username', 'password', 'textname', 'rolename')
