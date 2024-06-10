@@ -25,10 +25,10 @@ sudo reboot
 ### Points of failure  
 - Do not cancel setup prematurely. Depending on speed of download servers the duration of the setup may vary usually between five and 15 minutes.
 - The setup script requires sudo permissions. Ensure that the user running the setup has sudo privileges.
-- To check your installation [follow this guide](tests/tests_after_setup.md)
+- Do the [tests to run after installation](tests/tests_after_setup.md) to check your installation integrity
 
 ### Testing of MQTT-Server/Network performance etc.
-A performance test script will come soon...
+A test script to measure core website performance will come soon...
 
 ## How it works
 ![Biomed IoT schema](biomed_iot.png "Biomed IoT schema")

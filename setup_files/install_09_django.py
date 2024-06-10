@@ -51,7 +51,7 @@ def install_django(django_admin_email, django_admin_name, django_admin_pass):
         f'runuser -u {linux_user} -- {setup_dir}/biomed_iot/venv/bin/python {setup_dir}/biomed_iot/manage.py shell'
     )
     run_bash(confirm_email_command, show_output=False)
-    msg = 'Superuser email confirmed'
+    msg = 'Superuser email set to confirmed'
     print(msg)
     log(msg, DJANGO_INSTALL_LOG_FILE_NAME)
 
@@ -64,7 +64,7 @@ def install_django(django_admin_email, django_admin_name, django_admin_pass):
     out = run_bash('mkdir -p /var/www/biomed-iot/media/downloadfiles')
     log(out, DJANGO_INSTALL_LOG_FILE_NAME)
 
-    out = run_bash(f'cp {setup_dir}/biomed_iot/media/default.jpg')
+    out = run_bash(f'cp {setup_dir}/biomed_iot/media/default.jpg /var/www/biomed-iot/media')
     log(out, DJANGO_INSTALL_LOG_FILE_NAME)
 
     # Add 'linux_user' to the 'www-data' group
