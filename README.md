@@ -31,7 +31,7 @@ sudo reboot
 A test script to measure core website performance will come soon...
 
 ## How it works
-![Biomed IoT schema](biomed_iot.png "Biomed IoT schema")
+![Biomed IoT schema](biomed_iot/media/biomed_iot.png "Biomed IoT schema")
 
 ## How to use
 The *manual.pdf* file (also see 'Manual' in website menu) contains a guided tour through Biomed IoT and helps you to setup a working example.
