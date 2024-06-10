@@ -17,12 +17,12 @@ logger = logging.getLogger(__name__)
 @receiver(post_save, sender=settings.AUTH_USER_MODEL)
 def post_user_creation_setup(sender, instance, created, **kwargs):
     """Handle post-user creation setup."""
-    instance.profile.save()
 
     if created:
         # Below signals setup routines here except save_profile
 
         Profile.objects.create(user=instance)
+        instance.profile.save()
 
         # Initialize MQTT meta data and create MQTT client access roles
         mqtt_metadata_manager = MqttMetaDataManager(user=instance)
