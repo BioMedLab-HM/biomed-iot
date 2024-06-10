@@ -17,25 +17,13 @@ logger = logging.getLogger(__name__)
 @receiver(post_save, sender=settings.AUTH_USER_MODEL)
 def post_user_creation_setup(sender, instance, created, **kwargs):
     """Handle post-user creation setup."""
-    if created:
-        # Below signals setup routines here except save_profile
-        pass
-
-
-@receiver(post_save, sender=settings.AUTH_USER_MODEL)
-def create_profile(sender, instance, created, **kwargs):
-    if created:
-        Profile.objects.create(user=instance)
-
-
-@receiver(post_save, sender=settings.AUTH_USER_MODEL)
-def save_profile(sender, instance, **kwargs):
     instance.profile.save()
 
-
-@receiver(post_save, sender=settings.AUTH_USER_MODEL)
-def user_mqtt_setup(sender, instance, created, **kwargs):
     if created:
+        # Below signals setup routines here except save_profile
+
+        Profile.objects.create(user=instance)
+
         # Initialize MQTT meta data and create MQTT client access roles
         mqtt_metadata_manager = MqttMetaDataManager(user=instance)
         mqtt_metadata_manager.create_nodered_role()
@@ -46,10 +34,6 @@ def user_mqtt_setup(sender, instance, created, **kwargs):
         mqtt_client_manager.create_client(textname="Automation Tool Credentials", role_type=RoleType.NODERED.value)
         mqtt_client_manager.create_client(textname="Example Device", role_type=RoleType.DEVICE.value)
 
-
-@receiver(post_save, sender=settings.AUTH_USER_MODEL)
-def user_influxdb_and_grafana_setup(sender, instance, created, **kwargs):
-    if created:
         influx_user_manager = InfluxUserManager(user=instance)
         influx_user_manager.create_new_influx_user_resources()
 
@@ -62,6 +46,48 @@ def user_influxdb_and_grafana_setup(sender, instance, created, **kwargs):
         grafana_user_manager.create_user()
         logger.info('Signals.py > user_influxdb_and_grafana_setup: after grafana_user_manager.create_user()')
         print('Signals.py > user_influxdb_and_grafana_setup: after grafana_user_manager.create_user()')
+
+
+# @receiver(post_save, sender=settings.AUTH_USER_MODEL)
+# def create_profile(sender, instance, created, **kwargs):
+#     if created:
+#         Profile.objects.create(user=instance)
+
+
+# @receiver(post_save, sender=settings.AUTH_USER_MODEL)
+# def save_profile(sender, instance, **kwargs):
+#     instance.profile.save()
+
+
+# @receiver(post_save, sender=settings.AUTH_USER_MODEL)
+# def user_mqtt_setup(sender, instance, created, **kwargs):
+#     if created:
+#         # Initialize MQTT meta data and create MQTT client access roles
+#         mqtt_metadata_manager = MqttMetaDataManager(user=instance)
+#         mqtt_metadata_manager.create_nodered_role()
+#         mqtt_metadata_manager.create_device_role()
+
+#         # Initialize MQTT clients for Node-RED and an example device
+#         mqtt_client_manager = MqttClientManager(user=instance)
+#         mqtt_client_manager.create_client(textname="Automation Tool Credentials", role_type=RoleType.NODERED.value)
+#         mqtt_client_manager.create_client(textname="Example Device", role_type=RoleType.DEVICE.value)
+
+
+# @receiver(post_save, sender=settings.AUTH_USER_MODEL)
+# def user_influxdb_and_grafana_setup(sender, instance, created, **kwargs):
+#     if created:
+#         influx_user_manager = InfluxUserManager(user=instance)
+#         influx_user_manager.create_new_influx_user_resources()
+
+#         # Create Grafana user account
+#         logger.info('Signals.py > user_influxdb_and_grafana_setup: after InfluxDB Setup')
+#         print('Signals.py > user_influxdb_and_grafana_setup: after InfluxDB Setup')
+#         grafana_user_manager = GrafanaUserManager(user=instance)
+#         logger.info('Signals.py > user_influxdb_and_grafana_setup: created grafana_user_manager instance')
+#         print('Signals.py > user_influxdb_and_grafana_setup: created grafana_user_manager instance')
+#         grafana_user_manager.create_user()
+#         logger.info('Signals.py > user_influxdb_and_grafana_setup: after grafana_user_manager.create_user()')
+#         print('Signals.py > user_influxdb_and_grafana_setup: after grafana_user_manager.create_user()')
 
 
 # TODO: Better?: Instead of signals, overwrite delete() method in models (same for create())

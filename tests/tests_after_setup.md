@@ -45,5 +45,8 @@ for credentials, see DJANGO_ADMIN_PASS in config.toml
 	exit  # to exit psql CLI
 
 ### Optional:
-Check files in /home/<user>/biomed-iot/setup_files/tmp  
+Check files in 
+```
+~/biomed-iot/setup_files/tmp
+```
 Have all variables been inserted correctly?
