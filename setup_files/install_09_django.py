@@ -42,6 +42,19 @@ def install_django(django_admin_email, django_admin_name, django_admin_pass):
     print(msg)
     log(msg, DJANGO_INSTALL_LOG_FILE_NAME)
 
+    # Command to set email_confirmed to True for the superuser
+    confirm_email_command = (
+        f'echo "from users.models import CustomUser; '
+        f"superuser = CustomUser.objects.get(username='{django_admin_name}'); "
+        f"superuser.email_confirmed = True; "
+        f'superuser.save();\" | '
+        f'runuser -u {linux_user} -- {setup_dir}/biomed_iot/venv/bin/python {setup_dir}/biomed_iot/manage.py shell'
+    )
+    run_bash(confirm_email_command, show_output=False)
+    msg = 'Superuser email confirmed'
+    print(msg)
+    log(msg, DJANGO_INSTALL_LOG_FILE_NAME)
+
     # Prepare static files directory and deploy static files
     # see: https://docs.djangoproject.com/en/5.0/howto/static-files/
     # and https://forum.djangoproject.com/t/django-and-nginx-permission-issue-on-ubuntu/26804
@@ -49,6 +62,9 @@ def install_django(django_admin_email, django_admin_name, django_admin_pass):
     log(out, DJANGO_INSTALL_LOG_FILE_NAME)
 
     out = run_bash('mkdir -p /var/www/biomed-iot/media/downloadfiles')
+    log(out, DJANGO_INSTALL_LOG_FILE_NAME)
+
+    out = run_bash(f'cp {setup_dir}/biomed_iot/media/default.jpg')
     log(out, DJANGO_INSTALL_LOG_FILE_NAME)
 
     # Add 'linux_user' to the 'www-data' group
