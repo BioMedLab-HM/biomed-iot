@@ -258,7 +258,7 @@ def create_gateway_setup_zip_file(config_path):
     publish_example_script_file_path = f"{config_path}/publish_cpu_temp.sh"
     download_folder = "/var/www/biomed-iot/media/downloadfiles"
     zip_file_path = os.path.join(download_folder, "biomed_iot_gateway.zip")
-    
+
     # Create zip file
     with zipfile.ZipFile(zip_file_path, 'w') as zipf:
         # Add cert file
@@ -267,7 +267,7 @@ def create_gateway_setup_zip_file(config_path):
         zipf.write(script_file_path, os.path.basename(script_file_path))
         # Add publish example script
         zipf.write(script_file_path, os.path.basename(publish_example_script_file_path))
-    
+
     log(f"Created zip file: {zip_file_path}")
 
 
@@ -310,12 +310,32 @@ def main():
     django_admin_email = get_confirmed_text_input('Enter email address for ' "your website's admin user")
 
     pwreset_host, pwreset_port, pwreset_email, pwreset_pass = get_credentials_for_pw_reset()
-    pw_reset_credentials = {
+    email_config = {
         'RES_EMAIL_HOST': pwreset_host,
         'RES_EMAIL_PORT': pwreset_port,
         'RES_EMAIL_ADDRESS': pwreset_email,
         'RES_EMAIL_PASSWORD': pwreset_pass,
+        'EMAIL_VERIFICATION': "false"
     }
+
+    if pwreset_host is not None:
+        question = "\nDo you want email verification to be active for registration of Biomed IoT platform users?"
+        user_answer = input(f'{question} (y/n): ').strip().lower()
+        log(question)
+
+        if user_answer == 'y':
+            # Prefer IPv4-mapped IPv6 addresses via gai.conf to make SMTP to mailserver work.
+            file_path = "/etc/gai.conf"
+            line_to_add = "precedence ::ffff:0:0/96  100\n"
+            
+            # Append the uncommented line to the end of the file
+            with open(file_path, 'a') as file:
+                file.write(line_to_add)
+
+            email_config['EMAIL_VERIFICATION'] = "true"
+            msg = "Email verification for user registration activated."
+            print(msg)
+            log(msg)
 
     """ INSTALLATION OF SOFTWARE """
 
@@ -389,7 +409,7 @@ def main():
     # Write current known config data to config.toml; essential for django setup
     current_config_data = {
         **host_config_data,
-        **pw_reset_credentials,
+        **email_config,
         **nodered_config_data,
         **influxdb_config_data,
         **grafana_config_data,
@@ -425,7 +445,7 @@ def main():
 
     all_config_data = {
         **host_config_data,
-        **pw_reset_credentials,
+        **email_config,
         **nodered_config_data,
         **influxdb_config_data,
         **grafana_config_data,

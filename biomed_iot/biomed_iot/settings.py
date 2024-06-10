@@ -103,14 +103,11 @@ DATABASES = {  # Uncomment the database to use and stay with it
     # }
 }
 
-
 AUTH_USER_MODEL = 'users.CustomUser'
-
-USE_EMAIL_VERIFICATION = False
 
 AUTHENTICATION_BACKENDS = [  # first successful auth backend will authenticate the user
     'users.backends.EmailAuthAndVerifiedBackend'  # Login with verified email + password
-] if USE_EMAIL_VERIFICATION else [
+] if config.mail.EMAIL_VERIFICATION == "true" else [
     # 'users.backends.UsernameAuthBackend',  # Login with username + password (disabled for future use of username)
     'users.backends.EmailAuthBackend'  # Login with email + password
 ]
@@ -244,22 +241,22 @@ LOGGING = {
         # },
         'core': {
             'handlers': ['file'],
-            'level': 'DEBUG',
+            'level': 'INFO',
             'propagate': False,
         },
         'users': {
             'handlers': ['file'],
-            'level': 'DEBUG',
+            'level': 'INFO',
             'propagate': False,
         },
         'revproxy': {
             'handlers': ['file'],
-            'level': 'DEBUG',
+            'level': 'INFO',
             'propagate': True,
         },
         'urllib3': {
             'handlers': ['file'],
-            'level': 'DEBUG',
+            'level': 'INFO',
             'propagate': True,
         },
     },

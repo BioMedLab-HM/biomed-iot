@@ -108,7 +108,7 @@ class NodeRedUserData(models.Model):
             if not NodeRedUserData.objects.filter(container_name=new_name).exists():
                 print(f'Returning in Generate unique container name function. New name is: {new_name}')
                 return new_name
-            
+
     @staticmethod
     def generate_credentials():
         # Define the characters to use in the password

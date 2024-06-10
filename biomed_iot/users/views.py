@@ -299,11 +299,11 @@ def code_examples(request):
 @login_required
 def setup_gateway(request):
     if request.method == 'POST':
-        
+
         # Path to the ZIP file
         file_name = 'biomed_iot_gateway.zip'
         file_path = os.path.join(settings.MEDIA_ROOT, 'downloadfiles/', file_name)
-        
+
         if os.path.exists(file_path):
             with open(file_path, 'rb') as fh:
                 response = HttpResponse(fh.read(), content_type="application/zip")

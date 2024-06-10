@@ -78,12 +78,13 @@ module.exports = {
      * property can be used. See https://nodered.org/docs/security.html for details.
      */
     adminAuth: {
-       type: "credentials",
-       users: [{
-           username: process.env.USERNAME,
-           password: process.env.PASSWORD_HASH,
-           permissions: "*"
-       }]
+        sessionExpiryTime: 60, // 86400,  // (seconds) quals one day
+        type: "credentials",
+        users: [{
+            username: process.env.USERNAME,
+            password: process.env.PASSWORD_HASH,
+            permissions: "*"
+            }]
     },
 
     // FIXME: Custom token based authentication

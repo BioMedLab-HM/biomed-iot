@@ -57,7 +57,7 @@ class NoderedContainer:
             return state
         except docker.errors.NotFound:
             return 'not_found'
-    
+
     def hash_password(self, password):
         # Generate salt
         salt = bcrypt.gensalt()
