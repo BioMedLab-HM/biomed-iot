@@ -1,6 +1,6 @@
 #!/bin/bash
 
-logo_header = "
+logo_header="
  ______   _                           _    _      _______ 
 (____  \ (_)                         | |  | |    (_______)
  ____)  ) _   ___   ____   _____   __| |  | |  ___   _    
@@ -11,7 +11,7 @@ logo_header = "
 
 echo
 echo
-echo $logo_header
+echo "$logo_header"
 echo
 echo
 echo "Enter the hostname (domain or IP-address) of Biomed IoT"
@@ -34,16 +34,7 @@ sudo apt-get -y update
 sudo apt -y install mosquitto mosquitto-clients
 mv /etc/mosquitto/mosquitto.conf /etc/mosquitto/mosquitto.conf.backup
 
-# Write lines to mosquitto.conf
-# echo "port 1883" >>/etc/mosquitto/mosquitto.conf
-# echo "allow_anonymous true" >>/etc/mosquitto/mosquitto.conf
-# echo "connection ${gatewayname}" >>/etc/mosquitto/mosquitto.conf
-# echo "address ${hostname}:8883" >>/etc/mosquitto/mosquitto.conf
-# echo "remote_password ${mqtt_password}" >>/etc/mosquitto/mosquitto.conf
-# echo "remote_username ${mqtt_username}" >>/etc/mosquitto/mosquitto.conf
-# echo 'bridge_cafile /etc/mosquitto/certs/biomed-iot.crt' >>/etc/mosquitto/mosquitto.conf
-# echo "topic # both 2 sensorbase/ in/${topic_id}/" >>/etc/mosquitto/mosquitto.conf
-sudo tee /etc/mosquitto/mosquitto.conf > /dev/null <<EOL
+tee -a /etc/mosquitto/mosquitto.conf > /dev/null <<EOL
 port 1883
 allow_anonymous true
 connection ${gatewayname}
@@ -70,7 +61,7 @@ line="* * * * * mosquitto_pub -t sensorbase/devicestatus -m '{\"$gatewayname\":1
 
 # Restart Mosquitto to apply the new configuration
 sleep 1
-sudo systemctl restart mosquitto
+systemctl restart mosquitto
 sleep 1
 
 # Display final messages

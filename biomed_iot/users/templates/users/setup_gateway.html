@@ -17,12 +17,12 @@
 {% block content %}
 <div class="card mb-3">
     <div class="card-header">
-        <h4 class="my-0 font-weight-normal">How to Setup a Gateway for Secure TLS encryption</h4>
+        <h4 class="my-0 font-weight-normal">How to Setup a Gateway for Secure TLS Encryption</h4>
     </div>
     <div class="card-body">
-        <p>Download the setup files</p>
+        <p>Download the setup files by running this command in your gateways terminal</p>
         <pre><code>curl -O https://{{ hostname }}/media/downloadfiles/biomed_iot_gateway.zip</code></pre>
-        <p>or download it by clicking the button</p>
+        <p>or download them by clicking the button</p>
         <div class="row">
             <form method="post">
                 {% csrf_token %}
@@ -31,12 +31,12 @@
         </div>
         <br>
         <p>Unzip and delete the downloaded file</p>
-        <pre><code>unzip gateway_setup.zip<br>rm -r gateway_setup.zip<br>sudo bash setup.sh</code></pre>
+        <pre><code>unzip gateway_setup.zip<br>rm gateway_setup.zip<br>sudo bash setup.sh</code></pre>
         <p>Follow the instructions: enter all necessary values (Website Domain or IP), device credentials, and topic id.</p>
         <p>When everything is set up, you can reboot or run the publish_cpu_temp.sh file to test the connection with</p>
         <pre><code>bash cputemp.sh</code></pre>
         <p>This script sends the Raspberry Pi's CPU temperature to the IoT-Plattform every 20 seconds.</p>
-        <p>Next, set up 'Automation'. An example flow in Node-RED receives the messages and stores them in the Database</p>
+        <p>Next, go to 'Automate', add credentials to mqtt and influx nodes in the example flow in Node-RED to receive the messages and stores them in the database</p>
     </div>
 </div>
 

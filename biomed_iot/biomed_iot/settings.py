@@ -185,7 +185,8 @@ STATICFILES_DIRS = [BASE_DIR / 'static']  # for development server
 STATIC_ROOT = '/var/www/biomed-iot/static/'
 
 # TODO: static files; see above
-MEDIA_ROOT = '/var/www/biomed-iot/media/'  # BASE_DIR / 'media'
+MEDIA_ROOT = '/var/www/biomed-iot/media/'
+MEDIA_DEVELOPMENT = BASE_DIR / 'media'
 MEDIA_URL = '/media/'
 
 LOGIN_REDIRECT_URL = 'core-home'
