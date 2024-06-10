@@ -32,6 +32,7 @@ urlpatterns = [
     path('devices/', user_views.devices, name='devices'),
     path('message-and-topic-structure/', user_views.message_and_topic_structure, name='message-and-topic-structure'),
     path('code-examples/', user_views.code_examples, name='code-examples'),
+    path('setup-gateway/', user_views.setup_gateway, name='setup-gateway'),
 
     path('nodered-manager/', user_views.nodered_manager, name='nodered-manager'),
     path('nodered-create/', user_views.nodered_create, name='nodered-create'),

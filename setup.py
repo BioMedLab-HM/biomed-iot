@@ -21,6 +21,7 @@ import socket
 import platform
 import re
 import time
+import zipfile
 from getpass import getpass
 from setup_files.setup_utils import (
     run_bash,
@@ -28,7 +29,8 @@ from setup_files.setup_utils import (
     get_setup_dir,
     log,
     set_setup_dir_rights,
-    get_random_string
+    get_random_string,
+    get_conf_path
 )
 from setup_files.write_config_file import generate_empty_config_data, write_config_file
 from setup_files.install_01_basic_apt_packages import install_basic_apt_packages
@@ -215,7 +217,7 @@ def get_credentials_for_pw_reset():
                 'Enter the email address ' "for the website's password reset function"
             )
             pwreset_pass = get_confirmed_text_input(
-                'Enter the password ' "for the website's password reset function",
+                'Enter the password ' "for the website's password reset function; (hidden input)",
                 hidden_input=True,
             )
             msg = 'Credentials for password reset functions have been entered'
@@ -246,6 +248,27 @@ def create_config_dir():
     config_dir = '/etc/biomed-iot'
     os.makedirs(config_dir, exist_ok=True)
     log("Directory '/etc/biomed-iot' created. Path: " + config_dir)
+
+
+def create_gateway_setup_zip_file(config_path):
+    # TODO: add pem file from Let's Encrypt for "TLS_DOMAIN"
+    # Define paths
+    cert_file_path = "/etc/ssl/certs/biomed-iot.crt"
+    script_file_path = f"{config_path}/gateway_setup.sh"
+    publish_example_script_file_path = f"{config_path}/publish_cpu_temp.sh"
+    download_folder = "/var/www/biomed-iot/media/downloadfiles"
+    zip_file_path = os.path.join(download_folder, "biomed_iot_gateway.zip")
+    
+    # Create zip file
+    with zipfile.ZipFile(zip_file_path, 'w') as zipf:
+        # Add cert file
+        zipf.write(cert_file_path, os.path.basename(cert_file_path))
+        # Add script file
+        zipf.write(script_file_path, os.path.basename(script_file_path))
+        # Add publish example script
+        zipf.write(script_file_path, os.path.basename(publish_example_script_file_path))
+    
+    log(f"Created zip file: {zip_file_path}")
 
 
 def main():
@@ -309,8 +332,6 @@ def main():
 
     # Capture the start time to measure the duration of the setup routine
     start_time = time.time()
-
-    # TODO: build gateway zip file
 
     create_tmp_dir()
     create_config_dir()
@@ -393,6 +414,10 @@ def main():
     install_nginx(setup_scheme, domain, ip_address, hostname)
     print('NGINX installed')
     log('NGINX installed')
+
+    if setup_scheme == "TLS_NO_DOMAIN": # add pem file from Let's Encrypt for "TLS_DOMAIN"
+        config_path = get_conf_path()
+        create_gateway_setup_zip_file(config_path)
 
     set_setup_dir_rights()
 

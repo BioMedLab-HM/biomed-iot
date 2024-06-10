@@ -28,6 +28,10 @@ server {
         alias /var/www/biomed-iot/static/;
     }
 
+    location /media/ {
+        root /var/www/biomed-iot/media/;
+    }
+
     # location and proxy pass to gunicorn server (the Django server)
     location / {
         include proxy_params;

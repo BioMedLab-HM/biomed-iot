@@ -34,7 +34,6 @@ RUN rm -f /usr/src/node-red/node_modules/@node-red/nodes/core/storage/23-watch.j
 
 # use custom settings.js for authentication
 COPY settings.js /data/settings.js
-# COPY auth-middleware.js /data/auth-middleware.js
 
 # Set the ownership of the files to the node-red user
 RUN chown -R node-red:node-red /data

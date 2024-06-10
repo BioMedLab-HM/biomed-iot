@@ -48,6 +48,9 @@ def install_django(django_admin_email, django_admin_name, django_admin_pass):
     out = run_bash('mkdir -p /var/www/biomed-iot/static/')
     log(out, DJANGO_INSTALL_LOG_FILE_NAME)
 
+    out = run_bash('mkdir -p /var/www/biomed-iot/media/downloadfiles')
+    log(out, DJANGO_INSTALL_LOG_FILE_NAME)
+
     # Add 'linux_user' to the 'www-data' group
     out = run_bash(f'usermod -aG www-data {linux_user}')
     log(out, DJANGO_INSTALL_LOG_FILE_NAME)

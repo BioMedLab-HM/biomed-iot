@@ -44,9 +44,10 @@
                             <li class="nav-item dropdown">
                                 <a class="nav-link dropdown-toggle {% is_active 'devices' 'code-examples' 'message-and-topic-structure' %}" id="navbarDropdown" href="#" role="button" data-bs-toggle="dropdown" aria-expanded="false">Devices</a>
                                 <ul class="dropdown-menu dropdown-menu-end" aria-labelledby="navbarDropdown">
-                                    <li><a class="dropdown-item" href="{% url 'devices' %}">My Devices</a></li>
-                                    <li><a class="dropdown-item" href="{% url 'code-examples' %}">Code Examples</a></li>
+                                    <li><a class="dropdown-item" href="{% url 'devices' %}">Device List</a></li>
                                     <li><a class="dropdown-item" href="{% url 'message-and-topic-structure' %}">Message & Topic Structure</a></li>
+                                    <li><a class="dropdown-item" href="{% url 'setup-gateway' %}">Setup Gateway</a></li>
+                                    <li><a class="dropdown-item" href="{% url 'code-examples' %}">Code Examples</a></li>
                                 </ul>
                             </li>
                             <li class="nav-item"><a class="nav-link {% is_active 'Automate' %}" aria-current="page" href="{% url 'nodered-open' %}">Automate</a></li>

@@ -54,7 +54,7 @@ def log(message, log_file_name='main.log'):
 
 def run_bash(command, show_output=True):
 	"""
-	Execute a Bash command, optionally print its output to the console,
+	Execute a Bash command, optionally print its output to the terminal,
 	and return its output or an error message.
 	"""
 	if show_output:

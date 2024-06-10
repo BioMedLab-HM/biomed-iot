@@ -1,4 +1,5 @@
 import datetime
+import os
 import jwt
 import requests
 import secrets
@@ -12,7 +13,7 @@ from django.core.exceptions import ObjectDoesNotExist
 from django.contrib.auth import authenticate, login
 from django.shortcuts import render, redirect
 from django.contrib import messages
-from django.http import HttpResponse, JsonResponse
+from django.http import Http404, HttpResponse, JsonResponse
 from django.db import IntegrityError
 from django.db import transaction
 from .models import NodeRedUserData, CustomUser, Profile  # noqa: F401
@@ -293,6 +294,31 @@ def code_examples(request):
     page_title = 'Code Examples'
     context = {'title': page_title, 'examples': examples_content, 'thin_navbar': False}
     return render(request, 'users/code_examples.html', context)
+
+
+@login_required
+def setup_gateway(request):
+    if request.method == 'POST':
+        
+        # Path to the ZIP file
+        file_name = 'biomed_iot_gateway.zip'
+        file_path = os.path.join(settings.MEDIA_ROOT, 'downloadfiles/', file_name)
+        
+        if os.path.exists(file_path):
+            with open(file_path, 'rb') as fh:
+                response = HttpResponse(fh.read(), content_type="application/zip")
+                response['Content-Disposition'] = 'attachment; filename=' + file_name
+                return response
+        else:
+            raise Http404("File not found")
+
+    if config.host.DOMAIN != "":
+        hostname = config.host.DOMAIN
+    else:
+        hostname = config.host.IP
+    page_title = 'Gateway Setup'
+    context = {'title': page_title, 'hostname': hostname}
+    return render(request, 'users/setup_gateway.html', context)
 
 
 def get_or_create_nodered_user_data(request):

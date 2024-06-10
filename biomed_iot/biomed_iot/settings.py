@@ -178,8 +178,6 @@ USE_TZ = True
 
 
 # Static files (CSS, JavaScript, Images)
-# https://docs.djangoproject.com/en/4.2/howto/static-files/
-
 # see "Deploying static files" (https://docs.djangoproject.com/en/5.0/howto/static-files/)
 # also see: https://forum.djangoproject.com/t/django-and-nginx-permission-issue-on-ubuntu/26804
 STATIC_URL = '/static/'
@@ -187,7 +185,7 @@ STATICFILES_DIRS = [BASE_DIR / 'static']  # for development server
 STATIC_ROOT = '/var/www/biomed-iot/static/'
 
 # TODO: static files; see above
-MEDIA_ROOT = BASE_DIR / 'media'
+MEDIA_ROOT = '/var/www/biomed-iot/media/'  # BASE_DIR / 'media'
 MEDIA_URL = '/media/'
 
 LOGIN_REDIRECT_URL = 'core-home'
