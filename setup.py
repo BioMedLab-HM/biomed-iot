@@ -318,7 +318,7 @@ def main():
         'EMAIL_VERIFICATION': "false"
     }
 
-    if pwreset_host is not None:
+    if pwreset_host != "":
         question = "\nDo you want email verification to be active for registration of Biomed IoT platform users?"
         user_answer = input(f'{question} (y/n): ').strip().lower()
         log(question)

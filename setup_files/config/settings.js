@@ -78,7 +78,7 @@ module.exports = {
      * property can be used. See https://nodered.org/docs/security.html for details.
      */
     adminAuth: {
-        sessionExpiryTime: 60, // 86400,  // (seconds) quals one day
+        sessionExpiryTime: 86400,  // 86400 seconds equal one day
         type: "credentials",
         users: [{
             username: process.env.USERNAME,
