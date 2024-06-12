@@ -54,7 +54,7 @@ class CustomUserManager(BaseUserManager):
 
         return self.create_user(username=username, email=email, password=password, **extra_fields)
     
-    def handle_user_creation_setup(self, user):
+    def handle_post_creation_setup(self, user):
         try:
             # Below signals setup routines here except save_profile
 
