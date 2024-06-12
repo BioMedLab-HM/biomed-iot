@@ -33,9 +33,10 @@ class CustomUserManager(BaseUserManager):
         email = self.normalize_email(email)
         user = self.model(username=username, email=email, **extra_fields)
         user.set_password(password)
-        with transaction.atomic():
-            user.save(using=self._db)
-            self.handle_post_creation_setup(user)
+        user.save(using=self._db)
+        # with transaction.atomic():
+        #     user.save(using=self._db)
+        #     self.handle_post_creation_setup(user)
 
         return user
 
@@ -54,37 +55,31 @@ class CustomUserManager(BaseUserManager):
 
         return self.create_user(username=username, email=email, password=password, **extra_fields)
     
-    def handle_post_creation_setup(self, user):
-        try:
-            # Below signals setup routines here except save_profile
+    # def handle_post_creation_setup(self, user):
+    #     try:
+    #         # Below signals setup routines here except save_profile
 
-            Profile.objects.create(user=user)
-            user.profile.save()
+    #         Profile.objects.create(user=user)
+    #         user.profile.save()
 
-            # Initialize MQTT meta data and create MQTT client access roles
-            mqtt_metadata_manager = MqttMetaDataManager(user=user)
-            mqtt_metadata_manager.create_nodered_role()
-            mqtt_metadata_manager.create_device_role()
+    #         # Initialize MQTT meta data and create MQTT client access roles
+    #         mqtt_metadata_manager = MqttMetaDataManager(user=user)
+    #         mqtt_metadata_manager.create_nodered_role()
+    #         mqtt_metadata_manager.create_device_role()
 
-            # Initialize MQTT clients for Node-RED and an example device
-            mqtt_client_manager = MqttClientManager(user=user)
-            mqtt_client_manager.create_client(textname="Automation Tool Credentials", role_type=RoleType.NODERED.value)
-            mqtt_client_manager.create_client(textname="Example Device", role_type=RoleType.DEVICE.value)
+    #         # Initialize MQTT clients for Node-RED and an example device
+    #         mqtt_client_manager = MqttClientManager(user=user)
+    #         mqtt_client_manager.create_client(textname="Automation Tool Credentials", role_type=RoleType.NODERED.value)
+    #         mqtt_client_manager.create_client(textname="Example Device", role_type=RoleType.DEVICE.value)
 
-            influx_user_manager = InfluxUserManager(user=user)
-            influx_user_manager.create_new_influx_user_resources()
-
-            # Create Grafana user account
-            logger.info('Signals.py > user_influxdb_and_grafana_setup: after InfluxDB Setup')
-            print('Signals.py > user_influxdb_and_grafana_setup: after InfluxDB Setup')
-            grafana_user_manager = GrafanaUserManager(user=user)
-            logger.info('Signals.py > user_influxdb_and_grafana_setup: created grafana_user_manager instance')
-            print('Signals.py > user_influxdb_and_grafana_setup: created grafana_user_manager instance')
-            grafana_user_manager.create_user()
-            logger.info('Signals.py > user_influxdb_and_grafana_setup: after grafana_user_manager.create_user()')
-            print('Signals.py > user_influxdb_and_grafana_setup: after grafana_user_manager.create_user()')
-        except Exception as e:
-            logger.error('Error during post user creation setup: %s', e)
+    #         influx_user_manager = InfluxUserManager(user=user)
+    #         influx_user_manager.create_new_influx_user_resources()
+    #         print("after influx")
+    #         # Create Grafana user account
+    #         grafana_user_manager = GrafanaUserManager(user=user)
+    #         grafana_user_manager.create_user()
+    #     except Exception as e:
+    #         print('Error during post user creation setup: %s', e)
 
 
 class CustomUser(AbstractUser):
