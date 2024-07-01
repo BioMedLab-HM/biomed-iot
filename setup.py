@@ -435,7 +435,7 @@ def main():
     print('NGINX installed')
     log('NGINX installed')
 
-    if setup_scheme == "TLS_NO_DOMAIN": # add pem file from Let's Encrypt for "TLS_DOMAIN"
+    if setup_scheme == "TLS_NO_DOMAIN":
         config_path = get_conf_path()
         create_gateway_setup_zip_file(config_path)
 
