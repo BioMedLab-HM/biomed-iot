@@ -1,6 +1,6 @@
-import datetime
 import os
-import jwt
+# import jwt  # TODO: for auto-login into Node-RED
+# import datetime # TODO: for auto-login into Node-RED with jwt
 import requests
 import secrets
 import json
@@ -13,7 +13,7 @@ from django.core.exceptions import ObjectDoesNotExist
 from django.contrib.auth import authenticate, login
 from django.shortcuts import render, redirect
 from django.contrib import messages
-from django.http import Http404, HttpResponse, JsonResponse
+from django.http import HttpResponse, JsonResponse
 from django.db import IntegrityError
 from django.db import transaction
 from .models import NodeRedUserData, CustomUser, Profile  # noqa: F401
@@ -312,7 +312,6 @@ def setup_gateway(request):
         else:
             messages.info(request, "Gateway is currently only available for setups using TLS (https). No file downloaded.")
             return redirect('setup-gateway')
-            # raise Http404("File not found")
 
     if config.host.DOMAIN != "":
         hostname = config.host.DOMAIN

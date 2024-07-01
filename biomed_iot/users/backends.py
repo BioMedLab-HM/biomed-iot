@@ -53,13 +53,13 @@ class EmailAuthBackend(ModelBackend):
             # Try to fetch the user by searching the username field
             # user = CustomUser.objects.filter(email=username).first()
             user = CustomUser.objects.get(email=username)
-            logger.info('User fetched: {user}')
+            logger.info(f'User fetched: {user}')
 
             if user.check_password(password):
                 return user
             return None
         except CustomUser.DoesNotExist:
-            logger.error('User does not exist for username: {username}', )
+            logger.error(f'User does not exist for username: {username}', )
             return None
 
     def get_user(self, user_id):
@@ -87,10 +87,10 @@ class EmailAuthAndVerifiedBackend(ModelBackend):
                 if user.email_confirmed:
                     return user
                 else:
-                    logger.info('Login attempt with unverified email: %s', username)
+                    logger.info(f'Login attempt with unverified email: {username}')
             return None
         except CustomUser.DoesNotExist:
-            logger.error('User does not exist for username: {username}', )
+            logger.error(f'User does not exist for username: {username}', )
             return None
 
     def get_user(self, user_id):

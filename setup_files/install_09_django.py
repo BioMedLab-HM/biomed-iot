@@ -29,16 +29,48 @@ def install_django(django_admin_email, django_admin_name, django_admin_pass):
     set_setup_dir_rights()
     requirements_install_output = run_bash(requirements_command)
     log(requirements_install_output, DJANGO_INSTALL_LOG_FILE_NAME)
+    
+    # Prepare static files directory and deploy static files
+    # see: https://docs.djangoproject.com/en/5.0/howto/static-files/
+    # and https://forum.djangoproject.com/t/django-and-nginx-permission-issue-on-ubuntu/26804
+    out = run_bash('mkdir -p /var/www/biomed-iot/static/')
+    log(out, DJANGO_INSTALL_LOG_FILE_NAME)
 
+    # Create folder for media files and download files for production server
     out = run_bash('mkdir -p /var/www/biomed-iot/media/downloadfiles')
     log(out, DJANGO_INSTALL_LOG_FILE_NAME)
 
+    # Add current 'linux_user' to the 'www-data' group.
+    out = run_bash(f'usermod -aG www-data {linux_user}')
+    log(out, DJANGO_INSTALL_LOG_FILE_NAME)
+
+    # Change the group ownership of the directory to 'www-data'
+    out = run_bash(f'chown -R {linux_user}:www-data /var/www/biomed-iot/')
+    log(out, DJANGO_INSTALL_LOG_FILE_NAME)
+
+    # Set permissions to allow group members to write
+    out = run_bash('chmod 2775 /var/www/biomed-iot/')
+    log(out, DJANGO_INSTALL_LOG_FILE_NAME)
+
+    # Collect static files
+    collect_static_command = (
+        f"runuser -u {linux_user} -- bash -c 'source {setup_dir}/biomed_iot/venv/bin/activate && "
+        f'{setup_dir}/biomed_iot/venv/bin/python {setup_dir}/biomed_iot/manage.py collectstatic --noinput && '
+        f"deactivate'"
+    )
+    set_setup_dir_rights()
+    collectstatic_output = run_bash(collect_static_command)
+    log(collectstatic_output, DJANGO_INSTALL_LOG_FILE_NAME)
+
+    # Copy media files to folder for production server
     out = run_bash(f'cp {setup_dir}/biomed_iot/media/default.jpg /var/www/biomed-iot/media/')
+    print(out)
     log(out, DJANGO_INSTALL_LOG_FILE_NAME)
     
     out = run_bash(f'cp {setup_dir}/biomed_iot/media/biomed_iot.png /var/www/biomed-iot/media/')
+    print(out)
     log(out, DJANGO_INSTALL_LOG_FILE_NAME)
-    
+
     # Create Django superuser
     django_superuser_command = (
         f'echo "from users.models import CustomUser; '
@@ -63,36 +95,6 @@ def install_django(django_admin_email, django_admin_name, django_admin_pass):
     msg = 'Superuser email set to confirmed'
     print(msg)
     log(msg, DJANGO_INSTALL_LOG_FILE_NAME)
-
-    # Prepare static files directory and deploy static files
-    # see: https://docs.djangoproject.com/en/5.0/howto/static-files/
-    # and https://forum.djangoproject.com/t/django-and-nginx-permission-issue-on-ubuntu/26804
-    out = run_bash('mkdir -p /var/www/biomed-iot/static/')
-    log(out, DJANGO_INSTALL_LOG_FILE_NAME)
-
-    # moved creation of directory /var/www/biomed-iot/media/downloadfiles to before superuser creation
-
-    # Add 'linux_user' to the 'www-data' group
-    out = run_bash(f'usermod -aG www-data {linux_user}')
-    log(out, DJANGO_INSTALL_LOG_FILE_NAME)
-
-    # Change the group ownership of the directory to 'www-data'
-    out = run_bash(f'chown -R {linux_user}:www-data /var/www/biomed-iot/')
-    log(out, DJANGO_INSTALL_LOG_FILE_NAME)
-
-    # Set permissions to allow group members to write
-    out = run_bash('chmod 2775 /var/www/biomed-iot/')
-    log(out, DJANGO_INSTALL_LOG_FILE_NAME)
-
-    # Collect static files
-    collect_static_command = (
-        f"runuser -u {linux_user} -- bash -c 'source {setup_dir}/biomed_iot/venv/bin/activate && "  # was www-data
-        f'{setup_dir}/biomed_iot/venv/bin/python {setup_dir}/biomed_iot/manage.py collectstatic --noinput && '
-        f"deactivate'"
-    )
-    set_setup_dir_rights()
-    collectstatic_output = run_bash(collect_static_command)
-    log(collectstatic_output, DJANGO_INSTALL_LOG_FILE_NAME)
 
     config_data = {
         'DJANGO_SECRET_KEY': django_secret,
