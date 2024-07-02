@@ -200,15 +200,15 @@ def get_domain(setup_scheme):
 
 def get_credentials_for_pw_reset():
     question = (
-        "\nDo you want to Enter the credentials for the website's "
-        'password reset function?\nYou can add the credentials for the '
-        "website's password reset function later in /etc/biomed-iot/config.toml"
+        "\nDo you want to Enter the credentials for for a SMTP email server for the website's "
+        "password reset and email verification function?\nYou can add these credentials "
+        'later in /etc/biomed-iot/config.toml. There you also would need to set EMAIL_VERIFICATION to "true" manually'
     )
     while True:
         user_answer = input(f'{question} (y/n): ').strip().lower()
         if user_answer == 'y':
             pwreset_host = get_confirmed_text_input(
-                'Enter the host ' "for the website's password reset function (e.g. smtp.gmail.com)"
+                "Enter the host for the website's password reset or email verification function (e.g. smtp.gmail.com)"
             )
             pwreset_port = int(
                 get_confirmed_text_input('Enter the port ' "for the website's password reset function (e.g. 587)")

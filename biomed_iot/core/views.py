@@ -28,7 +28,7 @@ def contact_us(request):
 def imprint(request):
 	context = {}
 
-	page_title = 'Imprint'
+	page_title = 'Imprint - Impressum'
 	context = {'title': page_title, 'thin_navbar': False}
 	return render(request, 'core/imprint.html', context)
 
@@ -36,7 +36,7 @@ def imprint(request):
 def privacy_policy(request):
 	context = {}
 
-	page_title = 'Privacy Policy'
+	page_title = 'Privacy Policy - Datenschutzerklärung'
 	context = {'title': page_title, 'thin_navbar': False}
 	return render(request, 'core/privacy_policy.html', context)
 
