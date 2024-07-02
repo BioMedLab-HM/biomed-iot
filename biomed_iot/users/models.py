@@ -3,14 +3,10 @@ import random
 import string
 import logging
 from PIL import Image
-from django.db import models, transaction
+from django.db import models
 from django.contrib.auth.models import AbstractUser, BaseUserManager
 from django.utils.translation import gettext_lazy as _  # for automatic translation in case if it is implemented later
 from django.conf import settings
-from biomed_iot.config_loader import config
-from .services.mosquitto_utils import MqttClientManager, MqttMetaDataManager, RoleType
-from .services.grafana_utils import GrafanaUserManager
-from .services.influx_utils import InfluxUserManager
 
 
 logger = logging.getLogger(__name__)
@@ -34,9 +30,6 @@ class CustomUserManager(BaseUserManager):
         user = self.model(username=username, email=email, **extra_fields)
         user.set_password(password)
         user.save(using=self._db)
-        # with transaction.atomic():
-        #     user.save(using=self._db)
-        #     self.handle_post_creation_setup(user)
 
         return user
 
@@ -54,32 +47,6 @@ class CustomUserManager(BaseUserManager):
             raise ValueError(_('Superuser must have is_superuser=True.'))
 
         return self.create_user(username=username, email=email, password=password, **extra_fields)
-    
-    # def handle_post_creation_setup(self, user):
-    #     try:
-    #         # Below signals setup routines here except save_profile
-
-    #         Profile.objects.create(user=user)
-    #         user.profile.save()
-
-    #         # Initialize MQTT meta data and create MQTT client access roles
-    #         mqtt_metadata_manager = MqttMetaDataManager(user=user)
-    #         mqtt_metadata_manager.create_nodered_role()
-    #         mqtt_metadata_manager.create_device_role()
-
-    #         # Initialize MQTT clients for Node-RED and an example device
-    #         mqtt_client_manager = MqttClientManager(user=user)
-    #         mqtt_client_manager.create_client(textname="Automation Tool Credentials", role_type=RoleType.NODERED.value)
-    #         mqtt_client_manager.create_client(textname="Example Device", role_type=RoleType.DEVICE.value)
-
-    #         influx_user_manager = InfluxUserManager(user=user)
-    #         influx_user_manager.create_new_influx_user_resources()
-    #         print("after influx")
-    #         # Create Grafana user account
-    #         grafana_user_manager = GrafanaUserManager(user=user)
-    #         grafana_user_manager.create_user()
-    #     except Exception as e:
-    #         print('Error during post user creation setup: %s', e)
 
 
 class CustomUser(AbstractUser):

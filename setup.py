@@ -202,7 +202,8 @@ def get_credentials_for_pw_reset():
     question = (
         "\nDo you want to Enter the credentials for for a SMTP email server for the website's "
         "password reset and email verification function?\nYou can add these credentials "
-        'later in /etc/biomed-iot/config.toml. There you also would need to set EMAIL_VERIFICATION to "true" manually'
+        "later in /etc/biomed-iot/config.toml. There, in this case you would also need to "
+        'set EMAIL_VERIFICATION to "true" manually'
     )
     while True:
         user_answer = input(f'{question} (y/n): ').strip().lower()
@@ -285,8 +286,8 @@ def main():
     ip_address = run_bash("hostname --all-ip-addresses | awk '{print $1}'", show_output=False)
     linux_user = get_linux_user()
     setup_dir = get_setup_dir()
-    django_admin_name = 'admin-' + get_random_string(5)
-    django_admin_pass = 'Dj4' + get_random_string(3) + '-' + get_random_string(6) + '-' + get_random_string(6)
+    django_admin_name = 'admin'
+    django_admin_pass = get_random_string(6) + '-' + get_random_string(6) + '-' + get_random_string(6)
     pwreset_email = None
     pwreset_pass = None
     domain = ''
@@ -319,7 +320,8 @@ def main():
     }
 
     if pwreset_host != "":
-        question = "\nDo you want email verification to be active for registration of Biomed IoT platform users?"
+        question = ("\nDo you want email verification to be active for registration of Biomed IoT platform users? "
+                    "Recommended for public servers!")
         user_answer = input(f'{question} (y/n): ').strip().lower()
         log(question)
 
@@ -327,7 +329,7 @@ def main():
             # Prefer IPv4-mapped IPv6 addresses via gai.conf to make SMTP to mailserver work.
             file_path = "/etc/gai.conf"
             line_to_add = "precedence ::ffff:0:0/96  100\n"
-            
+
             # Append the uncommented line to the end of the file
             with open(file_path, 'a') as file:
                 file.write(line_to_add)

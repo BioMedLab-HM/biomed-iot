@@ -81,7 +81,7 @@ class InfluxUserManager:
             raise Exception(f'Failed to create token: {response.text}')
 
     def _write_initial_test_data(self, bucket_name, bucket_token):
-        write_client = InfluxDBClient(url=self.url, token=bucket_token, org=self.org_id).write_api(write_options=SYNCHRONOUS)
+        write_client = InfluxDBClient(url=self.url, token=bucket_token, org=self.org_id).write_api(write_options=SYNCHRONOUS)  # noqa
         point = Point('UltimateQuestion').tag('Computer', 'DeepThought').field('Answer', 42)  # Just a sample
         write_client.write(bucket=bucket_name, org=self.org_id, record=point)
 

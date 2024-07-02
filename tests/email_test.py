@@ -2,4 +2,7 @@
 from django.core.mail import send_mail
 from django.conf import settings
 
-send_mail('Test Email','This is a test email from Django.',settings.EMAIL_HOST_USER,['rene.sesgoer@gmail.com'],fail_silently=False)
+subject = 'Test Email'
+message = 'This is a test email from Django.'
+email_address = 'ADD_EMAIL_FOR_TEST'
+send_mail(subject,message,settings.EMAIL_HOST_USER,[email_address],fail_silently=False)

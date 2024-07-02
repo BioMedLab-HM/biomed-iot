@@ -1,6 +1,5 @@
 from datetime import datetime
 import re
-from django.utils import timezone
 from django import forms
 # from django.contrib.auth.models import User
 from django.contrib.auth.forms import UserCreationForm, AuthenticationForm
@@ -81,7 +80,8 @@ class DeleteDataForm(forms.Form):
         for pair in tag_pairs:
             match = tag_pattern.match(pair)
             if not match:
-                raise forms.ValidationError(f"Tag format error in '{pair}'. Ensure format is 'key=value' with no empty key or value.")
+                raise forms.ValidationError(f"Tag format error in '{pair}'. Ensure format is 'key=value' "
+                                            "with no empty key or value.")
             key, value = match.groups()
             tags_dict[key] = value
 

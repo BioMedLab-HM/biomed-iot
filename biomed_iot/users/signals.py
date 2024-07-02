@@ -3,9 +3,8 @@ from django.db.models.signals import post_save, pre_delete  # noqa
 # settings.AUTH_USER_MODEL instead of importing the user model directly
 from django.dispatch import receiver
 from django.conf import settings
-from django.db import transaction
 from django.core.exceptions import ObjectDoesNotExist
-from .models import InfluxUserData, MqttClient, MqttMetaData, Profile, NodeRedUserData  # noqa
+from .models import Profile, NodeRedUserData  # noqa
 from .services.mosquitto_utils import MqttMetaDataManager, MqttClientManager, RoleType  # noqa
 from .services.nodered_utils import NoderedContainer
 from .services.influx_utils import InfluxUserManager
@@ -13,78 +12,6 @@ from .services.grafana_utils import GrafanaUserManager
 
 
 logger = logging.getLogger(__name__)
-
-
-# @receiver(post_save, sender=settings.AUTH_USER_MODEL)
-# def post_user_creation_setup(sender, instance, created, **kwargs):
-#     if created:
-#         transaction.on_commit(lambda: handle_user_creation_setup(instance))
-
-# def handle_user_creation_setup(instance):
-#     try:
-#         # Below signals setup routines here except save_profile
-
-#         Profile.objects.create(user=instance)
-#         instance.profile.save()
-
-#         # Initialize MQTT meta data and create MQTT client access roles
-#         mqtt_metadata_manager = MqttMetaDataManager(user=instance)
-#         mqtt_metadata_manager.create_nodered_role()
-#         mqtt_metadata_manager.create_device_role()
-
-#         # Initialize MQTT clients for Node-RED and an example device
-#         mqtt_client_manager = MqttClientManager(user=instance)
-#         mqtt_client_manager.create_client(textname="Automation Tool Credentials", role_type=RoleType.NODERED.value)
-#         mqtt_client_manager.create_client(textname="Example Device", role_type=RoleType.DEVICE.value)
-
-#         influx_user_manager = InfluxUserManager(user=instance)
-#         influx_user_manager.create_new_influx_user_resources()
-
-#         # Create Grafana user account
-#         logger.info('Signals.py > user_influxdb_and_grafana_setup: after InfluxDB Setup')
-#         print('Signals.py > user_influxdb_and_grafana_setup: after InfluxDB Setup')
-#         grafana_user_manager = GrafanaUserManager(user=instance)
-#         logger.info('Signals.py > user_influxdb_and_grafana_setup: created grafana_user_manager instance')
-#         print('Signals.py > user_influxdb_and_grafana_setup: created grafana_user_manager instance')
-#         grafana_user_manager.create_user()
-#         logger.info('Signals.py > user_influxdb_and_grafana_setup: after grafana_user_manager.create_user()')
-#         print('Signals.py > user_influxdb_and_grafana_setup: after grafana_user_manager.create_user()')
-#     except Exception as e:
-#         logger.error('Error during post user creation setup: %s', e)
-
-
-# @receiver(post_save, sender=settings.AUTH_USER_MODEL)
-# def post_user_creation_setup(sender, instance, created, **kwargs):
-#     """Handle post-user creation setup."""
-
-#     if created:
-#         # Below signals setup routines here except save_profile
-
-#         Profile.objects.create(user=instance)
-#         instance.profile.save()
-#         logger.info("After profile")
-#         # Initialize MQTT meta data and create MQTT client access roles
-#         mqtt_metadata_manager = MqttMetaDataManager(user=instance)
-#         mqtt_metadata_manager.create_nodered_role()
-#         mqtt_metadata_manager.create_device_role()
-#         logger.info("After metadata")
-#         # Initialize MQTT clients for Node-RED and an example device
-#         mqtt_client_manager = MqttClientManager(user=instance)
-#         mqtt_client_manager.create_client(textname="Automation Tool Credentials", role_type=RoleType.NODERED.value)
-#         mqtt_client_manager.create_client(textname="Example Device", role_type=RoleType.DEVICE.value)
-#         logger.info("After client create")
-#         influx_user_manager = InfluxUserManager(user=instance)
-#         influx_user_manager.create_new_influx_user_resources()
-#         logger.info("After Influx")
-#         # Create Grafana user account
-#         logger.info('Signals.py > user_influxdb_and_grafana_setup: after InfluxDB Setup')
-#         print('Signals.py > user_influxdb_and_grafana_setup: after InfluxDB Setup')
-#         grafana_user_manager = GrafanaUserManager(user=instance)
-#         logger.info('Signals.py > user_influxdb_and_grafana_setup: created grafana_user_manager instance')
-#         print('Signals.py > user_influxdb_and_grafana_setup: created grafana_user_manager instance')
-#         grafana_user_manager.create_user()
-#         logger.info('Signals.py > user_influxdb_and_grafana_setup: after grafana_user_manager.create_user()')
-#         print('Signals.py > user_influxdb_and_grafana_setup: after grafana_user_manager.create_user()')
 
 
 @receiver(post_save, sender=settings.AUTH_USER_MODEL)

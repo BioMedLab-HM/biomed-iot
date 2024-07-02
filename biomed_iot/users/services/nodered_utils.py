@@ -1,12 +1,9 @@
 # Utility functions for Nodered
-import json
 import os
 import subprocess
 import logging
 import bcrypt
 import docker
-import tempfile  # was used for: Create a temporary file to save the modified JSON (see below)
-from docker.types import Mount
 import requests
 from biomed_iot.config_loader import config
 from . import server_utils
@@ -126,15 +123,15 @@ class NoderedContainer:
         stream.seek(0)
         container.put_archive(path=os.path.dirname(dest_path), data=stream)
 
-    def update_flows(self, new_flows_json):
-        node_red_flows_url = f'http://localhost:{self.port}/flows'
+    # def update_flows(self, new_flows_json):
+    #     node_red_flows_url = f'http://localhost:{self.port}/flows'
 
-        headers = {'Content-Type': 'application/json'}
-        response = requests.post(node_red_flows_url, headers=headers, data=new_flows_json)
-        if response.status_code == 204:
-            logger.info("Flows successfully updated.")
-        else:
-            logger.error("Failed to update flows:", response.status_code, response.text)
+    #     headers = {'Content-Type': 'application/json'}
+    #     response = requests.post(node_red_flows_url, headers=headers, data=new_flows_json)
+    #     if response.status_code == 204:
+    #         logger.info("Flows successfully updated.")
+    #     else:
+    #         logger.error("Failed to update flows:", response.status_code, response.text)
 
     def get_auth_token(self, username, password):
         url = f"http://localhost:{self.port}/auth/token"  # {config.host.IP}

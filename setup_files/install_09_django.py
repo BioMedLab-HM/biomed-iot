@@ -44,7 +44,7 @@ def install_django(django_admin_email, django_admin_name, django_admin_pass):
     out = run_bash(f'cp {setup_dir}/biomed_iot/media/default.jpg /var/www/biomed-iot/media/')
     print(out)
     log(out, DJANGO_INSTALL_LOG_FILE_NAME)
-    
+
     out = run_bash(f'cp {setup_dir}/biomed_iot/media/biomed_iot.png /var/www/biomed-iot/media/')
     print(out)
     log(out, DJANGO_INSTALL_LOG_FILE_NAME)

@@ -7,10 +7,9 @@ import json
 import logging
 from influxdb_client import InfluxDBClient
 from django.contrib.auth.decorators import login_required
-from django.utils.translation import gettext_lazy as _
 from django.utils.decorators import method_decorator
 from django.core.exceptions import ObjectDoesNotExist
-from django.contrib.auth import authenticate, login
+from django.contrib.auth import login
 from django.shortcuts import render, redirect
 from django.contrib import messages
 from django.http import HttpResponse, JsonResponse
@@ -21,6 +20,7 @@ from .forms import UserRegisterForm, UserUpdateForm, UserLoginForm, MqttClientFo
 from .services.mosquitto_utils import MqttMetaDataManager, MqttClientManager, RoleType
 from .services.nodered_utils import NoderedContainer, update_nodered_nginx_conf
 from .services.code_loader import load_code_examples, load_nodered_flow_examples
+from .services.email_templates import registration_confirmation_email
 from biomed_iot.config_loader import config
 from revproxy.views import ProxyView
 # For classed based login view, remove comment after tests
@@ -37,36 +37,30 @@ logger = logging.getLogger(__name__)
 
 
 def send_verification_email(user, request):
-    logger.debug('In send_verification_email')
-    # Call this function right after creating the user instance in your registration logic
+    # To be called right after creating the user instance in the registration logic
     token = default_token_generator.make_token(user)
-    logger.debug('In send_verification_email: After token creation')
     uid = urlsafe_base64_encode(force_bytes(user.pk))
-    logger.debug('In send_verification_email: After uid creation')
     url = request.build_absolute_uri(reverse('verify-email', kwargs={'uidb64': uid, 'token': token}))
-    logger.debug('In send_verification_email: After url build')
-    message = f'Biomed IoT\n\nPlease confirm your email by clicking on the link below:\n\n{url}'
-    logger.debug('In send_verification_email: before send_mail()')
+    message = registration_confirmation_email(url)
+    subject = 'Biomed IoT - Verify email address'
     try:
-        send_mail('Biomed IoT - Confirm your email', message, settings.EMAIL_HOST_USER, [user.email], fail_silently=False)
+        send_mail(subject, message, settings.EMAIL_HOST_USER, [user.email], fail_silently=False)
     except Exception as e:
         logger.error(f'Failed to send email: {e}')
-    logger.info('In send_verification_email: After send_mail()')
 
 
 def register(request):
     if request.method == 'POST':
         form = UserRegisterForm(request.POST)
         if form.is_valid():
-            logger.info('register view: Form is valid')
             user = None
             try:
                 user = form.save()  # noqa F841
-                logger.info('register view: Form is saved')
                 if config.mail.EMAIL_VERIFICATION == "true":
                     send_verification_email(user, request)
-                    logger.info('register view: verification email sent')
-                    messages.success(request, 'Your account has been created! Click the link in the confirmation email that was sent to you.')
+                    msg = ('Your account has been created! '
+                           'Click the link in the confirmation email that was sent to you.')
+                    messages.success(request, msg)
                     return redirect('login')
                 messages.success(request, 'Your account has been created! You are now able to log in')
                 return redirect('login')
@@ -113,6 +107,7 @@ class CustomLoginView(LoginView):
         return redirect(self.get_success_url())
 
 # TODO: remove user_login view if CustomLoginView proves to be reliant over longer time
+# from django.contrib.auth import authenticate  # place at beginning of file
 # def user_login(request):
 #     if request.method == 'POST':
 #         form = UserLoginForm(data=request.POST)
@@ -310,7 +305,8 @@ def setup_gateway(request):
                 response['Content-Disposition'] = 'attachment; filename=' + file_name
                 return response
         else:
-            messages.info(request, "Gateway is currently only available for setups using TLS (https). No file downloaded.")
+            msg = "Gateway is currently only available for setups using TLS (https). No file downloaded."
+            messages.info(request, msg)
             return redirect('setup-gateway')
 
     if config.host.DOMAIN != "":
@@ -520,8 +516,8 @@ def nodered_dashboard(request):
         nodered_data = NodeRedUserData.objects.get(user=request.user)
     except ObjectDoesNotExist:
         return redirect('nodered-manager')
-    # TODO: write and test instead: request.user.nodereduserdata.container_name
-    container_name = nodered_data.container_name  # TODO: remove comment after testing request.session.get("container_name")
+    # TODO: optional write and test instead: request.user.nodereduserdata.container_name
+    container_name = nodered_data.container_name
 
     if not container_name:
         messages.info(request, 'Start Nodered and UI first.')

@@ -1,8 +1,5 @@
 import os
-# import requests
-# from requests.auth import HTTPBasicAuth
-from time import sleep
-from .setup_utils import run_bash, log, get_random_string, get_setup_dir, get_conf_path
+from .setup_utils import run_bash, log, get_setup_dir, get_conf_path
 
 GRAFANA_INSTALL_LOG_FILE_NAME = 'install_06_grafana.log'
 
@@ -17,8 +14,6 @@ def install_grafana(architecture, setup_scheme, ip_address, domain, admin_email,
     setup_dir = get_setup_dir()
     conf_dir = get_conf_path()
     grafana_files_dir = f'{setup_dir}/setup_files/tmp/grafana_install_files'
-    # new_admin_username = "grafana-admin-" + get_random_string(10)
-    # new_admin_password = get_random_string(20)
     host = domain if setup_scheme == "TLS_DOMAIN" else ip_address
     port = 3000
 
@@ -102,9 +97,6 @@ def install_grafana(architecture, setup_scheme, ip_address, domain, admin_email,
         log(output, GRAFANA_INSTALL_LOG_FILE_NAME)
     # output = run_bash('systemctl restart grafana-server')
     # log(output, GRAFANA_INSTALL_LOG_FILE_NAME)
-
-    # TODO: REMOVE since not needed. Admin username and pw will be set in grafana.ini
-    # change_grafana_password(port, admin_username, old_admin_password, new_admin_password)
 
     config_data = {
         'GRAFANA_HOST': host,
