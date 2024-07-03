@@ -20,7 +20,9 @@
         <h4 class="my-0 font-weight-normal">How to Setup a Gateway for Secure TLS Encryption</h4>
     </div>
     <div class="card-body">
-        <p><span style="color: #800000;"><em>Currently, Gateway setup is available only if the platform uses TLS (https).</em></span></p>
+        {% if tls %}
+        <p><span style="color: #800000;"><em>Gateway is currently only available for setups using TLS (https). No file downloaded.</em></span></p>
+        {% endif %}
         <p>Download the setup files by running this command in your gateways terminal</p>
         <pre><code>curl -O -k {{ download_url }}</code></pre>
         <p>or download them by clicking the button</p>
