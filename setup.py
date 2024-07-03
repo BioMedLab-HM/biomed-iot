@@ -257,7 +257,7 @@ def create_gateway_setup_zip_file(config_path):
     cert_file_path = "/etc/ssl/certs/biomed-iot.crt"
     script_file_path = f"{config_path}/gateway_setup.sh"
     publish_example_script_file_path = f"{config_path}/publish_cpu_temp.sh"
-    download_folder = "/var/www/biomed-iot/media/downloadfiles"
+    download_folder = "/var/www/biomed-iot/media/public_download_files"
     zip_file_path = os.path.join(download_folder, "biomed_iot_gateway.zip")
 
     # Create zip file
@@ -267,7 +267,7 @@ def create_gateway_setup_zip_file(config_path):
         # Add script file
         zipf.write(script_file_path, os.path.basename(script_file_path))
         # Add publish example script
-        zipf.write(script_file_path, os.path.basename(publish_example_script_file_path))
+        zipf.write(publish_example_script_file_path, os.path.basename(publish_example_script_file_path))
 
     log(f"Created zip file: {zip_file_path}")
 

@@ -36,8 +36,12 @@ def install_django(django_admin_email, django_admin_name, django_admin_pass):
     out = run_bash('mkdir -p /var/www/biomed-iot/static/')
     log(out, DJANGO_INSTALL_LOG_FILE_NAME)
 
-    # Create folder for media files and download files for production server
-    out = run_bash('mkdir -p /var/www/biomed-iot/media/downloadfiles')
+    # Create folder for media files and public download files for production server
+    out = run_bash('mkdir -p /var/www/biomed-iot/media/public_download_files')
+    log(out, DJANGO_INSTALL_LOG_FILE_NAME)
+
+    # Create folder for media files and restricted download files for production server
+    out = run_bash('mkdir -p /var/www/biomed-iot/media/restricted_download_files')
     log(out, DJANGO_INSTALL_LOG_FILE_NAME)
 
     # Copy media files to folder for production server

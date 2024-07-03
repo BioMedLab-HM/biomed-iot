@@ -52,12 +52,20 @@ urlpatterns = [
     re_path(r'^grafana/(?P<path>.*)$', user_views.GrafanaProxyView.as_view(), name='grafana-proxy'),
 
     path('register/', user_views.register, name='register'),
-
     path('verify/<uidb64>/<token>/', user_views.verify_email, name='verify-email'),
+
+    # download urls with filename sanitization to prevent directory traversal. 
+    # Allows only alphanumeric characters, underscores, hyphens, and periods and no slash or backslash
+    re_path(r'^download/(?P<filename>[\w\-. ]+)$', user_views.public_download, name='public_download'),
+    re_path(
+        r'^restricted_download/(?P<filename>[\w\-. ]+)$', 
+        user_views.restricted_download, 
+        name='restricted_download'
+        ),
 
     path('profile/', user_views.profile, name='profile'),
 
-    # path('login/', user_views.user_login, name='login'),
+    # path('login/', user_views.user_login, name='login'),  # Old version. Keep as backup
     path('login/', user_views.CustomLoginView.as_view(template_name='users/login.html'), name='login'),
 
     path('logout/', auth_views.LogoutView.as_view(template_name='users/logout.html'), name='logout'),

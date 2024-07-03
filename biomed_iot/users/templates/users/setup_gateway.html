@@ -20,8 +20,9 @@
         <h4 class="my-0 font-weight-normal">How to Setup a Gateway for Secure TLS Encryption</h4>
     </div>
     <div class="card-body">
+        <p><span style="color: #800000;"><em>Currently, Gateway setup is available only if the platform uses TLS (https).</em></span></p>
         <p>Download the setup files by running this command in your gateways terminal</p>
-        <pre><code>curl -O -k https://{{ hostname }}/media/downloadfiles/biomed_iot_gateway.zip</code></pre>
+        <pre><code>curl -O -k {{ download_url }}</code></pre>
         <p>or download them by clicking the button</p>
         <div class="row">
             <form method="post">
@@ -31,7 +32,7 @@
         </div>
         <br>
         <p>Unzip and delete the downloaded file</p>
-        <pre><code>unzip gateway_setup.zip<br>rm gateway_setup.zip<br>sudo bash setup.sh</code></pre>
+        <pre><code>unzip biomed_iot_gateway.zip<br>rm biomed_iot_gateway.zip<br>sudo bash setup.sh</code></pre>
         <p>Follow the instructions: enter all necessary values (Website Domain or IP), device credentials, and topic id.</p>
         <p>When everything is set up, you can reboot or run the publish_cpu_temp.sh file to test the connection with</p>
         <pre><code>bash cputemp.sh</code></pre>

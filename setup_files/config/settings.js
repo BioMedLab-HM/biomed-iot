@@ -426,6 +426,7 @@ module.exports = {
              * If not set, the following default order is used:
              */
             //categories: ['subflows', 'common', 'function', 'network', 'sequence', 'parser', 'storage'],
+            editable: false // Disables the palette manager for all users
         },
 
         projects: {

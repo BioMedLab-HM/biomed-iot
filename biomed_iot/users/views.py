@@ -5,6 +5,7 @@ import requests
 import secrets
 import json
 import logging
+import mimetypes
 from influxdb_client import InfluxDBClient
 from django.contrib.auth.decorators import login_required
 from django.utils.decorators import method_decorator
@@ -12,7 +13,7 @@ from django.core.exceptions import ObjectDoesNotExist
 from django.contrib.auth import login
 from django.shortcuts import render, redirect
 from django.contrib import messages
-from django.http import HttpResponse, JsonResponse
+from django.http import HttpResponse, JsonResponse, Http404
 from django.db import IntegrityError
 from django.db import transaction
 from .models import NodeRedUserData, CustomUser, Profile  # noqa: F401
@@ -294,16 +295,10 @@ def code_examples(request):
 @login_required
 def setup_gateway(request):
     if request.method == 'POST':
-
-        # Path to the ZIP file
-        file_name = 'biomed_iot_gateway.zip'
-        file_path = os.path.join(settings.MEDIA_ROOT, 'downloadfiles/', file_name)
-
-        if os.path.exists(file_path):
-            with open(file_path, 'rb') as fh:
-                response = HttpResponse(fh.read(), content_type="application/zip")
-                response['Content-Disposition'] = 'attachment; filename=' + file_name
-                return response
+        if config.host.TLS == "true":
+            file_name = 'biomed_iot_gateway.zip'
+            download_path = reverse('public_download', args=[file_name])
+            return redirect(download_path)
         else:
             msg = "Gateway is currently only available for setups using TLS (https). No file downloaded."
             messages.info(request, msg)
@@ -313,9 +308,38 @@ def setup_gateway(request):
         hostname = config.host.DOMAIN
     else:
         hostname = config.host.IP
+
     page_title = 'Gateway Setup'
-    context = {'title': page_title, 'hostname': hostname}
+    download_url = f"https://{hostname}/download/biomed_iot_gateway.zip"
+    context = {'title': page_title, 'download_url': download_url}
     return render(request, 'users/setup_gateway.html', context)
+
+
+def public_download(request, filename):
+    file_path = os.path.join(settings.MEDIA_ROOT, 'public_download_files', os.path.basename(filename))
+    if os.path.exists(file_path):
+        mime_type, _ = mimetypes.guess_type(file_path)
+        mime_type = mime_type or 'application/octet-stream'
+        with open(file_path, 'rb') as fh:
+            response = HttpResponse(fh.read(), content_type=mime_type)
+            response['Content-Disposition'] = f'attachment; filename={os.path.basename(file_path)}'
+            return response
+    else:
+        raise Http404("File does not exist")
+    
+
+@login_required
+def restricted_download(request, filename):
+    file_path = os.path.join(settings.MEDIA_ROOT, 'restricted_download_files', os.path.basename(filename))
+    if os.path.exists(file_path):
+        mime_type, _ = mimetypes.guess_type(file_path)
+        mime_type = mime_type or 'application/octet-stream'
+        with open(file_path, 'rb') as fh:
+            response = HttpResponse(fh.read(), content_type=mime_type)
+            response['Content-Disposition'] = f'attachment; filename={os.path.basename(file_path)}'
+            return response
+    else:
+        raise Http404("File does not exist")
 
 
 def get_or_create_nodered_user_data(request):
@@ -599,7 +623,7 @@ def access_nodered(request):
     # logger.info(f"NodeRED-Token: {token}")
 
     # Redirect to the Node-RED instance with the token
-    return redirect(f"/nodered/{container_name}")  # /?access_token={token}
+    return redirect(f"/nodered/{container_name}")  # /?access_token={token}  # TODO: reverse function
 
     # Redirect to the Node-RED instance with the token in the header
     # response = HttpResponse(status=302)
