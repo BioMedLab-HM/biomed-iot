@@ -326,7 +326,7 @@ def public_download(request, filename):
             return response
     else:
         raise Http404("File does not exist")
-    
+
 
 @login_required
 def restricted_download(request, filename):

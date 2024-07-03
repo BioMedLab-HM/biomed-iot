@@ -54,12 +54,12 @@ urlpatterns = [
     path('register/', user_views.register, name='register'),
     path('verify/<uidb64>/<token>/', user_views.verify_email, name='verify-email'),
 
-    # download urls with filename sanitization to prevent directory traversal. 
+    # download urls with filename sanitization to prevent directory traversal.
     # Allows only alphanumeric characters, underscores, hyphens, and periods and no slash or backslash
     re_path(r'^download/(?P<filename>[\w\-. ]+)$', user_views.public_download, name='public_download'),
     re_path(
-        r'^restricted_download/(?P<filename>[\w\-. ]+)$', 
-        user_views.restricted_download, 
+        r'^restricted_download/(?P<filename>[\w\-. ]+)$',
+        user_views.restricted_download,
         name='restricted_download'
         ),
 
