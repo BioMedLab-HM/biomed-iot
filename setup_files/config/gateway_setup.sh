@@ -54,10 +54,10 @@ cp -r ./biomed-iot.crt /etc/mosquitto/certs/biomed-iot.crt
 
 # Get the username that is using sudo
 username=sudo env | grep SUDO_USER | cut -d= -f2  # $(whoami)
-crontab -r
+crontab -r -u $username
 # Add a cron job to send an MQTT status message every minute
 line="* * * * * mosquitto_pub -t sensorbase/devicestatus -m '{\"$gatewayname\":1}' -h localhost -p 1883"
-(crontab -u $username -l; echo "$line" ) | crontab -u $username -
+(crontab -u $username -l; echo "$line") | crontab -u $username
 
 # Restart Mosquitto to apply the new configuration
 sleep 1
