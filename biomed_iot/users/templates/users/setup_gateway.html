@@ -34,10 +34,10 @@
         </div>
         <br>
         <p>Unzip and delete the downloaded file</p>
-        <pre><code>unzip biomed_iot_gateway.zip<br>rm biomed_iot_gateway.zip<br>sudo bash setup.sh</code></pre>
+        <pre><code>unzip biomed_iot_gateway.zip<br>rm biomed_iot_gateway.zip<br>sudo bash gateway_setup.sh</code></pre>
         <p>Follow the instructions: enter all necessary values (Website Domain or IP), device credentials, and topic id.</p>
         <p>When everything is set up, you can reboot or run the publish_cpu_temp.sh file to test the connection with</p>
-        <pre><code>bash cputemp.sh</code></pre>
+        <pre><code>bash publish_cpu_temp.sh</code></pre>
         <p>This script sends the Raspberry Pi's CPU temperature to the IoT-Plattform every 20 seconds.</p>
         <p>Next, go to 'Automate', add credentials to mqtt and influx nodes in the example flow in Node-RED to receive the messages and stores them in the database</p>
     </div>

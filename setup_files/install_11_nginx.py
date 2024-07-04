@@ -39,7 +39,7 @@ def install_nginx(setup_scheme, domain, server_ip, hostname):
             f'bash {config_path}/tmp.nginx-biomed-iot-tls-local.conf.sh {server_ip} {hostname} > {setup_dir}/setup_files/tmp/nginx-biomed-iot-tls-local.conf',
             f'cp {setup_dir}/setup_files/tmp/nginx-biomed-iot-tls-local.conf /etc/nginx/sites-available/',
             'ln -s /etc/nginx/sites-available/nginx-biomed-iot-tls-local.conf /etc/nginx/sites-enabled',
-            f'bash {config_path}/tmp.openssl.cnf.sh {server_ip} {hostname} > {setup_dir}/setup_files/tmp/openssl.cnf',
+            f'bash {config_path}/tmp.openssl.cnf.sh {server_ip} {server_ip} > {setup_dir}/setup_files/tmp/openssl.cnf',
             f'openssl req -x509 -nodes -days 730 -newkey rsa:2048 -keyout /etc/ssl/private/biomed-iot.key -out /etc/ssl/certs/biomed-iot.crt -config {setup_dir}/setup_files/tmp/openssl.cnf',
             'openssl dhparam -out /etc/nginx/dhparam.pem 2048',
             f'cp {config_path}/tmp.self-signed.conf /etc/nginx/snippets/self-signed.conf',

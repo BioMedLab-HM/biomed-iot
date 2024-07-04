@@ -301,7 +301,7 @@ def setup_gateway(request):
             download_path = reverse('public_download', args=[file_name])
             return redirect(download_path)
         else:
-            msg = "Gateway is currently only available for setups using TLS (https). No file downloaded."
+            msg = "Gateway is currently only available for setups using TLS (https)."
             messages.info(request, msg)
             return redirect('setup-gateway')
 
@@ -311,7 +311,7 @@ def setup_gateway(request):
         hostname = config.host.IP
 
     page_title = 'Gateway Setup'
-    download_url = f"https://{hostname}/download/biomed_iot_gateway.zip"
+    download_url = f"https://{hostname}/download/biomed_iot_gateway.zip" if tls else ""
     context = {'title': page_title, 'download_url': download_url, 'tls': tls}
     return render(request, 'users/setup_gateway.html', context)
 
