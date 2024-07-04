@@ -372,7 +372,7 @@ def main():
     print('Basic apt packages installed')
     log('Basic apt packages installed')
 
-    install_security_packages()
+    install_security_packages(setup_scheme)
     print('Security Packages installed')
     log('Security Packages installed')
 

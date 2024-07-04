@@ -4,7 +4,9 @@ IP=$1
 HOSTNAME=$2
 
 # Create the OpenSSL configuration file with dynamic values
-# To make curl command accept the certificate: basicConstraints=critical,CA:TRUE,pathlen:1
+# To make curl command accept the certificate put under [ req_ext ]: basicConstraints=critical,CA:TRUE,pathlen:1 
+# --> turns out to be not working
+
 cat << EOF
 [ req ]
 default_bits       = 2048
@@ -23,7 +25,6 @@ CN = $HOSTNAME
 
 [ req_ext ]
 subjectAltName = @alt_names
-basicConstraints=critical,CA:TRUE,pathlen:1
 
 [ alt_names ]
 DNS.1   = $HOSTNAME

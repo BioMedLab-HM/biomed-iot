@@ -3,9 +3,13 @@ from .setup_utils import run_bash, log, get_setup_dir, get_conf_path
 SECURITY_INSTALL_LOG_FILE_NAME = 'install_02_security_packages.log'
 
 
-def install_security_packages():
+def install_security_packages(setup_scheme):
 	setup_dir = get_setup_dir()
 	config_path = get_conf_path()
+
+	mqtt_port = 1883
+	if setup_scheme != 'NO_TLS':
+		mqtt_port = 8883
 
 	commands = [
 		# Install ufw
@@ -14,7 +18,7 @@ def install_security_packages():
 		'ufw allow ssh',
 		'ufw allow 80',  # for http
 		'ufw allow 443/tcp',  # for https
-		'ufw allow 1883/tcp',  # For MQTT
+		f'ufw allow {mqtt_port}/tcp',  # For MQTT
 		'sudo ufw allow 8086/tcp',  # InfluxDB
 		'ufw allow 3000/tcp',  # For Grafana admin to login to dashboard
 		'echo',

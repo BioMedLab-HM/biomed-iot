@@ -50,7 +50,7 @@ chmod -R 644 /etc/mosquitto/mosquitto.conf
 cp -r ./biomed-iot.crt /etc/mosquitto/certs/biomed-iot.crt
 
 # Replace "TOPIC_ID" with the actual topic_id in publish_cpu_temp.sh
-sed -i "s/TOPIC_ID/${topic_id}/g" ./publish_cpu_temp.sh
+# sed -i "s/TOPIC_ID/${topic_id}/g" ./publish_cpu_temp.sh  # not necessary since bridge will forward to this topic
 
 # Get the username that is using sudo
 username=sudo env | grep SUDO_USER | cut -d= -f2  # $(whoami)

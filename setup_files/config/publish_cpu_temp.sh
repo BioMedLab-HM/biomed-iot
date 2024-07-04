@@ -17,7 +17,7 @@ echo
 echo "This script sends the Raspberry Pi's current CPU temperature every 20 seconds."
 echo "The message will be published under topic"
 echo "sensorbase/in/<your_topic_id>/cputemp"
-echo "Test it in another terminal window with this command, you shouldd see the messages:"
+echo "Test it in another terminal window with this command, you should see the messages:"
 echo "mosquitto_sub -h localhost -p 1883 -t "sensorbase/#""
 echo
 echo "You can stop this script by pressing Ctrl+C"
@@ -31,7 +31,7 @@ timestamp=$(date "+%s")
 echo '{"cputemp":'$cputemp',"timestamp":'$timestamp'}'
 
 # TOPIC_ID will be replaced with actual topic id during gateway setup
-mosquitto_pub -h localhost -p 1883 -t sensorbase/in/TOPIC_ID/cputemp -m '{"cputemp":'$cputemp',"timestamp":'$timestamp'}'
+mosquitto_pub -h localhost -p 1883 -t sensorbase/cputemp -m '{"cputemp":'$cputemp',"timestamp":'$timestamp'}'
 
 sleep 20
 done
