@@ -296,10 +296,9 @@ def code_examples(request):
 def setup_gateway(request):
     tls = config.host.TLS == "true"
     if request.method == 'POST':
-        if config.host.TLS == "true":
+        if tls:
             file_name = 'biomed_iot_gateway.zip'
             download_path = reverse('public_download', args=[file_name])
-            messages.success(request, 'The download has started successfully.')
             return redirect(download_path)
         else:
             msg = "Gateway is currently only available for setups using TLS (https). No file downloaded."
