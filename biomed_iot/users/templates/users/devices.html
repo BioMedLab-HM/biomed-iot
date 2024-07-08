@@ -2,7 +2,6 @@
 {% load crispy_forms_tags %}
 {% block content %}
 
-{% if device_clients %}
 <!-- <div style="margin-bottom: 2rem;"></div> -->
 <div class="card card mb-2">
     <div class="card-header">
@@ -37,7 +36,7 @@
             <div class="col-md-3 col-xl-4"><strong>Password</strong></div>
             <div class="col-md-2 col-xl-2"><strong>Actions</strong></div>
         </div>
-
+        {% if device_clients %}
         {% for device in device_clients %}
         <div class="mb-5">
             <!-- Inline Labels and Values for XS and SM -->
@@ -97,12 +96,12 @@
             </div>
         </div>
         {% endfor %}
+        {% else %}
+        <p>No devices found.</p>
+        {% endif %}
     </div>
 </div>
 <div style="margin-bottom: 1.5rem;"></div>
-{% else %}
-<p>No devices found.</p>
-{% endif %}
 
 {% endblock content %}
 
