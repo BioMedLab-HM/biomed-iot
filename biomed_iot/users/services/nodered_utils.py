@@ -83,7 +83,7 @@ class NoderedContainer:
                     environment={
                         'USERNAME': nodered_username,
                         'PASSWORD_HASH': hashed_password,
-                        # 'SECRET_KEY': self.access_token  # for Token (JWT) based auth
+                        # 'SECRET_KEY': self.access_token  # for Token (JWT) based auth, but does not work currently
                     }
                 )
                 self.determine_port()

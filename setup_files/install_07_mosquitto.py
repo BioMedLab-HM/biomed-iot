@@ -71,7 +71,7 @@ def install_mosquitto(setup_scheme):
 	# Create dict config data
 	config_data = {
 		'MOSQUITTO_HOST': 'localhost',
-		'MOSQUITTO_PORT': 1884,
+		'MOSQUITTO_PORT': 1883,
 		'DYNSEC_TOPIC': '$CONTROL/dynamic-security/v1',
 		'DYNSEC_RESPONSE_TOPIC': '$CONTROL/dynamic-security/v1/response',
 		'DYNSEC_ADMIN_USER': dynsec_admin_name,

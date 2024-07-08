@@ -35,7 +35,7 @@ class MosquittoDynSec:
 	    port (int): Network port of the MQTT broker.
 	"""
 
-	def __init__(self, username, password, host=config.mosquitto.MOSQUITTO_HOST, port=config.mosquitto.MOSQUITTO_PORT):
+	def __init__(self, username, password, host=config.mosquitto.MOSQUITTO_HOST, port=1884):
 		"""
 		Initializes a new instance of the MosquittoDynSec class.
 
@@ -46,8 +46,8 @@ class MosquittoDynSec:
 		Parameters:
 		    username (str): The username of the client that writes to the '$CONTROL/dynamic-security/v1' topic.
 		    password (str): The password of the client that writes to the '$CONTROL/dynamic-security/v1' topic.
-		    host (str): The hostname or IP address of the MQTT broker. Defaults to "localhost".
-		    port (int): The network port of the MQTT server. Defaults to 1883.
+		    host (str): The hostname or IP address of the MQTT broker.
+		    port (int): The network port of the MQTT server.
 		"""
 		self.username = username
 		self.password = password
