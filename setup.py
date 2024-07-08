@@ -200,7 +200,7 @@ def get_domain(setup_scheme):
 
 def get_credentials_for_pw_reset():
     question = (
-        "\nDo you want to Enter the credentials for for a SMTP email server for the website's "
+        "\nDo you want to Enter the credentials for an SMTP email server for the website's "
         "password reset and email verification function?\nYou can add these credentials "
         "later in /etc/biomed-iot/config.toml. There, in this case you would also need to "
         'set EMAIL_VERIFICATION to "true" manually'
@@ -468,7 +468,7 @@ def main():
     # TBD
     # set pw reset credentials in config.toml
     print('\n\n\n\n____________________________')
-    print('\n\nThe setup of Biomed IoT has successfully completed in\n' f'{num_minutes} min and {num_seconds} s.')
+    print('\n\nThe setup of Biomed IoT has completed in\n' f'{num_minutes} min and {num_seconds} s.')
 
     print("\n\nAccess your website's admin user credentials in '/etc/biomed-iot/config.toml'.")
 
@@ -490,7 +490,7 @@ def main():
         '\nFor detailed information on the installation process, '
         f'please refer to the log files located in {setup_dir}/setup_files/setup_logs.\n'
         f"You can delete the directory 'tmp' in '{setup_dir}/setup_files/'"
-        '\nTo make everything work, please reboot your machine and then change the grafana admin password'
+        "\nTo make everything work, please reboot your machine with 'sudo reboot'"
     )
 
     print('\n--- END OF SETUP ---\n\n')

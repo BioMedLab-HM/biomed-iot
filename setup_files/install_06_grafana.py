@@ -14,7 +14,7 @@ def install_grafana(architecture, setup_scheme, ip_address, domain, admin_email,
     setup_dir = get_setup_dir()
     conf_dir = get_conf_path()
     grafana_files_dir = f'{setup_dir}/setup_files/tmp/grafana_install_files'
-    host = "localhost"  # domain if setup_scheme == "TLS_DOMAIN" else ip_address
+    host = domain if setup_scheme == "TLS_DOMAIN" else ip_address
     port = 3000
 
     installation_commands_amd64 = [

@@ -77,8 +77,6 @@ class NoderedContainer:
                     restart_policy={'Name': 'unless-stopped'},
                     ports={
                         '1880/tcp': None,  # Node-RED port dynamically assigned by Docker
-                        '1883/tcp': 1884,  # Mosquitto port mapped to 1884 on host
-                        '8086/tcp': 8086   # InfluxDB port mapped to 8086 on host
                     },
                     volumes={f'{self.name}-volume': {'bind': '/data', 'mode': 'rw'}},
                     name=self.name,
