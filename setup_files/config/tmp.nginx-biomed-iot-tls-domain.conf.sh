@@ -54,4 +54,19 @@ server {
 
     return 301 https://$server_name$request_uri;  # redirect to server block with port 443 listener. Changed 302 to 301 after successfull testing
 }
+
+server {
+    listen 8087 ssl;
+    server_name $DOMAIN www.$DOMAIN;
+    include snippets/self-signed.conf; # contains ssl_certificate and ssl_certificate_key
+    include snippets/ssl-params.conf;  # contains additional params
+
+    location / {
+        proxy_pass http://localhost:8086;
+        proxy_set_header Host $host;
+        proxy_set_header X-Real-IP $remote_addr;
+        proxy_set_header X-Forwarded-For $proxy_add_x_forwarded_for;
+        proxy_set_header X-Forwarded-Proto $scheme;
+    }
+}
 EOF

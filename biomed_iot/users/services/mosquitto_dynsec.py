@@ -2,7 +2,6 @@ import threading
 import json
 import paho.mqtt.client as mqtt
 from paho.mqtt.client import MQTT_ERR_SUCCESS
-from biomed_iot.config_loader import config
 
 
 class MosquittoDynSec:
@@ -35,7 +34,7 @@ class MosquittoDynSec:
 	    port (int): Network port of the MQTT broker.
 	"""
 
-	def __init__(self, username, password, host=config.mosquitto.MOSQUITTO_HOST, port=1884):
+	def __init__(self, username, password, host="localhost", port=1884):
 		"""
 		Initializes a new instance of the MosquittoDynSec class.
 

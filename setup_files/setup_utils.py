@@ -4,6 +4,7 @@ import os
 import random
 import string
 import subprocess
+import sys
 
 
 def get_linux_user():
@@ -37,6 +38,14 @@ def get_linux_codename():
 		log(msg)
 		return None
 
+def is_running_with_sudo_or_exit_setup():
+    """Ensure the script is run with sudo."""
+    if os.geteuid() != 0:
+        msg = '\nThis script must be run with sudo. Exiting setup\n'
+        print(msg)
+        sys.exit(1)
+
+is_running_with_sudo_or_exit_setup()
 
 # Get the directory where this script is located
 # base_dir = os.path.dirname(os.path.abspath(__file__))

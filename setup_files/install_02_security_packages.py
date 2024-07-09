@@ -19,8 +19,8 @@ def install_security_packages(setup_scheme):
 		'ufw allow 80',  # for http
 		'ufw allow 443/tcp',  # for https
 		f'ufw allow {mqtt_port}/tcp',  # For MQTT
-		'sudo ufw allow 8086/tcp',  # InfluxDB
-		# 'ufw allow 3000/tcp',  # For Grafana admin to login to dashboard
+		'sudo ufw allow 8087/tcp',  # InfluxDB  # TODO: use 8086 (standard) here and 8087 for localhost communication
+		# 'ufw allow 3000/tcp',  # For Grafana admin to login to dashboard. If used with TLS, add proxy pass to nginx!
 		'echo',
 		"echo 'To enable ufw firewall, automatic response to confirmation will be provided.'",
 		"echo 'y' | sudo ufw enable",  # This sends "y" as input to the ufw enable command

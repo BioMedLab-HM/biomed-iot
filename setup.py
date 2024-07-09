@@ -48,12 +48,12 @@ from setup_files.install_11_nginx import install_nginx
 
 def print_logo_header():
     logo_header = """
- ______   _                           _    _      _______ 
+ ______   _                           _    _      _______
 (____  \ (_)                         | |  | |    (_______)
- ____)  ) _   ___   ____   _____   __| |  | |  ___   _    
-|  __  ( | | / _ \ |    \ | ___ | / _  |  | | / _ \ | |   
-| |__)  )| || |_| || | | || ____|( (_| |  | || |_| || |   
-|______/ |_| \___/ |_|_|_||_____) \____|  |_| \___/ |_|   
+ ____)  ) _   ___   ____   _____   __| |  | |  ___   _
+|  __  ( | | / _ \ |    \ | ___ | / _  |  | | / _ \ | |
+| |__)  )| || |_| || | | || ____|( (_| |  | || |_| || |
+|______/ |_| \___/ |_|_|_||_____) \____|  |_| \___/ |_|
 
 <<<----      Setup of Biomed IoT      --->>>
 <<<----       Version v1.0        --->>>
@@ -77,15 +77,6 @@ def get_and_check_cpu_architecture():
         sys.exit(1)
 
     return cpu_architecture
-
-
-def is_running_with_sudo_or_exit_setup():
-    """Ensure the script is run with sudo."""
-    if os.geteuid() != 0:
-        msg = 'This script must be run with sudo. Exiting setup'
-        print(msg)
-        log(msg)
-        sys.exit(1)
 
 
 def get_setup_scheme():
@@ -297,8 +288,6 @@ def main():
 
     """ DO PRE-CHECKS """
     architecture = get_and_check_cpu_architecture()
-
-    is_running_with_sudo_or_exit_setup()
 
     print("\nTo make sure your system is up to date, run 'sudo apt update' " "and 'sudo apt upgrade' before setup.\n")
     confirm_proceed('Do you want to proceed? Otherwise please update, upgrade ' 'and reboot - then start setup again.')
