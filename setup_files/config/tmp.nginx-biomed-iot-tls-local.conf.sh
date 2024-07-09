@@ -1,12 +1,5 @@
 #!/bin/sh
 
-# TODO: 
-# - Ergänzungen bei Gunicorn?
-# - location /media/ ...
-# - ggf. Grafana?
-# - weitere Dienste?
-# TODO: change 302 to 301 after successfull testing (bei redirect)
-
 # Get passed parameter
 IP_ADDRESS=$1
 MACHINE_NAME=$2
@@ -62,10 +55,10 @@ server {
 
     location / {
         proxy_pass http://localhost:8086;
-        proxy_set_header Host $host;
-        proxy_set_header X-Real-IP $remote_addr;
-        proxy_set_header X-Forwarded-For $proxy_add_x_forwarded_for;
-        proxy_set_header X-Forwarded-Proto $scheme;
+        proxy_set_header Host \$host;
+        proxy_set_header X-Real-IP \$remote_addr;
+        proxy_set_header X-Forwarded-For \$proxy_add_x_forwarded_for;
+        proxy_set_header X-Forwarded-Proto \$scheme;
     }
 }
 EOF
