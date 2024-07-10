@@ -162,7 +162,7 @@
         "id": "6ca8bde.9eb2f44",
         "type": "influxdb",
         "hostname": "localhost",
-        "port": "8086",
+        "port": "8087",
         "protocol": "https",
         "database": "new_db",
         "name": "influxdb-url",
