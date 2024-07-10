@@ -181,7 +181,7 @@
         "port": "broker_port",
         "clientid": "",
         "autoConnect": true,
-        "usetls": "use_tls",
+        "usetls": false,
         "protocolVersion": "4",
         "keepalive": "60",
         "cleansession": true,

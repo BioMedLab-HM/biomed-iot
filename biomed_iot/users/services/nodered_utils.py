@@ -168,9 +168,8 @@ class NoderedContainer:
         modified_flows_json = modified_flows_json.replace("user_bucket_name", user.influxuserdata.bucket_name)
 
         broker_port = "8883" if config.host.TLS == "true" else "1883"
-        use_tls = config.host.TLS == "true"
         modified_flows_json = modified_flows_json.replace("broker_port", broker_port)
-        modified_flows_json = modified_flows_json.replace("use_tls", use_tls)
+        modified_flows_json = modified_flows_json.replace('"usetls": "false"', '"usetls": true')
 
         host_address = config.host.DOMAIN if config.host.TLS == "true" and config.host.DOMAIN else config.host.IP
         modified_flows_json = modified_flows_json.replace("server_ip_or_domain", host_address)
