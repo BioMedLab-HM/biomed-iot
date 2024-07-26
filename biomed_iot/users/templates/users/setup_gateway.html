@@ -23,7 +23,9 @@
         {% if not tls %}
         <p><span style="color: #800000;"><em>Gateway is currently only available for setups using TLS (https). No file downloaded.</em></span></p>
         {% endif %}
-        <p>Download the setup files by running this command in your gateways terminal</p>
+        <p>To make sure you have 'unzip' and 'curl' installed on your gateways system, run this command in a terminal first.</p>
+        <pre><code>sudo apt -y install curl unzip</code></pre>
+        <p>Download the setup files by running this command</p>
         <pre><code>curl -O -k {{ download_url }}</code></pre>
         <p>or download them by clicking the button</p>
         <div class="row">
