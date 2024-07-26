@@ -32,9 +32,9 @@ echo
 
 sudo apt-get -y update
 sudo apt -y install mosquitto mosquitto-clients
-sudo mv /etc/mosquitto/mosquitto.conf /etc/mosquitto/mosquitto.conf.backup
+mv /etc/mosquitto/mosquitto.conf /etc/mosquitto/mosquitto.conf.backup
 
-sudo tee -a /etc/mosquitto/mosquitto.conf > /dev/null <<EOL
+tee -a /etc/mosquitto/mosquitto.conf > /dev/null <<EOL
 port 1883
 allow_anonymous true
 connection ${gatewayname}
@@ -42,25 +42,26 @@ address ${hostname}:8883
 remote_password ${mqtt_password}
 remote_username ${mqtt_username}
 bridge_cafile /etc/mosquitto/certs/biomed-iot.crt
-topic # out 2 in/ in/${topic_id}/
-topic # in 2 out/ out/${topic_id}/${gatewayname}/
+topic # both 2 sensorbase/ in/${topic_id}/
 EOL
 
-sudo chmod -R 644 /etc/mosquitto/mosquitto.conf
+chmod -R 644 /etc/mosquitto/mosquitto.conf
 
-sudo mkdir -p /etc/mosquitto/certs
-sudo cp -r ./biomed-iot.crt /etc/mosquitto/certs/biomed-iot.crt
+cp -r ./biomed-iot.crt /etc/mosquitto/certs/biomed-iot.crt
 
-# Get the current user who runs the script
-username=$(whoami)
-sudo crontab -r -u $username
+# Replace "TOPIC_ID" with the actual topic_id in publish_cpu_temp.sh
+# sed -i "s/TOPIC_ID/${topic_id}/g" ./publish_cpu_temp.sh  # not necessary since bridge will forward to this topic
+
+# Get the username that is using sudo
+username=sudo env | grep SUDO_USER | cut -d= -f2  # $(whoami)
+crontab -r -u $username
 # Add a cron job to send an MQTT status message every minute
-line="* * * * * mosquitto_pub -t in/devicestatus -m '{\"$gatewayname\":1}' -h localhost -p 1883"
-(crontab -u $username -l; echo "$line") | sudo crontab -u $username -
+line="* * * * * mosquitto_pub -t sensorbase/devicestatus -m '{\"$gatewayname\":1}' -h localhost -p 1883"
+(crontab -u $username -l; echo "$line") | crontab -u $username
 
 # Restart Mosquitto to apply the new configuration
 sleep 1
-sudo systemctl restart mosquitto
+systemctl restart mosquitto
 sleep 1
 
 # Display final messages

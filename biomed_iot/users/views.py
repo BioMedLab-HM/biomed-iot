@@ -691,7 +691,7 @@ def manage_data(request):
             # Execute the delete request
             response = requests.post(delete_url, headers=delete_headers, json=delete_data)
             if response.status_code == 204:
-                messages.success(request, 'Delete command completed successfully. Any existing data matching your'
+                messages.success(request, 'Delete command completed successfully. Any existing data matching your '
                                  + 'criteria has been removed.')
             else:
                 messages.error(request, f'Failed to delete data: {response.text}')

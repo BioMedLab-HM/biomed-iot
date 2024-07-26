@@ -11,14 +11,27 @@ cat << EOL
 |______/ |_| \___/ |_|_|_||_____) \____|  |_| \___/ |_|   
 EOL
 
+# Path to the mosquitto.conf file
+mosquitto_conf_path="/etc/mosquitto/mosquitto.conf"
+
+# Extract the gatewayname from the connection line
+gatewayname=$(grep -i '^connection ' "$mosquitto_conf_path" | awk '{print $2}')
+
+# Check if the gatewayname was found
+if [ -n "$gatewayname" ]; then
+    echo "Gateway name is: $gatewayname"
+else
+    echo "Gateway name not found in $mosquitto_conf_path"
+fi
+
 echo
-echo "<<<-----   Publish RPi CPU Temperature   ----->>>"
+echo "<<<-----   Publish Rasberry Pi CPU Temperature   ----->>>"
 echo
-echo "This script sends the Raspberry Pi's current CPU temperature every 20 seconds."
-echo "The message will be published under topic"
-echo "sensorbase/in/<your_topic_id>/cputemp"
+echo "If you use a Raspvberry Pi as Gateway, this script sends current CPU temperature every 20 seconds."
+echo "The message will be published on the IoT platform under topic"
+echo "in/<your_topic_id>/$gatewayname/cputemp"
 echo "Test it in another terminal window with this command, you should see the messages:"
-echo "mosquitto_sub -h localhost -p 1883 -t "sensorbase/#""
+echo "mosquitto_sub -h localhost -p 1883 -t "in/#""
 echo
 echo "You can stop this script by pressing Ctrl+C"
 echo
@@ -31,7 +44,7 @@ timestamp=$(date "+%s")
 echo '{"cputemp":'$cputemp',"timestamp":'$timestamp'}'
 
 # TOPIC_ID will be replaced with actual topic id during gateway setup
-mosquitto_pub -h localhost -p 1883 -t sensorbase/cputemp -m '{"cputemp":'$cputemp',"timestamp":'$timestamp'}'
+mosquitto_pub -h localhost -p 1883 -t in/$gatewayname/cputemp -m '{"cputemp":'$cputemp',"timestamp":'$timestamp'}'
 
 sleep 20
 done
