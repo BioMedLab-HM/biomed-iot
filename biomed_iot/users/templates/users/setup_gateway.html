@@ -17,15 +17,36 @@
 {% block content %}
 <div class="card mb-3">
     <div class="card-header">
+        <h4 class="my-0 font-weight-normal">What is a Biomed IoT-Gateway?</h4>
+    </div>
+    <div class="card-body">
+        <p><strong>When to Use It:</strong><br>
+        If your IoT devices operate locally while the platform is on the internet, the Biomed-IoT gateway simplifies integration by connecting devices to the gateway instead of the platform directly. The gateway forwards all messages to the platform.</p>
+        
+        <p><strong>Advantages:</strong></p>
+        <ul>
+            <li><strong>Reduced Load:</strong> Shift tasks like encryption and optional data pre-processing to the gateway, boosting device performance.</li>
+            <li><strong>Power Efficiency:</strong> Devices can use simpler, non-Wi-Fi protocols, conserving battery life.</li>
+            <li><strong>Simplified Management:</strong> Avoid programming access credentials into each device, minimizing errors.</li>
+        </ul>
+
+        <p><strong>What You Need:</strong><br>
+        A Raspberry Pi 3 or 4 is sufficent.</p>
+    </div>
+</div>
+<div class="card mb-3">
+    <div class="card-header">
         <h4 class="my-0 font-weight-normal">How to Setup a Gateway for Secure TLS Encryption</h4>
     </div>
     <div class="card-body">
         {% if not tls %}
         <p><span style="color: #800000;"><em>Gateway is currently only available for setups using TLS (https). No file downloaded.</em></span></p>
         {% endif %}
-        <p>To make sure you have 'unzip' and 'curl' installed on your gateways system, run this command in a terminal first.</p>
+<p><strong>First</strong>, create gateway credentials on the <a href="{% url 'devices' %}">Device List</a> page and get your <a href="{% url 'message-and-topic-structure' %}">personal topic ID</a>. Make sure to review the instructions on both of these pages.</p>
+
+        <p><strong>On your gateway</strong>: to make sure you have 'unzip' and 'curl' installed on your gateways system, run this command in a terminal first.</p>
         <pre><code>sudo apt -y install curl unzip</code></pre>
-        <p>Download the setup files by running this command</p>
+        <p>Download the gateway setup files by running this command</p>
         <pre><code>curl -O -k {{ download_url }}</code></pre>
         <p>or download them by clicking the button</p>
         <div class="row">
@@ -37,11 +58,12 @@
         <br>
         <p>Unzip and delete the downloaded file</p>
         <pre><code>unzip biomed_iot_gateway.zip<br>rm biomed_iot_gateway.zip<br>bash gateway_setup.sh</code></pre>
-        <p>Follow the instructions: enter all necessary values (Website Domain or IP), device credentials, and topic id.</p>
-        <p>When everything is set up, you can reboot or run the publish_cpu_temp.sh file to test the connection with</p>
+        <p>Follow the instructions and enter all necessary values: Website Domain or IP, device credentials and topic id.</p>
+        <p>When everything is set up, reboot the gateway.</p>
+        <p>If your gateway is a Raspberry Pi, you can run a script that sends the current CPU temperature to the platform every 20 seconds<strong><sup>*</sup></strong>. Execute this command: </p>
         <pre><code>bash publish_cpu_temp.sh</code></pre>
-        <p>This script sends the Raspberry Pi's CPU temperature to the IoT-Plattform every 20 seconds.</p>
-        <p>Next, go to 'Automate', add credentials to mqtt and influx nodes in the example flow in Node-RED to receive the messages and stores them in the database</p>
+        <p><strong><sup>*</sup></strong>Note that this script will only run as long as your terminal session persists. An explanation of how to run this script as a systemd service will come soon.</p>
+        <p>If you have not yet done so, go to 'Automate', to use Node-RED, to receive Messages, create automations and save data to the database</p>
     </div>
 </div>
 

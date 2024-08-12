@@ -9,7 +9,7 @@
         <div class="alert alert-primary" role="alert">
             <p>Use Node-RED to:</p>
             <ul>
-                <li>Automate tasks by connecting sensors and actuators through MQTT messages</li>
+                <li>Automate tasks by connecting sensors and effector devices through MQTT messages</li>
                 <li>Store data into the Database</li>
             </ul>
             <button type="submit" class="btn btn-success" name="action" value="create">Start with Node-RED</button>
@@ -23,7 +23,7 @@
     {% elif container_state == 'running' %}
         <div class="alert alert-success mb-3" role="alert">
             <p>Your Node-RED is running and working.</p>
-            <p>Open Node-RED now and edit your flows</p>
+            <p>Open Node-RED now to create and edit flows</p>
             <button type="submit" class="btn btn-info" name="action" value="run">Open Node-RED</button>
         </div>
         <div class="card mb-3">
@@ -54,12 +54,12 @@
         <!-- <div style="margin-bottom: 1.5rem;"></div> -->
         <!-- <hr> -->
         <div class="alert alert-danger" role="alert">
-            <p>Kindly stop Node-RED to pause your flows if you don't need them for a while to give back resources to the server.</p>
+            <p>Please stop Node-RED to free up server resources if the flows are not needed.</p>
             <button type="submit" class="btn btn-danger" name="action" value="stop">Stop Node-RED</button>
         </div>
     {% elif container_state == 'starting' %}
         <div class="alert alert-info text-center d-flex justify-content-center align-items-center" role="alert" style="flex-direction: column;">
-            <p>Node-RED is starting up. Please wait...</p>
+            <p>Node-RED is starting up. Please wait, this may take up to a minute...</p>
             <div class="spinner-border" role="status">
                 <span class="sr-only"></span>
             </div>

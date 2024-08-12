@@ -13,7 +13,7 @@ class UserLoginForm(AuthenticationForm):
     username = forms.CharField(label=_('Email'), widget=forms.TextInput(attrs={'autofocus': True}))
 
     error_messages = {
-        'invalid_login': _('Please enter a correct email and password. Note that both fields may be case-sensitive.'),
+        'invalid_login': _('Please enter a correct email and password. Note that both fields are case-sensitive.'),
         'inactive': _('This account is inactive.'),
     }
 

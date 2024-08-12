@@ -10,7 +10,7 @@
     <div class="card-body">
         <div class="row align-items-center mt-3 mb-2"> <!-- First row -->
             <div class="col-12 col-md-7 col-lg-7 col-xl-6">
-                <p class="mb-1">Publish data to this topic from your sensor device:</p>
+                <p class="mb-1">Publish MQTT messages to the following topic structure from your iot-device<strong><sup>*</sup></strong>:</p>
             </div>
             <div class="col-9 col-md-5">
                 <input type="text" id="inTopicField" class="form-control" value="{{ in_topic }}" readonly>
@@ -19,15 +19,18 @@
 
         <div class="row align-items-center"> <!-- New row for separation -->
             <div class="col-12 col-md-7 col-lg-7 col-xl-6">
-                <p class="mb-1">Subscribe to this topic on your controlling device to receive data:</p>
+                <p class="mb-1">Subscribe to this topic on your controlling device to receive data<strong><sup>*</sup></strong>:</p>
             </div>
             <div class="col-9 col-md-5">
                 <input type="text" id="outTopicField" class="form-control" value="{{ out_topic }}" readonly>
             </div>
         </div>
         <div class="row"> <!-- New row for separation -->
-            <p class="mt-3 mb-1">With <strong>'<i>{{ topic_id }}</i>'</strong> as you personal topic-id, under which
-                only your devices can send and receive data.<br>Choose 'your/subtopic' as you wish.</p>
+            <p class="mt-3 mb-1"><strong>'<i>{{ topic_id }}</i>'</strong> is your personal topic ID, under which
+                only your devices can send and receive data.<br>Replace <code>your/subtopic</code> with any specific subtopic you need for your application</p>
+        </div>
+        <div class="row"> <!-- New row for additional clarification -->
+            <p class="mt-3 mb-1"><strong><sup>*</sup></strong>If you send data to a <strong>local gateway</strong>, <strong>omit the personal topic ID</strong>. In this case, the topic structure should be: <code>in/your/subtopic</code></p>
         </div>
     </div>
 </div>
@@ -41,7 +44,7 @@
     <div class="card-body">
         <div class="row align-items-center mt-3 mb-2"> <!-- First row -->
             <div class="col-12 col-md-7 col-lg-7 col-xl-6">
-                <p class="mb-1">Use this structure for your message payload:</p>
+                <p class="mb-1">Use this structure for your message payload:<br>(Timestamp is optional)</p>
             </div>
             <div class="col-9 col-md-5">
                 <pre><code>{{ message_example }}</code></pre>
@@ -49,7 +52,7 @@
         </div>
         <div class="row align-items-center mt-3 mb-2"> <!-- First row -->
             <div class="col-12 col-md-7 col-lg-7 col-xl-6">
-                <p class="mb-1">Or extend it for more than one sensor value:</p>
+                <p class="mb-1">Or extend it for more than one sensor value:<br>(Timestamp is optional)</p>
             </div>
             <div class="col-9 col-md-5">
                 <pre><code>{{ message_example_large }}</code></pre>

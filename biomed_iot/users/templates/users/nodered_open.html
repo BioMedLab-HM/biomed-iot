@@ -5,38 +5,52 @@
     {% csrf_token %}
     <div class="alert alert-success mb-3" role="alert">
         <h4>Your Node-RED is running.</h4>
-        <p>Open Node-RED now and edit your flows.</p>
+        <p>Open Node-RED now to create and edit flows.</p>
         <button type="submit" class="btn btn-info" name="action" value="open">Open Node-RED</button>
-        <p style="margin-top: 20px;">Build dashboards for Node-RED to view and control your flows.</p>
+        <p style="margin-top: 20px;">Build dashboards for Node-RED to view and control flows.</p>
         <!-- Ensure this is within a Django HTML template file -->
         <button type="button" class="btn btn-info" data-url="{% url 'nodered-dashboard' %}" id="openDashboard">
-            Open Nodered Dashboard
+            Open Node-RED Dashboard
         </button>
 
     </div> 
     <div class="card mb-3">
         <div class="card-header">
-            <h4 class="my-0 font-weight-normal">Personal Credentials for Node-RED Login and MQTT- and InfluxDB-Nodes.</h4>
+            <h4 class="my-0 font-weight-normal">Personal Credentials for Node-RED Login, MQTT-Nodes and InfluxDB-Nodes.</h4>
         </div>
         <div class="card-body">
             <div class="row">
                 <!-- Left column for explanatory text -->
                 <div class="col-lg-5 col-sm-12">
                     <p>
-                        <a href="#" onclick="toggleVisibility(); return false;">Show Credentials</a>
+                        <!-- TODO: Activate and test manual toggle for credentials -->
+                        <!-- <a href="#" class="card-link" onclick="toggleVisibility(); return false;">Show/Hide Credentials</a> -->
+                        <a href="#" onclick="toggleVisibilityWithTimer(); return false;">Show Credentials</a>
                         &nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;
-                        <a href="#" class="copy-text">Copy All Credentials</a><br><br> 
-                        <strong>In Node-RED:</strong> Drag an MQTT/InfluxDB node into the flow <br>
-                        <strong>></strong> double click on it <br>
-                        <strong>></strong> click edit server (pencil icon) <br>
-                        <strong>></strong> click on the 'Security' tab <br>
-                        <strong>></strong> fill in the credentials there <br><br>
-                        <i>Tip: Temporarily paste the credentials into a textfile.</i>
+                        <a href="#" class="copy-text">Copy All Credentials </a><br><br>
+                        <strong>1. Login to Node-RED:</strong> <br>
+                        <strong>></strong> Use the credentials on the right <br>
+                        <strong>></strong> You will be prompted to re-enter them weekly <br>
+                    </p>
+                    <p>
+                        <strong>2. In Node-RED:</strong> <br>
+                        <strong>a)</strong> Double-click on MQTT (violet) or InfluxDB (brown) node<br>
+                        <strong>b)</strong> Click on edit server (pencil icon) <br>
+                        &nbsp;&nbsp;&nbsp;&nbsp;&nbsp;For MQTT node: Click the 'Security' tab <br>
+                        <strong>c)</strong> Enter the credentials or token there <br>
                     </p>
                 </div>
                 <!-- Right column for credentials -->
                 <div class="col-lg-5 col-sm-12">
                     <!-- Nested structure for username and password fields to ensure they stack on small screens -->
+                    <div class="mb-3">
+                        <label for="usernameField" class="form-label">Node-RED Login Username</label>
+                        <input type="password" id="noderedUsernameField" class="form-control" value="{{ username }}" readonly>
+                    </div>
+                    <div class="mb-3">
+                        <label for="passwordField" class="form-label">Node-RED Login Password</label>
+                        <input type="password" id="noderedPasswordField" class="form-control" value="{{ password }}" readonly>
+                    </div>
                     <div class="mb-3">
                         <label for="usernameField" class="form-label">MQTT-Username</label>
                         <input type="password" id="usernameField" class="form-control" value="{{ nodered_mqtt_client_data.username }}" readonly>
@@ -49,14 +63,6 @@
                         <label for="tokenField" class="form-label">InfluxDB Read/Write Token</label>
                         <input type="password" id="tokenField" class="form-control" value="{{ influxdb_token }}" readonly>
                     </div>
-                    <div class="mb-3">
-                        <label for="usernameField" class="form-label">Node-RED Login Username</label>
-                        <input type="password" id="noderedUsernameField" class="form-control" value="{{ username }}" readonly>
-                    </div>
-                    <div class="mb-3">
-                        <label for="passwordField" class="form-label">Node-RED Login Password</label>
-                        <input type="password" id="noderedPasswordField" class="form-control" value="{{ password }}" readonly>
-                    </div>
                 </div>
             </div>
         </div>
@@ -64,7 +70,7 @@
     <!-- <div style="margin-bottom: 1.5rem;"></div> -->
     <!-- <hr> -->
     <div class="alert alert-danger" role="alert">
-        <p>Kindly stop Node-RED to pause your flows if you don't need them for a while to give back resources to the server.</p>
+        <p>Please stop Node-RED to free up server resources if the flows are not needed.</p>
         <button type="submit" class="btn btn-danger" name="action" value="stop">Stop Node-RED</button>
     </div>
 </form>
@@ -80,7 +86,35 @@
         window.open(url, '_blank');
     });
 
-    function toggleVisibility() {
+    // Toggle Credential Visibility
+    // function toggleVisibility() {
+    //     var usernameField = document.getElementById("usernameField");
+    //     var passwordField = document.getElementById("passwordField");
+    //     var tokenField = document.getElementById("tokenField");
+    //     var noderedUsername = document.getElementById("noderedUsernameField");
+    //     var noderedPassword = document.getElementById("noderedPasswordField");
+    //     var link = event.target; // Get the clicked link
+
+    //     // Toggle  visibility
+    //     if (usernameField.type === "password") {
+    //         usernameField.type = "text";
+    //         passwordField.type = "text";
+    //         tokenField.type = "text";
+    //         noderedUsername.type = "text";
+    //         noderedPassword.type = "text";
+    //         link.textContent = "Hide Credentials";
+    //     } else {
+    //         usernameField.type = "password";
+    //         passwordField.type = "password";
+    //         tokenField.type = "password";
+    //         noderedUsername.type = "password";
+    //         noderedPassword.type = "password";
+    //         link.textContent = "Show Credentials";
+    //     }
+    // }
+
+    // Toggle Credential Visibility with Timer
+    function toggleVisibilityWithTimer() {
         var usernameField = document.getElementById("usernameField");
         var passwordField = document.getElementById("passwordField");
         var tokenField = document.getElementById("tokenField");
@@ -111,6 +145,7 @@
             setTimeout(hideCredentials, 10000); // 10000 milliseconds = 10 seconds
         }
     }
+
     // Copy credentials script
     document.addEventListener('DOMContentLoaded', () => {
         // Select the copy link

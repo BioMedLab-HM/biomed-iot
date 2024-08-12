@@ -67,7 +67,7 @@
         "type": "mqtt in",
         "z": "d3f3e87db40f23f2",
         "name": "",
-        "topic": "in/topic_id/cputemp",
+        "topic": "in/topic_id/gateway-name-here/cputemp",
         "qos": "2",
         "datatype": "auto-detect",
         "broker": "4440ee1d27092426",

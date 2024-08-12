@@ -1,4 +1,4 @@
-# Tests to run after installation
+# Tests After Installation
 
 ### Reboot if not yet done
 	sudo reboot

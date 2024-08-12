@@ -11,8 +11,9 @@
                 Biomed IoT is an open-source IoT platform, designed for collecting and storing sensor data, as well as automation between devices.
             </p>
             <ol class="styled-list">
-                <li><strong><a href="{% url 'devices' %}">Devices</a>:</strong> begin by registering your devices to get MQTT credentials for your device</li>
-                <li><strong><a href="{% url 'nodered-manager' %}">Automate</a>:</strong> Link your sensors and actuators and store your devices' data into the time series database (InfluxDB) with Node-RED.</li>
+                <li><strong><a href="{% url 'register' %}">Create an account</a></strong> and log in (email verification is required depending on your setup)</li>
+                <li><strong><a href="{% url 'devices' %}">Device List</a>:</strong> Begin by registering your devices to get MQTT credentials for your device</li>
+                <li><strong><a href="{% url 'nodered-manager' %}">Automate</a>:</strong> Link your sensors and effector devices and store your devices' data into the time series database (InfluxDB) with Node-RED.</li>
                 <li><strong><a href="{% url 'visualize' %}">"Visualize"</a>:</strong> Visit the 'Visualize' page to visualize and export (csv) your data with Grafana.</li>
                 <li><strong><a href="{% url 'manage-data' %}">Manage Data</a>:</strong> Navigate to the 'Manage Data' page to selectively delete data. More functionality may come.</li>
             </ol>
