@@ -12,10 +12,10 @@ This manual explains how to use the Biomed IoT platform with a simple applicatio
 - Delete the data from the database again
 
 ## Content
-- [Registration and Login](#Registration-and-Login)
+- [Registration and Login](#registration-and-Login)
 - [Link Device to the platform](#Link-Device-to-the-platform)
-    - [Variant 1: With Gateway](#Variant-1:-With-Gateway)
-    - [Variant 2: Without Gateway](#Variant-2:-Without-Gateway)
+    - [Variant 1: With Gateway](#Variant-1-With-Gateway)
+    - [Variant 2: Without Gateway](#Variant-2-Without-Gateway)
 - [Create Automations and Save Data With Node-RED](#Create-Automations-and-Save-Data-With-Node-RED)
 - [Visualize with Grafana](#Visualize-with-Grafana)
 - [Export a csv file with Grafana](#Export-a-csv-file-with-Grafana)
@@ -91,7 +91,7 @@ If you want to visualize your temperature data from your ESP32 or CPU temperatur
 6. Click 'Download CSV' and check your computer's download folder.
 
 
-## Delete Unused Data
+## Delete Data
 1. Click 'Delete Data' on the website menu bar and read the instructions there
 2. select 'devicename' in the 'Select Measurement' field, click on the 'Delete Data' button and confirm with 'Ok'
 
