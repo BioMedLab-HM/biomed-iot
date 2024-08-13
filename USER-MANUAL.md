@@ -21,6 +21,16 @@ This manual explains how to use the Biomed IoT platform with a simple applicatio
 - [Export a csv file with Grafana](#Export-a-csv-file-with-Grafana)
 - [Delete Data](#Delete-Data)
 
+- [Registration and Login](#registration-and-login)
+- [Link Device to the Platform](#link-device-to-the-platform)
+    - [Variant 1: With Gateway](#variant-1-with-gateway)
+    - [Variant 2: Without Gateway](#variant-2-without-gateway)
+- [Create Automations and Save Data With Node-RED](#create-automations-and-save-data-with-node-red)
+- [Visualize with Grafana](#visualize-with-grafana)
+- [Export a CSV File with Grafana](#export-a-csv-file-with-grafana)
+- [Delete Data](#delete-data)
+
+
 ## Registration and Login
 1. Click on 'User' and then on 'Register' on the website menu bar.
 2. Fill the form with all necessary data. The password needs to comply with the rules for safe passwords, listed there.
