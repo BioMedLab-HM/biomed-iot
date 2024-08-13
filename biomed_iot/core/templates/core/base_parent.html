@@ -52,7 +52,7 @@
                             </li>
                             <li class="nav-item"><a class="nav-link {% is_active 'Automate' %}" aria-current="page" href="{% url 'nodered-open' %}">Automate</a></li>
                             <li class="nav-item"><a class="nav-link {% starts_with 'visualize' %}" href="{% url 'visualize' %}">Visualize</a></li>
-                            <li class="nav-item"><a class="nav-link {% starts_with 'manage' %}" href="{% url 'manage-data' %}">Manage Data</a></li>
+                            <li class="nav-item"><a class="nav-link {% starts_with 'manage' %}" href="{% url 'manage-data' %}">Delete Data</a></li>
                         {% endif %}
                         <li class="nav-item"><a class="nav-link {% is_active 'core-manual' %}" href="{% url 'core-manual' %}">Manual</a></li>
                         <li class="nav-item dropdown">

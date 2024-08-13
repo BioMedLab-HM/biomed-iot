@@ -7,8 +7,11 @@
         <h4>Your Node-RED is running.</h4>
         <p>Open Node-RED now to create and edit flows.</p>
         <button type="submit" class="btn btn-info" name="action" value="open">Open Node-RED</button>
+        <!-- Alternative Button to open Node-RED in new tab -->
+        <!-- <button type="button" class="btn btn-info" data-url="{% url 'nodered' %}" id="openFlows">
+            Open Nodered Flows (New Tab)
+        </button> -->
         <p style="margin-top: 20px;">Build dashboards for Node-RED to view and control flows.</p>
-        <!-- Ensure this is within a Django HTML template file -->
         <button type="button" class="btn btn-info" data-url="{% url 'nodered-dashboard' %}" id="openDashboard">
             Open Node-RED Dashboard
         </button>
@@ -86,6 +89,12 @@
         window.open(url, '_blank');
     });
 
+    //Alternative Button control to open Node-RED Flows in new tab --> needs adjustments in views.py
+    // document.getElementById('openFlows').addEventListener('click', function() {
+    //     var url = this.getAttribute('data-url');
+    //     window.open(url, '_blank');
+    // });
+
     // Toggle Credential Visibility
     // function toggleVisibility() {
     //     var usernameField = document.getElementById("usernameField");
@@ -154,14 +163,14 @@
             e.preventDefault(); // Prevent the default link behavior
 
             // Get the values from the input fields
+            var noderedUsername = document.getElementById("noderedUsernameField").value;
+            var noderedPassword = document.getElementById("noderedPasswordField").value;
             var username = document.getElementById("usernameField").value;
             var password = document.getElementById("passwordField").value;
             var token = document.getElementById("tokenField").value;
-            var noderedUsername = document.getElementById("noderedUsernameField").value;
-            var noderedPassword = document.getElementById("noderedPasswordField").value;
 
             // Create a string that concatenates the credentials
-            const credentials = "MQTT-Username: " + username + "\nMQTT-Password: " + password + "\nInfluxDB-Token: " + token + "\nNode-RED Login Username: " + noderedUsername + "\nNode-RED Login Password: " + noderedPassword;
+            const credentials = "Node-RED Login Username: " + noderedUsername + "\nNode-RED Login Password: " + noderedPassword + "\nMQTT-Username: " + username + "\nMQTT-Password: " + password + "\nInfluxDB-Token: " + token;
 
             // Create a temporary textarea to hold the text to copy
             const textarea = document.createElement('textarea');

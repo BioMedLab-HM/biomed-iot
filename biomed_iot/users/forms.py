@@ -1,6 +1,7 @@
-from datetime import datetime
 import re
 from django import forms
+from datetime import datetime, timedelta
+# from django.utils import timezone
 # from django.contrib.auth.models import User
 from django.contrib.auth.forms import UserCreationForm, AuthenticationForm
 from .models import Profile, CustomUser
@@ -58,7 +59,9 @@ class DeleteDataForm(forms.Form):
         label='End Time',
         input_formats=['%Y-%m-%d %H:%M:%S'],  # User-friendly input format
         required=True,
-        initial=datetime.now().strftime("%Y-%m-%d %H:%M:%S"),
+        # initial=datetime.now().strftime("%Y-%m-%d %H:%M:%S"),
+        # initial=lambda: datetime.now().replace(hour=23, minute=59, second=59).strftime("%Y-%m-%d %H:%M:%S"),
+        initial=lambda: (datetime.now() + timedelta(days=1)).strftime("%Y-%m-%d %H:%M:%S"),
         help_text='Format: yyyy-MM-dd hh:mm:ss'
     )
 

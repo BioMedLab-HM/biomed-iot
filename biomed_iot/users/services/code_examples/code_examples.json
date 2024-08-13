@@ -1,11 +1,18 @@
 {
-    "arduino": {
-      "filename": "arduino_template.cpp",
-      "headline": "Arduino (C++) MQTT Publish Example"
-    },
-    "python": {
-      "filename": "python_template.py",
-      "headline": "Python MQTT Publish Example"
-    }
+  "esp32_with_gateway": {
+    "filename": "esp32_with_gateway.cpp",
+    "headline": "Example: ESP32 + DHT22 Sensor (for use with gateway)"
+  },
+  "esp32_without_gateway": {
+    "filename": "esp32_without_gateway.cpp",
+    "headline": "Example: ESP32 + DHT22 Sensor (for use without gateway)"
+  },
+  "function_node_save_any_data": {
+    "filename": "function_node_save_any_data.txt",
+    "headline": "Function Node to Save Any Data (use in Node-RED)"
+  },
+  "function_node_save_any_devicestatus": {
+    "filename": "esp32_without_gateway.cpp",
+    "headline": "Function Node to Save Any Devicestatus (use in Node-RED)"
   }
-  
+}

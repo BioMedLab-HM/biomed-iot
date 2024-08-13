@@ -95,6 +95,8 @@ Close the file by pressing Ctrl+x.
 A test script to measure core website performance is coming soon...
 
 ## How it Works
+Once the master's thesis about this project is published, you can read about technical details there.
+Below figure explains the functionality of Biomed IoT on a high level.
 ![Biomed IoT Schema](biomed_iot/media/biomed_iot.png "Biomed IoT Schema")
 
 ## How to Use

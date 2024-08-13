@@ -1,0 +1,53 @@
+///// DO NOT CHANGE THIS SCRIPT /////
+/* This script is to store any device status that is received */
+
+// Parse the incoming payload
+var data = msg.payload;
+var deviceName = Object.keys(data)[0];
+
+// Mandatory: Define measurement name
+var measurement = "devicestatus";
+
+// Optional: Define tags here.
+var tags = {
+    // devicename as tagname
+    "devicename": deviceName
+}
+
+// Dynamically build fields object from data properties
+var fields = {};
+for (var key in data) {
+    // Assuming all properties except 'timestamp' are fields
+    if (data.hasOwnProperty(key) && key !== 'timestamp') {
+        // Ensure the value is 1
+        if (data[key] === 1) {
+            fields[key] = data[key];
+        } else {
+            // If the value is not 1, you can either skip or handle it
+            return null; // Discard this message if the value is not 1
+        }
+    }
+}
+
+// Create a new message object to pass to the InfluxDB out node
+var newMsg = {
+    payload: [
+        {
+            measurement: measurement,
+            fields: fields,
+            //tags: tags,
+        }
+    ]
+};
+
+// Add tags to the payload if they are not empty
+if (Object.keys(tags).length > 0) {
+    newMsg.payload[0].tags = tags;
+}
+
+// Add timestamp if it exists
+if (data.timestamp) {
+    newMsg.payload[0].timestamp = data.timestamp; // * factor if necessary
+}
+
+return newMsg;

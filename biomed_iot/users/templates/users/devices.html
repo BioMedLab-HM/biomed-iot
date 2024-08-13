@@ -8,14 +8,11 @@
         <h5 class="my-0 font-weight-normal">Your Devices</h4>
     </div>
     <div class="card-body">
-        <strong>How to create device credentials:</strong>
-        <ul>
-            <li>Create credentials for your IoT device (a microcontroller or a gateway) by entering a descriptive name for your device into the form below (click button).</li>
-            <li>Your new device credentials will be added at the bottom of the list below.</li>
-            <li>Click on 'Show/Hide Credentials' to toggle the visibility of the credentials (for safety reasons).</li>
-            <li>Copy the visible username and password from the teext fields.</li>
-            <li>If you need to delete device credentials click on the 'Delete' button right next to the respective line and confirm with 'Ok'</li>
-        </ul>  
+        <ul class="text-muted">
+            <li>Create device credentials by adding a descriptive name for your device using the form below</li>
+            <li>The new credentials will appear at the bottom of the list</li>
+            <li>Toggle visibility with 'Show/Hide Credentials' and copy the username and password</li>
+        </ul>
         <form method="post" class="mt-3 mb-3">
             {% csrf_token %}
             <div class="form-group row">

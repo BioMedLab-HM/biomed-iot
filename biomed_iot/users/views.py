@@ -1,6 +1,6 @@
 import os
 # import jwt  # TODO: for auto-login into Node-RED
-# import datetime # TODO: for auto-login into Node-RED with jwt
+from datetime import datetime
 import requests
 import secrets
 import json
@@ -271,12 +271,15 @@ def message_and_topic_structure(request):
 
     message_example_json = json.dumps(message_example, indent=4)
     message_example_large_json = json.dumps(message_example_large, indent=4)
+
+    current_server_time = datetime.now().strftime("%Y-%m-%d %H:%M:%S")
     context = {
         'message_example': message_example_json,
         'message_example_large': message_example_large_json,
         'in_topic': in_topic,
         'out_topic': out_topic,
         'topic_id': topic_id,
+        'current_server_time': current_server_time,
         'title': 'Message & Topic Structure',
         'thin_navbar': False,
     }

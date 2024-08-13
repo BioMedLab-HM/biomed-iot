@@ -44,7 +44,7 @@
         {% endif %}
 <p><strong>First</strong>, create gateway credentials on the <a href="{% url 'devices' %}">Device List</a> page and get your <a href="{% url 'message-and-topic-structure' %}">personal topic ID</a>. Make sure to review the instructions on both of these pages.</p>
 
-        <p><strong>On your gateway</strong>: to make sure you have 'unzip' and 'curl' installed on your gateways system, run this command in a terminal first.</p>
+        <p><strong>On your gateway device</strong>: to make sure you have 'unzip' and 'curl' installed on your gateways system, run this command in a terminal first.</p>
         <pre><code>sudo apt -y install curl unzip</code></pre>
         <p>Download the gateway setup files by running this command</p>
         <pre><code>curl -O -k {{ download_url }}</code></pre>

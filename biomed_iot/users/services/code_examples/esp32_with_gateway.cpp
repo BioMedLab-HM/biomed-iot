@@ -1,0 +1,152 @@
+/* THIS VERSION IS FOR USE WITH A BIOMED IOT GATEWAY
+ * 
+ * Example Code for Biomed IoT Device using 
+ * - an ESP32 microcontroller
+ * - a DHT22 temperature and humidity sensor on the A0 pin of your ESP32
+ * - a real time unix timestamp (to be implemented in the future) 
+ * 
+ * To finish this code modify the following in the code below:
+ * - wifi_ssid (enter your WiFi name)
+ * - wifi_password (enter your WiFi password)
+ * - mqtt_server (enter your Biomed IoT gateway IP address)
+ */
+
+#include <WiFi.h>          // Library for WiFi
+#include <PubSubClient.h>  // Library for MQTT
+#include <time.h>
+#include "DHT.h"           // Library for DHT sensors
+
+#define wifi_ssid          "YOUR_WIFI_NAME"
+#define wifi_password      "YOUR_WIFI_PASSWORD"
+
+#define mqtt_server        "BIOMED_IOT_SERVER_IP_OR_DOMAIN"
+
+#define temperature_topic  "in/esp32/temperature/"
+#define humidity_topic     "in/esp32/humidity/" 
+#define devicestatus_topic "in/esp32/devicestatus"
+
+#define DHTPIN A0          // DHT Pin 
+#define DHTTYPE DHT22      // DHT 22  (AM2302)
+
+DHT dht(DHTPIN, DHTTYPE);      
+WiFiClient espClient;
+PubSubClient client(espClient);
+
+
+void setup() {
+  Serial.begin(115200);
+  setup_wifi();
+  
+  client.setServer(mqtt_server, 1883);  // Configure MQTT connection
+  if (!client.connected()) {
+    reconnect();
+  }
+  dht.begin();
+}
+
+void loop() { 
+  if (!client.connected()) { 
+    reconnect(); 
+  } 
+
+  if (client.connected()){ 
+
+    // Read sensor values
+    float temperature = dht.readTemperature(); 
+    float humidity = dht.readHumidity();
+
+    // Publish values to MQTT topics and print to serial connection for debugging
+    if (!isnan(temperature)){
+      String payload = "{\"temperature\":" + String(temperature) + "}";
+      client.publish(temperature_topic, String(payload).c_str(), true);
+      Serial.println(String(temperature_topic) + ": " + payload); 
+    }
+
+    if (!isnan(humidity)){
+      String payload = "{\"humidity\":" + String(humidity) + "}"; 
+      client.publish(humidity_topic, String(payload).c_str(), true);
+      Serial.println(String(humidity_topic) + payload); 
+    }
+
+    // Send devicestatus 1
+    String payload = "{\"esp32\":" + String(1) + "}"; 
+    client.publish(devicestatus_topic, String(payload).c_str(), true);
+    Serial.println(String(devicestatus_topic) + payload);
+    
+  }
+  
+  // Wait for 10 seconds 
+  delay (10000);
+} 
+
+
+void setup_wifi() {
+  Serial.println();
+  Serial.print("[WiFi] Connecting to ");
+  Serial.println(wifi_ssid);
+  WiFi.mode(WIFI_STA);
+  WiFi.begin(wifi_ssid, wifi_password);
+  
+  // Will try for about 10 seconds (20x 500ms)
+  int tryDelay = 500;
+  int numberOfTries = 20;
+
+  // Wait for the WiFi event
+  while (true) {
+    switch(WiFi.status()) {
+      case WL_NO_SSID_AVAIL:
+        Serial.println("[WiFi] SSID not found");
+        break;
+      case WL_CONNECT_FAILED:
+        Serial.print("[WiFi] Failed - WiFi not connected! Reason: ");
+        return;
+        break;
+      case WL_CONNECTION_LOST:
+        Serial.println("[WiFi] Connection was lost");
+        break;
+      case WL_SCAN_COMPLETED:
+        Serial.println("[WiFi] Scan is completed");
+        break;
+      case WL_DISCONNECTED:
+        Serial.println("[WiFi] WiFi is disconnected");
+        break;
+      case WL_CONNECTED:
+        Serial.println("[WiFi] WiFi is connected!");
+        Serial.print("[WiFi] IP address: ");
+        Serial.println(WiFi.localIP());
+        return;
+        break;
+      default:
+        Serial.print("[WiFi] WiFi Status: ");
+        Serial.println(WiFi.status());
+        break;
+      }
+      delay(tryDelay);
+          
+    if(numberOfTries <= 0){
+      Serial.print("[WiFi] Failed to connect to WiFi!");
+      // Use disconnect function to force stop trying to connect
+      WiFi.disconnect();
+      ESP.restart();
+      return;
+    } else {
+      numberOfTries--;
+    }
+  }
+}
+
+
+//Reconnect to wifi if connection is lost
+void reconnect() {
+  while (!client.connected()) {
+    Serial.print("Connecting to MQTT broker ...");
+    if (client.connect("ESP32Client")) {
+      Serial.println("OK");
+    } else {
+      Serial.print("[Error] Not connected: ");
+      Serial.print(client.state());
+      Serial.println("Wait 5 seconds before retry.");
+      delay(5000);
+    }
+  }
+}

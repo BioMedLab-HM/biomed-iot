@@ -6,6 +6,9 @@
         <h4 class="my-0 font-weight-normal">Selectively Delete Measurement Data</h4>
     </div>
     <div class="card-body">
+        <p class="text-muted">
+            <strong>How it works:</strong> To delete a measurement and all its fields, select the measurement and click delete. To remove specific field values, enter them in "Fields to delete" as shown below. You can also set a time range to target specific data; by default, the time range is set broadly enough to include all data.
+        </p>
         <form method="post">
             {% csrf_token %}
             {{ form|crispy }}

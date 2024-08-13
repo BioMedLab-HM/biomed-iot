@@ -1,0 +1,51 @@
+/////// USER INPUT SECTION ///////
+
+// Mandatory: Define your measurement name
+var measurement = "esp32";
+
+/////// END OF USER INPUT SECTION ///////
+
+
+
+
+
+
+
+///// DO NOT CHANGE CODE BELOW /////
+/* This script is to store any device status that is received */
+
+// Parse the incoming payload
+var data = msg.payload;
+
+// Dynamically build fields and tags objects from data properties
+var fields = {};
+var tags = {};
+for (var key in data) {
+    // Assuming all properties except 'timestamp' are fields
+    if (data.hasOwnProperty(key) && key !== 'timestamp') {
+        fields[key] = data[key];
+        // Create a tag for each field with the key being "field" and the value being the field name
+        tags["fieldname"] = key;
+    }
+}
+
+// Use the timestamp from the MQTT message, converting to the correct precision if necessary
+var timestamp = data.timestamp; // * factor
+
+// Create a new message object to pass to the InfluxDB out node
+var newMsg = {
+    payload: [
+        {
+            measurement: measurement,
+            fields: fields,
+            tags: tags
+        }
+    ]
+};
+
+// Add timestamp as the last element if it exists
+if (data.timestamp) {
+    newMsg.payload[0].timestamp = data.timestamp; // * factor if necessary
+}
+
+return newMsg;
