@@ -5,16 +5,19 @@ The manual will be expanded in the future to explain additional features of the 
 
 This manual explains how to use the Biomed IoT platform with a simple application example. You will learn how to:
 - Send temperature and humidity data from an ESP32 microcontroller with a DHT 22 sensor to the platform
+- Setup and learn about a Biomed IoT Gateway (if Biomed IoT is running on an internet server)
 - Store this data in the database using Node-RED
 - Use Node-RED for automation
 - Visualize the data in Grafana
 - Export the data from Grafana as a CSV file for download
 - Delete the data from the database again
 
+First have a look at the [schematic presentation of Biomed IoT](README.md#how-it-works). You will see how sensors, an optional gateway and the platform are linked together. Then come back to this user manual.
+
 ## Content
 - [Registration and Login](#registration-and-login)
 - [Link Device to the Platform](#link-device-to-the-platform)
-    - [Variant 1: With Gateway](#variant-1-with-gateway)
+    - [Variant 1: With Gateway (use this if Biomed IoT is accessable on the internet)](#variant-1-with-gateway)
     - [Variant 2: Without Gateway](#variant-2-without-gateway)
 - [Create Automations and Save Data With Node-RED](#create-automations-and-save-data-with-node-red)
 - [Visualize with Grafana](#visualize-with-grafana)
@@ -31,13 +34,13 @@ Data can be sent to the platform directly (recommended when the platform is runn
 or indirectly by sending data to a local Biomed IoT gateway that forwards the message to the platform with encryption (recommended if the Biomed IoT platform is running on an internet server)
 
 ### Variant 1: With Gateway 
-*e.g. when Biomed IoT is running on the internet*
+*e.g. when Biomed IoT is running on the internet where TLS encryption (https) is needed*
 1. Go to 'Gateway Setup' page and follow the instructions there.
 2. Go to the 'Code Examples' page, copy the 'ESP32 + DHT22 Sensor (for use with gateway)' and use it for your ESP32+DHT22 setup. You will find further instructions for code adjustment and hardware setup in the code.
 3. When you finished the code and hardware setup, start your ESP32. It will already send data. To actually receive and save the data on the platform follow the instructions for Node-RED below.
 
 ### Variant 2: Without Gateway
-*when Biomed IoT is running in a secure local network*
+*when Biomed IoT is running in a secure local network where no TLS encryption (https) is needed*
 1. Create device credentials for your ESP32 on the 'Device List' page
 2. Get your personal topic ID from the 'Message & Topic Structure' page.
 3. Go to the 'Code Examples' page, copy the 'ESP32 + DHT22 Sensor (for use without gateway)' and use it for your ESP32+DHT22 setup. You will find further instructions for code adjustment and hardware setup in the code (device credentials and personal topic ID needed)

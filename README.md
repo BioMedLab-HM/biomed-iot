@@ -95,12 +95,14 @@ Close the file by pressing Ctrl+x.
 A test script to measure core website performance is coming soon...
 
 ## How it Works
-Once the master's thesis about this project is published, you can read about technical details there.
-Below figure explains the functionality of Biomed IoT on a high level.
+Below figure explains the functionality of Biomed IoT on a high level
+- Sensors can send data to the platform (if the platform is running online, over a gateway).
+- There, the user can store data to a database, create Visualizations and send data out to effector devices
+
 ![Biomed IoT Schema](biomed_iot/media/biomed_iot.png "Biomed IoT Schema")
 
 ## How to Use
-The [*USER-MANUAL*](USER-MANUAL.md) (see also 'Manual' in the website menu) contains a guided tour through Biomed IoT and helps you to set up a working example.
+The [*user manual*](USER-MANUAL.md) (see also 'Manual' in the website menu) contains a guided tour through Biomed IoT and helps you to set up a working example.
 
 Use the platform at your own risk. If you publish it on the internet, use a legitimate privacy policy and imprint. 
 
