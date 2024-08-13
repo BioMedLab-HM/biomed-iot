@@ -89,7 +89,7 @@ Close the file by pressing Ctrl+x.
 - Do not abort the setup process prematurely. Depending on the speed of the download servers, the duration of the setup can vary, usually between five and 15 minutes.
 - The setup script requires sudo privileges. Ensure that the user running the setup has sudo privileges.
 - The safest way to repeat the installation of Biomed IoT is to first setup your operating system from scratch (e.g. flashing the SD card for your Pi).
-- Execute the [tests to execute after installation](tests/tests_after_setup.md) to check the integrity of your installation.
+- Execute the [*Tests After Installation*](tests/tests_after_setup.md) to check the integrity of your installation.
 
 ## Performance Testing
 A test script to measure core website performance is coming soon...
