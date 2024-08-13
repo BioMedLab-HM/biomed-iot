@@ -11,6 +11,10 @@
  * - mqtt_server (enter your Biomed IoT server IP address or domain name)
  * - mqtt_username and mqtt_password (enter the device credentials you created on the Biomed IoT platform)
  * - YOUR_TOPIC_ID (substitute it with your actual personal topic-id)
+ * - DHTPIN (Adjust its value to the pin you used for your hardware setup)
+ *
+ * For hardware setup and further help, visit: 
+ * https://randomnerdtutorials.com/esp32-dht11-dht22-temperature-humidity-sensor-arduino-ide/
  */
 
 #include <WiFi.h>          // Library for WiFi

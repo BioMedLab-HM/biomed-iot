@@ -95,7 +95,7 @@
                         {% csrf_token %}
                         <input type="hidden" name="device_username" value="{{ device.username }}">
                         <button type="submit" class="btn btn-danger btn-sm"
-                            onclick="return confirm('Are you sure you want to delete this device?');">Delete</button>
+                            onclick="return confirm('Once deleted, these credentials will not work anymore! Are you sure you want to delete this device?');">Delete</button>
                     </form>
                 </div>
             </div>

@@ -9,6 +9,10 @@
  * - wifi_ssid (enter your WiFi name)
  * - wifi_password (enter your WiFi password)
  * - mqtt_server (enter your Biomed IoT gateway IP address)
+ * - DHTPIN (Adjust its value to the pin you used for your hardware setup)
+ *
+ * For hardware setup and further help, visit: 
+ * https://randomnerdtutorials.com/esp32-dht11-dht22-temperature-humidity-sensor-arduino-ide/
  */
 
 #include <WiFi.h>          // Library for WiFi
