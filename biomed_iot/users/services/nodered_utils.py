@@ -158,7 +158,7 @@ class NoderedContainer:
         response.raise_for_status()
 
     def configure_nodered(self, user):
-        '''Open flows.json template, replace placeholders for various values and copy and copy it to the container'''
+        '''Open flows.json template, replace placeholders for various values and copy it to the container'''
 
         file_path = os.path.join(os.path.dirname(__file__), 'nodered_flows', 'flows.json')
         with open(file_path, 'r') as file:
@@ -176,7 +176,8 @@ class NoderedContainer:
         modified_flows_json = modified_flows_json.replace("influxdb-org-name", config.influxdb.INFLUX_ORG_NAME)
 
         server_scheme = "https" if config.host.TLS == "true" else "http"
-        influxdb_url = f"{server_scheme}://{host_address}:{config.influxdb.INFLUX_PORT}"
+        influxdb_port = "8087"  # TODO: NGINX conf is 8087 to rv. proxy 8086. config.influxdb.INFLUX_PORT is 8086
+        influxdb_url = f"{server_scheme}://{host_address}:{influxdb_port}"
         modified_flows_json = modified_flows_json.replace("influxdb-url", influxdb_url)
 
         nodered_username = user.nodereduserdata.username
