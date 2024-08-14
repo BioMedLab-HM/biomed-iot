@@ -44,7 +44,7 @@
     <div class="card-body">
         <div class="row align-items-center mt-3 mb-2"> <!-- First row -->
             <div class="col-12 col-md-7 col-lg-7 col-xl-6">
-                <p class="mb-1">Use this structure for your message payload<strong><sup>*</sup></strong>:</p>
+                <p class="mb-1">Use this JSON structure for your message payload<strong><sup>*</sup></strong>:</p>
             </div>
             <div class="col-9 col-md-5">
                 <pre><code>{{ message_example }}</code></pre>
@@ -59,7 +59,9 @@
             </div>
         </div>
         <div class="row align-items-center mt-3 mb-2"> <!-- First row -->
-            <p><strong><sup>*</sup></strong>If no timestamp is specified, the database will automatically generate one using the server time, currently {{ current_server_time }}</p>
+            <p>
+                <strong><sup>*</sup></strong>If no timestamp is specified, the database will automatically generate one using the server time, currently {{ current_server_time }}
+            </p>
         </div>
     </div>
 </div>
