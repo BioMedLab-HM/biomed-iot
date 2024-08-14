@@ -14,7 +14,8 @@ Biomed IoT is an open source IoT platform for data acquisition, visualization an
 ## Installation:
 
 ### Requirements
-The setup and platform have been tested on a cleanly installed Debian 12 server (x86 and ARM) and under Raspberry Pi OS (64-Bit) on a Raspberry Pi 4, both running Python 3.11.2. It is recommended that you create a new Linux user (included in the sudo group) under which the platform will run.
+The setup and platform have been tested on a cleanly installed Debian 12 server (x86 and ARM) and under Raspberry Pi OS (64-Bit) on a Raspberry Pi 4, both running Python 3.11.2. It is recommended that you create a new Linux user (included in the sudo group) under which the platform will run.  
+To enable email verification for platform users, an SMTP email provider with 'App-password' is necessary. For example, Gmail&reg offers this for free. during the Biomed IoT installation process you will be asked for the SMTP email server, port, email address and app-password (a more modern version than App-password may be implemented in the future.)
 
 ### Setup
 If you are setting up Biomed IoT on a Raspberry Pi, you can use [Debian for Pi](https://raspi.debian.net) or, the easier way, [Raspberry Pi OS light (64 Bit)](https://www.raspberrypi.com/software/operating-systems/), flashed to an SD-card using the [Raspberry Pi Imager](https://www.raspberrypi.com/software/).
@@ -62,7 +63,7 @@ Then reboot
 sudo reboot
 ```
 
-The guided installation process will ensure that Biomed IoT is installed on your system.  
+The guided installation process will ensure that Biomed IoT is installed on your system.
 Clone the repository and start the Biomed IoT installation by executing the following commands
 ```
 cd ~
@@ -70,7 +71,7 @@ git clone https://github.com/BioMedLab-HM/biomed-iot.git
 cd biomed-iot
 sudo python3 setup.py
 ```
-Consider reading the information, given in the last lines at the end of the installation (e.g. for the URL to reach Biomed IoT in the web browser), then reboot:
+Consider reading the information, given in the last lines at the end of the installation (e.g. for the URL to reach Biomed IoT in the web browser or where to find the admin login password), then reboot:
 ``` 
 sudo reboot
 ```
@@ -79,7 +80,7 @@ Biomed IoT should now be up and running. Type your server's IP address, host nam
 To log in as admin, use the email address you provided during setup. The password was auto-generated. You can find it by running the following command in the terminal:
 ```
 nano /etc/biomed-iot/config.toml
-# If you need to edit this file use
+# If you must edit this file use sudo. Do not change any value in this file except you know exactly what you are doing.
 sudo nano /etc/biomed-iot/config.toml
 ```
 Look for the 'DJANGO_ADMIN_PASS' line at the bottom of the file to find your password.

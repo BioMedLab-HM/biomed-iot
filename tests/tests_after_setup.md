@@ -9,11 +9,26 @@
 	nano /etc/biomed-iot/config.toml
 
 ### Website
-Check all functions
+Check all functions (at least check if each page and service like Node-RED and Grafana opens)
+Check Database by using an MQTT-in node in Node-RED and send {"test":1} to the topic for devicestatus. Then delete the data.
 
 ### Website Admin Dashboard
-\<ip>/admin or \<domain>/admin  
-for credentials, see DJANGO_ADMIN_PASS in config.toml
+Go to the '/admin' path of the website
+for credentials, (see DJANGO_ADMIN_PASS in config.toml)
+Check for completeness of data for:
+- Profile (Email)
+- Node red user datas (will be created only after first start of Node-RED)
+- Mqtt meta datas (User Topic ID, Nodered Role Name, Device Role Name)
+- Mqtt clients (Username, Password, Textname, Rolename)
+- Influx user datas (Bucket Name, Bucket ID, Bucket Token)
+
+### Setup Logs
+	cd /home/<user>/biomed-iot/setup_files/setup_logs  # substitute <user> with your linux username
+	ls -al
+	grep -R "Error" .  # search for "Error" or other keywords in log files
+	# Read all setup logs
+	nano main.log
+	nano install_xx_<name>.log  # substitute 'xx_<name>' according to the respective log file name
 
 ### Nginx
 	sudo nginx -t
@@ -30,13 +45,6 @@ for credentials, see DJANGO_ADMIN_PASS in config.toml
 ### Mosquitto und Mosquitto dynamic-security.json
 	sudo systemctl status mosquitto.service
 	sudo nano /var/lib/mosquitto/dynamic-security.json
-
-### Setup Logs
-	cd /home/<user>/biomed-iot/setup_files/setup_logs
-	ls -al
-	grep -R "Error" .  # search for "Error" or other keywords in log files
-	nano main.log
-	nano install_xx_<name>.log
 
 ### PostgreSQL (with <your_postgres_user> from config.toml)
 	sudo systemctl status postgresql
