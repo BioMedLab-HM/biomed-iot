@@ -36,8 +36,10 @@ or indirectly by sending data to a local Biomed IoT gateway that forwards the me
 ### Variant 1: With Gateway 
 *e.g. when Biomed IoT is running on the internet where TLS encryption (https) is needed*
 1. Go to 'Gateway Setup' page and follow the instructions there.
-2. Go to the 'Code Examples' page, copy the 'ESP32 + DHT22 Sensor (for use with gateway)' and use it for your ESP32+DHT22 setup. You will find further instructions for code adjustment and hardware setup in the code.
-3. When you finished the code and hardware setup, start your ESP32. It will already send data. To actually receive and save the data on the platform follow the instructions for Node-RED below.
+2. Create device credentials for your ESP32 on the 'Device List' page
+3. Get your personal topic ID from the 'Message & Topic Structure' page.
+4. Go to the 'Code Examples' page, copy the 'ESP32 + DHT22 Sensor (for use with gateway)' and use it for your ESP32+DHT22 setup. You will find further instructions for code adjustment and hardware setup in the code.
+5. When you finished the code and hardware setup, start your ESP32. It will already send data. To actually receive and save the data on the platform follow the instructions for Node-RED below.
 
 ### Variant 2: Without Gateway
 *when Biomed IoT is running in a secure local network where no TLS encryption (https) is needed*
