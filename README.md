@@ -41,14 +41,19 @@ Add your newly created user to the sudo group
 ```
 usermod -G sudo <your-username>
 ```
-To use 'sudo' without being prompted for the password, execute
+To use 'sudo' with the new user without being prompted for your password, execute
 ```
-sudo visudo
+visudo
 ```
 A file opens in the editor (e.g. nano). Append this line to the end of the file:
 ```
 <your-username> ALL=(ALL) NOPASSWD: ALL
 ```
+Now switch to your new user:
+```
+su <your-username>
+```
+
 Make sure your system is up to date by executing
 ```
 sudo apt update
