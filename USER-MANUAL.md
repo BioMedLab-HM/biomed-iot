@@ -56,10 +56,13 @@ or indirectly by sending data to a local Biomed IoT gateway that forwards the me
 3. Go to the 'Code Examples' page, copy the 'ESP32 + DHT22 Sensor (for use without gateway)' and use it for your ESP32+DHT22 setup. You will find further instructions for code adjustment and hardware setup in the code (device credentials and personal topic ID needed)
 4. When you finished the code and hardware setup, start your ESP32. It will already send data. To actually receive and safe the data on the platform follow the instructions for Node-RED below.
 
-## Create Automations and Save Data With Node-RED
+## Create Automations and Save Data with Node-RED
 
-1. Click 'Automate' and then on 'Open here' or 'Open in new tab' (more convenient) on the website menu and follow the instructions there.
-2. Once you opened the Node-RED Flow Editor and made the described modifications to the nodes according to the instructions before, your temperature and humidity data is saved to the database. The MQTT-Out nodes on the right side show the topics where you can subscribe to get a Code 0 or 1 depending on the temperature threshold in the subflows for cputemp or dht22-temperature (a subscriber script is not provided in this version of the manual).
+1. Click 'Automate' on the website menu and follow the instructions there.
+2. After Node-RED startup process is finished you will be on the page, saying 'Your Node-RED is running'. Read the instructions about Nod-RED login and MQTT- and InfluxDB nodes in the box below the green area. Before you open the Nod-RED Flow Editor (dark blue button) open this same page again in a new tab (click on 'Automate' again and select 'Open in new tab') and open Node-RED Flow Editor there. Then it is easier to copy and paste the below usernames and passwords into the Nod-RED login or the described nodes from the first to the second tab.
+2. Once you have opened the Node-RED Flow Editor and made the described modifications to the nodes according to the instructions before, you also need to adjust one value in the 'Prepare Data for Database'-function node of the subflow for the esp32 temperature values (the middle one of the three). Double click the function node and replace 'yourMeasurementNameHere' by a broad description of your measurements: for example if you measure temperature and other values of a fridge in the lab, use 'labfridge'. 
+3. Finally click on the red deploy button in the top right corner of the Flow editor to apply your changes. Your temperature  data is now saved to the database. If you want humidity to be saved too, copy the '...esp32/temperature' mqtt in node and place it right above the other one, double click it and change the subtopic 'temperature' to 'humidity'. Click on the red button 'Fertig' or 'Done'. Then wire the new mqtt in node with the function node by clicking on its small gray end and draw the wire to the other nodes end. Click the red deploy button again. Now. your humidity data will also be saved to the database.   
+4. Optional: The MQTT-Out nodes on the right side show the topics where you can subscribe to get a Code 0 or 1 depending on the temperature threshold in the subflows for cputemp or dht22-temperature (a subscriber script is not provided in this version of the manual).
 
 ## Visualize with Grafana
 

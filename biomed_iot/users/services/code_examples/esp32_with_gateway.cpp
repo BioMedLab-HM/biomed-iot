@@ -27,7 +27,7 @@
 
 #define temperature_topic  "in/esp32/temperature/"
 #define humidity_topic     "in/esp32/humidity/" 
-#define devicestatus_topic "in/esp32/devicestatus"
+#define devicestatus_topic "in/devicestatus"
 
 #define DHTPIN A0          // DHT Pin 
 #define DHTTYPE DHT22      // DHT 22  (AM2302)

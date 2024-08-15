@@ -17,7 +17,7 @@ Biomed IoT is an open source IoT platform for data acquisition, visualization an
 ### Requirements
 
 The setup and platform have been tested on a cleanly installed Debian 12 server (x86 and ARM) and under Raspberry Pi OS (64-Bit) on a Raspberry Pi 4, both running Python 3.11.2. It is recommended that you create a new Linux user (included in the sudo group) under which the platform will run.  
-To enable email verification for platform users, an SMTP email provider with 'App-password' is necessary. For example, Gmail&reg offers this for free. during the Biomed IoT installation process you will be asked for the SMTP email server, port, email address and app-password (a more modern version than App-password may be implemented in the future.)
+To enable email verification for platform users, an SMTP email provider with 'App-password' is necessary. For example, Gmail&reg; offers this for free. during the Biomed IoT installation process you will be asked for the SMTP email server, port, email address and app-password (a more modern version than App-password may be implemented in the future.)
 
 ### Setup
 

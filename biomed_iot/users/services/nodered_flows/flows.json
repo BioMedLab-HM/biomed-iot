@@ -126,7 +126,7 @@
         "type": "mqtt in",
         "z": "d3f3e87db40f23f2",
         "name": "",
-        "topic": "in/topic_id/your_gateway_name_here/cputemp",
+        "topic": "in/topic_id/your_gateway_name/cputemp",
         "qos": "2",
         "datatype": "auto-detect",
         "broker": "4440ee1d27092426",
@@ -384,7 +384,7 @@
         "type": "comment",
         "z": "d3f3e87db40f23f2",
         "name": "double click here!",
-        "info": "This cpu temperature sub-flow works only when \nyou have set up a Biomed IoT Gateway.\n\nTo make the flow work:\nIn the CPU Temp example's mqtt-in node, \nsubstitute 'your_gateway_name_here' in the\n topic structure with your gateway name,\n you used during gateway setup.\nIt should be the device name on the \n\"Device List\" page if you used this name.",
+        "info": "This cpu temperature sub-flow works only when \nyou have set up a Biomed IoT Gateway.\n\nTo make the flow work:\nIn the CPU Temp example's mqtt-in node,\nsubstitute 'your_gateway_name' in the\ntopic structure with your gateway name,\nyou used during gateway setup.\nIt should be the device name on the\n\"Device List\" page if you used this name.",
         "x": 200,
         "y": 200,
         "wires": []
