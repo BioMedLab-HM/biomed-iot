@@ -20,8 +20,8 @@ echo
 echo "Enter the 'Name' for your gateway (device), you created on the 'Device List' page of Biomed IoT"
 read gatewayname
 echo 
-echo "Enter the corresponding 'username' for your device."
-read mqtt_username
+echo "Enter the corresponding 'username' for your device. (input is hidden for safety)"
+read -s mqtt_username
 echo
 echo "Enter the corresponding 'password' for your device. (input is hidden for safety)"
 read -s mqtt_password
