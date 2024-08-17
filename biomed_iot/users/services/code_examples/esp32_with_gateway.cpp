@@ -10,6 +10,8 @@
  * - wifi_password (enter your WiFi password)
  * - mqtt_server (enter your Biomed IoT gateway IP address)
  * - DHTPIN (Adjust its value to the pin you used for your hardware setup)
+ * - ALSO: if you want to change the sensors or the name for their values or the device name in the status message
+ *         adjust the json message in the sections 'Publish values to MQTT...' and 'Send devicestatus 1'.
  *
  * For hardware setup and further help, visit: 
  * https://randomnerdtutorials.com/esp32-dht11-dht22-temperature-humidity-sensor-arduino-ide/
@@ -29,7 +31,7 @@
 #define humidity_topic     "in/esp32/humidity/" 
 #define devicestatus_topic "in/devicestatus"
 
-#define DHTPIN A0          // DHT Pin 
+#define DHTPIN 4           // DHT Pin 
 #define DHTTYPE DHT22      // DHT 22  (AM2302)
 
 DHT dht(DHTPIN, DHTTYPE);      
