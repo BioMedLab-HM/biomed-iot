@@ -12,13 +12,15 @@
 
 ### Website
 
-Check all functions (at least check if each page and service like Node-RED and Grafana opens)
-Check Database by using an MQTT-in node in Node-RED and send {"test":1} to the topic for devicestatus. Then delete the data.
+Check all functions (at least check if each page and service like Node-RED and Grafana opens)  
+Check the database by using an MQTT-in node in Node-RED and send {"test":1} to the topic for devicestatus.  
+you have to create a 'Device' on the 'Devices' >'Device List' first.  
+Finallly delete the data.
 
 ### Website Admin Dashboard
 
 Go to the '/admin' path of the website
-for credentials, (see DJANGO_ADMIN_PASS in config.toml)
+for credentials, (see DJANGO_ADMIN_PASS in /etc/biomed-iot/config.toml)
 Check for completeness of data for:
 - Profile (Email)
 - Node red user datas (will be created only after first start of Node-RED)

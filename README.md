@@ -88,7 +88,9 @@ Biomed IoT should now be up and running. Type your server's IP address, host nam
 To log in as admin, use the email address you provided during setup. The password was auto-generated. You can find it by running the following command in the terminal:
 ```
 nano /etc/biomed-iot/config.toml
-# If you must edit this file use sudo. Do not change any value in this file except you know exactly what you are doing.
+# If you must edit this file use sudo. 
+# Do not change any value in this file except  
+# you know exactly what you are doing.
 sudo nano /etc/biomed-iot/config.toml
 ```
 Look for the 'DJANGO_ADMIN_PASS' line at the bottom of the file to find your password.

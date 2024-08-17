@@ -1,6 +1,6 @@
 # Biomed IoT - User Manual
 
-This is the Biomed IoT User Manual. The installation instructions can be found in the [README file](README.md).  
+This is the Biomed IoT User Manual. The installation instructions for Admins can be found in the [README document (ext. link)](README.md).  
 The manual will be expanded in the future to explain additional features of the platform.
 
 *About Biomed IoT*
@@ -16,9 +16,9 @@ This manual explains how to use the Biomed IoT platform with a simple applicatio
 - Export the data from Grafana as a CSV file for download
 - Delete the data from the database again
 
-First have a look at the [schematic presentation of Biomed IoT](README.md#how-it-works). You will see how sensors, an optional gateway and the platform are linked together. Then come back to this user manual.
+First have a look at the [schematic presentation of Biomed IoT in the README document](README.md#how-it-works). You will see how sensors, an optional gateway and the platform are linked together. Then come back to this user manual.
 
-## Content
+## Table of Content
 
 - [Registration and Login](#registration-and-login)
 - [Link Device to the Platform](#link-device-to-the-platform)
