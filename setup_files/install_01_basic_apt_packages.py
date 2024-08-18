@@ -7,7 +7,7 @@ def install_basic_apt_packages():
 	commands = [
 		'apt update',
 		'apt install -y python3-pip python3-venv python3-dev',
-		# adduser is requirement of Grafana
+		# adduser is requirement of PostgreSQL
 		'apt install -y curl wget inotify-tools zip adduser git',
 		# libfontconfig1 is requirement of Grafana
 		'apt install -y libopenjp2-7 libtiff6 libfontconfig1',

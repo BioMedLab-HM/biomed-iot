@@ -317,7 +317,7 @@ def main():
         if user_answer == 'y':
             # Prefer IPv4-mapped IPv6 addresses via gai.conf to make SMTP to mailserver work.
             file_path = "/etc/gai.conf"
-            line_to_add = "precedence ::ffff:0:0/96  100\n"
+            line_to_add = "precedence ::ffff:0:0/96  100\n"  # The line actually already exists but is commented out. 
 
             # Append the uncommented line to the end of the file
             with open(file_path, 'a') as file:

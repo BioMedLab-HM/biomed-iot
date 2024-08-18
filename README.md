@@ -72,6 +72,7 @@ sudo reboot
 ```
 
 The guided installation process will ensure that Biomed IoT is installed on your system.
+Login to your Linux terminal with your new user.
 Clone the repository and start the Biomed IoT installation by executing the following commands
 ```
 cd ~
@@ -85,13 +86,13 @@ sudo reboot
 ```
 Biomed IoT should now be up and running. Type your server's IP address, host name or domain in a web browser.
 
-To log in as admin, use the email address you provided during setup. The password was auto-generated. You can find it by running the following command in the terminal:
+To log in to the Biomed IoT platform as admin, use the email address you provided during setup. The password was auto-generated. You can find it by running the following command in the servers terminal:
 ```
 nano /etc/biomed-iot/config.toml
 # If you must edit this file use sudo. 
 # Do not change any value in this file except  
 # you know exactly what you are doing.
-sudo nano /etc/biomed-iot/config.toml
+# sudo nano /etc/biomed-iot/config.toml
 ```
 Look for the 'DJANGO_ADMIN_PASS' line at the bottom of the file to find your password.
 Close the file by pressing Ctrl+x.
