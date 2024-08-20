@@ -4,13 +4,24 @@ Biomed IoT is an open source IoT platform for data acquisition, visualization an
 
 ## Content
 
+- [How it works](#how-it-works)
 - [Installation](#installation)
 - [Performance Testing](#performance-testing)
     - [Requirements](#requirements)
     - [Setup](#setup)
     - [Troubleshooting](#troubleshooting)
-- [How it works](#how-it-works)
 - [How to use](#how-to-use)
+
+
+## How it Works
+
+Below figure explains the functionality of Biomed IoT on a high level
+- Sensors can send data to the Biomed IoT platform via the MQTT protocol as MQTT messages to an MQTT topic (if the platform is running online, over a gateway).
+- An MQTT topic is like a label that tells devices where to send or get the messages
+- On the website, the user can store data to a database, create visualizations and send data out to effector devices
+
+![Biomed IoT Schema](biomed_iot/media/biomed_iot.png "Biomed IoT Schema")
+
 
 ## Installation:
 
@@ -104,18 +115,11 @@ Close the file by pressing Ctrl+x.
 - The safest way to repeat the installation of Biomed IoT is to first setup your operating system from scratch (e.g. flashing the SD card for your Pi).
 - Execute the [*Tests After Installation*](tests/tests_after_setup.md) to check the integrity of your installation.
 
+
 ## Performance Testing
 
-A test script to measure core website performance is coming soon...
+A test script to measure core website performance will come in teh future.
 
-## How it Works
-
-Below figure explains the functionality of Biomed IoT on a high level
-- Sensors can send data to the Biomed IoT platform via the MQTT protocol as MQTT messages to an MQTT topic (if the platform is running online, over a gateway).
-- An MQTT topic is like a label that tells devices where to send or get the messages
-- On the website, the user can store data to a database, create visualizations and send data out to effector devices
-
-![Biomed IoT Schema](biomed_iot/media/biomed_iot.png "Biomed IoT Schema")
 
 ## How to Use
 

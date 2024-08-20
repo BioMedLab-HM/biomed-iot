@@ -16,11 +16,11 @@ def install_security_packages(setup_scheme):
 		'apt install -y ufw',
 		# Configure ufw
 		'ufw allow ssh',
-		'ufw allow 80',  # for http
+		'ufw allow 80/tcp',  # for http
 		'ufw allow 443/tcp',  # for https
 		f'ufw allow {mqtt_port}/tcp',  # For MQTT
 		'sudo ufw allow 8087/tcp',  # InfluxDB
-		# TODO: avoid opening this port by implementing docker network to allow influxdb node connect directly to the db
+		# TODO: avoid opening the InfluxDB port by implementing docker network to allow influxdb node connect directly to the db
 		# 'ufw allow 3000/tcp',  # For Grafana admin to login to dashboard. If used with TLS, add proxy pass to nginx!
 		'echo',
 		"echo 'To enable ufw firewall, automatic response to confirmation will be provided.'",
