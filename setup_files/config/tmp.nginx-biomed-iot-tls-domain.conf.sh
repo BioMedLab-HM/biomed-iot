@@ -58,7 +58,8 @@ server {
 server {
     listen 8087 ssl;
     server_name $DOMAIN www.$DOMAIN;
-    include snippets/self-signed.conf; # contains ssl_certificate and ssl_certificate_key
+    ssl_certificate /etc/letsencrypt/live/$DOMAIN/fullchain.pem;
+    ssl_certificate_key /etc/letsencrypt/live/$DOMAIN/privkey.pem;
     include snippets/ssl-params.conf;  # contains additional params
 
     location / {

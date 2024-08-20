@@ -6,16 +6,16 @@ Biomed IoT is an open source IoT platform for data acquisition, visualization an
 
 - [How it works](#how-it-works)
 - [Installation](#installation)
-- [Performance Testing](#performance-testing)
     - [Requirements](#requirements)
     - [Setup](#setup)
     - [Troubleshooting](#troubleshooting)
+- [Performance Testing](#performance-testing)
 - [How to use](#how-to-use)
 
 
 ## How it Works
 
-Below figure explains the functionality of Biomed IoT on a high level
+The figure below explains the functionality of Biomed IoT on a high level
 - Sensors can send data to the Biomed IoT platform via the MQTT protocol as MQTT messages to an MQTT topic (if the platform is running online, over a gateway).
 - An MQTT topic is like a label that tells devices where to send or get the messages
 - On the website, the user can store data to a database, create visualizations and send data out to effector devices

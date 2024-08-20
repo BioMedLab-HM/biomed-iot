@@ -70,6 +70,7 @@ class NoderedContainer:
         hashed_password = self.hash_password(nodered_password)
 
         if self.container is None:  # Only create a new container if one doesn't already exist
+
             try:
                 self.container = self.docker_client.containers.run(
                     'custom-node-red',
@@ -84,7 +85,8 @@ class NoderedContainer:
                         'USERNAME': nodered_username,
                         'PASSWORD_HASH': hashed_password,
                         # 'SECRET_KEY': self.access_token  # for Token (JWT) based auth, but does not work currently
-                    }
+                    },
+                    network="bridge"  # Attach the container to the newly created network
                 )
                 self.determine_port()
             except (docker.errors.ContainerError, docker.errors.ImageNotFound) as e:
@@ -112,6 +114,17 @@ class NoderedContainer:
                 print(f'Container {self.name} not found.')
             except Exception as e:
                 print(f'An error occurred: {e}')
+
+            # Attempt to delete the network associated with this container
+            network_name = f'{self.name}-network'
+            try:
+                network = self.docker_client.networks.get(network_name)
+                network.remove()
+                print(f'Network {network_name} has been deleted.')
+            except docker.errors.NotFound:
+                print(f'Network {network_name} not found.')
+            except Exception as e:
+                print(f'An error occurred while deleting the network: {e}')
 
     def copy_json_to_container(self, container, src_path, dest_path):
         # Create a tar archive of the file
