@@ -86,7 +86,7 @@ class NoderedContainer:
                         'PASSWORD_HASH': hashed_password,
                         # 'SECRET_KEY': self.access_token  # for Token (JWT) based auth, but does not work currently
                     },
-                    network="bridge"  # Attach the container to the newly created network
+                    network="bridge"  # Attach the container to the default network
                 )
                 self.determine_port()
             except (docker.errors.ContainerError, docker.errors.ImageNotFound) as e:
@@ -180,17 +180,21 @@ class NoderedContainer:
         modified_flows_json = flows_json.replace("topic_id", user.mqttmetadata.user_topic_id)
         modified_flows_json = modified_flows_json.replace("user_bucket_name", user.influxuserdata.bucket_name)
 
-        broker_port = "8883" if config.host.TLS == "true" else "1883"
+        # broker_port = "8883" if config.host.TLS == "true" else "1883"
+        broker_port = "1885" if config.host.TLS == "true" else "1884"
         modified_flows_json = modified_flows_json.replace("broker_port", broker_port)
-        if config.host.TLS == "true":
-            modified_flows_json = modified_flows_json.replace('"usetls": false', '"usetls": true')
+        # if config.host.TLS == "true":
+        #     modified_flows_json = modified_flows_json.replace('"usetls": false', '"usetls": true')
 
-        host_address = config.host.DOMAIN if config.host.TLS == "true" and config.host.DOMAIN else config.host.IP
+        # host_address = config.host.DOMAIN if config.host.TLS == "true" and config.host.DOMAIN else config.host.IP
+        host_address = "172.17.0.1"
         modified_flows_json = modified_flows_json.replace("server_ip_or_domain", host_address)
         modified_flows_json = modified_flows_json.replace("influxdb-org-name", config.influxdb.INFLUX_ORG_NAME)
 
-        server_scheme = "https" if config.host.TLS == "true" else "http"
-        influxdb_port = "8087"  # TODO: NGINX conf is 8087 to rv. proxy 8086. config.influxdb.INFLUX_PORT is 8086
+        # server_scheme = "https" if config.host.TLS == "true" else "http"
+        # influxdb_port = "8087"  # TODO: NGINX conf is 8087 to reverse proxy 8086. config.influxdb.INFLUX_PORT is 8086
+        server_scheme = "http"
+        influxdb_port = "8086"  # get from config
         influxdb_url = f"{server_scheme}://{host_address}:{influxdb_port}"
         modified_flows_json = modified_flows_json.replace("influxdb-url", influxdb_url)
 
