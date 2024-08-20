@@ -1,4 +1,4 @@
-from .setup_utils import run_bash, log, get_linux_codename, get_linux_user
+from .setup_utils import run_bash, log, get_linux_codename, get_linux_user, get_conf_path
 
 DOCKER_INSTALL_LOG_FILE_NAME = 'install_03_docker.log'
 
@@ -9,6 +9,7 @@ def install_docker():
 	"""
 	linux_codename = get_linux_codename()
 	linux_user = get_linux_user()
+	config_path = get_conf_path()
 
 	# Preparing the Docker APT repository command
 	docker_apt_repo_command = (
@@ -30,6 +31,7 @@ def install_docker():
 		# Install latest Docker version
 		'sudo apt-get install -y docker-ce docker-ce-cli containerd.io docker-buildx-plugin docker-compose-plugin',
 		f'usermod -aG docker {linux_user}',
+		f'cp {config_path}/deamon.json /etc/docker'
 	]
 
 	for command in commands:

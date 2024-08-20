@@ -19,7 +19,8 @@ def install_security_packages(setup_scheme):
 		'ufw allow 80/tcp',  # for http
 		'ufw allow 443/tcp',  # for https
 		f'ufw allow {mqtt_port}/tcp',  # For MQTT
-		'sudo ufw allow 8087/tcp',  # InfluxDB
+		# 'sudo ufw allow 8087/tcp',  # InfluxDB
+		'sudo ufw allow in from 172.17.0.0/16 to any port 8086',  # InfluxDB access in docker network
 		# TODO: avoid opening the InfluxDB port by implementing docker network to allow influxdb node connect directly to the db
 		# 'ufw allow 3000/tcp',  # For Grafana admin to login to dashboard. If used with TLS, add proxy pass to nginx!
 		'echo',

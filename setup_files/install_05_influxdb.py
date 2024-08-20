@@ -44,6 +44,7 @@ def install_influxdb(architecture):
 		'cd -',
 		# Disables sending telemetry data to InfluxData
 		"echo 'reporting-disabled = true' | sudo tee -a /etc/influxdb/config.toml > /dev/null",
+		"echo 'http-bind-address = \"0.0.0.0:8086\"' | sudo tee -a /etc/influxdb/config.toml > /dev/null",
 	]
 
 	installation_commands_arm64 = [
@@ -64,6 +65,7 @@ def install_influxdb(architecture):
 		'cd -',
 		# Disables sending telemetry data to InfluxData
 		"echo 'reporting-disabled = true' | sudo tee -a /etc/influxdb/config.toml > /dev/null",
+		"echo 'http-bind-address = \"0.0.0.0:8086\"' | sudo tee -a /etc/influxdb/config.toml > /dev/null",
 	]
 
 	if architecture in ['amd64', 'x86_64']:
