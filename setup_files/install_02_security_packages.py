@@ -21,6 +21,8 @@ def install_security_packages(setup_scheme):
 		f'ufw allow {mqtt_port}/tcp',  # For MQTT
 		# 'sudo ufw allow 8087/tcp',  # InfluxDB
 		'sudo ufw allow in from 172.17.0.0/16 to any port 8086',  # InfluxDB access in docker network
+		'sudo ufw allow in from 172.17.0.0/16 to any port 1884',  # Mosquitto access in docker network
+		'sudo ufw allow in from 172.17.0.0/16 to any port 1885',  # Mosquitto access in docker network
 		# Block inter-container communication comes after docker installation 
 		# Allow traffic from containers to host 
 		# Allow traffic from host to containers

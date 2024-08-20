@@ -35,7 +35,10 @@ def install_docker():
 		# Script and crontab for iptables to block inter-container communication on docker0
 		f'cp {config_path}/iptables-docker-rules.sh /etc/biomed-iot',
 		'chmod +x /etc/biomed-iot/iptables-docker-rules.sh',
-		'(sudo crontab -l 2>/dev/null; echo "@reboot /etc/biomed-iot/iptables-docker-rules.sh") | sudo crontab -'
+		# '(sudo crontab -l 2>/dev/null; echo "@reboot /etc/biomed-iot/iptables-docker-rules.sh") | sudo crontab -'  did not work
+		f'cp {config_path}/iptables-docker.service /etc/systemd/system/',
+		'systemctl enable iptables-docker.service',
+		'systemctl start iptables-docker.service'
 	]
 
 	for command in commands:

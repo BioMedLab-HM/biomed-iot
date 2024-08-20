@@ -1,0 +1,12 @@
+[Unit]
+Description=Apply custom iptables rules after Docker starts
+After=docker.service
+Requires=docker.service
+
+[Service]
+Type=oneshot
+ExecStart=/bin/bash /etc/biomed-iot/iptables-docker-rules.sh
+RemainAfterExit=true
+
+[Install]
+WantedBy=multi-user.target
