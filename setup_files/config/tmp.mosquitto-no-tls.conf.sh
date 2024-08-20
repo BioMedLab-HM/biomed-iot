@@ -11,8 +11,11 @@ cat << EOF
 # Explicitly disabled when using dynamic security plugin according to mosquitto website manual
 per_listener_settings false
 
-# Listener on port 1884 for unsecured external and internal clients 
-listener 1884
+# listener for port 1884 on localhost 
+listener 1884 localhost
+
+# listener on port 1885 on docker network host address
+listener 1885 172.17.0.1
 
 # Only allow clients to connect with known credentials
 allow_anonymous false
