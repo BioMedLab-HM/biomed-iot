@@ -19,6 +19,7 @@ Below figure explains the functionality of Biomed IoT on a high level
 - Sensors can send data to the Biomed IoT platform via the MQTT protocol as MQTT messages to an MQTT topic (if the platform is running online, over a gateway).
 - An MQTT topic is like a label that tells devices where to send or get the messages
 - On the website, the user can store data to a database, create visualizations and send data out to effector devices
+- If you already have access to a ready set up Biomed IoT, go to the section [How to use](#how-to-use)
 
 ![Biomed IoT Schema](biomed_iot/media/biomed_iot.png "Biomed IoT Schema")
 
