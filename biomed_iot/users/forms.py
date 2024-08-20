@@ -47,7 +47,7 @@ class MqttClientForm(forms.Form):
 
 class DeleteDataForm(forms.Form):
     measurement = forms.ChoiceField(label="Select Measurement", required=True)
-    tags = forms.CharField(label='Tags', max_length=1000, required=False, help_text="Format: key1=value1,key2=value2")
+    tags = forms.CharField(label='Tags', max_length=1000, required=False, help_text="Example: fieldname=temperature,fieldname=humidity (deletes all values for the fields 'temperature' and 'humidity' from the selected measurement)")
     start_time = forms.DateTimeField(
         label='Start Time',
         input_formats=['%Y-%m-%d %H:%M:%S'],  # User-friendly input format
