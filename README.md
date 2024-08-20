@@ -73,10 +73,7 @@ sudo apt -y full-upgrade
 ```
 Install the following packages:
 ```
-sudo apt -y install net-tools
-sudo apt -y install git
-sudo apt -y install python3-pip
-sudo apt -y install python3-venv
+sudo apt -y install net-tools git python3-pip python3-venv
 ``` 
 Then reboot
 ```
@@ -92,7 +89,7 @@ git clone https://github.com/BioMedLab-HM/biomed-iot.git
 cd biomed-iot
 sudo python3 setup.py
 ```
-Consider reading the information, given in the last lines at the end of the installation (e.g. for the URL to reach Biomed IoT in the web browser or where to find the admin login password), then reboot:
+Consider reading the information, given in the last lines at the end of the installation (e.g. for the URL to reach Biomed IoT in the web browser or where to find the admin login password), then reboot, to make the Biomed IoT Platform fully work:
 ``` 
 sudo reboot
 ```

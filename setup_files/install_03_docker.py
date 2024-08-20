@@ -31,7 +31,10 @@ def install_docker():
 		# Install latest Docker version
 		'sudo apt-get install -y docker-ce docker-ce-cli containerd.io docker-buildx-plugin docker-compose-plugin',
 		f'usermod -aG docker {linux_user}',
-		f'cp {config_path}/deamon.json /etc/docker'
+		# f'cp {config_path}/deamon.json /etc/docker'  # icc=false not working kept for later tries
+		'sudo ufw route deny from 172.17.0.0/16 to 172.17.0.0/16', # Block inter-container communication
+		'sudo ufw allow from 172.17.0.0/16 to 172.17.0.1',  # Allow traffic from containers to host 
+		'sudo ufw allow from 172.17.0.1 to 172.17.0.0/16'  # Allow traffic from host to containers
 	]
 
 	for command in commands:
