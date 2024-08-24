@@ -2,11 +2,10 @@
 The Config and ConfigSection classes simplify managing and accessing
 settings from the config.toml file.
 
-Config reads the configuration from a file
+The class Config reads the configuration from a file
 (by default, "/etc/biomed-iot/config.toml") and sets up each main section
-(e.g. [host] within the toml file] using ConfigSection. This makes the settings
-from the TOML file's sections and sub-sections easily accessible via dot
-notation (like config.section.setting).
+(e.g. [host]) within the toml file, using the class ConfigSection. This makes the settings
+from the toml file easily accessible via dot notation with the pattern: config.<section>.<SETTING>
 """
 
 import tomllib

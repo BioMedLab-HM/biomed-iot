@@ -43,7 +43,7 @@ def send_verification_email(user, request):
     uid = urlsafe_base64_encode(force_bytes(user.pk))
     url = request.build_absolute_uri(reverse('verify-email', kwargs={'uidb64': uid, 'token': token}))
     message = registration_confirmation_email(url)
-    subject = 'Biomed IoT - Verify email address'
+    subject = 'Biomed IoT - Verify your email address'
     try:
         send_mail(subject, message, settings.EMAIL_HOST_USER, [user.email], fail_silently=False)
     except Exception as e:
@@ -133,7 +133,7 @@ class CustomLoginView(LoginView):
 @login_required
 def profile(request):
     context = {}
-    if request.method == 'POST':
+    if request.method == 'POST':  # Changing Profile info currently not active
         u_form = UserUpdateForm(request.POST, instance=request.user)
 
         # p_form: Profile form commented out because it only contains an image which is currently not used
@@ -347,6 +347,7 @@ def restricted_download(request, filename):
 
 
 def get_or_create_nodered_user_data(request):
+    '''A helper function to get NodeRedUserData  for current user or create new if no data is there'''
     with transaction.atomic():
         try:
             nodered_data, created = NodeRedUserData.objects.get_or_create(
@@ -475,7 +476,7 @@ def nodered_wait(request):
 @login_required
 def nodered_open(request):
     if request.method == 'POST':
-        if request.POST.get('action') == 'open':
+        if request.POST.get('action') == 'open':  # currently inactive due to inline script calling nodered url
             request.session['open_nodered_requested'] = True
 
         elif request.POST.get('action') == 'stop':
@@ -521,9 +522,9 @@ def nodered_unavailable(request):
 
 @login_required
 def nodered(request):
-    if not request.session.get('came_from_nodered_manager'):
-        messages.info(request, 'Access Node-RED from here.')
-        return redirect('nodered-manager')
+    # if not request.session.get('came_from_nodered_manager'):
+    #     messages.info(request, 'Access Node-RED from here.')
+    #     return redirect('nodered-manager')
 
     if not request.session.get('container_name'):
         messages.info(request, 'Reloading Node-RED brings you back here.')
@@ -561,6 +562,7 @@ def nodered_dashboard(request):
 
 
 def update_nodered_data_container_port(nodered_data, nodered_container):
+    ''' A helper function to update nodered container port in NodeRedUserData model '''
     with transaction.atomic():  # protection against race condition
         # Identify and lock the conflicting row
         conflicting_users = (
@@ -610,8 +612,8 @@ def access_nodered(request):
     if not request.session.get('came_from_nodered_page'):
         messages.info(request, 'View Node-RED within the website.')
         return redirect('nodered-manager')
-
     del request.session['came_from_nodered_page']
+
     nodered_user_data = request.user.nodereduserdata
     container_name = nodered_user_data.container_name
     if container_name is None:

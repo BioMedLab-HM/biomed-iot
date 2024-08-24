@@ -203,7 +203,7 @@ EMAIL_HOST_USER = config.mail.RES_EMAIL_ADDRESS
 
 DEFAULT_AUTO_FIELD = 'django.db.models.BigAutoField'
 
-CRISPY_ALLOWED_TEMPLATE_PACKS = 'bootstrap5'
+CRISPY_ALLOWED_TEMPLATE_PACKS = 'bootstrap5'  # from the pip package crispy-bootstrap5
 CRISPY_TEMPLATE_PACK = 'bootstrap5'
 
 # TODO: Hier weitere security settings?
