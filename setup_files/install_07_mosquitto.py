@@ -24,12 +24,15 @@ def install_mosquitto(setup_scheme):
 	# Configure Mosquitto from template config files (for TLS or non-TLS)
 	dynsec_plugin_path = run_bash("whereis mosquitto_dynamic_security.so | awk '{print $2}'")
 
-	if setup_scheme == 'NO_TLS':
-		conf_script = 'tmp.mosquitto-no-tls.conf.sh'
-		file_name = 'mosquitto-no-tls.conf'
-	else:
-		conf_script = 'tmp.mosquitto-tls.conf.sh'
-		file_name = 'mosquitto-tls.conf'
+	conf_script = 'tmp.mosquitto-biomed.conf.sh'
+	file_name = 'mosquitto-biomed.conf'
+	
+	# if setup_scheme == 'NO_TLS':
+	# 	conf_script = 'tmp.mosquitto-no-tls.conf.sh'
+	# 	file_name = 'mosquitto-no-tls.conf'
+	# else:
+	# 	conf_script = 'tmp.mosquitto-tls.conf.sh'
+	# 	file_name = 'mosquitto-tls.conf'
 
 	conf_command = f'bash {config_path}/{conf_script} {dynsec_plugin_path} > {setup_dir}/setup_files/tmp/{file_name}'
 	output = run_bash(conf_command)

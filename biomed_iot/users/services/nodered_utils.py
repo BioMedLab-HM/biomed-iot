@@ -115,16 +115,6 @@ class NoderedContainer:
             except Exception as e:
                 print(f'An error occurred: {e}')
 
-            # Attempt to delete the network associated with this container
-            network_name = f'{self.name}-network'
-            try:
-                network = self.docker_client.networks.get(network_name)
-                network.remove()
-                print(f'Network {network_name} has been deleted.')
-            except docker.errors.NotFound:
-                print(f'Network {network_name} not found.')
-            except Exception as e:
-                print(f'An error occurred while deleting the network: {e}')
 
     def copy_json_to_container(self, container, src_path, dest_path):
         # Create a tar archive of the file
@@ -271,9 +261,10 @@ def del_nodered_nginx_conf(instance):
 
     # Path to the server block create script.
     # Could be replaced by a python script
-    script_path = config.nodered.SERVERBLOCK_CREATE_SCRIPT_PATH
-
-    command = ['sudo', 'rm', script_path, container_name]
+    script_path = "/etc/nginx/conf.d/nodered_locations"  # config.nodered.SERVERBLOCK_CREATE_SCRIPT_PATH
+    config_file_path = os.path.join(script_path, f"{container_name}.conf")
+    
+    command = ['sudo', 'rm', config_file_path]
     result = subprocess.run(
         command,
         check=False,  # change to False to handle errors manually

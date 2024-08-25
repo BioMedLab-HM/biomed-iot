@@ -6,7 +6,7 @@ from django.conf import settings
 from django.core.exceptions import ObjectDoesNotExist
 from .models import Profile, NodeRedUserData  # noqa
 from .services.mosquitto_utils import MqttMetaDataManager, MqttClientManager, RoleType  # noqa
-from .services.nodered_utils import NoderedContainer
+from .services.nodered_utils import NoderedContainer, del_nodered_nginx_conf
 from .services.influx_utils import InfluxUserManager
 from .services.grafana_utils import GrafanaUserManager
 
@@ -84,4 +84,4 @@ def delete_user_service_accounts_and_data(sender, instance, **kwargs):
         # If NodeRedUserData exists, delete the associated container
         nodered_container = NoderedContainer(nodered_user_data)
         nodered_container.delete_container()
-
+        del_nodered_nginx_conf(instance)

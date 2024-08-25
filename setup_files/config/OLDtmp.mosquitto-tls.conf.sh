@@ -20,11 +20,14 @@ listener 1885 172.17.0.1
 # Only allow clients to connect with known credentials
 allow_anonymous false
 
-# Replace the clientid that a client connected with its username
+# Replace the clientid that a client connected with its username. Since usernames are unique, 
+# this makes it impossible to have two clients with the same client id, kicking each other out.
 use_username_as_clientid true
 
-# Autosave broker in-memory database to disk 
-autosave_interval 300  
+# Autosave broker in-memory database to disk (contains information about client subscriptions, retained messages, etc.)
+# A lower number in seconds reduces data losss in case of a broker crash but increases disk I/O.
+# Only works with 'persistence true'
+autosave_interval 300
 
 # To remember retained messages after broker restart.
 persistence true
@@ -32,8 +35,10 @@ persistence true
 # Allowed number of simultaneously connected clients (-1 is infinite) 
 max_connections -1
 
-# Max. number of outgoing QoS 1/2 messages that can be transmitted simultaneously
-max_inflight_messages 100
+# Max. number of outgoing QoS 1/2 messages that can be transmitted (be in-flight) without 
+# acknoledgements from the client. This helps avoid overwhelming clients with too many messages at once, 
+# particularly in unreliable network conditions. A value of 1 guarantees in Order transmission.
+max_inflight_messages 1
 
 plugin $DYNSEC_PLUGIN_PATH
 plugin_opt_config_file /var/lib/mosquitto/dynamic-security.json

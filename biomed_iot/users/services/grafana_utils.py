@@ -130,7 +130,7 @@ class GrafanaUserManager:
             else:
                 logger.error("ID not found in response: " + content)
         else:
-            logger.error("Error from API: " + response.status_code + "  " + response.text)
+            logger.error(f"Error from API: Code: {response.status_code}  Response:{response.text}")
         return None
 
     def _switch_user_org(self, userid, orgid):

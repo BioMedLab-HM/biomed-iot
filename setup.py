@@ -278,7 +278,7 @@ def main():
     linux_user = get_linux_user()
     setup_dir = get_setup_dir()
     django_admin_name = 'admin'
-    django_admin_pass = get_random_string(6) + '-' + get_random_string(6) + '-' + get_random_string(6)
+    django_admin_pass = get_random_string(7) + '-' + get_random_string(7) + '-' + get_random_string(7)
     pwreset_email = None
     pwreset_pass = None
     domain = ''
