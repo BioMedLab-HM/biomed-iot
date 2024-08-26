@@ -44,6 +44,7 @@ def install_influxdb(architecture):
 		'cd -',
 		# Disables sending telemetry data to InfluxData
 		"echo 'reporting-disabled = true' | sudo tee -a /etc/influxdb/config.toml > /dev/null",
+		# To allow InfluxDB Node in Node-RED Container to accesss InfluxDB via the Docker network host address
 		"echo 'http-bind-address = \"0.0.0.0:8086\"' | sudo tee -a /etc/influxdb/config.toml > /dev/null",
 	]
 
@@ -65,6 +66,7 @@ def install_influxdb(architecture):
 		'cd -',
 		# Disables sending telemetry data to InfluxData
 		"echo 'reporting-disabled = true' | sudo tee -a /etc/influxdb/config.toml > /dev/null",
+		# To allow InfluxDB Node in Node-RED Container to accesss InfluxDB via the Docker network host address
 		"echo 'http-bind-address = \"0.0.0.0:8086\"' | sudo tee -a /etc/influxdb/config.toml > /dev/null",
 	]
 

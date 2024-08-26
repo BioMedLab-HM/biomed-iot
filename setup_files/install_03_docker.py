@@ -32,7 +32,7 @@ def install_docker():
 		'sudo apt-get install -y docker-ce docker-ce-cli containerd.io docker-buildx-plugin docker-compose-plugin',
 		f'usermod -aG docker {linux_user}',
 		# f'cp {config_path}/deamon.json /etc/docker'  # icc=false not working kept for later tries
-		# Script and crontab for iptables to block inter-container communication on docker0
+		# Script and Service for iptables to block inter-container communication on docker0
 		f'cp {config_path}/iptables-docker-rules.sh /etc/biomed-iot',
 		'chmod +x /etc/biomed-iot/iptables-docker-rules.sh',
 		# '(sudo crontab -l 2>/dev/null; echo "@reboot /etc/biomed-iot/iptables-docker-rules.sh") | sudo crontab -'  did not work

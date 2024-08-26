@@ -266,11 +266,11 @@ def create_gateway_setup_zip_file(config_path):
 def main():
     """
     Content:
-    - "DO PRE-CHECKS"
-    - "ASK FOR USER INPUT"
+    - "PRE-CHECKS"
+    - "USER INPUT"
     - "INSTALLATION OF SOFTWARE" (setup files in sub directory "setup_files")
     - "WRITE CONFIG FILE" (Some config data will be written during installation of software)
-    - "FINAL INFORMATION OUTPUT FOR THE USER"
+    - "FINAL INFORMATION OUTPUT"
     """
 
     hostname = socket.gethostname()
@@ -286,13 +286,18 @@ def main():
 
     print_logo_header()
 
+
     """ DO PRE-CHECKS """
+
+    # Pre check if script is called with sudo is already done witth the import of the setup_utils module
+
     architecture = get_and_check_cpu_architecture()
 
     print("\nTo make sure your system is up to date, run 'sudo apt update' " "and 'sudo apt upgrade' before setup.\n")
     confirm_proceed('Do you want to proceed? Otherwise please update, upgrade ' 'and reboot - then start setup again.')
 
-    """ ASK FOR USER INPUT """
+
+    """ USER INPUT """
     setup_scheme = get_setup_scheme()
 
     domain = get_domain(setup_scheme)
@@ -314,21 +319,19 @@ def main():
         user_answer = input(f'{question} (y/n): ').strip().lower()
         log(question)
 
+         # Prefer IPv4-mapped IPv6 addresses via gai.conf to make SMTP to mailserver work.
+        file_path = "/etc/gai.conf"
+        line_to_add = "precedence ::ffff:0:0/96  100\n"  # The line actually already exists but is commented out
+
+        # Append the uncommented line to the end of the file
+        with open(file_path, 'a') as file:
+            file.write(line_to_add)
+
         if user_answer == 'y':
-            # Prefer IPv4-mapped IPv6 addresses via gai.conf to make SMTP to mailserver work.
-            file_path = "/etc/gai.conf"
-            line_to_add = "precedence ::ffff:0:0/96  100\n"  # The line actually already exists but is commented out. 
-
-            # Append the uncommented line to the end of the file
-            with open(file_path, 'a') as file:
-                file.write(line_to_add)
-
             email_config['EMAIL_VERIFICATION'] = "true"
             msg = "Email verification for user registration activated."
             print(msg)
             log(msg)
-
-    """ INSTALLATION OF SOFTWARE """
 
     print(
         '\nThis will install Biomed IoT with server installation scheme: '
@@ -337,6 +340,10 @@ def main():
     confirm_proceed(
         'Do you want to proceed with the installation of ' 'Biomed IoT, including necessary packages and services?'
     )
+
+
+    """ INSTALLATION OF SOFTWARE """
+    
     msg = '\nStarting installation of Biomed IoT. Please do not interrupt!\n'
     print(msg)
     log(msg)
@@ -432,6 +439,7 @@ def main():
 
     set_setup_dir_rights()
 
+
     """WRITE CONFIG FILE"""
 
     all_config_data = {
@@ -453,9 +461,8 @@ def main():
     num_minutes = int(setup_duration // 60)
     num_seconds = setup_duration % 60
 
-    """ FINAL INFORMATION OUTPUT FOR THE USER """
-    # TBD
-    # set pw reset credentials in config.toml
+
+    """ FINAL INFORMATION OUTPUT """
     print('\n\n\n\n____________________________')
     print('\n\nThe setup of Biomed IoT has completed in\n' f'{num_minutes} min and {num_seconds} s.')
 
