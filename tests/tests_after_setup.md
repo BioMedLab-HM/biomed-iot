@@ -50,7 +50,22 @@ Check for completeness of data for:
 
 ### Docker/Node-RED
 
-	docker ps -a  # list all containers
+	docker ps -a  # list all containers (should be zero directly after installation)
+
+Test Docker network with ping command
+Create two test containers with different names (test 01 and test02), each one with this command structure:
+	docker run -d \
+	--name test01 \
+	--network bridge \
+	-p 1880 \
+	custom-node-red
+
+	ping 172.17.0.2  # ping test01 container should work
+Enter container test01
+	docker exec -it test01 /bin/bash
+	ping 172.17.0.1  # ping host system should work
+	ping 172.17.0.3  # ping test02 container should not work
+
 
 ### Mosquitto und Mosquitto dynamic-security.json
 

@@ -24,7 +24,7 @@ def install_nginx(setup_scheme, domain, server_ip, hostname):
             f'bash {config_path}/tmp.nginx-biomed-iot-tls-domain.conf.sh {domain} > {setup_dir}/setup_files/tmp/nginx-biomed-iot-tls-domain.conf',
             f'cp {setup_dir}/setup_files/tmp/nginx-biomed-iot-tls-domain.conf /etc/nginx/sites-available/{domain}.conf',
             f'ln -s /etc/nginx/sites-available/{domain}.conf /etc/nginx/sites-enabled',
-            'openssl dhparam -out /etc/nginx/dhparam.pem 2048',  # 4096 is recommended for public servers
+            'openssl dhparam -out /etc/nginx/dhparam.pem 3072',  # 3072 is recommended for public servers
             f'certbot --nginx --rsa-key-size 2048 -d {domain} -d www.{domain}',
             f'cp {config_path}/tmp.ssl-params.conf /etc/nginx/snippets/ssl-params.conf',
             f'bash {config_path}/tmp.nginx-stream-tls-domain.conf.sh {domain} > {setup_dir}/setup_files/tmp/tmp.nginx-stream-tls-domain.conf',
@@ -41,7 +41,7 @@ def install_nginx(setup_scheme, domain, server_ip, hostname):
             'ln -s /etc/nginx/sites-available/nginx-biomed-iot-tls-local.conf /etc/nginx/sites-enabled',
             f'bash {config_path}/tmp.openssl.cnf.sh {server_ip} {server_ip} > {setup_dir}/setup_files/tmp/openssl.cnf',
             f'openssl req -x509 -nodes -days 3650 -newkey rsa:2048 -keyout /etc/ssl/private/biomed-iot.key -out /etc/ssl/certs/biomed-iot.crt -config {setup_dir}/setup_files/tmp/openssl.cnf',
-            'openssl dhparam -out /etc/nginx/dhparam.pem 2048', # 4096 is recommended for public servers
+            'openssl dhparam -out /etc/nginx/dhparam.pem 2048', # 3072 is recommended for public servers
             f'cp {config_path}/tmp.self-signed.conf /etc/nginx/snippets/self-signed.conf',
             f'cp {config_path}/tmp.ssl-params.conf /etc/nginx/snippets/ssl-params.conf',
             f'cp {config_path}/tmp.nginx-stream-tls.conf /etc/nginx/modules-available/nginx-stream-tls.conf',

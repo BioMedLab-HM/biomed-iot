@@ -1,6 +1,17 @@
-///// DO NOT CHANGE THIS SCRIPT /////
+///// STOP, DO NOT CHANGE THIS SCRIPT /////
 /* This script is to store any device status that is received */
 
+
+
+
+
+
+
+
+
+
+
+///// DO NOT CHANGE CODE BELOW /////
 // Parse the incoming payload
 var data = msg.payload;
 var deviceName = Object.keys(data)[0];
@@ -19,12 +30,12 @@ var fields = {};
 for (var key in data) {
     // Assuming all properties except 'timestamp' are fields
     if (data.hasOwnProperty(key) && key !== 'timestamp') {
-        // Ensure the value is 1
-        if (data[key] === 1) {
-            fields[key] = data[key];
+        // Ensure the value is defined, not null, not an empty string, and equal to 1
+        if (data[key] !== null && data[key] !== undefined && data[key] !== "" && data[key] === 1) {
+            fields[key] = data[key]; // Add the valid field to fields object
         } else {
-            // If the value is not 1, you can either skip or handle it
-            return null; // Discard this message if the value is not 1
+            // If the value is invalid or not 1, discard this message
+            return null; // Discard the message
         }
     }
 }
@@ -35,7 +46,6 @@ var newMsg = {
         {
             measurement: measurement,
             fields: fields,
-            //tags: tags,
         }
     ]
 };
@@ -50,4 +60,10 @@ if (data.timestamp) {
     newMsg.payload[0].timestamp = data.timestamp; // * factor if necessary
 }
 
-return newMsg;
+// Only return the newMsg if there are valid fields to write
+if (Object.keys(fields).length > 0) {
+    return newMsg;
+} else {
+    node.warn("No valid fields to send to InfluxDB.");
+    return null;
+}

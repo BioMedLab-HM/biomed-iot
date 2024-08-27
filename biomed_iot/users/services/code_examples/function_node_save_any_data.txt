@@ -11,6 +11,9 @@ var measurement = "esp32";
 
 
 
+
+
+
 ///// DO NOT CHANGE CODE BELOW /////
 /* This script is to store any device status that is received */
 
@@ -20,12 +23,18 @@ var data = msg.payload;
 // Dynamically build fields and tags objects from data properties
 var fields = {};
 var tags = {};
+
+// Iterate through the data and check if values exist
 for (var key in data) {
-    // Assuming all properties except 'timestamp' are fields
     if (data.hasOwnProperty(key) && key !== 'timestamp') {
-        fields[key] = data[key];
-        // Create a tag for each field with the key being "field" and the value being the field name
-        tags["fieldname"] = key;
+        // Check if the value is defined and not null/empty
+        if (data[key] !== null && data[key] !== undefined && data[key] !== "") {
+            fields[key] = data[key]; // Add the valid field to fields object
+            tags["fieldname"] = key; // Create a tag for the field
+        } else {
+            // Optionally log or handle empty or invalid data
+            node.warn("Invalid or missing value for key: " + key);
+        }
     }
 }
 
@@ -48,4 +57,10 @@ if (data.timestamp) {
     newMsg.payload[0].timestamp = data.timestamp; // * factor if necessary
 }
 
-return newMsg;
+// Only return the newMsg if there are valid fields to write
+if (Object.keys(fields).length > 0) {
+    return newMsg;
+} else {
+    node.warn("No valid fields to send to InfluxDB.");
+    return null;
+}
