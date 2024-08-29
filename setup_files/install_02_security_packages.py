@@ -21,7 +21,7 @@ def install_security_packages(setup_scheme):
 		f'ufw allow {mqtt_port}/tcp',  # For MQTT
 		# 'sudo ufw allow 8087/tcp',  # InfluxDB
 		'sudo ufw allow in from 172.17.0.0/16 to any port 8086',  # InfluxDB access in docker network
-		'sudo ufw allow in from 172.17.0.0/16 to any port 1884',  # Mosquitto access in docker network
+		'sudo ufw allow in from 172.17.0.0/16 to any port 1885',  # Mosquitto access in docker network
 		# 'ufw allow 3000/tcp',  # For Grafana admin to login to dashboard. If used with TLS, add proxy pass to nginx!
 		'echo',
 		"echo 'To enable ufw firewall, automatic response to confirmation will be provided.'",
