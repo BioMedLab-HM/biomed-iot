@@ -33,9 +33,10 @@ To enable email verification for platform users, an SMTP email provider with 'Ap
 
 ### Setup
 
-If you are setting up Biomed IoT on a Raspberry Pi, you can use [Debian for Pi](https://raspi.debian.net) or, the easier way, [Raspberry Pi OS light (64 Bit)](https://www.raspberrypi.com/software/operating-systems/), flashed to an SD-card using the [Raspberry Pi Imager](https://www.raspberrypi.com/software/).
+If you are setting up Biomed IoT on a Raspberry Pi, you can use [Debian for Pi](https://raspi.debian.net) or, the easier way, [Raspberry Pi OS light (64 Bit)](https://www.raspberrypi.com/software/operating-systems/), flashed to an SD-card using the [Raspberry Pi Imager](https://www.raspberrypi.com/software/). If your are using Raspberry Pi OS, the user can be created during before the flashing process with the Raspberry Pi Imager. In this case you can omit the first steps and start with ‘Add your newly created user to the sudo group‘.
 
 First prepare your system for the Biomed IoT setup. Read the instructions carefully before executing the following commands:
+
 
 Switch to user 'root' and enter the password when prompted
 ```
