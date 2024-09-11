@@ -1,5 +1,22 @@
 # ruff: noqa: E402
-# https://influxdb-client.readthedocs.io/en/stable/index.html
+"""
+This script interacts with an InfluxDB instance to demonstrate various operations using the InfluxDBClient library.
+
+Sections:
+1. **Configuration**: Sets up the InfluxDB connection parameters, including the URL, access token, organization ID, and bucket name.
+2. **Initialize Client**: Initializes the InfluxDB client using the provided credentials.
+3. **Step 1: Create a New Bucket**: Creates a new bucket named "test" for storing and managing data.
+4. **Step 2: Create a Read-Write Token**: Generates a read-write token specifically for the "test" bucket to allow authorized data operations.
+5. **Step 3: Write Test Data**: Writes sample data (the answer to the ultimate question of life) into the "test" bucket using the InfluxDBClient.
+6. **Step 4: Query Data Using InfluxQL**: Queries the stored data using the InfluxQL language through the v1 compatibility endpoint.
+7. **Step 5: Delete Data**: Deletes the test data from the "test" bucket using the InfluxDB API.
+8. **Step 6: Delete the Test-Bucket Token**: Deletes the previously created read-write token to clean up security credentials.
+9. **Step 7: Delete the "Test" Bucket**: Removes the "test" bucket from the InfluxDB instance to clean up resources.
+10. **Exception Handling and Cleanup**: Ensures proper cleanup of resources and handles any exceptions that may occur during the script's execution.
+"""
+
+
+# Further information: https://influxdb-client.readthedocs.io/en/stable/index.html
 
 from influxdb_client import InfluxDBClient, Point
 from influxdb_client.client.write_api import SYNCHRONOUS

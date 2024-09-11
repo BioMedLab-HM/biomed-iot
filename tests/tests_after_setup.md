@@ -1,4 +1,6 @@
 # Tests After Installation
+Some of the commands in this document need deeper understanding of the matter.
+More explanations may come in the future.
 
 [(Back to the README file)](../README.md)  
 

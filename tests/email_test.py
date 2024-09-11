@@ -1,3 +1,4 @@
+# Send an Email from Django using the SMTP Mailserver 
 # Run this in your Django shell
 from django.core.mail import send_mail
 from django.conf import settings
