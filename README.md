@@ -1,6 +1,6 @@
 # Biomed IoT
 
-Biomed IoT is an open source IoT platform for data acquisition, visualization and automation. It enables the integration and real-time analysis of sensors and effector devices. It is optimized for data security and privacy, making it suitable for medical data, such as in clinical trials. It is built on the Django framework and provides its core functionality by integrating the Eclipse Mosquitto™ MQTT broker, Node-RED, InfluxDB&reg; 2.0 and Grafana&reg;.
+Biomed IoT is an open source IoT platform for data acquisition, visualization and automation. It enables the integration and real-time analysis of sensors and effector devices. It is optimized for data security and privacy, making it suitable for medical data, such as in clinical trials. It is built on the Django framework and provides its core functionality by integrating the Eclipse Mosquitto™ MQTT broker, Node-RED(R), InfluxDB&reg; 2.0 and Grafana&reg;.
 
 ## Content
 
@@ -19,7 +19,8 @@ The figure below explains the functionality of Biomed IoT on a high level
 - Sensors can send data to the Biomed IoT platform via the MQTT protocol as MQTT messages to an MQTT topic (if the platform is running online, over a gateway).
 - An MQTT topic is like a label that tells devices where to send or get the messages
 - On the website, the user can store data to a database, create visualizations and send data out to effector devices
-- If you already have access to a ready set up Biomed IoT, go to the section [How to use](#how-to-use)
+- If you already have access to a ready set up Biomed IoT, go to section [How to use](#how-to-use)
+- Get a deeper understanding for the concept und implementation of Biomed IoT, by consulting the underlying [master's thesis](https://www.researchgate.net/publication/384329057_Weiterentwicklung_einer_Open_Source_IoT-Plattform_fur_Laborautomatisierung_mit_containerbasierten_Node-RED-Instanzen_fur_mehrere_Nutzer)
 
 ![Biomed IoT Schema](biomed_iot/media/biomed_iot.png "Biomed IoT Schema")
 
