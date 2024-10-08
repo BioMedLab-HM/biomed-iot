@@ -28,7 +28,9 @@ def install_security_packages(setup_scheme):
 		"echo 'y' | sudo ufw enable",  # This sends "y" as input to the ufw enable command
 		'sudo ufw status',
 
-		# Append custom UFW rules from the repo to /etc/ufw/after.rules
+		# Append custom UFW rules from the repo to /etc/ufw/after.rules before the COMMIT line
+		'sudo cp /etc/ufw/after.rules /etc/ufw/after.rules.bak',
+		# f'sed -i "/COMMIT/i $(cat {config_path}/ufw-after-rules.txt)" /etc/ufw/after.rules'
     	f'cat {config_path}/ufw-after-rules.txt >> /etc/ufw/after.rules',
 		# Reload UFW to apply the new rules
     	'sudo ufw reload',

@@ -1,7 +1,7 @@
 # BEGIN UFW AND DOCKER
 # Source: https://github.com/chaifeng/ufw-docker
 
-These chains ensure that Docker traffic is processed through UFW (ufw-user-forward) 
+# These chains ensure that Docker traffic is processed through UFW (ufw-user-forward) 
 # and set up logging for dropped packets (ufw-docker-logging-deny).
 *filter
 :ufw-user-forward - [0:0]
@@ -35,5 +35,5 @@ These chains ensure that Docker traffic is processed through UFW (ufw-user-forwa
 -A DOCKER-USER -i docker0 ! -d 172.17.0.1 -o docker0 -j DROP
 -A DOCKER-USER -i docker0 -s 172.17.0.1 -o docker0 -j ACCEPT
 
-COMMIT
+# COMMIT
 # END UFW AND DOCKER
