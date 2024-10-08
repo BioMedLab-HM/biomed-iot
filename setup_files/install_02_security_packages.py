@@ -27,6 +27,12 @@ def install_security_packages(setup_scheme):
 		"echo 'To enable ufw firewall, automatic response to confirmation will be provided.'",
 		"echo 'y' | sudo ufw enable",  # This sends "y" as input to the ufw enable command
 		'sudo ufw status',
+
+		# Append custom UFW rules from the repo to /etc/ufw/after.rules
+    	f'cat {config_path}/ufw-after-rules.txt >> /etc/ufw/after.rules',
+		# Reload UFW to apply the new rules
+    	'sudo ufw reload',
+
 		# Install fail2ban
 		'apt install -y fail2ban',
 		'systemctl start fail2ban',
