@@ -122,7 +122,7 @@ Close the file by pressing Ctrl+x.
 
 ## Performance Testing
 
-A test script to measure core website performance will come in teh future.
+A test script to measure core website performance will come in the future.
 
 
 ## How to Use
