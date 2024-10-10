@@ -1,4 +1,5 @@
 from .setup_utils import run_bash, log, get_random_string, get_setup_dir, get_conf_path
+from config import start_mosquitto_service_after_docker as mosquitto_after_docker
 
 MOSQUITTO_INSTALL_LOG_FILE_NAME = 'install_07_mosquitto.log'
 
@@ -70,6 +71,13 @@ def install_mosquitto(setup_scheme):
 	# Restart Mosquitto to apply configurations
 	output = run_bash('systemctl restart mosquitto.service')
 	log(output, MOSQUITTO_INSTALL_LOG_FILE_NAME)
+
+	# Bugfix: start mosquitto service after docker service because mosquitto listens to docker network
+	try:
+		mosquitto_after_docker.modify_service_file()
+		mosquitto_after_docker.reload_systemd()
+	except Exception as e:
+		print(f"An error occurred: {e}")
 
 	# Create dict config data
 	config_data = {
