@@ -1,5 +1,5 @@
 from .setup_utils import run_bash, log, get_random_string, get_setup_dir, get_conf_path
-from config import start_mosquitto_service_after_docker as mosquitto_after_docker
+from .config import start_mosquitto_service_after_docker as mosquitto_after_docker
 
 MOSQUITTO_INSTALL_LOG_FILE_NAME = 'install_07_mosquitto.log'
 
