@@ -4,7 +4,7 @@ def registration_confirmation_email(url):
     email_body =  f"""
     Dear User,
 
-    Thank you for registering with Biomed IoT! We're excited to have you on board.
+    Thank you for registering with Biomed IoT!
 
     To complete your registration, please confirm your email address by clicking on the link below:
 
