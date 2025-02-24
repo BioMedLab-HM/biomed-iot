@@ -113,7 +113,7 @@ class NoderedContainer:
             except docker.errors.NotFound:
                 print(f'Container {self.name} not found.')
             except Exception as e:
-                print(f'An error occurred: {e}')
+                print(f'An error occurred while trying to delete the nodered container: {e}')
 
 
     def copy_json_to_container(self, container, src_path, dest_path):
@@ -263,7 +263,7 @@ def del_nodered_nginx_conf(instance):
     # Could be replaced by a python script
     script_path = "/etc/nginx/conf.d/nodered_locations"  # config.nodered.SERVERBLOCK_CREATE_SCRIPT_PATH
     config_file_path = os.path.join(script_path, f"{container_name}.conf")
-    
+
     command = ['sudo', 'rm', config_file_path]
     result = subprocess.run(
         command,
