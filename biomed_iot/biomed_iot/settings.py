@@ -207,9 +207,13 @@ CRISPY_ALLOWED_TEMPLATE_PACKS = 'bootstrap5'  # from the pip package crispy-boot
 CRISPY_TEMPLATE_PACK = 'bootstrap5'
 
 # TODO: Hier weitere security settings? --> für Inline JS!
+# Consider: https://content-security-policy.com/unsafe-inline/
 X_FRAME_OPTIONS = "SAMEORIGIN"
 USE_X_FORWARDED_HOST = True
 CSP_DEFAULT_SRC = ("'self'", "http:", "https:", "'unsafe-inline'", "'unsafe-eval'")
+if config.host.TLS == "true":
+    SESSION_COOKIE_SECURE = True
+    CSRF_COOKIE_SECURE = True
 
 
 # see: https://docs.djangoproject.com/en/5.0/topics/logging/
