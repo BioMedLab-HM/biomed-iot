@@ -206,16 +206,14 @@ DEFAULT_AUTO_FIELD = 'django.db.models.BigAutoField'
 CRISPY_ALLOWED_TEMPLATE_PACKS = 'bootstrap5'  # from the pip package crispy-bootstrap5
 CRISPY_TEMPLATE_PACK = 'bootstrap5'
 
-# TODO: Hier weitere security settings?
+# TODO: Hier weitere security settings? --> für Inline JS!
 X_FRAME_OPTIONS = "SAMEORIGIN"
 USE_X_FORWARDED_HOST = True
 CSP_DEFAULT_SRC = ("'self'", "http:", "https:", "'unsafe-inline'", "'unsafe-eval'")
 
 
-# TODO: NO Logger level "DEBUG" in production!
 # see: https://docs.djangoproject.com/en/5.0/topics/logging/
-LOG_FILE_PATH = os.path.join(BASE_DIR, 'logging', 'debug.log')
-
+LOG_FILE_PATH = os.path.join(BASE_DIR, 'logging', 'django.log')
 
 LOGGING = {
     'version': 1,
@@ -231,14 +229,31 @@ LOGGING = {
         },
     },
     'handlers': {
-        'file': {'level': 'DEBUG', 'class': 'logging.FileHandler', 'filename': LOG_FILE_PATH, 'formatter': 'verbose'},
+        'file': {
+            'level': 'DEBUG',
+            'class': 'logging.handlers.RotatingFileHandler',
+            'filename': LOG_FILE_PATH,
+            'maxBytes': 10 * 1024 * 1024,  # 10 MB
+            'backupCount': 5,
+            'formatter': 'verbose',
+        },
     },
     'loggers': {
-        # 'django': {
-        #     'handlers': ['file'],
-        #     'level': 'DEBUG',
-        #     'propagate': True,
-        # },
+        'django': {
+            'handlers': ['file'],
+            'level': 'WARNING',
+            'propagate': True,
+        },
+        'django.request': {
+            'handlers': ['file'],
+            'level': 'ERROR',
+            'propagate': False,
+        },
+        'urllib3': {
+            'handlers': ['file'],
+            'level': 'WARNING',
+            'propagate': True,
+        },
         'core': {
             'handlers': ['file'],
             'level': 'INFO',
@@ -254,10 +269,6 @@ LOGGING = {
             'level': 'INFO',
             'propagate': True,
         },
-        'urllib3': {
-            'handlers': ['file'],
-            'level': 'INFO',
-            'propagate': True,
-        },
     },
 }
+
