@@ -42,7 +42,9 @@ address ${hostname}:8883
 remote_password ${mqtt_password}
 remote_username ${mqtt_username}
 bridge_cafile /etc/mosquitto/certs/biomed-iot.crt
+# For outgoing messages: rewrite topics from prefix "in/" to "in/${topic_id}/"
 topic # out 2 in/ in/${topic_id}/
+# For incoming messages: rewrite topics from prefix "out/" to "out/${topic_id}/${gatewayname}/"
 topic # in 2 out/ out/${topic_id}/${gatewayname}/
 EOL
 
