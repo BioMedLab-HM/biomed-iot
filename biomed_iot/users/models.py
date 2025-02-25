@@ -102,7 +102,7 @@ class NodeRedUserData(models.Model):
         max_attempts = 1000
         for attempt in range(max_attempts):
             logger.debug(f'Attempt {attempt+1} to generate unique container name')
-            new_name = generate_random_readable_string(20, secure=True)
+            new_name = generate_random_readable_string(length = 20, secure=True)
             if not NodeRedUserData.objects.filter(container_name=new_name).exists():
                 logger.debug(f'Unique container name generated: {new_name}')
                 return new_name
@@ -111,8 +111,8 @@ class NodeRedUserData(models.Model):
 
     @staticmethod
     def generate_credentials():
-        new_username = generate_random_readable_string(10, secure=True)
-        new_password = generate_random_readable_string(20, secure=True)
+        new_username = generate_random_readable_string(length = 10, secure=True)
+        new_password = generate_random_readable_string(length = 20, secure=True)
         return new_username, new_password
 
 
@@ -129,7 +129,7 @@ class MqttMetaData(models.Model):
     def generate_unique_mqtt_metadata():
         max_attempts = 1000
         for attempt in range(max_attempts):
-            new_user_topic_id = generate_random_readable_string(12, secure=True)
+            new_user_topic_id = generate_random_readable_string(length = 12, secure=True)
             new_nodered_role_name = 'nodered-' + new_user_topic_id
             new_device_role_name = 'device-' + new_user_topic_id
             if not MqttMetaData.objects.filter(user_topic_id=new_user_topic_id).exists():
@@ -152,7 +152,7 @@ class MqttClient(models.Model):
     def generate_unique_username():
         max_attempts = 1000
         for attempt in range(max_attempts):
-            new_name = generate_random_readable_string(20, secure=True)
+            new_name = generate_random_readable_string(length = 20, secure=True)
             if not MqttClient.objects.filter(username=new_name).exists():
                 return new_name
         logger.error('Failed to generate unique MQTT client username after maximum attempts')
@@ -178,7 +178,7 @@ class InfluxUserData(models.Model):
     def generate_unique_bucket_name():
         max_attempts = 1000
         for attempt in range(max_attempts):
-            new_name = generate_random_readable_string(name_length = 20, secure=True)
+            new_name = generate_random_readable_string(length = 20, secure=True)
             if not InfluxUserData.objects.filter(bucket_name=new_name).exists():
                 return new_name
         logger.error('Failed to generate unique bucket name after maximum attempts')
