@@ -22,18 +22,11 @@ def install_mosquitto(setup_scheme):
 	output = run_bash('apt install -y mosquitto mosquitto-clients')
 	log(output, MOSQUITTO_INSTALL_LOG_FILE_NAME)
 
-	# Configure Mosquitto from template config files (for TLS or non-TLS)
+	# Configure Mosquitto from template config file
 	dynsec_plugin_path = run_bash("whereis mosquitto_dynamic_security.so | awk '{print $2}'")
 
 	conf_script = 'tmp.mosquitto-biomed.conf.sh'
 	file_name = 'mosquitto-biomed.conf'
-	
-	# if setup_scheme == 'NO_TLS':
-	# 	conf_script = 'tmp.mosquitto-no-tls.conf.sh'
-	# 	file_name = 'mosquitto-no-tls.conf'
-	# else:
-	# 	conf_script = 'tmp.mosquitto-tls.conf.sh'
-	# 	file_name = 'mosquitto-tls.conf'
 
 	conf_command = f'bash {config_path}/{conf_script} {dynsec_plugin_path} > {setup_dir}/setup_files/tmp/{file_name}'
 	output = run_bash(conf_command)
@@ -44,7 +37,6 @@ def install_mosquitto(setup_scheme):
 
 	# Initialize the Mosquitto Dynmic Security Plugin file
 	init_dynsec_commands = [
-		# "echo 'include_dir /etc/mosquitto/conf.d' >> /etc/mosquitto/mosquitto.conf",  # duplicate
 		# Initialize and build dynamic-security.json file
 		(f'mosquitto_ctrl dynsec init /var/lib/mosquitto/dynamic-security.json {dynsec_admin_name} {dynsec_admin_pass}'),  # noqa: E501
 		# Set file permissions:

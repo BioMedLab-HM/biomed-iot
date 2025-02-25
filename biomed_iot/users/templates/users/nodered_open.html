@@ -78,9 +78,6 @@
 </form>
 {% endblock %}
 
-{% block extra_css %}
-{% endblock %}
-
 {% block extra_js %}
 <script>
     document.getElementById('openDashboard').addEventListener('click', function() {
@@ -93,33 +90,6 @@
         var url = this.getAttribute('data-url');
         window.open(url, '_blank');
     });
-
-    // Toggle Credential Visibility
-    // function toggleVisibility() {
-    //     var usernameField = document.getElementById("usernameField");
-    //     var passwordField = document.getElementById("passwordField");
-    //     var tokenField = document.getElementById("tokenField");
-    //     var noderedUsername = document.getElementById("noderedUsernameField");
-    //     var noderedPassword = document.getElementById("noderedPasswordField");
-    //     var link = event.target; // Get the clicked link
-
-    //     // Toggle  visibility
-    //     if (usernameField.type === "password") {
-    //         usernameField.type = "text";
-    //         passwordField.type = "text";
-    //         tokenField.type = "text";
-    //         noderedUsername.type = "text";
-    //         noderedPassword.type = "text";
-    //         link.textContent = "Hide Credentials";
-    //     } else {
-    //         usernameField.type = "password";
-    //         passwordField.type = "password";
-    //         tokenField.type = "password";
-    //         noderedUsername.type = "password";
-    //         noderedPassword.type = "password";
-    //         link.textContent = "Show Credentials";
-    //     }
-    // }
 
     // Toggle Credential Visibility with Timer
     function toggleVisibilityWithTimer() {

@@ -50,15 +50,7 @@
                                     <li><a class="dropdown-item" href="{% url 'code-examples' %}">Code Examples</a></li>
                                 </ul>
                             </li>
-                            <!-- Version of Automate link without choice to open in new tab. Use when Open Nodered Flow Button opens in new tab -->
                             <li class="nav-item"><a class="nav-link {% is_active 'Automate' %}" aria-current="page" href="{% url 'nodered-manager' %}">Automate</a></li>
-                            <!-- <li class="nav-item dropdown">
-                                <a class="nav-link dropdown-toggle {% is_active 'nodered-open' %}" id="navbarDropdown" href="#" role="button" data-bs-toggle="dropdown" aria-expanded="false">Automate</a>
-                                <ul class="dropdown-menu dropdown-menu-end" aria-labelledby="navbarDropdown">
-                                    <li><a class="dropdown-item" href="{% url 'nodered-open' %}">Open here</a></li>
-                                    <li><a class="dropdown-item" href="{% url 'nodered-open' %}" target="_blank">Open in new tab</a></li>
-                                </ul>
-                            </li> -->
                             <li class="nav-item"><a class="nav-link {% starts_with 'visualize' %}" href="{% url 'visualize' %}">Visualize</a></li>
                             <li class="nav-item"><a class="nav-link {% starts_with 'manage' %}" href="{% url 'manage-data' %}">Delete Data</a></li>
                         {% endif %}

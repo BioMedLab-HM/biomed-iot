@@ -107,35 +107,12 @@ class CustomLoginView(LoginView):
         login(self.request, user)
         return redirect(self.get_success_url())
 
-# TODO: remove user_login view if CustomLoginView proves to be reliant over longer time
-# from django.contrib.auth import authenticate  # place at beginning of file
-# def user_login(request):
-#     if request.method == 'POST':
-#         form = UserLoginForm(data=request.POST)
-#         if form.is_valid():
-#             logger.debug('user_login view: Form is valid')
-#             user = authenticate(
-#                 request,
-#                 username=form.cleaned_data['username'],
-#                 password=form.cleaned_data['password'],
-#             )
-#             if request.user:
-#                 login(request, request.user)
-#                 return redirect('core-home')
-#     else:
-#         form = UserLoginForm()
-
-#     page_title = 'Login'
-#     context = {'form': form, 'title': page_title, 'thin_navbar': False}
-#     return render(request, 'users/login.html', context)
-
 
 @login_required
 def profile(request):
     context = {}
     if request.method == 'POST':  # Changing Profile info currently not active
         u_form = UserUpdateForm(request.POST, instance=request.user)
-
         # p_form: Profile form commented out because it only contains an image which is currently not used
         # p_form = ProfileUpdateForm(request.POST,
         #                            request.FILES,  # FILES is an Image
@@ -159,29 +136,6 @@ def profile(request):
     }
 
     return render(request, 'users/profile.html', context)
-
-
-# Experimental: Prepare a map of common locations to timezone choices you wish to offer.
-common_timezones = {
-    'Berlin': 'Europe/Berlin',
-    'London': 'Europe/London',
-    'New York': 'America/New_York',
-}
-timezones = [('New York', 'America/New_York'), ('London', 'Europe/London')]
-
-# FIXME: Experimental function to determine user time zone
-@login_required
-def set_timezone(request):
-    if request.method == 'POST':
-        request.session['django_timezone'] = request.POST['timezone']
-        return redirect('/')
-    else:
-        # Convert the dictionary to a list of tuples and sort by city name
-        timezones_list = sorted(common_timezones.items(), key=lambda x: x[0])
-
-        page_title = 'Register'
-        context = {'timezones': timezones_list, 'title': page_title, 'thin_navbar': False}
-        return render(request, 'set_timezone.html', context)
 
 
 @login_required
@@ -211,10 +165,10 @@ def devices(request):
                 return redirect('devices')
 
         elif 'modify' in request.POST:
-            # TODO: Optional rename client logic
+            # see MqttClientManager.modify_client()
             pass
 
-        elif request.POST.get('device_username'):
+        elif request.POST.get('device_username'):  # TODO: ambiguous! --> could also be sth else than delete.
             client_username = request.POST.get('device_username')
             print(f'delete device ({client_username}) case')
             success = mqtt_client_manager.delete_client(client_username)

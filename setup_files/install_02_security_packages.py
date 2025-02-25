@@ -1,7 +1,7 @@
 from .setup_utils import run_bash, log, get_setup_dir, get_conf_path
 
-SECURITY_INSTALL_LOG_FILE_NAME = 'install_02_security_packages.log'
 
+SECURITY_INSTALL_LOG_FILE_NAME = 'install_02_security_packages.log'
 
 def install_security_packages(setup_scheme):
 	setup_dir = get_setup_dir()

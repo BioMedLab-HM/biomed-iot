@@ -3,7 +3,6 @@ from .setup_utils import run_bash, log, get_random_string
 
 POSTGRESS_INSTALL_LOG_FILE_NAME = 'install_08_postgres.log'
 
-
 def install_postgres():
 	"""
 	install postgreSQL

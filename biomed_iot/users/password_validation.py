@@ -1,14 +1,10 @@
 """
 Custom password validators for Django authentication system
-
 Including checks for uppercase letters, lowercase letters, digits, and symbols.
-
 Add these validators to AUTH_PASSWORD_VALIDATORS in settings.py
 to enforce password complexity requirements.
-
 For more information, see: https://docs.djangoproject.com/en/5.0/topics/auth/passwords/
 """
-
 from django.core.exceptions import ValidationError
 from django.utils.translation import gettext as _
 

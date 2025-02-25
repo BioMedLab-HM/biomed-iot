@@ -170,26 +170,5 @@
             field.type = field.type === "password" ? "text" : "password";
         });
     }
-
-    // // Copy Button Script
-    // document.addEventListener('DOMContentLoaded', () => {
-    //     document.querySelectorAll('.copy-button').forEach(button => {
-    //         button.addEventListener('click', function() {
-    //             const text = this.getAttribute('data-clipboard-text');
-    //             const textarea = document.createElement('textarea');
-    //             textarea.value = text;
-    //             document.body.appendChild(textarea);
-    //             textarea.select();
-    //             try {
-    //                 const successful = document.execCommand('copy');
-    //                 const msg = successful ? 'successful' : 'unsuccessful';
-    //                 console.log('Fallback: Copying text command was ' + msg);
-    //             } catch (err) {
-    //                 console.error('Fallback: Oops, unable to copy', err);
-    //             }
-    //             document.body.removeChild(textarea);
-    //         });
-    //     });
-    // });
 </script>
 {% endblock %}
