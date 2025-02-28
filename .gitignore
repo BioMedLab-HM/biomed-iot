@@ -1,6 +1,7 @@
 # Temporary stuff
 tmp/
 playground/
+*.bundle
 
 #Mac
 .DS_Store
