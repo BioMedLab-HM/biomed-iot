@@ -480,16 +480,28 @@ def nodered(request):
     #     messages.info(request, 'Access Node-RED from here.')
     #     return redirect('nodered-manager')
 
-    if not request.session.get('container_name'):
+    # Retrieve container_name from session.
+    container_name = request.session.get('container_name')
+    if not container_name:
         messages.info(request, 'Reloading Node-RED brings you back here.')
         return redirect('nodered-manager')
 
     request.session['came_from_nodered_page'] = True
 
-    # container_name = request.session.get('container_name')  # TODO: delete if access_nodered works reliantly
-    del request.session['container_name']
+    # Check the current state of the container.
+    current_state = NoderedContainer.check_container_state_by_name(container_name)
+    # If the container is not running, delete the container_name from session and redirect.
+    if current_state != 'running':
+        if 'container_name' in request.session:
+            del request.session['container_name']
+        messages.info(request, 'Node-RED is currently not running.')
+        return redirect('nodered-manager')
+
+    # If the container is running, set the flag and do NOT delete container_name.
+    request.session['came_from_nodered_page'] = True
+    # (Optional) You can leave container_name in the session so that subsequent loads work.
     page_title = 'Node-RED Flows'
-    context = {'title': page_title, 'thin_navbar': True}  # 'container_name': container_name,
+    context = {'title': page_title, 'thin_navbar': True}
     return render(request, 'users/nodered.html', context)
 
 
