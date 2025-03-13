@@ -5,6 +5,7 @@ from biomed_iot.config_loader import config
 
 logger = logging.getLogger(__name__)
 
+
 class GrafanaUserManager:
     def __init__(self, user):
         self.username = user.username
@@ -41,6 +42,12 @@ class GrafanaUserManager:
 
     def _switch_org(self, orgid):
         url = f"{self.grafana_origin}/api/user/using/{orgid}"
+        headers = {'content-type': 'application/json'}
+        return requests.post(url, headers=headers)
+
+    def _switch_org_main(self):
+        # Switch to the default admin organization (org id 1)
+        url = f"{self.grafana_origin}/api/user/using/1"
         headers = {'content-type': 'application/json'}
         return requests.post(url, headers=headers)
 
@@ -102,6 +109,17 @@ class GrafanaUserManager:
         response2 = requests.post(url, data=json.dumps(flux_payload), headers=headers)
         return response1, response2
 
+    def _switch_user_org(self, userid, orgid):
+        url = f"{self.grafana_origin}/api/users/{userid}/using/{orgid}"
+        headers = {'content-type': 'application/json'}
+        return requests.post(url, headers=headers)
+
+    def _remove_user_from_main_org(self, userid):
+        # Removes the custom user from the default organization (org id 1)
+        url = f"{self.grafana_origin}/api/orgs/1/users/{userid}"
+        headers = {'content-type': 'application/json'}
+        return requests.delete(url, headers=headers)
+
     def _get_user_id(self):
         url = f"{self.grafana_origin}/api/users/lookup?loginOrEmail={self.username}"
         headers = {'content-type': 'application/json'}
@@ -116,41 +134,6 @@ class GrafanaUserManager:
             logger.error(f"Error getting user ID: {response.status_code} {response.text}")
         return None
 
-    def _switch_user_org(self, userid, orgid):
-        url = f"{self.grafana_origin}/api/users/{userid}/using/{orgid}"
-        headers = {'content-type': 'application/json'}
-        return requests.post(url, headers=headers)
-
-    def _remove_user_from_main_org(self, userid):
-        # Removes the custom user from the default organization (org id 1)
-        url = f"{self.grafana_origin}/api/orgs/1/users/{userid}"
-        headers = {'content-type': 'application/json'}
-        return requests.delete(url, headers=headers)
-
-    def _switch_org_main(self):
-        url = f"{self.grafana_origin}/api/user/using/1"
-        headers = {'content-type': 'application/json'}
-        return requests.post(url, headers=headers)
-
-    def create_user(self):
-        self._make_org()
-        orgid = self._get_org_id()
-        if orgid:
-            self._switch_org(orgid)
-            self._make_user()
-            self._add_user_to_org(orgid)
-            self._add_data_sources()
-            userid = self._get_user_id()
-            if userid:
-                self._switch_user_org(userid, orgid)
-                self._remove_user_from_main_org(userid)
-                return True
-            else:
-                logger.error("User ID not retrieved after creation.")
-        else:
-            logger.error("Organization ID not retrieved after org creation.")
-        return False
-
     def _del_user(self, userid):
         headers = {'content-type': 'application/json'}
         url = f"{self.grafana_origin}/api/admin/users/{userid}"
@@ -160,6 +143,50 @@ class GrafanaUserManager:
         headers = {'content-type': 'application/json'}
         url = f"{self.grafana_origin}/api/orgs/{orgid}"
         return requests.delete(url, headers=headers)
+
+    def create_user(self):
+        # Create the custom organization for the user.
+        org_resp = self._make_org()
+        if org_resp.status_code not in [200, 204]:
+            logger.error(f"Failed to create org: {org_resp.status_code} {org_resp.text}")
+            return False
+
+        orgid = self._get_org_id()
+        if not orgid:
+            logger.error("Organization ID not retrieved after org creation.")
+            return False
+
+        # Switch to the newly created organization.
+        switch_resp = self._switch_org(orgid)
+        if switch_resp.status_code not in [200, 204]:
+            logger.error(f"Failed to switch to user org: {switch_resp.status_code} {switch_resp.text}")
+            return False
+
+        # Create the custom user account.
+        user_resp = self._make_user()
+        if user_resp.status_code not in [200, 204]:
+            logger.error(f"Failed to create user: {user_resp.status_code} {user_resp.text}")
+            return False
+
+        # Add the user to their own organization.
+        add_resp = self._add_user_to_org(orgid)
+        if add_resp.status_code not in [200, 204]:
+            logger.error(f"Failed to add user to org: {add_resp.status_code} {add_resp.text}")
+            return False
+
+        # Add data sources for the user.
+        self._add_data_sources()
+
+        userid = self._get_user_id()
+        if userid:
+            # Switch the user's context to the custom organization.
+            self._switch_user_org(userid, orgid)
+            # Remove the custom user from the main org (org id 1).
+            self._remove_user_from_main_org(userid)
+            return True
+        else:
+            logger.error("User ID not retrieved after creation.")
+            return False
 
     def delete_user(self):
         try:
@@ -173,17 +200,27 @@ class GrafanaUserManager:
                 logger.error("Grafana delete_user: _get_org_id returned None")
                 return False
 
-            # Delete the custom Grafana user.
+            # Delete the custom user from Grafana.
             r1 = self._del_user(userid)
-            # Delete the custom organization.
-            r2 = self._del_org(orgid)
-            self._switch_org_main()  # Switch back to the default organization
-
-            if r1.status_code in [200, 204] and r2.status_code in [200, 204]:
-                return True
-            else:
-                logger.error(f"Grafana deletion failed: delete user status {r1.status_code}, delete org status {r2.status_code}")
+            if r1.status_code not in [200, 204]:
+                logger.error(f"Failed to delete Grafana user: status code {r1.status_code} {r1.text}")
                 return False
+
+            # IMPORTANT:
+            # The default admin user cannot be removed from an organization when using its own credentials.
+            # Therefore, before deleting the org, switch the active org to the main org (org id 1).
+            r_switch = self._switch_org_main()
+            if r_switch.status_code not in [200, 204]:
+                logger.error(f"Failed to switch to main org: status code {r_switch.status_code} {r_switch.text}")
+                return False
+
+            # Now delete the user's custom organization.
+            r2 = self._del_org(orgid)
+            if r2.status_code not in [200, 204]:
+                logger.error(f"Failed to delete Grafana org: status code {r2.status_code} {r2.text}")
+                return False
+
+            return True
         except Exception as e:
             logger.error(f"Exception in Grafana delete_user: {e}")
             return False

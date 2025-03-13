@@ -65,65 +65,47 @@ def user_influxdb_and_grafana_setup(sender, instance, created, **kwargs):
 
 @receiver(pre_delete, sender=settings.AUTH_USER_MODEL)
 def delete_user_service_accounts_and_data(sender, instance, **kwargs):
-    # Delete Mosquitto user data
+    user = instance
+    delete_mosquitto_user_data(user)
+    delete_grafana_user_account(user)
+    delete_influxdb_user_resources(user)
+    stop_and_delete_nodered_container_and_config(user)
+
+def delete_mosquitto_user_data(user):
     try:
-        mqtt_metadata_manager = MqttMetaDataManager(user=instance)
-        try:
-            mqtt_metadata_manager.delete_nodered_role()
-        except Exception as e:
-            logger.error(f"Error deleting Node-RED role: {e}")
-        try:
-            mqtt_metadata_manager.delete_device_role()
-        except Exception as e:
-            logger.error(f"Error deleting device role: {e}")
+        mosquitto_metadata_manager = MqttMetaDataManager(user)
+        mosquitto_metadata_manager.delete_nodered_role()
+        mosquitto_metadata_manager.delete_device_role()
     except Exception as e:
-        logger.error(f"Error initializing MqttMetaDataManager: {e}")
+        logger.error(f"Error deleting Mosquitto roles: {e}")
 
     try:
-        mqtt_client_manager = MqttClientManager(user=instance)
-        try:
-            mqtt_client_manager.delete_all_clients_for_user()
-        except Exception as e:
-            logger.error(f"Error deleting MQTT clients: {e}")
+        mosquitto_client_manager = MqttClientManager(user)
+        mosquitto_client_manager.delete_all_clients_for_user()
     except Exception as e:
-        logger.error(f"Error initializing MqttClientManager: {e}")
+        logger.error(f"Error deleting Mosquitto clients: {e}")
 
-    # Delete Grafana user account
+def delete_grafana_user_account(user):
     try:
-        grafana_user_manager = GrafanaUserManager(user=instance)
-        try:
-            grafana_user_manager.delete_user()
-        except Exception as e:
-            logger.error(f"Error deleting Grafana user: {e}")
+        grafana_user_manager = GrafanaUserManager(user)
+        grafana_user_manager.delete_user()
     except Exception as e:
-        logger.error(f"Error initializing GrafanaUserManager: {e}")
+        logger.error(f"Error deleting Grafana user: {e}")
 
-    # Delete InfluxDB user data
+def delete_influxdb_user_resources(user):
     try:
-        influx_user_manager = InfluxUserManager(user=instance)
-        try:
-            influx_user_manager.delete_influx_user_resources()
-        except Exception as e:
-            logger.error(f"Error deleting InfluxDB user resources: {e}")
+        influx_user_manager = InfluxUserManager(user)
+        influx_user_manager.delete_influx_user_resources()
     except Exception as e:
-        logger.error(f"Error initializing InfluxUserManager: {e}")
+        logger.error(f"Error deleting InfluxDB resources: {e}")
 
-    # Stop and Delete the user's Node-RED Container and its nginx config
+def stop_and_delete_nodered_container_and_config(user):
     try:
-        try:
-            nodered_user_data = NodeRedUserData.objects.get(user=instance)
-        except ObjectDoesNotExist:
-            nodered_user_data = None
-
-        if nodered_user_data:
-            try:
-                nodered_container = NoderedContainer(nodered_user_data)
-                nodered_container.delete_container()
-            except Exception as e:
-                logger.error(f"Error deleting Node-RED container: {e}")
-            try:
-                del_nodered_nginx_conf(instance)
-            except Exception as e:
-                logger.error(f"Error deleting Node-RED nginx configuration: {e}")
+        nodered_user_data = user.nodereduserdata
+        nodered_container = NoderedContainer(nodered_user_data)
+        nodered_container.delete_container()
+        del_nodered_nginx_conf(nodered_user_data)
+    except ObjectDoesNotExist:
+        logger.info(f"No NodeRedUserData found for user {user}")
     except Exception as e:
-        logger.error(f"Error handling NodeRedUserData deletion: {e}")
+        logger.error(f"Error stopping and deleting Node-RED container and config: {e}")

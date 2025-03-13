@@ -13,12 +13,12 @@ logger = logging.getLogger(__name__)
 
 
 class NoderedContainer:
-    def __init__(self, nodered_data):
-        self.name = nodered_data.container_name
-        self.port = nodered_data.container_port
-        self.is_configured = nodered_data.is_configured
-        self.nodered_data = nodered_data
-        self.access_token = nodered_data.access_token  # TODO: login with access token for security
+    def __init__(self, nodered_user_data):
+        self.name = nodered_user_data.container_name
+        self.port = nodered_user_data.container_port
+        self.is_configured = nodered_user_data.is_configured
+        self.nodered_data = nodered_user_data
+        self.access_token = nodered_user_data.access_token  # TODO: login with access token for security
         self.state = 'none'
         self.docker_client = docker.from_env()
         self.container = self.get_existing_container()
@@ -227,11 +227,11 @@ class NoderedContainer:
             self.port = None  # TODO: delete this comment if working, else revert: was ''
 
 
-def update_nodered_nginx_conf(instance):
+def update_nodered_nginx_conf(nodered_user_data):
     print('update_nodered_nginx_conf() ausgeführt')  # TODO: Später entfernen bzw durch log ersetzen
     # Logic to update Nginx configuration
-    container_name = instance.container_name
-    port = instance.container_port
+    container_name = nodered_user_data.container_name
+    port = nodered_user_data.container_port
     if not container_name and port:
         return
 
@@ -252,12 +252,12 @@ def update_nodered_nginx_conf(instance):
         logger.error('Error:', result.stderr.decode())
 
 
-def del_nodered_nginx_conf(instance):
+def del_nodered_nginx_conf(nodered_user_data):
     """
     Run this function when django user is deleted or if
     delete container is implemented on the nodered dashboard page
     """
-    container_name = instance.container_name
+    container_name = nodered_user_data.container_name
 
     # Path to the server block create script.
     # Could be replaced by a python script
