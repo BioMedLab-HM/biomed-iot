@@ -1,4 +1,5 @@
-# Build command: docker build -t custom-node-red .
+# Build command (if changes are made to settings.js after platform setup): 
+# docker build -t custom-node-red .
 
 # Use the official Node-RED base image
 FROM nodered/node-red:latest

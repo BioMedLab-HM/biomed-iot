@@ -1,6 +1,6 @@
 import os
-# import jwt  # TODO: for auto-login into Node-RED
-from datetime import datetime
+import jwt
+from datetime import datetime, timedelta, timezone
 import requests
 import secrets
 import json
@@ -573,23 +573,21 @@ def access_nodered(request):
     if container_name is None:
         return redirect("core-home")
 
-    # Generate a JWT token for the user
-    # payload = {
-    #     'username': request.user.username,
-    #     'exp': datetime.datetime.now(datetime.timezone.utc) + datetime.timedelta(minutes=300)
-    # }
+    # Create a JWT payload. The token will expire in 300 minutes.
+    payload = {
+        'username': request.user.username,
+        'exp': datetime.now(timezone.utc) + timedelta(minutes=300)
+    }
 
-    # token = jwt.encode(payload, nodered_user_data.access_token, algorithm='HS256')
-    # logger.info(f"NodeRED-Token: {token}")
+    # Generate the token using the SECRET_KEY stored in nodered_user_data.access_token
+    token = jwt.encode(payload, nodered_user_data.access_token, algorithm='HS256')
+    logger.info(f"NodeRED-Token: {token}")
 
-    # Redirect to the Node-RED instance with the token
-    return redirect(f"/nodered/{container_name}")  # /?access_token={token}  # TODO: reverse function
+    # # Redirect to the Node-RED instance with the token (for basic password auth only)
+    # return redirect(f"/nodered/{container_name}")
 
-    # Redirect to the Node-RED instance with the token in the header
-    # response = HttpResponse(status=302)
-    # response['Location'] = f"/nodered/{container_name}/"
-    # response['Authorization'] = f"Bearer {token}"
-    # return response
+    # Redirect to Node-RED, appending the token as a query parameter.
+    return redirect(f"/nodered/{container_name}?access_token={token}")
 
 
 @login_required

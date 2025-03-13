@@ -7,6 +7,8 @@ import docker
 import requests
 from biomed_iot.config_loader import config
 from . import server_utils
+import datetime
+import jwt
 
 
 logger = logging.getLogger(__name__)
@@ -18,13 +20,12 @@ class NoderedContainer:
         self.port = nodered_user_data.container_port
         self.is_configured = nodered_user_data.is_configured
         self.nodered_data = nodered_user_data
-        self.access_token = nodered_user_data.access_token  # TODO: login with access token for security
+        self.access_token = nodered_user_data.access_token
         self.state = 'none'
         self.docker_client = docker.from_env()
         self.container = self.get_existing_container()
 
     def get_existing_container(self):
-        """Attempt to get an existing container by name. Return None if not found."""
         try:
             return self.docker_client.containers.get(self.name)
         except docker.errors.NotFound:
@@ -67,7 +68,7 @@ class NoderedContainer:
         user.nodereduserdata.username = nodered_username
         user.nodereduserdata.password = nodered_password
         user.nodereduserdata.save()
-        hashed_password = self.hash_password(nodered_password)
+        # hashed_password = self.hash_password(nodered_password)
 
         if self.container is None:  # Only create a new container if one doesn't already exist
 
@@ -82,9 +83,9 @@ class NoderedContainer:
                     volumes={f'{self.name}-volume': {'bind': '/data', 'mode': 'rw'}},
                     name=self.name,
                     environment={
-                        'USERNAME': nodered_username,
-                        'PASSWORD_HASH': hashed_password,
-                        # 'SECRET_KEY': self.access_token  # for Token (JWT) based auth, but does not work currently
+                        # 'USERNAME': nodered_username, for Basic User Auth
+                        # 'PASSWORD_HASH': hashed_password,
+                        'SECRET_KEY': self.access_token  # for Token (JWT) based auth
                     },
                     network="bridge"  # Attach the container to the default network
                 )
@@ -115,7 +116,6 @@ class NoderedContainer:
             except Exception as e:
                 print(f'An error occurred while trying to delete the nodered container: {e}')
 
-
     def copy_json_to_container(self, container, src_path, dest_path):
         # Create a tar archive of the file
         import tarfile
@@ -127,29 +127,6 @@ class NoderedContainer:
         # Move the stream's pointer to the beginning
         stream.seek(0)
         container.put_archive(path=os.path.dirname(dest_path), data=stream)
-
-    # def update_flows(self, new_flows_json):
-    #     node_red_flows_url = f'http://localhost:{self.port}/flows'
-
-    #     headers = {'Content-Type': 'application/json'}
-    #     response = requests.post(node_red_flows_url, headers=headers, data=new_flows_json)
-    #     if response.status_code == 204:
-    #         logger.info("Flows successfully updated.")
-    #     else:
-    #         logger.error("Failed to update flows:", response.status_code, response.text)
-
-    def get_auth_token(self, username, password):
-        url = f"http://localhost:{self.port}/auth/token"  # {config.host.IP}
-        payload = {
-            'client_id': 'node-red-admin',
-            'grant_type': 'password',
-            'scope': '*',
-            'username': username,
-            'password': password
-        }
-        response = requests.post(url, data=payload)
-        response.raise_for_status()
-        return response.json()['access_token']
 
     def update_flows(self, token, flows_json):
         url = f"http://localhost:{self.port}/flows"
@@ -188,11 +165,20 @@ class NoderedContainer:
         influxdb_url = f"{server_scheme}://{host_address}:{influxdb_port}"
         modified_flows_json = modified_flows_json.replace("influxdb-url", influxdb_url)
 
-        nodered_username = user.nodereduserdata.username
-        nodered_password = user.nodereduserdata.password
-
         self.determine_port()
-        token = self.get_auth_token(nodered_username, nodered_password)
+
+        # Alternative for basic auth with username + password 
+        # nodered_username = user.nodereduserdata.username
+        # nodered_password = user.nodereduserdata.password
+
+        # Generate a JWT token locally (expires in 300 minutes)
+        exp = datetime.datetime.now(datetime.timezone.utc) + datetime.timedelta(minutes=300)
+        payload = {
+            'username': user.nodereduserdata.username,
+            'exp': exp
+        }
+        token = jwt.encode(payload, self.nodered_data.access_token, algorithm='HS256')
+        logger.info(f"Generated JWT token for Node-RED configuration: {token}")
         self.update_flows(token, modified_flows_json)
 
         self.nodered_data.is_configured = True
