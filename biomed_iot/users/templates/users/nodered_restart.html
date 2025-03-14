@@ -4,8 +4,9 @@
 <form method="post">
     {% csrf_token %}
     <div class="alert alert-warning" role="alert">
-        <p>Your Node-RED is currently stopped. Your flows are not running.</p>
-        <p>Restart Node-RED to let it work again</p>
+        <p>Your Node-RED is currently stopped!<br></p>
+        <p>&rarr; Flows are not running.</p>
+        <p>&rarr; No data is saved to the database</p>
         <button type="submit" class="btn btn-primary" name="action" value="restart">Restart Node-RED</button>
     </div>
 </form>

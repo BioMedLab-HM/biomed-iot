@@ -2,17 +2,16 @@
 {% load crispy_forms_tags %}
 {% block content %}
 
-<!-- <div style="margin-bottom: 2rem;"></div> -->
 <div class="card card mb-2">
     <div class="card-header">
-        <h5 class="my-0 font-weight-normal">Your Devices</h4>
+        <h5 class="my-0 font-weight-normal">Manage your IoT-Devices MQTT-Credentials</h5>
     </div>
     <div class="card-body">
-        <ul class="text-muted">
+        <!-- <ul class="text-muted">
             <li>Create device credentials by adding a descriptive name for your device using the form below</li>
             <li>The new credentials will appear at the bottom of the list</li>
             <li>Toggle visibility with 'Show/Hide Credentials' and copy the username and password</li>
-        </ul>
+        </ul> -->
         <form method="post" class="mt-3 mb-3">
             {% csrf_token %}
             <div class="form-group row">
@@ -27,14 +26,10 @@
                 </div>
             </div>
             <div class="form-group row mt-3">
-                <!-- <div class="mt-3 col-md-3 col-12 d-flex justify-content-between align-items-center"> -->
                 <p><a href="#" class="card-link" onclick="toggleVisibility(); return false;">Show/Hide Credentials</a></p>
-                <!-- </div> -->
             </div>
         </form>
-        <!-- <div class="container-fluid mt-3"> -->
-        <!-- Headings -->
-        <!-- Column Headers for MD and Up -->
+        <!-- Desktop Header -->
         <div class="row mb-3 d-none d-md-flex">
             <div class="col-md-4 col-xl-3"><strong>Name</strong></div>
             <div class="col-md-3 col-xl-3"><strong>Username</strong></div>
@@ -44,9 +39,8 @@
         {% if device_clients %}
         {% for device in device_clients %}
         <div class="mb-5">
-            <!-- Inline Labels and Values for XS and SM -->
+            <!-- Mobile Layout -->
             <div class="d-md-none">
-                <!-- Horizontal rule only visible on small screens -->
                 <hr style="margin-top: 20px; margin-bottom: 20px; border: 0; border-top: 2px solid #1B4F72;">
                 <div class="row mb-2">
                     <div class="col-4"><strong>Name:</strong></div>
@@ -55,15 +49,19 @@
                 <div class="row mb-2">
                     <div class="col-4 mt-1"><strong>Username:</strong></div>
                     <div class="col-8">
-                        <input type="password" class="form-control usernameField" value="{{ device.username }}"
-                            readonly>
+                        <div class="input-group">
+                            <input type="password" class="form-control usernameField" value="{{ device.username }}" readonly>
+                            <button class="btn btn-outline-secondary copy-button" type="button" onclick="copyValue(this)">Copy</button>
+                        </div>
                     </div>
                 </div>
                 <div class="row mb-2">
                     <div class="col-4 mt-1"><strong>Password:</strong></div>
                     <div class="col-8">
-                        <input type="password" class="form-control passwordField" value="{{ device.password }}"
-                            readonly>
+                        <div class="input-group">
+                            <input type="password" class="form-control passwordField" value="{{ device.password }}" readonly>
+                            <button class="btn btn-outline-secondary copy-button" type="button" onclick="copyValue(this)">Copy</button>
+                        </div>
                     </div>
                 </div>
                 <div class="row mb-2">
@@ -76,20 +74,25 @@
                 </div>
             </div>
 
-            <!-- Values Only for MD and larger (since labels are in the header) -->
+            <!-- Desktop Layout -->
             <div class="row d-none d-md-flex align-items-center">
                 <div class="col-md-4 col-xl-3">{{ device.textname }}</div>
                 <div class="col-md-3 col-xl-3">
-                    <div class="{% cycle 'alternating-item-odd' 'alternating-item-even' %}"> <!-- Toggles between two classes -->
-                        <input type="password" class="form-control alternating-item usernameField" value="{{ device.username }}" readonly>
+                    <div class="{% cycle 'alternating-item-odd' 'alternating-item-even' %}">
+                        <div class="input-group">
+                            <input type="password" class="form-control usernameField" value="{{ device.username }}" readonly>
+                            <button class="btn btn-outline-secondary copy-button" type="button" onclick="copyValue(this)">Copy</button>
+                        </div>
                     </div>
                 </div>
                 <div class="col-md-3 col-xl-4">
-                    <div class="{% cycle 'alternating-item-odd' 'alternating-item-even' %}"> <!-- Toggles between two classes -->
-                        <input type="password" class="form-control passwordField" value="{{ device.password }}" readonly>
+                    <div class="{% cycle 'alternating-item-odd' 'alternating-item-even' %}">
+                        <div class="input-group">
+                            <input type="password" class="form-control passwordField" value="{{ device.password }}" readonly>
+                            <button class="btn btn-outline-secondary copy-button" type="button" onclick="copyValue(this)">Copy</button>
+                        </div>
                     </div>
                 </div>
-                <!-- Actions Column, consistent across sizes -->
                 <div class="col-md-2 col-xl-2">
                     <form method="post" action="{% url 'devices' %}">
                         {% csrf_token %}
@@ -119,9 +122,7 @@
         right: 0;
         bottom: 0;
         width: 10px;
-        /* background: linear-gradient(to right, transparent, #f7f7f7); */
     }
-
     .scroll-indicator::after {
         content: '';
         position: absolute;
@@ -129,27 +130,19 @@
         left: 0;
         bottom: 0;
         width: 10px;
-        /* background: linear-gradient(to left, transparent, #f7f7f7); */
     }
-
     .table-responsive {
         position: relative;
         margin-bottom: -1rem;
     }
-
     .copy-button {
         cursor: pointer;
-        background: #5D6D7E;
-        /* transparent; */
         border: none;
         font-size: 1rem;
         transition: background 0.2s;
-        /* Smooth transition for background color */
     }
-
     .copy-button:hover {
         background: #CCCCCC;
-        /* Lighter shade for hover */
     }
 </style>
 {% endblock %}
@@ -160,15 +153,23 @@
         var usernameFields = document.querySelectorAll(".usernameField");
         var passwordFields = document.querySelectorAll(".passwordField");
 
-        // Loop through all username fields
         usernameFields.forEach(function (field) {
             field.type = field.type === "password" ? "text" : "password";
         });
 
-        // Loop through all password fields
         passwordFields.forEach(function (field) {
             field.type = field.type === "password" ? "text" : "password";
         });
+    }
+
+    function copyValue(btn) {
+        var inputField = btn.parentElement.querySelector('input');
+        var originalType = inputField.type;
+        inputField.type = 'text';
+        inputField.select();
+        document.execCommand('copy');
+        inputField.type = originalType;
+        alert('Copied to clipboard!');
     }
 </script>
 {% endblock %}

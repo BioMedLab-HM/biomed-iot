@@ -560,7 +560,7 @@ def nodered_flow_examples(request):
 
 @login_required
 def nodered_status_check(request):
-    """Called by JS function checkNoderedStatus() in nodered_manager.html"""
+    """Called by JS function checkNoderedStatus() in nodered_wait.html"""
     print('nodered_status_check: Started handling request')
     # Attempt to retrieve the container name from the session.
     container_name = request.session.get('container_name')

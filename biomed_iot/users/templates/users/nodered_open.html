@@ -3,22 +3,30 @@
 {% block content %}
 <form method="post">
     {% csrf_token %}
+    <!-- <button type="submit" class="btn btn-info" name="action" value="open">Open Node-RED Flow Editor</button> -->
     <div class="alert alert-success mb-3" role="alert">
-        <h4>Your Node-RED is running.</h4>
-        <!-- <p>Open Node-RED now to create and edit flows.</p> -->
-        <!-- <button type="submit" class="btn btn-info" name="action" value="open">Open Node-RED Flow Editor</button> -->
-        <button type="button" class="btn btn-info" data-url="{% url 'nodered' %}" id="openFlows">
-            Open Node-RED Flow Editor (new tab)
-        </button>
-        <p style="margin-top: 20px;">Build dashboards for Node-RED to view and control flows.</p>
-        <button type="button" class="btn btn-info" data-url="{% url 'nodered-dashboard' %}" id="openDashboard">
-            Open Node-RED Dashboard (new tab)
-        </button>
+        <div class="row mt-12">
+            <div class="col-md-6" style="margin-bottom: 0.7rem;">
+                <h4>Your Node-RED is running</h4>
+            </div>
+        </div>
+        <div class="row mt-12">
+            <div class="col-md-4" style="margin-bottom: 0.7rem;">
+                <button type="button" class="btn btn-info btn-block" data-url="{% url 'nodered' %}" id="openFlows" title="Opens in a new tab">
+                    Node-RED Flow Editor <span aria-hidden="true">&#8599;</span>
+                </button>
+            </div>
+            <div class="col-md-4">
+                <button type="button" class="btn btn-info btn-block" data-url="{% url 'nodered-dashboard' %}" id="openDashboard" title="Opens in a new tab">
+                    Node-RED Dashboard <span aria-hidden="true">&#8599;</span>
+                </button>
+            </div>
+        </div>
+    </div>
 
-    </div> 
     <div class="card mb-3">
         <div class="card-header">
-            <h4 class="my-0 font-weight-normal">Personal Credentials for Node-RED Login, MQTT-/InfluxDB-Nodes</h4>
+            <h4 class="my-0 font-weight-normal">Personal Credentials for MQTT- and InfluxDB-Nodes</h4>
         </div>
         <div class="card-body">
             <div class="row">
@@ -28,14 +36,14 @@
                         <!-- TODO: Activate and test manual toggle for credentials -->
                         <!-- <a href="#" class="card-link" onclick="toggleVisibility(); return false;">Show/Hide Credentials</a> -->
                         <a href="#" onclick="toggleVisibilityWithTimer(); return false;">Show Credentials</a>
-                        &nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;
+                        <!-- &nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;
                         <a href="#" class="copy-text">Copy All Credentials </a><br><br>
                         <strong>1. Login to Node-RED:</strong> <br>
                         <strong>></strong> Use the credentials on the right <br>
-                        <strong>></strong> You will be prompted to re-enter them weekly <br>
+                        <strong>></strong> You will be prompted to re-enter them weekly <br> -->
                     </p>
                     <p>
-                        <strong>2. In Node-RED:</strong> <br>
+                        <strong>Complete Node Setup on First Launch:</strong> <br>
                         <strong>a)</strong> Double-click on MQTT (violet) or InfluxDB (brown) node<br>
                         <strong>b)</strong> Click on edit server (pencil icon) <br>
                         &nbsp;&nbsp;&nbsp;&nbsp;&nbsp;For MQTT node: Click the 'Security' tab <br>
@@ -45,26 +53,49 @@
                 <!-- Right column for credentials -->
                 <div class="col-lg-5 col-sm-12">
                     <!-- Nested structure for username and password fields to ensure they stack on small screens -->
-                    <div class="mb-3">
+                    <!-- <div class="mb-3">
                         <label for="usernameField" class="form-label">Node-RED Login Username</label>
                         <input type="password" id="noderedUsernameField" class="form-control" value="{{ username }}" readonly>
                     </div>
                     <div class="mb-3">
                         <label for="passwordField" class="form-label">Node-RED Login Password</label>
                         <input type="password" id="noderedPasswordField" class="form-control" value="{{ password }}" readonly>
-                    </div>
+                    </div> -->
                     <div class="mb-3">
                         <label for="usernameField" class="form-label">MQTT-Username</label>
-                        <input type="password" id="usernameField" class="form-control" value="{{ nodered_mqtt_client_data.username }}" readonly>
+                        <div class="input-group">
+                            <input type="password" id="usernameField" class="form-control" value="{{ nodered_mqtt_client_data.username }}" readonly>
+                            <button class="btn btn-outline-secondary" type="button" onclick="copyValue('usernameField')">Copy</button>
+                        </div>
                     </div>
                     <div class="mb-3">
                         <label for="passwordField" class="form-label">MQTT-Password</label>
-                        <input type="password" id="passwordField" class="form-control" value="{{ nodered_mqtt_client_data.password }}" readonly>
+                        <div class="input-group">
+                            <input type="password" id="passwordField" class="form-control" value="{{ nodered_mqtt_client_data.password }}" readonly>
+                            <button class="btn btn-outline-secondary" type="button" onclick="copyValue('passwordField')">Copy</button>
+                        </div>
                     </div>
                     <div class="mb-3">
                         <label for="tokenField" class="form-label">InfluxDB Read/Write Token</label>
-                        <input type="password" id="tokenField" class="form-control" value="{{ influxdb_token }}" readonly>
+                        <div class="input-group">
+                            <input type="password" id="tokenField" class="form-control" value="{{ influxdb_token }}" readonly>
+                            <button class="btn btn-outline-secondary" type="button" onclick="copyValue('tokenField')">Copy</button>
+                        </div>
                     </div>
+                    
+                    <script>
+                    function copyValue(fieldId) {
+                        var inputField = document.getElementById(fieldId);
+                        // Temporarily change type to text to enable selection
+                        inputField.type = 'text';
+                        inputField.select();
+                        document.execCommand('copy');
+                        // Revert back to password type
+                        inputField.type = 'password';
+                        alert('Copied to clipboard!');
+                    }
+                    </script>
+                    
                 </div>
             </div>
         </div>
@@ -72,8 +103,9 @@
     <!-- <div style="margin-bottom: 1.5rem;"></div> -->
     <!-- <hr> -->
     <div class="alert alert-danger" role="alert">
-        <p>Please stop Node-RED to free up server resources if the flows are not needed.</p>
-        <button type="submit" class="btn btn-danger" name="action" value="stop" onclick="return confirm('Are your sure you want to stop your Node-RED flows?');">Stop Node-RED</button>
+        <p>Stop Node-RED if you do not need it for a while (saves server resources).</p>
+        <p>Be aware that flows will be stopped and no data will be saved to the database</p>
+        <button type="submit" class="btn btn-danger" name="action" value="stop" title="Stop Node-RED" onclick="return confirm('Are your sure you want to stop Node-RED?');">Stop Node-RED</button>
     </div>
 </form>
 {% endblock %}
@@ -96,8 +128,8 @@
         var usernameField = document.getElementById("usernameField");
         var passwordField = document.getElementById("passwordField");
         var tokenField = document.getElementById("tokenField");
-        var noderedUsername = document.getElementById("noderedUsernameField");
-        var noderedPassword = document.getElementById("noderedPasswordField");
+        // var noderedUsername = document.getElementById("noderedUsernameField");
+        // var noderedPassword = document.getElementById("noderedPasswordField");
         var link = event.target; // Get the clicked link
 
         // Function to hide credentials
@@ -105,8 +137,8 @@
             usernameField.type = "password";
             passwordField.type = "password";
             tokenField.type = "password";
-            noderedUsername.type = "password";
-            noderedPassword.type = "password";
+            // noderedUsername.type = "password";
+            // noderedPassword.type = "password";
             link.textContent = "Show Credentials";
         }
 
@@ -115,52 +147,14 @@
             usernameField.type = "text";
             passwordField.type = "text";
             tokenField.type = "text";
-            noderedUsername.type = "text";
-            noderedPassword.type = "text";
+            // noderedUsername.type = "text";
+            // noderedPassword.type = "text";
             //link.textContent = "Hide Credentials";
 
             // Set a timeout to revert back to password type after 10 seconds
             setTimeout(hideCredentials, 10000); // 10000 milliseconds = 10 seconds
         }
     }
-
-    // Copy credentials script
-    document.addEventListener('DOMContentLoaded', () => {
-        // Select the copy link
-        const copyLink = document.querySelector('.copy-text');
-        copyLink.addEventListener('click', function(e) {
-            e.preventDefault(); // Prevent the default link behavior
-
-            // Get the values from the input fields
-            var noderedUsername = document.getElementById("noderedUsernameField").value;
-            var noderedPassword = document.getElementById("noderedPasswordField").value;
-            var username = document.getElementById("usernameField").value;
-            var password = document.getElementById("passwordField").value;
-            var token = document.getElementById("tokenField").value;
-
-            // Create a string that concatenates the credentials
-            const credentials = "Node-RED Login Username: " + noderedUsername + "\nNode-RED Login Password: " + noderedPassword + "\nMQTT-Username: " + username + "\nMQTT-Password: " + password + "\nInfluxDB-Token: " + token;
-
-            // Create a temporary textarea to hold the text to copy
-            const textarea = document.createElement('textarea');
-            textarea.value = credentials;
-            document.body.appendChild(textarea);
-            textarea.select();
-
-            try {
-                const successful = document.execCommand('copy');
-                const msg = successful ? 'Credentials copied' : 'Failed to copy credentials';
-                console.log(msg);
-                alert(msg);
-            } catch (err) {
-                console.error('Oops, unable to copy', err);
-                alert('Failed to copy credentials: ' + err.message);
-            }
-
-            // Clean up the textarea from the body
-            document.body.removeChild(textarea);
-        });
-    });
 </script>
 {% endblock %}
 
