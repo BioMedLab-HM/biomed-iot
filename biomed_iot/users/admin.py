@@ -1,3 +1,4 @@
+from core.admin_site import admin_site
 from django.contrib import admin
 from .models import CustomUser, Profile, NodeRedUserData, MqttClient, MqttMetaData, InfluxUserData
 
@@ -17,9 +18,10 @@ class MqttMetaDataAdmin(admin.ModelAdmin):
 class InfluxUserDataAdmin(admin.ModelAdmin):
     list_display = ('user', 'bucket_name', 'bucket_id', 'bucket_token', 'bucket_token_id')
 
-admin.site.register(CustomUser)
-admin.site.register(Profile, ProfileAdmin)
-admin.site.register(NodeRedUserData, NodeRedUserDataAdmin)
-admin.site.register(MqttClient, MqttClientAdmin)
-admin.site.register(MqttMetaData, MqttMetaDataAdmin)
-admin.site.register(InfluxUserData, InfluxUserDataAdmin)
+# use custom admin_site instead of admin.site
+admin_site.register(CustomUser)
+admin_site.register(Profile, ProfileAdmin)
+admin_site.register(NodeRedUserData, NodeRedUserDataAdmin)
+admin_site.register(MqttClient, MqttClientAdmin)
+admin_site.register(MqttMetaData, MqttMetaDataAdmin)
+admin_site.register(InfluxUserData, InfluxUserDataAdmin)

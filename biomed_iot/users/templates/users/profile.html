@@ -25,6 +25,9 @@
             <button class="btn btn-outline-info" type="submit">Update</button>
         </div> -->
       </form>
+      {% if user.is_staff %}
+        <a href="{% url 'admin:index' %}" target="_blank" rel="noopener">Django Admin Dashboard &nearr;</a>
+      {% endif %}
       <div class="form-group mt-4">
         <a class="btn btn-warning" href="{% url 'password_reset' %}">Reset Password</a>
       </div>

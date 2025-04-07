@@ -15,16 +15,18 @@ Including another URLconf
     2. Add a URL to urlpatterns:  path('blog/', include('blog.urls'))
 """
 
-from django.contrib import admin
+# from django.contrib import admin
 from django.contrib.auth import views as auth_views
 from django.urls import path, include, re_path
 from django.conf import settings
 from django.conf.urls.static import static
 from users import views as user_views
+from core.admin_site import admin_site
 # from users.views import CustomLoginView
 
 urlpatterns = [
-    path('admin/', admin.site.urls),
+    # path('admin/', admin.site.urls),
+    path('iot-admin/', admin_site.urls),
 
     # path('o/', include('oauth2_provider.urls', namespace='oauth2_provider')),
     # path('auth/callback/', views.oauth_callback, name='oauth_callback'),
