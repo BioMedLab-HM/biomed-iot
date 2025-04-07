@@ -148,28 +148,5 @@
 {% endblock %}
 
 {% block extra_js %}
-<script>
-    function toggleVisibility() {
-        var usernameFields = document.querySelectorAll(".usernameField");
-        var passwordFields = document.querySelectorAll(".passwordField");
-
-        usernameFields.forEach(function (field) {
-            field.type = field.type === "password" ? "text" : "password";
-        });
-
-        passwordFields.forEach(function (field) {
-            field.type = field.type === "password" ? "text" : "password";
-        });
-    }
-
-    function copyValue(btn) {
-        var inputField = btn.parentElement.querySelector('input');
-        var originalType = inputField.type;
-        inputField.type = 'text';
-        inputField.select();
-        document.execCommand('copy');
-        inputField.type = originalType;
-        alert('Copied to clipboard!');
-    }
-</script>
+    <script src="{% static 'js/custom/devices_scripts.js' %}"></script>
 {% endblock %}

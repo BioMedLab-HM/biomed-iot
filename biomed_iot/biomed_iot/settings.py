@@ -208,7 +208,7 @@ CRISPY_TEMPLATE_PACK = 'bootstrap5'
 # Consider: https://content-security-policy.com/unsafe-inline/
 X_FRAME_OPTIONS = "SAMEORIGIN"
 USE_X_FORWARDED_HOST = True
-CSP_DEFAULT_SRC = ("'self'", "http:", "https:", "'unsafe-inline'", "'unsafe-eval'")
+CSP_DEFAULT_SRC = ("'self'", "http:", "https:")  # , "'unsafe-inline'", "'unsafe-eval'"
 if config.host.TLS == "true":
     SESSION_COOKIE_SECURE = True
     CSRF_COOKIE_SECURE = True
