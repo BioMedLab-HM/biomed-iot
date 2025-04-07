@@ -32,6 +32,10 @@ server {
         root /var/www/biomed-iot/media/;
     }
 
+    location = /robots.txt {
+        alias /var/www/biomed-iot/static/robots.txt;
+    }
+
     # location and proxy pass to gunicorn server (the Django server)
     location / {
         include proxy_params;
@@ -53,21 +57,5 @@ server {
     server_name $DOMAIN www.$DOMAIN;
 
     return 301 https://\$server_name\$request_uri;  # redirect to server block with port 443 listener. Changed 302 to 301 after successfull testing
-}
-
-server {
-    listen 8087 ssl;
-    server_name $DOMAIN www.$DOMAIN;
-    ssl_certificate /etc/letsencrypt/live/$DOMAIN/fullchain.pem;
-    ssl_certificate_key /etc/letsencrypt/live/$DOMAIN/privkey.pem;
-    include snippets/ssl-params.conf;  # contains additional params
-
-    location / {
-        proxy_pass http://localhost:8086;
-        proxy_set_header Host \$host;
-        proxy_set_header X-Real-IP \$remote_addr;
-        proxy_set_header X-Forwarded-For \$proxy_add_x_forwarded_for;
-        proxy_set_header X-Forwarded-Proto \$scheme;
-    }
 }
 EOF

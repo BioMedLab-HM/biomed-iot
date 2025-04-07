@@ -31,6 +31,10 @@ server {
         root /var/www/biomed-iot/media/;
     }
 
+    location = /robots.txt {
+        alias /var/www/biomed-iot/static/robots.txt;
+    }
+
     # location and proxy pass to gunicorn server (the Django server)
     location / {
         include proxy_params;
@@ -44,16 +48,4 @@ server {
     # location files for nodered container instances
     include /etc/nginx/conf.d/nodered_locations/*.conf;
 }
-
-# server {
-#     listen 8087;
-
-#     location / {
-#         proxy_pass http://localhost:8086;
-#         proxy_set_header Host \$host;
-#         proxy_set_header X-Real-IP \$remote_addr;
-#         proxy_set_header X-Forwarded-For \$proxy_add_x_forwarded_for;
-#         proxy_set_header X-Forwarded-Proto \$scheme;
-#     }
-# }
 EOF

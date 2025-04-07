@@ -1,9 +1,7 @@
 """
 Django settings for biomed-iot project.
 
-d by 'django-admin startproject' using Django 4.2.5.
-
-For more information on this file, see
+For more information on this file, see respective latest version
 https://docs.djangoproject.com/en/4.2/topics/settings/
 
 For the full list of settings and their values, see
@@ -88,7 +86,7 @@ WSGI_APPLICATION = 'biomed_iot.wsgi.application'
 
 # Database
 # https://docs.djangoproject.com/en/5.0/ref/settings/#databases
-DATABASES = {  # Uncomment the database to use and stay with it
+DATABASES = {  # Uncomment the database to use before setup and stay with it
     'default': {
         'ENGINE': 'django.db.backends.sqlite3',
         'NAME': BASE_DIR / 'db.sqlite3',

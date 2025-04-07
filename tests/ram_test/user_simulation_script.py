@@ -1,5 +1,7 @@
 # User-Simulation-Script
 
+# run script with venv in django base directory: ~/biomed-iot/biomed_iot
+
 # Creates Users with Node-RED containers
 # users request  URL every 10 seconds
 # User Count is ingreased after each container startup
@@ -32,18 +34,18 @@ from users.services.nodered_utils import NoderedContainer
 from users.models import NodeRedUserData
 
 # Constants
-CSV_FILE_NAME = 'ram_test_x86.csv'  # Choose a name for the csv-file
+CSV_FILE_NAME = 'ram_test.csv'  # Choose a name for the csv-file
 INITIAL_COUNT = 1
 MAX_COUNT = 37
 WARM_UP_DURATION = 60
 DETERMINE_STATE_INTERVAL = 3
 REQUEST_INTERVAL = 10
 MIN_FRACTION_AVAILABLE_RAM = 0.03  # MIN_FRACTION_AVAILABLE_RAM = min. available RAM / total RAM
-USER_PASSWORD = "****"  # define a Password for Test purposes
+USER_PASSWORD = "testpass123!"  # define a test-Password for Test purposes
 URLS = [
-    "URL_1",  # Enter a URL for the Request. Use the same three times for constant request sizes.
-    "URL_1",
-    "URL_1",
+    "URL_1",  # Enter a Biomed IoT Website URL for the Request. Use the same three times for constant request sizes.
+    "URL_2",
+    "URL_3",
 ]
 MEMORY_MEASUREMENTS_INTERVAL = 0.5
 NUMBER_OF_MEMORY_MEASUREMENTS = 20
