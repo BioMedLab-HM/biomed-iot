@@ -65,7 +65,7 @@ def install_nginx(setup_scheme, domain, server_ip, hostname):
 
     # Verify the self-signed certificate
     if setup_scheme == 'TLS_NO_DOMAIN':
-        output = run_bash('openssl x509 -in /etc/ssl/certs/$HOSTNAME.crt -text -noout', show_output=False)
+        output = run_bash('openssl x509 -in /etc/ssl/certs/biomed-iot.crt -text -noout', show_output=False)
         log(output, NGINX_INSTALL_LOG_FILE_NAME)
 
     output = run_bash('mkdir /etc/nginx/conf.d/nodered_locations')

@@ -45,7 +45,9 @@ def install_mosquitto(setup_scheme):
 	]
 	for command in init_dynsec_commands:
 		output = run_bash(command)
-		log(output, MOSQUITTO_INSTALL_LOG_FILE_NAME)
+		log_text = ("Dynamic Security Plugin admin client created - "
+			 "See https://mosquitto.org/documentation/dynamic-security/ for list of all commands.")
+		log(log_text, MOSQUITTO_INSTALL_LOG_FILE_NAME)
 
 	# Add Clients and Roles to dynamic-security.json using a prepared script
 	dynsec_create_command_script = f'{config_path}/tmp.mosquitto-dynsec-commands.sh'

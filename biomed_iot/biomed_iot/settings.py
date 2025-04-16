@@ -25,7 +25,7 @@ BASE_DIR = Path(__file__).resolve().parent.parent
 SECRET_KEY = config.django.DJANGO_SECRET_KEY
 
 # SECURITY WARNING: don't run with debug turned on in production!
-DEBUG = False
+DEBUG = True if config.django.DJANGO_DEBUG == "true" else False
 
 ALLOWED_HOSTS = [config.host.IP, config.host.HOSTNAME, config.host.DOMAIN, 'localhost', '127.0.0.1']
 
@@ -204,7 +204,6 @@ DEFAULT_AUTO_FIELD = 'django.db.models.BigAutoField'
 CRISPY_ALLOWED_TEMPLATE_PACKS = 'bootstrap5'  # from the pip package crispy-bootstrap5
 CRISPY_TEMPLATE_PACK = 'bootstrap5'
 
-# TODO: Hier weitere security settings? --> für Inline JS!
 # Consider: https://content-security-policy.com/unsafe-inline/
 X_FRAME_OPTIONS = "SAMEORIGIN"
 USE_X_FORWARDED_HOST = True

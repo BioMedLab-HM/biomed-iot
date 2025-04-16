@@ -1,13 +1,13 @@
 #!/bin/sh
 
-"""
-Changes made to this file:
-    Added 'enabled = true' to the following sections
-    [sshd]
-    [nginx-http-auth]
-    [nginx-botsearch]
-    [nginx-bad-request]
-"""
+
+# Changes made to this file:
+#    Added 'enabled = true' to the following sections
+#    [sshd]
+#    [nginx-http-auth]
+#    [nginx-botsearch]
+#    [nginx-bad-request]
+
 
 # Define jail.local template
 cat << EOF
