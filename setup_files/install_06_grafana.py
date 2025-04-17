@@ -1,10 +1,10 @@
 import os
-from .setup_utils import run_bash, log, get_setup_dir, get_conf_path
+from .setup_utils import run_bash, log, get_setup_dir, get_conf_path, get_random_string
 
 GRAFANA_INSTALL_LOG_FILE_NAME = 'install_06_grafana.log'
 
 
-def install_grafana(architecture, setup_scheme, ip_address, domain, admin_email, admin_name, admin_pass):
+def install_grafana(architecture, setup_scheme, ip_address, domain, admin_email):
     """
     Install Grafana OSS (Open Source) Version based on the provided architecture and setup scheme.
     Download pages:
@@ -16,6 +16,8 @@ def install_grafana(architecture, setup_scheme, ip_address, domain, admin_email,
     grafana_files_dir = f'{setup_dir}/setup_files/tmp/grafana_install_files'
     host = "localhost"  # domain if setup_scheme == "TLS_DOMAIN" else ip_address
     port = 3000
+    admin_name = get_random_string(20, incl_symbols=True)
+    admin_pass = get_random_string(30, incl_symbols=True)
 
     installation_commands_amd64 = [
         # Ensure the temp directory exists and enter it
@@ -103,6 +105,7 @@ def install_grafana(architecture, setup_scheme, ip_address, domain, admin_email,
         'GRAFANA_PORT': port,
         'GRAFANA_ADMIN_USERNAME': admin_name,
         'GRAFANA_ADMIN_PASSWORD': admin_pass,
+        'GRAFANA_ADMIN_EMAIL': admin_email,
     }
     log('Grafana installation done', GRAFANA_INSTALL_LOG_FILE_NAME)
     return config_data

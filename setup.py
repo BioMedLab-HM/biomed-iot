@@ -277,7 +277,7 @@ def main():
     ip_address = run_bash("hostname --all-ip-addresses | awk '{print $1}'", show_output=False)
     linux_user = get_linux_user()
     setup_dir = get_setup_dir()
-    django_admin_name = 'admin'
+    django_admin_name = 'iot_admin'
     django_admin_pass = get_random_string(7) + '-' + get_random_string(7) + '-' + get_random_string(7)
     pwreset_email = None
     pwreset_pass = None
@@ -343,7 +343,7 @@ def main():
 
 
     """ INSTALLATION OF SOFTWARE """
-    
+
     msg = '\nStarting installation of Biomed IoT. Please do not interrupt!\n'
     print(msg)
     log(msg)
@@ -389,9 +389,7 @@ def main():
         setup_scheme,
         ip_address,
         domain,
-        django_admin_email,
-        django_admin_name,
-        django_admin_pass
+        django_admin_email
         )
     print('Grafana installed')
     log('Grafana installed')
