@@ -105,6 +105,7 @@ def install_django(django_admin_email, django_admin_name, django_admin_pass):
         'DJANGO_ADMIN_MAIL': django_admin_email,
         'DJANGO_ADMIN_NAME': django_admin_name,
         'DJANGO_ADMIN_PASS': django_admin_pass,
+        'DJANGO_DEBUG': "false",  # Set to false for production
     }
 
     log('Django setup done', DJANGO_INSTALL_LOG_FILE_NAME)
