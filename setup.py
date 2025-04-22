@@ -389,7 +389,9 @@ def main():
         setup_scheme,
         ip_address,
         domain,
-        django_admin_email
+        django_admin_email,
+        django_admin_name,
+        django_admin_pass
         )
     print('Grafana installed')
     log('Grafana installed')

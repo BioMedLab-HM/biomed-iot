@@ -5,6 +5,7 @@ import random
 import string
 import subprocess
 import sys
+import secrets
 
 
 def get_linux_user():
@@ -97,19 +98,44 @@ def run_bash(command, show_output=True):
 			return f'Error executing command: {e.cmd}\nOutput:\n{e.stdout.strip()}\n'
 
 
-def get_random_string(string_length, incl_symbols=False):
-	"""
-	Define the characters to include in the random string
-	Leave incl_symbols to False (no symbols in password) for easy copy paste
-	but make passwords etc. longer for security.
-	"""
-	symbols = '!@#$%&*()_+-=[]}{|;:<>/?'
-	characters = string.ascii_letters + string.digits
-	if incl_symbols:
-		characters += symbols
-	# Generate a random string of the specified length
-	rand_str = ''.join(random.choice(characters) for _ in range(string_length))
-	return rand_str
+def get_random_string(length, incl_symbols=False):
+    """
+    Generate a secure random string of given length.
+    If incl_symbols is True, ensures >=1 lowercase, uppercase, digit, and symbol.
+    """
+    if length <= 0:
+        return ''
+    symbols = '!@#$%&*()_+-=[]}{|;:<>/?'
+    pool = string.ascii_letters + string.digits + (symbols if incl_symbols else '')
+
+    if incl_symbols:
+        if length < 4:
+            raise ValueError("Length must be at least 4 when including symbols.")
+        # one from each category
+        req = [secrets.choice(c) for c in (string.ascii_lowercase, string.ascii_uppercase, string.digits, symbols)]
+        # fill rest and shuffle
+        rest = [secrets.choice(pool) for _ in range(length - 4)]
+        token = req + rest
+        random.SystemRandom().shuffle(token)
+        return ''.join(token)
+
+    # simple secure choice
+    return ''.join(secrets.choice(pool) for _ in range(length))
+
+## TODO OLD VERSION --> DELETE AFTER TESTS
+# def get_random_string(string_length, incl_symbols=False):
+# 	"""
+# 	Define the characters to include in the random string
+# 	Leave incl_symbols to False (no symbols in password) for easy copy paste
+# 	but make passwords etc. longer for security.
+# 	"""
+# 	symbols = '!@#$%&*()_+-=[]}{|;:<>/?'
+# 	characters = string.ascii_letters + string.digits
+# 	if incl_symbols:
+# 		characters += symbols
+# 	# Generate a random string of the specified length
+# 	rand_str = ''.join(random.choice(characters) for _ in range(string_length))
+# 	return rand_str
 
 
 def set_setup_dir_rights():

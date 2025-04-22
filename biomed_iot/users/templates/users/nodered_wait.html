@@ -2,17 +2,19 @@
 {% load static %}
 
 {% block content %}
-<div class="alert alert-info text-center d-flex justify-content-center align-items-center" role="alert" style="flex-direction: column;">
-    <p>Setting up Node-RED. Please wait, this may take up to a minute...</p>
-    <div class="spinner-border" role="status">
-        <span class="sr-only"></span>
-    </div>
-</div>
-{% endblock %}
+  <div
+    id="nodered-wait"
+    data-status-url="{% url 'nodered-status-check' %}"
+    data-manager-url="{% url 'nodered-manager' %}"
+    class="alert alert-info text-center d-flex justify-content-center align-items-center"
+    style="flex-direction: column;"
+  >
 
-{% block extra_css %}
+    <p>Setting up Node-RED. Please wait, this may take up to a minute...</p>
+    <div class="spinner-border" role="status"><span class="sr-only"></span></div>
+  </div>
 {% endblock %}
 
 {% block extra_js %}
-    <script src="{% static 'js/custom/nodered_wait_scripts.js' %}"></script>
+  <script src="{% static 'js/custom/nodered_wait_scripts.js' %}"></script>
 {% endblock %}
