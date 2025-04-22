@@ -74,6 +74,7 @@ def run_bash(command, show_output=True):
 			stdout=subprocess.PIPE,
 			stderr=subprocess.STDOUT,
 			text=True,
+			bufsize=1
 		)
 		stdout = ''
 		while True:
@@ -81,21 +82,20 @@ def run_bash(command, show_output=True):
 			if output == '' and process.poll() is not None:
 				break
 			if output:
-				print(output.strip())
+				print(output, end='')  # Keep original formatting
 				stdout += output
 		exit_code = process.poll()
 		if exit_code == 0:
-			return stdout.strip()
+			return stdout
 		else:
-			return f'Error executing command: {command}\nOutput:\n{stdout.strip()}\n'
+			return f'Error executing command: {command}\nOutput:\n{stdout}'
 	else:
 		try:
 			result = subprocess.run(command, shell=True, check=True, capture_output=True, text=True)
-			# Return the standard output of the command
-			return result.stdout.strip()
+			return result.stdout
 		except subprocess.CalledProcessError as e:
-			# Return the standard error output, which is captured in stdout due to redirect
-			return f'Error executing command: {e.cmd}\nOutput:\n{e.stdout.strip()}\n'
+			return f'Error executing command: {e.cmd}\nOutput:\n{e.stdout}'
+
 
 
 def get_random_string(length, incl_symbols=False):
