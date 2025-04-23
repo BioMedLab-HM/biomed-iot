@@ -1,11 +1,5 @@
 #!/bin/sh
 
-# TODO: 
-# - Ergänzungen bei Gunicorn?
-# - location /media/ ...
-# - ggf. Grafana?
-# - weitere Dienste?
-
 # Not using TLS encryption is not recommended but may be considered when security is less important and 
 # system ressources are limited (e.g. on older Raspberry Pi)
 
@@ -18,7 +12,7 @@ cat << EOF
 server {
     listen 80;
     listen [::]:80;
-    server_name $IP_ADDRESS $MACHINE_NAME;
+        server_name $IP_ADDRESS $MACHINE_NAME;
 
     location = /favicon.ico { access_log off; log_not_found off; }
 

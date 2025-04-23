@@ -74,7 +74,6 @@ def run_bash(command, show_output=True):
 			stdout=subprocess.PIPE,
 			stderr=subprocess.STDOUT,
 			text=True,
-			bufsize=1
 		)
 		stdout = ''
 		while True:
@@ -82,19 +81,21 @@ def run_bash(command, show_output=True):
 			if output == '' and process.poll() is not None:
 				break
 			if output:
-				print(output, end='')  # Keep original formatting
+				print(output.strip())
 				stdout += output
 		exit_code = process.poll()
 		if exit_code == 0:
-			return stdout
+			return stdout.strip()  # strip is used to remove trailing newlines
 		else:
-			return f'Error executing command: {command}\nOutput:\n{stdout}'
+			return f'Error executing command: {command}\nOutput:\n{stdout.strip()}\n'
 	else:
 		try:
 			result = subprocess.run(command, shell=True, check=True, capture_output=True, text=True)
-			return result.stdout
+			# Return the standard output of the command
+			return result.stdout.strip()
 		except subprocess.CalledProcessError as e:
-			return f'Error executing command: {e.cmd}\nOutput:\n{e.stdout}'
+			# Return the standard error output, which is captured in stdout due to redirect
+			return f'Error executing command: {e.cmd}\nOutput:\n{e.stdout.strip()}\n'
 
 
 
