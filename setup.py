@@ -388,8 +388,7 @@ def main():
         architecture,
         setup_scheme,
         ip_address,
-        domain,
-        django_admin_email
+        domain
         )
     print('Grafana installed')
     log('Grafana installed')
