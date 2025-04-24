@@ -434,6 +434,9 @@ def main():
         config_path = get_conf_path()
         create_gateway_setup_zip_file(config_path)
 
+    # Delete the tmp directory itself and its contents using the 'rm -rf' command
+    run_bash(f'rm -rf {setup_dir}/setup_files/tmp', show_output=False)
+
     set_setup_dir_rights()
 
 
@@ -460,6 +463,7 @@ def main():
 
 
     """ FINAL INFORMATION OUTPUT """
+
     print('\n\n\n\n____________________________')
     print('\n\nThe setup of Biomed IoT has completed in\n' f'{num_minutes} min and {num_seconds} s.')
 
@@ -482,7 +486,6 @@ def main():
     print(
         '\nFor detailed information on the installation process, '
         f'please refer to the log files located in {setup_dir}/setup_files/setup_logs.\n'
-        f"You can delete the directory 'tmp' in '{setup_dir}/setup_files/'"
         "\nTo make everything work, please reboot your machine with 'sudo reboot'"
     )
 
