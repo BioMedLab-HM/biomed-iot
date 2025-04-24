@@ -17,11 +17,12 @@ from django.http import HttpResponse, JsonResponse, Http404
 from django.db import IntegrityError
 from django.db import transaction
 from .models import NodeRedUserData, CustomUser, Profile  # noqa: F401
-from .forms import UserRegisterForm, UserUpdateForm, UserLoginForm, MqttClientForm, DeleteDataForm
+from .forms import UserRegisterForm, UserUpdateForm, UserLoginForm, MqttClientForm, SelectDataForm
 from .services.mosquitto_utils import MqttMetaDataManager, MqttClientManager, RoleType
 from .services.nodered_utils import NoderedContainer, update_nodered_nginx_conf
 from .services.code_loader import load_code_examples, load_nodered_flow_examples
 from .services.email_templates import registration_confirmation_email
+from .services.influx_data_utils import InfluxDataManager, to_rfc3339
 from biomed_iot.config_loader import config
 from revproxy.views import ProxyView
 # For classed based login view, remove comment after tests
@@ -605,76 +606,72 @@ def access_nodered(request):
 
 @login_required
 def manage_data(request):
-    def get_measurements():
-        bucket_name = request.user.influxuserdata.bucket_name
-        url = f"http://{config.influxdb.INFLUX_HOST}:{config.influxdb.INFLUX_PORT}"
-        token = request.user.influxuserdata.bucket_token
-        org_id = config.influxdb.INFLUX_ORG_ID
+    """
+    Render the form for selecting measurement / tags / time range.
+    All data-changing actions (download, delete) are handled by their
+    own endpoints and reached via the <form> buttons’ `formaction`.
+    """
+    if request.method != "GET":
+        return redirect("manage-data")        # guard against accidental POSTs
 
-        # Create a client and query to fetch measurements
-        client = InfluxDBClient(url=url, token=token, org=org_id)
-        query_api = client.query_api()
-        query = f'''
-        from(bucket: "{bucket_name}")
-        |> range(start: 1970-01-01T00:00:00Z)
-        |> keep(columns: ["_measurement"])
-        |> distinct(column: "_measurement")
-        '''
+    dm   = InfluxDataManager(request.user)
+    form = SelectDataForm(dm.list_measurements())
 
-        result = query_api.query(query=query)
+    return render(
+        request,
+        "users/manage_data.html",
+        {"title": "Manage Measurement Data", "form": form},
+    )
 
-        # Flatten output tables into list of measurements
-        measurements = [row.values["_value"] for table in result for row in table]
 
-        client.close()
-        return measurements
+@login_required
+def delete_data(request):
+    """POST endpoint that deletes matching data, then redirects back."""
+    if request.method != "POST":
+        return redirect("manage-data")
 
-    if request.method == 'POST':
-        form = DeleteDataForm(get_measurements(), request.POST)
-        if form.is_valid():
-            measurement = form.cleaned_data["measurement"]
-            tags = form.cleaned_data["tags"]
-            start_time = form.cleaned_data["start_time"]
-            end_time = form.cleaned_data["end_time"]
+    dm   = InfluxDataManager(request.user)
+    form = SelectDataForm(dm.list_measurements(), request.POST)
+    if not form.is_valid():
+        messages.error(request, "Invalid parameters – please correct the form.")
+        return redirect("manage-data")
 
-            # Build the predicate string based on tags
-            tags_predicate = " AND ".join([f'{key}="{value}"' for key, value in tags.items()])
-            predicate = f'_measurement="{measurement}"'
-            if tags:
-                predicate += f" AND {tags_predicate}"
+    ok = dm.delete(
+        measurement=form.cleaned_data["measurement"],
+        tags=form.cleaned_data["tags"],
+        start_iso=to_rfc3339(form.cleaned_data["start_time"]),
+        stop_iso=to_rfc3339(form.cleaned_data["end_time"]),
+    )
+    messages.success(request, "Delete completed." if ok else "Delete failed.")
+    return redirect("manage-data")
 
-            # Prepare data for the delete request
-            delete_data = {
-                'start': start_time,
-                'stop': end_time,
-                'predicate': predicate
-            }
 
-            # Configure the request to InfluxDB
-            url = f"http://{config.influxdb.INFLUX_HOST}:{config.influxdb.INFLUX_PORT}"
-            org_id = config.influxdb.INFLUX_ORG_ID
-            bucket_name = request.user.influxuserdata.bucket_name
-            bucket_token = request.user.influxuserdata.bucket_token
-            delete_url = f'{url}/api/v2/delete?org={org_id}&bucket={bucket_name}'
-            delete_headers = {'Authorization': f'Token {bucket_token}', 'Content-Type': 'application/json'}
+@login_required
+def download_data(request):
+    """POST endpoint for exporting data as zipped CSV."""
+    if request.method != "POST":
+        return redirect("manage-data")
 
-            # Execute the delete request
-            response = requests.post(delete_url, headers=delete_headers, json=delete_data)
-            if response.status_code == 204:
-                messages.success(request, 'Delete command completed successfully. Any existing data matching your '
-                                 + 'criteria has been removed.')
-            else:
-                messages.error(request, f'Failed to delete data: {response.text}')
-            return redirect('manage-data')
-    else:
-        form = DeleteDataForm(get_measurements())
+    idm = InfluxDataManager(request.user)
+    form = SelectDataForm(idm.list_measurements(), request.POST)
+    if not form.is_valid():
+        messages.error(request, "Invalid parameters – please correct the form.")
+        return redirect("manage-data")
 
-    context = {
-        'title': 'Manage Data',
-        'form': form,
-        'thin_navbar': False
-    }
-    return render(request, 'users/manage_data.html', context)
+    try:
+        zip_bytes, zip_name = idm.export(
+            measurement=form.cleaned_data["measurement"],
+            tags=form.cleaned_data["tags"],
+            start_iso=to_rfc3339(form.cleaned_data["start_time"]),
+            stop_iso=to_rfc3339(form.cleaned_data["end_time"]),
+        )
+    except ValueError:
+        messages.warning(request, "No data matches your query – nothing to download.")
+        return redirect("manage-data")
+
+    response = HttpResponse(zip_bytes, content_type="application/zip")
+    response["Content-Disposition"] = f'attachment; filename="{zip_name}"'
+    return response
 
 
 @login_required

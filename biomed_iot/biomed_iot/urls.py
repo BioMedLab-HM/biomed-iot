@@ -48,6 +48,8 @@ urlpatterns = [
     path('access-nodered/', user_views.access_nodered, name='access-nodered'),  # access-nodered/<str:token>/
 
     path('manage-data/', user_views.manage_data, name='manage-data'),
+    path('delete-data/', user_views.delete_data, name='delete-data'),
+    path("download-data/", user_views.download_data, name="download-data"),
 
     path('visualize/', user_views.visualize, name='visualize'),
     path('get-grafana/', user_views.get_grafana, name='get-grafana'),
