@@ -1,14 +1,14 @@
 """
-High-level data operations (read / delete / export) for a single user bucket.
+High-level data operations (read / delete / export_stream) for a single user bucket.
 """
 
 from __future__ import annotations
 
 import csv
 import io
-import zipfile
+# import zipfile
 from datetime import datetime
-from typing import Dict, List, Tuple
+from typing import Iterator, Dict, Any, Tuple, List
 
 import requests
 from influxdb_client import InfluxDBClient
@@ -40,63 +40,150 @@ class InfluxDataManager:
 
     # ─────────────────────────── Private helpers ────────────────────────────
     def _client(self) -> InfluxDBClient:
-        return InfluxDBClient(url=self.url, token=self.token, org=self.org_id)
+        return InfluxDBClient(
+            url=self.url,
+            token=self.token,
+            org=self.org_id,
+            timeout=300_000  # e.g. 5 minutes = 300_000 ms
+        )
 
     # services/influx_data_utils.py  (replace the helper)
 
     @staticmethod
-    def _flatten_tables(tables) -> List[dict]:
+    def _flatten_tables(flux_tables) -> List[Dict[str, Any]]:
         """
-        Convert Flux tables to list[dict] while stripping Flux-meta columns
-        and any tag keys you don't want (e.g. 'fieldname').
+        Convert a sequence of Flux tables into a flat list of row-dicts,
+        stripping out Flux metadata and underscore-prefixed keys.
         """
-        SKIP = {"result", "table"}          # Flux meta cols
-        rows = []
-        for table in tables:
-            for rec in table:
-                row = {
-                    "_time":  rec.get_time().isoformat(),
-                    "_field": rec["_field"],
-                    "_value": rec["_value"],
+        METADATA_COLUMNS = {"result", "table"}
+        flat_rows: List[Dict[str, Any]] = []
+
+        for table in flux_tables:
+            for record in table:
+                # base fields every row will have
+                row: Dict[str, Any] = {
+                    "time":  record.get_time().isoformat(),
+                    "field": record["_field"],
+                    "value": record["_value"],
                 }
-                for k, v in rec.values.items():
-                    if k in SKIP or k.startswith("_"):
+
+                # include any non-meta, non-underscore tags/columns
+                for column_name, column_value in record.values.items():
+                    if column_name in METADATA_COLUMNS or column_name.startswith("_"):
                         continue
-                    row[k] = v
-                rows.append(row)
-        return rows
+                    row[column_name] = column_value
 
+                flat_rows.append(row)
 
-    @staticmethod
-    def _csv_zip(records: List[dict], measurement: str) -> Tuple[bytes, str]:
-        """Return (zip-bytes, filename)."""
-        fieldnames = sorted(records[0].keys())
-        buf_csv = io.StringIO()
-        cw = csv.DictWriter(buf_csv, fieldnames=fieldnames)
-        cw.writeheader()
-        cw.writerows(records)
+        return flat_rows
 
-        ts = datetime.now().strftime("%Y-%m-%d_%H:%M:%S")
-        # ts = timezone.now().strftime("%Y%m%d%H%M%S")
-        zip_name = f"measurement_{measurement}_{ts}.zip"
-        buf_zip = io.BytesIO()
-        with zipfile.ZipFile(buf_zip, "w", zipfile.ZIP_DEFLATED) as zf:
-            zf.writestr(f"measurement_{measurement}_{ts}.csv", buf_csv.getvalue())
-        buf_zip.seek(0)
-        return buf_zip.read(), zip_name
+    def export_stream(
+        self,
+        measurement: str,
+        tag_filters: Dict[str, str],
+        start_iso: str,
+        stop_iso: str,
+        ) -> Tuple[Iterator[bytes], str]:
+        """
+        Stream query results as CSV lines. Returns (csv_byte_iterator, filename).
+        """
+        # build Flux filter predicate
+        filter_clauses = [
+            f'r["{tag_name}"]=="{tag_value}"'
+            for tag_name, tag_value in tag_filters.items()
+        ]
+        measurement_predicate = f'r["_measurement"]=="{measurement}"'
+        full_predicate = " and ".join([measurement_predicate] + filter_clauses)
+
+        flux = f"""
+from(bucket:"{self.bucket}")
+  |> range(start:{start_iso}, stop:{stop_iso})
+  |> filter(fn:(r) => {full_predicate})
+"""
+
+        client = self._client()
+        record_stream = client.query_api().query_stream(flux)
+
+        timestamp = datetime.now().strftime("%Y-%m-%d_%H-%M-%S")
+        filename = f"measurement_{measurement}_{timestamp}.csv"
+
+        return self._row_generator(record_stream), filename
+
+    def _row_generator(self, record_stream: Iterator[Any]) -> Iterator[bytes]:
+        """
+        Take an iterator of FluxRecord, flatten each to a dict,
+        write CSV header on first row, then yield each row as UTF-8 bytes.
+        """
+        buffer = io.StringIO()
+        csv_writer: csv.DictWriter | None = None
+        header_fields: list[str] | None = None
+
+        for record in record_stream:
+            # flatten a single FluxRecord to a simple dict
+            row: Dict[str, Any] = {
+                "time": record.get_time().isoformat(),
+                "field":     record["_field"],
+                "value":     record["_value"],
+            }
+            for key, value in record.values.items():
+                if key in {"result", "table"} or key.startswith("_"):
+                    continue
+                row[key] = value
+
+            # initialize writer & header on first row
+            if header_fields is None:
+                header_fields = sorted(row.keys())
+                csv_writer = csv.DictWriter(buffer, fieldnames=header_fields)
+                csv_writer.writeheader()
+                yield buffer.getvalue().encode("utf-8")
+                buffer.seek(0); buffer.truncate(0)
+
+            # write the current row and yield bytes
+            csv_writer.writerow(row)  # type: ignore
+            yield buffer.getvalue().encode("utf-8")
+            buffer.seek(0); buffer.truncate(0)
+
+        # no records at all?
+        if header_fields is None:
+            raise ValueError("No matching points")
+
+    # @staticmethod
+    # def _csv_zip(records: List[dict], measurement: str) -> Tuple[bytes, str]:
+    #     """Return (zip-bytes, filename)."""
+    #     fieldnames = sorted(records[0].keys())
+    #     buf_csv = io.StringIO()
+    #     cw = csv.DictWriter(buf_csv, fieldnames=fieldnames)
+    #     cw.writeheader()
+    #     cw.writerows(records)
+
+    #     ts = datetime.now().strftime("%Y-%m-%d_%H:%M:%S")
+    #     # ts = timezone.now().strftime("%Y%m%d%H%M%S")
+    #     zip_name = f"measurement_{measurement}_{ts}.zip"
+    #     buf_zip = io.BytesIO()
+    #     with zipfile.ZipFile(buf_zip, "w", zipfile.ZIP_DEFLATED) as zf:
+    #         zf.writestr(f"measurement_{measurement}_{ts}.csv", buf_csv.getvalue())
+    #     buf_zip.seek(0)
+    #     return buf_zip.read(), zip_name
+
 
     # ─────────────────────────── Public API ─────────────────────────────────
     def list_measurements(self) -> List[str]:
-        """Return all distinct measurement names for the user bucket."""
-        flux = f"""
+        """Return all distinct measurement names in this bucket."""
+        flux_query = f"""
 from(bucket:"{self.bucket}")
   |> range(start: 1970-01-01T00:00:00Z)
-  |> keep(columns:["_measurement"])
-  |> distinct(column:"_measurement")
+  |> keep(columns: ["_measurement"])
+  |> distinct(column: "_measurement")
 """
-        with self._client() as c:
-            res = c.query_api().query(flux)
-        return [row["_value"] for table in res for row in table]
+        with self._client() as client:
+            tables = client.query_api().query(flux_query)
+
+        # extract the measurement name from each row
+        measurements: List[str] = []
+        for table in tables:
+            for row in table:
+                measurements.append(row["_value"])
+        return measurements
 
     def delete(
         self,
@@ -104,48 +191,60 @@ from(bucket:"{self.bucket}")
         tags: Dict[str, str],
         start_iso: str,
         stop_iso: str,
-    ) -> bool:
-        """Delete records; return True on success."""
-        predicate_parts = [f'_measurement="{measurement}"'] + [
-            f'{k}="{v}"' for k, v in tags.items()
-        ]
-        predicate = " AND ".join(predicate_parts)
-
-        payload = {"start": start_iso, "stop": stop_iso, "predicate": predicate}
-        url = f"{self.url}/api/v2/delete?org={self.org_id}&bucket={self.bucket}"
-        resp = requests.post(
-            url,
-            headers={"Authorization": f"Token {self.token}", "Content-Type": "application/json"},
-            json=payload,
-        )
-        return resp.status_code == 204
-
-    def export(
-        self,
-        measurement: str,
-        tags: Dict[str, str],
-        start_iso: str,
-        stop_iso: str,
-    ) -> Tuple[bytes, str]:
+        ) -> bool:
         """
-        Query points → return ( zipped-csv bytes, filename ). Raises
-        ValueError when no points match.
+        Delete all points matching the given measurement, tags, and time range.
+        Returns True if the HTTP delete succeeded (204 status).
         """
-        tag_filters = " and ".join([f'r["{k}"]=="{v}"' for k, v in tags.items()])
-        fn_pred = f'r["_measurement"]=="{measurement}"' + (
-            f" and {tag_filters}" if tag_filters else ""
+        # build individual clauses like _measurement="foo" and tag1="bar"
+        clauses = [f'_measurement="{measurement}"']
+        for tag_key, tag_val in tags.items():
+            clauses.append(f'{tag_key}="{tag_val}"')
+        predicate = " AND ".join(clauses)
+
+        delete_payload = {
+            "start":     start_iso,
+            "stop":      stop_iso,
+            "predicate": predicate,
+        }
+        endpoint = f"{self.url}/api/v2/delete?org={self.org_id}&bucket={self.bucket}"
+        response = requests.post(
+            endpoint,
+            headers={
+                "Authorization": f"Token {self.token}",
+                "Content-Type":  "application/json",
+            },
+            json=delete_payload,
         )
 
-        flux = f"""
-from(bucket:"{self.bucket}")
-  |> range(start:{start_iso}, stop:{stop_iso})
-  |> filter(fn:(r)=>{fn_pred})
-"""
-        with self._client() as c:
-            tables = c.query_api().query(flux)
+        return response.status_code == 204
 
-        records = self._flatten_tables(tables)
-        if not records:
-            raise ValueError("No matching points")
+#     def export(
+#         self,
+#         measurement: str,
+#         tags: Dict[str, str],
+#         start_iso: str,
+#         stop_iso: str,
+#     ) -> Tuple[bytes, str]:
+#         """
+#         Query points → return ( zipped-csv bytes, filename ). Raises
+#         ValueError when no points match.
+#         """
+#         tag_filters = " and ".join([f'r["{k}"]=="{v}"' for k, v in tags.items()])
+#         fn_pred = f'r["_measurement"]=="{measurement}"' + (
+#             f" and {tag_filters}" if tag_filters else ""
+#         )
 
-        return self._csv_zip(records, measurement)
+#         flux = f"""
+# from(bucket:"{self.bucket}")
+#   |> range(start:{start_iso}, stop:{stop_iso})
+#   |> filter(fn:(r)=>{fn_pred})
+# """
+#         with self._client() as c:
+#             tables = c.query_api().query(flux)
+
+#         records = self._flatten_tables(tables)
+#         if not records:
+#             raise ValueError("No matching points")
+
+#         return self._csv_zip(records, measurement)

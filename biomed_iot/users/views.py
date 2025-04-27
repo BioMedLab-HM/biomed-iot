@@ -13,7 +13,7 @@ from django.core.exceptions import ObjectDoesNotExist
 from django.contrib.auth import login
 from django.shortcuts import render, redirect
 from django.contrib import messages
-from django.http import HttpResponse, JsonResponse, Http404
+from django.http import HttpResponse, JsonResponse, Http404, StreamingHttpResponse
 from django.db import IntegrityError
 from django.db import transaction
 from .models import NodeRedUserData, CustomUser, Profile  # noqa: F401
@@ -614,8 +614,8 @@ def manage_data(request):
     if request.method != "GET":
         return redirect("manage-data")        # guard against accidental POSTs
 
-    dm   = InfluxDataManager(request.user)
-    form = SelectDataForm(dm.list_measurements())
+    idm   = InfluxDataManager(request.user)
+    form = SelectDataForm(idm.list_measurements())
 
     return render(
         request,
@@ -630,13 +630,13 @@ def delete_data(request):
     if request.method != "POST":
         return redirect("manage-data")
 
-    dm   = InfluxDataManager(request.user)
-    form = SelectDataForm(dm.list_measurements(), request.POST)
+    idm   = InfluxDataManager(request.user)
+    form = SelectDataForm(idm.list_measurements(), request.POST)
     if not form.is_valid():
         messages.error(request, "Invalid parameters – please correct the form.")
         return redirect("manage-data")
 
-    ok = dm.delete(
+    ok = idm.delete(
         measurement=form.cleaned_data["measurement"],
         tags=form.cleaned_data["tags"],
         start_iso=to_rfc3339(form.cleaned_data["start_time"]),
@@ -648,7 +648,6 @@ def delete_data(request):
 
 @login_required
 def download_data(request):
-    """POST endpoint for exporting data as zipped CSV."""
     if request.method != "POST":
         return redirect("manage-data")
 
@@ -658,20 +657,53 @@ def download_data(request):
         messages.error(request, "Invalid parameters – please correct the form.")
         return redirect("manage-data")
 
+    measurement = form.cleaned_data["measurement"]
+    tags        = form.cleaned_data["tags"]
+    start_iso   = to_rfc3339(form.cleaned_data["start_time"])
+    stop_iso    = to_rfc3339(form.cleaned_data["end_time"])
+
     try:
-        zip_bytes, zip_name = idm.export(
-            measurement=form.cleaned_data["measurement"],
-            tags=form.cleaned_data["tags"],
-            start_iso=to_rfc3339(form.cleaned_data["start_time"]),
-            stop_iso=to_rfc3339(form.cleaned_data["end_time"]),
+        csv_stream, filename = idm.export_stream(
+            measurement=measurement,
+            tags=tags,
+            start_iso=start_iso,
+            stop_iso=stop_iso,
         )
     except ValueError:
         messages.warning(request, "No data matches your query – nothing to download.")
         return redirect("manage-data")
 
-    response = HttpResponse(zip_bytes, content_type="application/zip")
-    response["Content-Disposition"] = f'attachment; filename="{zip_name}"'
+    response = StreamingHttpResponse(csv_stream, content_type="text/csv")
+    response["Content-Disposition"] = f'attachment; filename="{filename}"'
     return response
+
+
+# @login_required
+# def download_data(request):
+#     """POST endpoint for exporting data as zipped CSV."""
+#     if request.method != "POST":
+#         return redirect("manage-data")
+
+#     idm = InfluxDataManager(request.user)
+#     form = SelectDataForm(idm.list_measurements(), request.POST)
+#     if not form.is_valid():
+#         messages.error(request, "Invalid parameters – please correct the form.")
+#         return redirect("manage-data")
+
+#     try:
+#         zip_bytes, zip_name = idm.export(
+#             measurement=form.cleaned_data["measurement"],
+#             tags=form.cleaned_data["tags"],
+#             start_iso=to_rfc3339(form.cleaned_data["start_time"]),
+#             stop_iso=to_rfc3339(form.cleaned_data["end_time"]),
+#         )
+#     except ValueError:
+#         messages.warning(request, "No data matches your query – nothing to download.")
+#         return redirect("manage-data")
+
+#     response = HttpResponse(zip_bytes, content_type="application/zip")
+#     response["Content-Disposition"] = f'attachment; filename="{zip_name}"'
+#     return response
 
 
 @login_required
