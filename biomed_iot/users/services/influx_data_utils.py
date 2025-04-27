@@ -77,38 +77,6 @@ class InfluxDataManager:
 
         return flat_rows
 
-    def export_stream(
-        self,
-        measurement: str,
-        tag_filters: Dict[str, str],
-        start_iso: str,
-        stop_iso: str,
-        ) -> Tuple[Iterator[bytes], str]:
-        """
-        Stream query results as CSV lines. Returns (csv_byte_iterator, filename).
-        """
-        # build Flux filter predicate
-        filter_clauses = [
-            f'r["{tag_name}"]=="{tag_value}"'
-            for tag_name, tag_value in tag_filters.items()
-        ]
-        measurement_predicate = f'r["_measurement"]=="{measurement}"'
-        full_predicate = " and ".join([measurement_predicate] + filter_clauses)
-
-        flux = f"""
-from(bucket:"{self.bucket}")
-  |> range(start:{start_iso}, stop:{stop_iso})
-  |> filter(fn:(r) => {full_predicate})
-"""
-
-        client = self._client()
-        record_stream = client.query_api().query_stream(flux)
-
-        timestamp = datetime.now().strftime("%Y-%m-%d_%H-%M-%S")
-        filename = f"measurement_{measurement}_{timestamp}.csv"
-
-        return self._row_generator(record_stream), filename
-
     def _row_generator(self, record_stream: Iterator[Any]) -> Iterator[bytes]:
         """
         Take an iterator of FluxRecord, flatten each to a dict,
@@ -218,6 +186,38 @@ from(bucket:"{self.bucket}")
         )
 
         return response.status_code == 204
+
+    def export_stream(
+        self,
+        measurement: str,
+        tags: Dict[str, str],
+        start_iso: str,
+        stop_iso: str,
+        ) -> Tuple[Iterator[bytes], str]:
+        """
+        Stream query results as CSV lines. Returns (csv_byte_iterator, filename).
+        """
+        # build Flux filter predicate
+        filter_clauses = [
+            f'r["{tag_name}"]=="{tag_value}"'
+            for tag_name, tag_value in tags.items()
+        ]
+        measurement_predicate = f'r["_measurement"]=="{measurement}"'
+        full_predicate = " and ".join([measurement_predicate] + filter_clauses)
+
+        flux = f"""
+from(bucket:"{self.bucket}")
+  |> range(start:{start_iso}, stop:{stop_iso})
+  |> filter(fn:(r) => {full_predicate})
+"""
+
+        client = self._client()
+        record_stream = client.query_api().query_stream(flux)
+
+        timestamp = datetime.now().strftime("%Y-%m-%d_%H-%M-%S")
+        filename = f"measurement_{measurement}_{timestamp}.csv"
+
+        return self._row_generator(record_stream), filename
 
 #     def export(
 #         self,
