@@ -98,6 +98,8 @@ urlpatterns = [
     # path('set_timezone/', user_views.set_timezone, name='set_timezone'),
 
     path('', include('core.urls')),
+
+    path("ajax/tags/", user_views.ajax_get_tags, name="ajax_get_tags"),
 ]
 
 if settings.DEBUG:

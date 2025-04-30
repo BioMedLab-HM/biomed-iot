@@ -5,6 +5,7 @@ from datetime import datetime, timedelta
 # from django.contrib.auth.models import User
 from django.contrib.auth.forms import UserCreationForm, AuthenticationForm
 from .models import Profile, CustomUser
+from .services.influx_data_utils import InfluxDataManager
 from django.utils.translation import gettext_lazy as _
 
 
@@ -44,17 +45,15 @@ class ProfileUpdateForm(forms.ModelForm):
 class MqttClientForm(forms.Form):
     textname = forms.CharField(label='Device Name', max_length=30, required=True)
 
-
 class SelectDataForm(forms.Form):
     measurement = forms.ChoiceField(label="Select Measurement", required=True)
-    tags = forms.CharField(label='Tags', max_length=1000, required=False, help_text="Example: fieldname=temperature,fieldname=humidity (deletes all values for the fields 'temperature' and 'humidity' from the selected measurement)")
     start_time = forms.DateTimeField(
         label='Start Time',
         input_formats=['%Y-%m-%d %H:%M:%S'],  # User-friendly input format
         required=True,
         initial='1970-01-01 00:00:00',
         help_text='Format: yyyy-MM-dd hh:mm:ss'
-    )
+        )
     end_time = forms.DateTimeField(
         label='End Time',
         input_formats=['%Y-%m-%d %H:%M:%S'],  # User-friendly input format
@@ -63,32 +62,49 @@ class SelectDataForm(forms.Form):
         # initial=lambda: datetime.now().replace(hour=23, minute=59, second=59).strftime("%Y-%m-%d %H:%M:%S"),
         initial=lambda: (datetime.now() + timedelta(days=1)).strftime("%Y-%m-%d %H:%M:%S"),
         help_text='Format: yyyy-MM-dd hh:mm:ss'
+        )
+    tags = forms.MultipleChoiceField(
+        label = "Tags (Use tags to select only the tagged data points. Leave empty to select the entire measurement.)",
+        required=False,
+        widget=forms.SelectMultiple,
+        help_text="Select one or more (key=value).",
     )
 
     def __init__(self, measurements_choices, *args, **kwargs):
-        super(SelectDataForm, self).__init__(*args, **kwargs)
-        # Ensure measurement names are displayed as they are
-        self.fields['measurement'].choices = [(m, m) for m in measurements_choices]
+        user = kwargs.pop("user")            # pass request.user into the form
+        super().__init__(*args, **kwargs)
+
+        # measurement placeholder + real choices
+        placeholder = [("", "-- Select Measurement --")]
+        self.fields["measurement"].choices = placeholder + [(m, m) for m in measurements_choices]
+        self.fields["measurement"].initial = ""
+
+        # tags start empty; if form is bound with a measurement, pre-populate
+        self.fields["tags"].choices = []
+        meas = self.data.get("measurement") or self.initial.get("measurement")
+        if meas:
+            mgr = InfluxDataManager(user)
+            pairs = mgr.list_tag_pairs(meas)
+            self.fields["tags"].choices = [(p, p) for p in pairs]
+
+    def clean_measurement(self):
+        val = self.cleaned_data["measurement"]
+        if not val:
+            raise forms.ValidationError("You must select a measurement.")
+        return val
 
     def clean_tags(self):
-        tags_string = self.cleaned_data['tags']
-        if not tags_string:
-            return {}
-
-        # Regex to match 'key=value' where key and value cannot be empty
-        tag_pattern = re.compile(r'^\s*([^=\s]+)\s*=\s*([^=\s]+)\s*$')
-        tags_dict = {}
-        tag_pairs = tags_string.split(',')
-
-        for pair in tag_pairs:
-            match = tag_pattern.match(pair)
-            if not match:
-                raise forms.ValidationError(f"Tag format error in '{pair}'. Ensure format is 'key=value' "
-                                            "with no empty key or value.")
-            key, value = match.groups()
-            tags_dict[key] = value
-
-        return tags_dict
+        """
+        Convert ['key=val',...] into {'key':'val',...}.
+        """
+        raw = self.cleaned_data["tags"]
+        out: dict[str,str] = {}
+        for pair in raw:
+            if "=" not in pair:
+                raise forms.ValidationError(f"Bad tag: {pair!r}")
+            k, v = pair.split("=", 1)
+            out[k] = v
+        return out
 
     def clean_start_time(self):
         start_time = self.cleaned_data['start_time']
@@ -97,6 +113,82 @@ class SelectDataForm(forms.Form):
     def clean_end_time(self):
         end_time = self.cleaned_data['end_time']
         return end_time.strftime('%Y-%m-%dT%H:%M:%SZ')
+
+# class SelectDataForm(forms.Form):
+#     measurement = forms.ChoiceField(
+#         label="Select Measurement",
+#         required=True
+#         )
+#     tags = forms.CharField(
+#         label='Tags (Optional Advanced Feature!)',
+#         max_length=1000,
+#         required=False,
+#         help_text="Example: fieldname=temperature,fieldname=humidity -> selects values (not columns) for the fields 'temperature' and 'humidity' from the selected measurement."
+#         )
+#     start_time = forms.DateTimeField(
+#         label='Start Time',
+#         input_formats=['%Y-%m-%d %H:%M:%S'],  # User-friendly input format
+#         required=True,
+#         initial='1970-01-01 00:00:00',
+#         help_text='Format: yyyy-MM-dd hh:mm:ss'
+#         )
+#     end_time = forms.DateTimeField(
+#         label='End Time',
+#         input_formats=['%Y-%m-%d %H:%M:%S'],  # User-friendly input format
+#         required=True,
+#         # initial=datetime.now().strftime("%Y-%m-%d %H:%M:%S"),
+#         # initial=lambda: datetime.now().replace(hour=23, minute=59, second=59).strftime("%Y-%m-%d %H:%M:%S"),
+#         initial=lambda: (datetime.now() + timedelta(days=1)).strftime("%Y-%m-%d %H:%M:%S"),
+#         help_text='Format: yyyy-MM-dd hh:mm:ss'
+#         )
+
+#     def __init__(self, measurements_choices, *args, **kwargs):
+#         super().__init__(*args, **kwargs)
+
+#         # 1) define your placeholder label
+#         placeholder = "-- Select Measurement --"
+
+#         # 2) build choices with a blank first entry
+#         blank_choice = [("", placeholder)]
+#         actual_choices = [(m, m) for m in measurements_choices]
+#         self.fields['measurement'].choices = blank_choice + actual_choices
+
+#         # 3) ensure the blank is selected by default
+#         self.fields['measurement'].initial = ""
+
+#     def clean_measurement(self):
+#         data = self.cleaned_data['measurement']
+#         if not data:
+#             raise forms.ValidationError("You must select a measurement.")
+#         return data
+
+#     def clean_tags(self):
+#         tags_string = self.cleaned_data['tags']
+#         if not tags_string:
+#             return {}
+
+#         # Regex to match 'key=value' where key and value cannot be empty
+#         tag_pattern = re.compile(r'^\s*([^=\s]+)\s*=\s*([^=\s]+)\s*$')
+#         tags_dict = {}
+#         tag_pairs = tags_string.split(',')
+
+#         for pair in tag_pairs:
+#             match = tag_pattern.match(pair)
+#             if not match:
+#                 raise forms.ValidationError(f"Tag format error in '{pair}'. Ensure format is 'key=value' "
+#                                             "with no empty key or value.")
+#             key, value = match.groups()
+#             tags_dict[key] = value
+
+#         return tags_dict
+
+#     def clean_start_time(self):
+#         start_time = self.cleaned_data['start_time']
+#         return start_time.strftime('%Y-%m-%dT%H:%M:%SZ')
+
+#     def clean_end_time(self):
+#         end_time = self.cleaned_data['end_time']
+#         return end_time.strftime('%Y-%m-%dT%H:%M:%SZ')
 
 
 # class MqttClientForm(forms.ModelForm):

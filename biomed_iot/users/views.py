@@ -1,11 +1,11 @@
 import os
 import jwt
-from datetime import datetime, timedelta, timezone
-import requests
 import secrets
 import json
 import logging
 import mimetypes
+from datetime import datetime, timedelta, timezone
+from itertools import chain
 from influxdb_client import InfluxDBClient
 from django.contrib.auth.decorators import login_required
 from django.utils.decorators import method_decorator
@@ -14,6 +14,7 @@ from django.contrib.auth import login
 from django.shortcuts import render, redirect
 from django.contrib import messages
 from django.http import HttpResponse, JsonResponse, Http404, StreamingHttpResponse
+from django.http import HttpResponseBadRequest
 from django.db import IntegrityError
 from django.db import transaction
 from .models import NodeRedUserData, CustomUser, Profile  # noqa: F401
@@ -606,22 +607,37 @@ def access_nodered(request):
 
 @login_required
 def manage_data(request):
-    """
-    Render the form for selecting measurement / tags / time range.
-    All data-changing actions (download, delete) are handled by their
-    own endpoints and reached via the <form> buttons’ `formaction`.
-    """
-    if request.method != "GET":
-        return redirect("manage-data")        # guard against accidental POSTs
+    # 1) build the InfluxDataManager for the current user
+    idm = InfluxDataManager(request.user)
+    measurements = idm.list_measurements()
 
-    idm   = InfluxDataManager(request.user)
-    form = SelectDataForm(idm.list_measurements())
+    # 2) instantiate the form, always passing user=request.user
+    if request.method == "POST":
+        form = SelectDataForm(measurements, request.POST, user=request.user)
+    else:
+        form = SelectDataForm(measurements, user=request.user)
 
-    return render(
-        request,
-        "users/manage_data.html",
-        {"title": "Manage Measurement Data", "form": form},
-    )
+    return render(request, "users/manage_data.html", {
+        "title": "Manage Measurement Data",
+        "form": form,
+    })
+# def manage_data(request):
+#     """
+#     Render the form for selecting measurement / tags / time range.
+#     All data-changing actions (download, delete) are handled by their
+#     own endpoints and reached via the <form> buttons’ `formaction`.
+#     """
+#     if request.method != "GET":
+#         return redirect("manage-data")        # guard against accidental POSTs
+
+#     idm   = InfluxDataManager(request.user)
+#     form = SelectDataForm(idm.list_measurements())
+
+#     return render(
+#         request,
+#         "users/manage_data.html",
+#         {"title": "Manage Measurement Data", "form": form},
+#     )
 
 
 @login_required
@@ -630,8 +646,9 @@ def delete_data(request):
     if request.method != "POST":
         return redirect("manage-data")
 
-    idm   = InfluxDataManager(request.user)
-    form = SelectDataForm(idm.list_measurements(), request.POST)
+    idm = InfluxDataManager(request.user)
+    # ← pass user into the form
+    form = SelectDataForm(idm.list_measurements(), request.POST, user=request.user)
     if not form.is_valid():
         messages.error(request, "Invalid parameters – please correct the form.")
         return redirect("manage-data")
@@ -651,8 +668,8 @@ def download_data(request):
     if request.method != "POST":
         return redirect("manage-data")
 
-    idm = InfluxDataManager(request.user)
-    form = SelectDataForm(idm.list_measurements(), request.POST)
+    idm  = InfluxDataManager(request.user)
+    form = SelectDataForm(idm.list_measurements(), request.POST, user=request.user)
     if not form.is_valid():
         messages.error(request, "Invalid parameters – please correct the form.")
         return redirect("manage-data")
@@ -669,13 +686,28 @@ def download_data(request):
             start_iso=start_iso,
             stop_iso=stop_iso,
         )
+        # Peek at the first chunk so we can catch “no data” here
+        first_chunk = next(csv_stream)
     except ValueError:
-        messages.warning(request, "No data matches your query – nothing to download.")
+        messages.warning(request, "No data in this time range – nothing to download.")
         return redirect("manage-data")
 
-    response = StreamingHttpResponse(csv_stream, content_type="text/csv")
+    # Re‐chain the first chunk back onto the rest of the stream
+    safe_stream = chain([first_chunk], csv_stream)
+
+    response = StreamingHttpResponse(safe_stream, content_type="text/csv")
     response["Content-Disposition"] = f'attachment; filename="{filename}"'
     return response
+
+
+@login_required
+def ajax_get_tags(request):
+    measurement = request.GET.get("measurement")
+    if not measurement:
+        return HttpResponseBadRequest("Missing measurement parameter")
+    manager = InfluxDataManager(request.user)
+    pairs = manager.list_tag_pairs(measurement)
+    return JsonResponse({"tags": pairs})
 
 
 # @login_required

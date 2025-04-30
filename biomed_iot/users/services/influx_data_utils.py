@@ -1,18 +1,16 @@
 """
-High-level data operations (read / delete / export_stream) for a single user bucket.
+High-level data operations (read / delete / export) for a single user bucket/measurement.
 """
 
 from __future__ import annotations
 
 import csv
 import io
-# import zipfile
+import requests
 from datetime import datetime
 from typing import Iterator, Dict, Any, Tuple, List
-
-import requests
 from influxdb_client import InfluxDBClient
-
+from influxdb_client.client.flux_table import FluxTable
 from biomed_iot.config_loader import config
 
 
@@ -102,36 +100,25 @@ class InfluxDataManager:
             if header_fields is None:
                 header_fields = sorted(row.keys())
                 csv_writer = csv.DictWriter(buffer, fieldnames=header_fields)
-                csv_writer.writeheader()
+                # build a mapping of field → header label, adding " (tag)" for non-core fields
+                header_labels = {
+                    key: key if key in ("time", "field", "value")
+                         else f"{key} (tag)"
+                    for key in header_fields
+                }
+                # write custom header row
+                csv_writer.writerow(header_labels)
                 yield buffer.getvalue().encode("utf-8")
                 buffer.seek(0); buffer.truncate(0)
 
             # write the current row and yield bytes
-            csv_writer.writerow(row)  # type: ignore
+            csv_writer.writerow(row)
             yield buffer.getvalue().encode("utf-8")
             buffer.seek(0); buffer.truncate(0)
 
         # no records at all?
         if header_fields is None:
             raise ValueError("No matching points")
-
-    # @staticmethod
-    # def _csv_zip(records: List[dict], measurement: str) -> Tuple[bytes, str]:
-    #     """Return (zip-bytes, filename)."""
-    #     fieldnames = sorted(records[0].keys())
-    #     buf_csv = io.StringIO()
-    #     cw = csv.DictWriter(buf_csv, fieldnames=fieldnames)
-    #     cw.writeheader()
-    #     cw.writerows(records)
-
-    #     ts = datetime.now().strftime("%Y-%m-%d_%H:%M:%S")
-    #     # ts = timezone.now().strftime("%Y%m%d%H%M%S")
-    #     zip_name = f"measurement_{measurement}_{ts}.zip"
-    #     buf_zip = io.BytesIO()
-    #     with zipfile.ZipFile(buf_zip, "w", zipfile.ZIP_DEFLATED) as zf:
-    #         zf.writestr(f"measurement_{measurement}_{ts}.csv", buf_csv.getvalue())
-    #     buf_zip.seek(0)
-    #     return buf_zip.read(), zip_name
 
 
     # ─────────────────────────── Public API ─────────────────────────────────
@@ -219,32 +206,57 @@ from(bucket:"{self.bucket}")
 
         return self._row_generator(record_stream), filename
 
-#     def export(
-#         self,
-#         measurement: str,
-#         tags: Dict[str, str],
-#         start_iso: str,
-#         stop_iso: str,
-#     ) -> Tuple[bytes, str]:
-#         """
-#         Query points → return ( zipped-csv bytes, filename ). Raises
-#         ValueError when no points match.
-#         """
-#         tag_filters = " and ".join([f'r["{k}"]=="{v}"' for k, v in tags.items()])
-#         fn_pred = f'r["_measurement"]=="{measurement}"' + (
-#             f" and {tag_filters}" if tag_filters else ""
-#         )
+    def list_tag_keys(self, measurement: str) -> list[str]:
+        """
+        Return all tag _keys_ for this measurement, across all time,
+        but exclude any Flux metadata columns (those that begin with "_").
+        """
+        flux = f'''
+import "influxdata/influxdb/schema"
 
-#         flux = f"""
-# from(bucket:"{self.bucket}")
-#   |> range(start:{start_iso}, stop:{stop_iso})
-#   |> filter(fn:(r)=>{fn_pred})
-# """
-#         with self._client() as c:
-#             tables = c.query_api().query(flux)
+schema.tagKeys(
+  bucket: "{self.bucket}",
+  predicate: (r) => r._measurement == "{measurement}",
+  start: 1970-01-01T00:00:00Z,
+  stop: now()
+)
+'''
+        tables = self._client().query_api().query(flux)
+        # filter out any key starting with "_" so only real tags remain
+        return [
+            row["_value"]
+            for table in tables
+            for row in table
+            if not row["_value"].startswith("_")
+        ]
 
-#         records = self._flatten_tables(tables)
-#         if not records:
-#             raise ValueError("No matching points")
+    def list_tag_values(self, measurement: str, tag_key: str) -> list[str]:
+        """
+        Return all tag _values_ for one tag key in this measurement, across all time.
+        (No change needed here.)
+        """
+        flux = f'''
+import "influxdata/influxdb/schema"
 
-#         return self._csv_zip(records, measurement)
+schema.tagValues(
+  bucket: "{self.bucket}",
+  tag: "{tag_key}",
+  predicate: (r) => r._measurement == "{measurement}",
+  start: 1970-01-01T00:00:00Z,
+  stop: now()
+)
+'''
+        tables = self._client().query_api().query(flux)
+        return [row["_value"] for table in tables for row in table]
+
+
+
+    def list_tag_pairs(self, measurement: str) -> list[str]:
+        """
+        Return all key=value strings for this measurement.
+        """
+        pairs: list[str] = []
+        for key in self.list_tag_keys(measurement):
+            for val in self.list_tag_values(measurement, key):
+                pairs.append(f"{key}={val}")
+        return pairs

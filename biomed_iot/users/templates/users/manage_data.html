@@ -1,32 +1,54 @@
 {% extends "core/base.html" %}
 {% load crispy_forms_tags %}
+{% load static %}
+
 {% block content %}
 <div class="card mb-3">
-  <div class="card-header"><h4 class="my-0 font-weight-normal">Download or Delete Data</h4></div>
+  <div class="card-header">
+    <h4 class="my-0 font-weight-normal">Download or Delete Data</h4>
+  </div>
   <div class="card-body">
     <ul class="text-muted">
-      <li>Download your data as a zipped CSV or delete it permanently.</li>
-      <li>Select measurement, optional tags, and a time range.</li>
+      <li>Delete measurement data or download it as a CSV</li>
+      <li>How: Select measurement, optional tags and time range.</li>
     </ul>
 
     <form method="post" action="{% url 'manage-data' %}">
-        {% csrf_token %}
-        {{ form|crispy }}
-      
+      {% csrf_token %}
+      {{ form|crispy }}
+      <div id="data-endpoints" 
+        data-ajax-get-tags-url="{% url 'ajax_get_tags' %}">
+      </div>
+      {# single toggle button, right-aligned #}
+      <div class="mb-2 text-right">
+        <button
+          type="button"
+          id="toggle-tags"
+          class="btn btn-outline-secondary btn-sm"
+          disabled>
+          Select All Tags
+        </button>
+      </div>
+
+      <div class="d-flex justify-content-between mt-4 flex-wrap">
         <button type="submit"
                 formaction="{% url 'download-data' %}"
-                class="btn btn-primary">
-          Download as zip file
+                class="btn btn-outline-primary">
+          📥 Download CSV
         </button>
-      
         <button type="submit"
                 formaction="{% url 'delete-data' %}"
-                class="btn btn-danger"
-                onclick="return confirm('Are you sure?');">
-          Delete Data
+                class="btn btn-delete"
+                onclick="return confirm('Are you sure you want to permanently delete the selected data?');">
+          🗑️ Delete Data
         </button>
-      </form>
+      </div>
       
+      
+    </form>
   </div>
 </div>
+<script src="{% static 'js/jquery.min.js' %}"></script>
+<script src="{% static 'js/custom/manage_data_scripts.js' %}"></script>
+  
 {% endblock %}
