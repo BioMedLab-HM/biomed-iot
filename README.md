@@ -95,10 +95,7 @@ Consider reading the information, given in the last lines at the end of the inst
 ``` 
 sudo reboot
 ```
-TEMPORARY BUG WORKAROUND: You need to restart mosquitto manually after a reboot because listener on docker network fails when mosquitto is trying to load before the docker service. This bug will be fixed soo.
-```
-sudo systemctl restart mosquitto
-```
+
 Biomed IoT should now be up and running. Type your server's IP address, host name or domain in a web browser.
 
 To log in to the Biomed IoT platform as admin, use the email address you provided during setup. The password was auto-generated. You can find it by running the following command in the servers terminal:
