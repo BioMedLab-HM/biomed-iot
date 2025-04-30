@@ -64,7 +64,7 @@ class SelectDataForm(forms.Form):
         help_text='Format: yyyy-MM-dd hh:mm:ss'
         )
     tags = forms.MultipleChoiceField(
-        label = "Tags (Use tags to select only the tagged data points. Leave empty to select the entire measurement.)",
+        label = "Tags (Use tags to select only certain tagged data points. Leave empty to select the entire measurement.)",
         required=False,
         widget=forms.SelectMultiple,
         help_text="Select one or more (key=value).",
