@@ -153,6 +153,18 @@ button,
   transition: color .15s ease-in-out, background-color .15s ease-in-out, border-color .15s ease-in-out, box-shadow .15s ease-in-out; /* Smooth transition for hover effects */
 }
 
+/* Custom red delete button */
+.btn-delete {
+    background-color: #dc3545 !important;  /* Bootstrap danger base color */
+    color: white;
+}
+
+.btn-delete:hover {
+    background-color: #ff4c5b !important;  /* Brighter red on hover */
+    color: white;
+}
+
+
 .styled-list {
     padding-left: 20px;
     list-style-position: inside;
@@ -179,3 +191,4 @@ button,
 .styled-list a:hover {
     text-decoration: underline; /* Optional: Underline on hover for links */
 }
+
