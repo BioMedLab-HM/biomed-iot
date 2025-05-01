@@ -77,9 +77,7 @@ module.exports = {
      */
     /*
      * Security
-     * Enable JWT-based authentication by using a tokens function.
-     * (If you use only the tokens function you can remove the httpAdminMiddleware
-     * and httpNodeMiddleware lines below.)
+     * Enable JWT-based authentication.
      */
     adminAuth: {
         // Alternative for basic auth with username + password

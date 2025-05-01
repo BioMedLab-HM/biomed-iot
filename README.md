@@ -1,6 +1,6 @@
 # Biomed IoT
 
-Biomed IoT is an open source IoT platform for data acquisition, visualization and automation. It enables the integration and real-time analysis of sensors and effector devices. It is optimized for data security and privacy, making it suitable for medical data, such as in clinical trials. It is built on the Django&reg; framework and provides its core functionality by integrating the Eclipse Mosquitto™ MQTT broker, Node-RED&reg;, InfluxDB&reg; 2.0 and Grafana&reg;.
+Biomed IoT is an open source IoT platform for data acquisition, visualization and automation. It enables the integration and real-time analysis of sensors and effector devices. It is optimized for data security and privacy, making it suitable for medical data, such as in clinical trials. It is built on the Django&reg; framework and provides its core functionality by integrating the Eclipse Mosquitto™ MQTT broker, Node-RED&reg;, InfluxDB&reg; and Grafana&reg;.
 
 ## Content
 
@@ -16,7 +16,7 @@ Biomed IoT is an open source IoT platform for data acquisition, visualization an
 ## How it Works
 
 The figure below explains the functionality of Biomed IoT on a high level
-- Sensors can send data to the Biomed IoT platform via the MQTT protocol as MQTT messages to an MQTT topic (if the platform is running online, over a gateway).
+- Sensors can send data to the Biomed IoT platform (server) via the MQTT protocol as MQTT messages to an MQTT topic (or over a gateway if the platform is running online).
 - An MQTT topic is like a label that tells devices where to send or get the messages
 - On the website, the user can store data to a database, create visualizations and send data out to effector devices
 - If you already have access to a ready set up Biomed IoT, go to section [How to use](#how-to-use)
@@ -25,7 +25,7 @@ The figure below explains the functionality of Biomed IoT on a high level
 ![Biomed IoT Schema](biomed_iot/media/biomed_iot.png "Biomed IoT Schema")
 
 
-## Installation:
+## Installation
 
 ### Requirements
 
@@ -34,7 +34,7 @@ To enable email verification for platform users, an SMTP email provider with 'Ap
 
 ### Setup
 
-If you are setting up Biomed IoT on a Raspberry Pi, you can use [Debian for Pi](https://raspi.debian.net) or, the easier way, [Raspberry Pi OS light (64 Bit)](https://www.raspberrypi.com/software/operating-systems/), flashed to an SD-card using the [Raspberry Pi Imager](https://www.raspberrypi.com/software/). If your are using Raspberry Pi OS, the user can be created during before the flashing process with the Raspberry Pi Imager. In this case you can omit the first steps and start with ‘Add your newly created user to the sudo group‘.
+If you want to up Biomed IoT server on a Raspberry Pi, you can use [Debian for Pi](https://raspi.debian.net) or, the easier way, [Raspberry Pi OS light (64 Bit)](https://www.raspberrypi.com/software/operating-systems/), flashed to an SD-card using the [Raspberry Pi Imager](https://www.raspberrypi.com/software/). If your are using Raspberry Pi OS, the user can be created  before the flashing process with the Raspberry Pi Imager. In this case you can omit the first steps and start with ‘Add your newly created user to the sudo group‘.
 
 First prepare your system for the Biomed IoT setup. Read the instructions carefully before executing the following commands:
 
@@ -47,7 +47,7 @@ Create a new user if you have not already done so with the command below (choose
 ```
 adduser <your-username>
 ```
-Install the 'sudo' command capability. This will later allow your user to temporarily perform a command with root privileges
+Install the 'sudo' command capability. This will later allow your user to temporarily perform a command with elevated (root) privileges
 ```
 apt install sudo
 ```
@@ -77,7 +77,7 @@ Install the following packages:
 ```
 sudo apt -y install net-tools git python3-pip python3-venv
 ``` 
-Then reboot
+Then reboot the system
 ```
 sudo reboot
 ```
@@ -91,12 +91,12 @@ git clone https://github.com/BioMedLab-HM/biomed-iot.git
 cd biomed-iot
 sudo python3 setup.py
 ```
-Consider reading the information, given in the last lines at the end of the installation (e.g. for the URL to reach Biomed IoT in the web browser or where to find the admin login password), then reboot, to make the Biomed IoT Platform fully work:
+Consider reading the information, given in the last lines at the end of the installation (e.g. for the URL or IP address to reach Biomed IoT in the web browser or where to find the login password for the admin account for which you already provided an email address during the setup process), then reboot, to make the Biomed IoT Platform fully work:
 ``` 
 sudo reboot
 ```
 
-Biomed IoT should now be up and running. Type your server's IP address, host name or domain in a web browser.
+The Biomed IoT should now be up and running. Type your server's IP address, host name or domain in a web browser.
 
 To log in to the Biomed IoT platform as admin, use the email address you provided during setup. The password was auto-generated. You can find it by running the following command in the servers terminal:
 ```
@@ -111,9 +111,9 @@ Close the file by pressing Ctrl+x.
 
 ### Troubleshooting
 
-- Do not abort the setup process prematurely. Depending on the speed of the download servers, the duration of the setup can vary, usually between five and 15 minutes.
-- The setup script requires sudo privileges. Ensure that the user running the setup has sudo privileges.
-- The safest way to repeat the installation of Biomed IoT is to first setup your operating system from scratch (e.g. flashing the SD card for your Pi).
+- Do not abort the setup process prematurely. Depending on the speed of the download servers, the duration of the setup can vary, usually between 2 and 10 minutes.
+- The setup script requires root privileges. Ensure that the setup command was executed with sudo like written in the setup description above.
+- The safest way to repeat the installation of Biomed IoT is to re-setup your operating system from scratch (e.g. flashing the SD of for your Pi).
 - Execute the [*Tests After Installation*](tests/tests_after_setup.md) to check the integrity of your installation.
 
 
@@ -126,7 +126,7 @@ A test script to measure core website performance will come in the future.
 
 The [*user manual*](USER-MANUAL.md) (see also 'Manual' in the website menu) contains a guided tour through Biomed IoT and helps you to set up a working example.
 
-Use the platform at your own risk. If you publish it on the internet, use a legitimate privacy policy and imprint. 
+Use the platform at your own risk. If you serve it on a public server, use a legitimate privacy policy and imprint. 
 
 [(Go Back to top)](#biomed-iot)
 #

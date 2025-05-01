@@ -81,25 +81,23 @@ def get_and_check_cpu_architecture():
 
 def get_setup_scheme():
     """Determine the setup scheme based on user input."""
-    print(
-        '\nTLS (Transport Layer Security) encrypts the data between your '
-        'server and its users and gateways (using https), ensuring the data '
-        'remains private and secure. It is highly recommended for most '
-        "installations.\nHowever, if you're setting up a development "
-        "environment, running tests or you're in a controlled and isolated "
-        "environment where encryption isn't a priority and even have limited "
-        'system resources (older Raspberry Pi), you might consider running '
-        'without TLS (using http).\n'
-    )
+    # print(
+    #     '\nTLS (Transport Layer Security) encrypts data between your '
+    #     'server and its users and gateways (using https), ensuring the data '
+    #     'remains private and secure. It is highly recommended for most '
+    #     'installations.\nIf you are in a controlled, isolated environment with '
+    #     'limited resources (e.g., an older Raspberry Pi) and encryption is not '
+    #     'a priority, you might consider using HTTP without TLS.\n'
+    # )
     chosen_scheme = 'NO_TLS'  # Default scheme without TLS encryption
     answer = (
-        input('Shall your Biomed IoT use TLS encryption for MQTT messages? ' '(Y/n, default is n): ').strip().lower()
+        input('\n\n\nEnable encryption (TLS) for your Biomed IoT server? ' '(Y/n, default is n): ').strip().lower()
     )
     if answer == 'y':
         chosen_scheme = 'TLS_NO_DOMAIN'
         # Ask about the domain
         domain_answer = (
-            input('Is the server using a domain name like ' "'example.com')? (y/N, default is N): ").strip().lower()
+            input('\n\n\nIs the server using a domain name like ' "'example.com')? (y/N, default is N): ").strip().lower()
         )
         if domain_answer == 'y':
             chosen_scheme = 'TLS_DOMAIN'
@@ -116,7 +114,7 @@ def confirm_proceed(question_to_ask):
         if user_answer == 'y':
             break  # Exit the loop and proceed
         elif user_answer == 'n':
-            msg = 'You declined to proceed. Exiting setup.'
+            msg = '\nYou declined to proceed. Exiting setup.'
             print(msg)
             log(msg)
             sys.exit(1)  # Exit the script with an error code
@@ -184,17 +182,17 @@ def prompt_for_password(required_length=12):
 def get_domain(setup_scheme):
     domain = ''
     if setup_scheme == 'TLS_DOMAIN':
-        domain = input("Enter the domain name (e.g., 'example.com') " "without leading 'www.': ").strip()
+        domain = get_confirmed_text_input("\nEnter the domain name (e.g. 'example.com') without leading 'www.': ")
     log('Entered Domain: ' + domain)
     return domain
 
 
 def get_credentials_for_pw_reset():
     question = (
-        "\nDo you want to Enter the credentials for an SMTP email server for the website's "
-        "password reset and email verification function?\nYou can add these credentials "
-        "later in /etc/biomed-iot/config.toml. There, in this case you would also need to "
-        'set EMAIL_VERIFICATION to "true" manually'
+        "\n\n\nIf you want to use the platform's password reset function and email verification for users, you need to "
+        "enter credentials for an SMTP email server with App password. \nYou can add these credentials later in "
+        "/etc/biomed-iot/config.toml. There you can also set EMAIL_VERIFICATION to 'true' manually. \n"
+        "\nDo you want to enter credentials now?"
     )
     while True:
         user_answer = input(f'{question} (y/n): ').strip().lower()
@@ -202,20 +200,31 @@ def get_credentials_for_pw_reset():
             pwreset_host = get_confirmed_text_input(
                 "Enter the host for the website's password reset or email verification function (e.g. smtp.gmail.com)"
             )
-            pwreset_port = int(
-                get_confirmed_text_input('Enter the port ' "for the website's password reset function (e.g. 587)")
-            )
+            while True:
+                try:
+                    pwreset_port = int(
+                        get_confirmed_text_input(
+                            "Enter the port for the website's password reset function (e.g. 587): "
+                        )
+                    )
+                    if 1 <= pwreset_port <= 65535:
+                        break  # Valid port; exit loop
+                    else:
+                        print("Invalid port: please enter a number between 1 and 65535.")
+                except ValueError:
+                    print("Invalid input: please enter a valid integer for the port.")
+
             pwreset_email = get_confirmed_text_input(
-                'Enter the email address ' "for the website's password reset function"
+                'Enter the email address ' "for the SMTP Server"
             )
             pwreset_pass = get_confirmed_text_input(
-                'Enter the password ' "for the website's password reset function; (hidden input)",
+                'Enter the password ' "for the SMTP Server; (hidden input)",
                 hidden_input=True,
             )
-            msg = 'Credentials for password reset functions have been entered'
+            msg = '\nCredentials for password reset functions have been entered'
             break
         elif user_answer == 'n':
-            msg = 'No credentials for password reset function have been entered'
+            msg = '\nNo credentials for password reset function have been entered'
             pwreset_host = ''
             pwreset_port = ''
             pwreset_email = ''
@@ -293,7 +302,7 @@ def main():
 
     architecture = get_and_check_cpu_architecture()
 
-    print("\nTo make sure your system is up to date, run 'sudo apt update' " "and 'sudo apt upgrade' before setup.\n")
+    print("\n\nTo make sure your system is up to date, run 'sudo apt update' " "and 'sudo apt upgrade' before setup.\n")
     confirm_proceed('Do you want to proceed? Otherwise please update, upgrade ' 'and reboot - then start setup again.')
 
 
@@ -302,7 +311,7 @@ def main():
 
     domain = get_domain(setup_scheme)
 
-    django_admin_email = get_confirmed_text_input('Enter email address for ' "your website's admin user")
+    django_admin_email = get_confirmed_text_input('\n\nEnter email address for ' "your website's admin user")
 
     pwreset_host, pwreset_port, pwreset_email, pwreset_pass = get_credentials_for_pw_reset()
     email_config = {
@@ -314,7 +323,7 @@ def main():
     }
 
     if pwreset_host != "":
-        question = ("\nDo you want email verification to be active for registration of Biomed IoT platform users? "
+        question = ("\n\n\nDo you want email verification to be active for registration of Biomed IoT platform users? "
                     "Recommended for public servers!")
         user_answer = input(f'{question} (y/n): ').strip().lower()
         log(question)
@@ -334,17 +343,14 @@ def main():
             log(msg)
 
     print(
-        '\nThis will install Biomed IoT with server installation scheme: '
-        f"{setup_scheme} into directory '{setup_dir}' for user '{linux_user}'"
+        f"\n\n\n\nThis will install Biomed IoT to directory '{setup_dir}'"
     )
-    confirm_proceed(
-        'Do you want to proceed with the installation of ' 'Biomed IoT, including necessary packages and services?'
-    )
+    confirm_proceed('\nDo you want to proceed?')
 
 
     """ INSTALLATION OF SOFTWARE """
 
-    msg = '\nStarting installation of Biomed IoT. Please do not interrupt!\n'
+    msg = '\nStarting installation of Biomed IoT. Please do not interrupt!\n\n'
     print(msg)
     log(msg)
 

@@ -140,7 +140,7 @@ class NoderedContainer:
     def configure_nodered(self, user):
         '''Open flows.json template, replace placeholders for various values and copy it to the container'''
 
-        file_path = os.path.join(os.path.dirname(__file__), 'nodered_flows', 'flows.json')
+        file_path = os.path.join(os.path.dirname(__file__), 'nodered_flows', 'flows_template.json')
         with open(file_path, 'r') as file:
             flows_json = file.read()
 
