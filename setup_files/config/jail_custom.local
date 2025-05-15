@@ -1,0 +1,21 @@
+[DEFAULT]
+ignoreip   = 127.0.0.1/8
+bantime    = 600
+findtime   = 600
+maxretry   = 5
+
+[sshd]
+enabled = true
+sshd_backend = systemd
+
+[nginx-http-auth]
+enabled = true
+
+[nginx-botsearch]
+enabled = true
+
+[nginx-bad-request]
+enabled = true
+
+[recidive]
+enabled   = true

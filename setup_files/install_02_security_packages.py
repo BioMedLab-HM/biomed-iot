@@ -36,12 +36,12 @@ def install_security_packages(setup_scheme):
     	'sudo ufw reload',
 
 		# Install fail2ban
+		'apt install python3-systemd',  # Required for fail2ban to use systemd as a logging backend
 		'apt install -y fail2ban',
 		'systemctl start fail2ban',
 		'systemctl enable fail2ban',
 		# Configure fail2ban
-		f'bash {config_path}/tmp.jail.local.sh > {setup_dir}/setup_files/tmp/jail.local',
-		f'cp {setup_dir}/setup_files/tmp/jail.local /etc/fail2ban/jail.local',
+		f'cp {config_path}/jail_custom.local /etc/fail2ban/jail_custom.local',
 		# Restart fail2ban to apply any changes
 		'systemctl restart fail2ban',
 	]
