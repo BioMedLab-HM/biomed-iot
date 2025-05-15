@@ -41,7 +41,7 @@ def install_security_packages(setup_scheme):
 		'systemctl start fail2ban',
 		'systemctl enable fail2ban',
 		# Configure fail2ban
-		f'cp {config_path}/jail_custom.local /etc/fail2ban/jail_custom.local',
+		f'cp {config_path}/jail_custom.local /etc/fail2ban/jail.d/jail_custom.local',
 		# Restart fail2ban to apply any changes
 		'systemctl restart fail2ban',
 	]

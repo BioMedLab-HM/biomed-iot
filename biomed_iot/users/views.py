@@ -148,7 +148,6 @@ def devices(request):
     although theoretically, one could use more than one client on one device.
     For technical correctness, the term client is used here.
     """
-    print('in "devices view"')
     mqtt_client_manager = MqttClientManager(request.user)
 
     if request.method == 'POST':
