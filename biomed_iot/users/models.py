@@ -119,8 +119,9 @@ class NodeRedUserData(models.Model):
 class MqttMetaData(models.Model):
     user = models.OneToOneField(settings.AUTH_USER_MODEL, on_delete=models.CASCADE, primary_key=True)
     user_topic_id = models.CharField(max_length=12, unique=True)
-    nodered_role_name = models.CharField(max_length=14, unique=True)
-    device_role_name = models.CharField(max_length=14, unique=True)
+    nodered_role_name = models.CharField(max_length=20, unique=True)
+    device_role_name = models.CharField(max_length=20, unique=True)
+    inout_role_name = models.CharField(max_length=20, unique=True)
 
     def __str__(self):
         return self.user_topic_id
@@ -132,10 +133,11 @@ class MqttMetaData(models.Model):
             new_user_topic_id = generate_random_readable_string(length = 12, secure=True)
             new_nodered_role_name = 'nodered-' + new_user_topic_id
             new_device_role_name = 'device-' + new_user_topic_id
+            new_inout_role_name = 'inout-' + new_user_topic_id
             if not MqttMetaData.objects.filter(user_topic_id=new_user_topic_id).exists():
-                return new_user_topic_id, new_nodered_role_name, new_device_role_name
+                return new_user_topic_id, new_nodered_role_name, new_device_role_name, new_inout_role_name
         logger.error('Failed to generate unique MQTT metadata after maximum attempts')
-        return None, None, None
+        return None, None, None, None
 
 
 class MqttClient(models.Model):

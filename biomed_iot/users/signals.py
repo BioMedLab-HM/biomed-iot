@@ -33,6 +33,10 @@ def user_mqtt_setup(sender, instance, created, **kwargs):
             mqtt_metadata_manager.create_device_role()
         except Exception as e:
             logger.error(f"Error creating device role: {e}")
+        try:
+            mqtt_metadata_manager.create_inout_role()
+        except Exception as e:
+            logger.error(f"Error creating inout role: {e}")
 
         # Initialize MQTT clients for Node-RED and an example device
         mqtt_client_manager = MqttClientManager(user=instance)
@@ -76,6 +80,7 @@ def delete_mosquitto_user_data(user):
         mosquitto_metadata_manager = MqttMetaDataManager(user)
         mosquitto_metadata_manager.delete_nodered_role()
         mosquitto_metadata_manager.delete_device_role()
+        mosquitto_metadata_manager.delete_inout_role()
     except Exception as e:
         logger.error(f"Error deleting Mosquitto roles: {e}")
 

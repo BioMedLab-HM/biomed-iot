@@ -11,6 +11,7 @@ logger = logging.getLogger(__name__)
 class RoleType(Enum):
     DEVICE = 'device'
     NODERED = 'nodered'
+    INOUT = 'inout'
 
 class MqttMetaDataManager:
     def __init__(self, user):
@@ -23,7 +24,7 @@ class MqttMetaDataManager:
         meta_data = None
         with transaction.atomic():
             try:
-                user_topic_id, nodered_role_name, device_role_name = (
+                user_topic_id, nodered_role_name, device_role_name, inout_role_name = (
                     users.models.MqttMetaData.generate_unique_mqtt_metadata()
                 )
                 meta_data, created = users.models.MqttMetaData.objects.get_or_create(
@@ -32,6 +33,7 @@ class MqttMetaDataManager:
                         'user_topic_id': user_topic_id,
                         'nodered_role_name': nodered_role_name,
                         'device_role_name': device_role_name,
+                        'inout_role_name': inout_role_name,
                     },
                 )
             except IntegrityError:
@@ -108,6 +110,58 @@ class MqttMetaDataManager:
                 logger.error(f"Error initializing MosquittoDynSec for device role creation: {e}")
         return success
 
+    def create_inout_role(self):
+        success = False
+        if self.metadata:
+            inout_topic = f'inout/{self.metadata.user_topic_id}/#'
+            try:
+                dynsec = MosquittoDynSec(self.dynsec_username, self.dynsec_password)
+                try:
+                    success = dynsec.create_role(
+                        self.metadata.inout_role_name,
+                        acls=[
+                            {
+                                'acltype': 'publishClientSend',
+                                'topic': inout_topic,
+                                'priority': -1,
+                                'allow': True,
+                            },
+                            {
+                                'acltype': 'subscribePattern',
+                                'topic': inout_topic,
+                                'priority': -1,
+                                'allow': True,
+                            },
+                        ],
+                    )
+                    if not success:
+                        logger.error(f"Failed to create in/out role: {self.metadata.inout_role_name}")
+                except Exception as e:
+                    logger.error(f"Exception during in/out role creation: {e}")
+                finally:
+                    dynsec.disconnect()
+            except Exception as e:
+                logger.error(f"Error initializing MosquittoDynSec for in/out role creation: {e}")
+        return success
+
+    def delete_inout_role(self):
+        success = False
+        if self.metadata:
+            try:
+                dynsec = MosquittoDynSec(self.dynsec_username, self.dynsec_password)
+                try:
+                    success = dynsec.delete_role(self.metadata.inout_role_name)
+                    if not success:
+                        logger.error(f"Failed to delete in/out role: {self.metadata.inout_role_name}")
+                except Exception as e:
+                    logger.error(f"Exception during delete_role for in/out: {e}")
+                finally:
+                    dynsec.disconnect()
+            except Exception as e:
+                logger.error(f"Error initializing MosquittoDynSec for in/out role deletion: {e}")
+        return success
+
+
     def delete_nodered_role(self):
         success = False
         if self.metadata:
@@ -153,43 +207,90 @@ class MqttClientManager:
     def create_client(self, textname='New Device', role_type=None):
         new_username = users.models.MqttClient.generate_unique_username()
         new_password = users.models.MqttClient.generate_password()
+        success = False
 
         try:
             mqtt_meta_data = users.models.MqttMetaData.objects.get(user=self.user)
-            if role_type == RoleType.DEVICE.value:
+            meta_manager = MqttMetaDataManager(self.user)
+
+            if role_type == RoleType.INOUT.value:
+                meta_manager.create_inout_role()
+                rolename = mqtt_meta_data.inout_role_name
+            elif role_type == RoleType.DEVICE.value:
+                meta_manager.create_device_role()
                 rolename = mqtt_meta_data.device_role_name
-            elif role_type == RoleType.NODERED.value:
-                textname = 'Node-RED MQTT Credentials'
-                rolename = mqtt_meta_data.nodered_role_name
-            roles = [{'rolename': rolename, 'priority': -1}]
-
-            try:
-                dynsec = MosquittoDynSec(self.dynsec_username, self.dynsec_password)
-                try:
-                    success = dynsec.create_client(new_username, new_password, textname=textname, roles=roles)
-                except Exception as e:
-                    logger.error(f"Exception during create_client in MosquittoDynSec: {e}")
-                    success = False
-                finally:
-                    dynsec.disconnect()
-            except Exception as e:
-                logger.error(f"Error initializing MosquittoDynSec for client creation: {e}")
-                success = False
-
-            if success:
-                users.models.MqttClient.objects.create(
-                    user=self.user,
-                    username=new_username,
-                    password=new_password,
-                    textname=textname,
-                    rolename=rolename,
-                )
             else:
-                logger.error('Failed to create MQTT client in dynamic security system.')
+                textname = 'Node-RED MQTT Credentials'
+                meta_manager.create_nodered_role()
+                rolename = mqtt_meta_data.nodered_role_name
+
+            dynsec = MosquittoDynSec(self.dynsec_username, self.dynsec_password)
+            try:
+                success = dynsec.create_client(
+                    new_username,
+                    new_password,
+                    textname=textname,
+                    roles=[{'rolename': rolename, 'priority': -1}]
+                )
+            except Exception as e:
+                logger.error(f"Exception during create_client in MosquittoDynSec: {e}")
+            finally:
+                dynsec.disconnect()
+
         except users.models.MqttMetaData.DoesNotExist:
             logger.error('MqttMetaData does not exist for the user.')
         except IntegrityError as e:
             logger.error(f'Database error when creating MQTT client: {e}')
+
+        if success:
+            users.models.MqttClient.objects.create(
+                user=self.user,
+                username=new_username,
+                password=new_password,
+                textname=textname,
+                rolename=rolename,
+            )
+
+    # def create_client(self, textname='New Device', role_type=None):
+    #     new_username = users.models.MqttClient.generate_unique_username()
+    #     new_password = users.models.MqttClient.generate_password()
+
+    #     try:
+    #         mqtt_meta_data = users.models.MqttMetaData.objects.get(user=self.user)
+    #         if role_type == RoleType.DEVICE.value:
+    #             rolename = mqtt_meta_data.device_role_name
+    #         elif role_type == RoleType.NODERED.value:
+    #             textname = 'Node-RED MQTT Credentials'
+    #             rolename = mqtt_meta_data.nodered_role_name
+    #         roles = [{'rolename': rolename, 'priority': -1}]
+
+    #         try:
+    #             dynsec = MosquittoDynSec(self.dynsec_username, self.dynsec_password)
+    #             try:
+    #                 success = dynsec.create_client(new_username, new_password, textname=textname, roles=roles)
+    #             except Exception as e:
+    #                 logger.error(f"Exception during create_client in MosquittoDynSec: {e}")
+    #                 success = False
+    #             finally:
+    #                 dynsec.disconnect()
+    #         except Exception as e:
+    #             logger.error(f"Error initializing MosquittoDynSec for client creation: {e}")
+    #             success = False
+
+    #         if success:
+    #             users.models.MqttClient.objects.create(
+    #                 user=self.user,
+    #                 username=new_username,
+    #                 password=new_password,
+    #                 textname=textname,
+    #                 rolename=rolename,
+    #             )
+    #         else:
+    #             logger.error('Failed to create MQTT client in dynamic security system.')
+    #     except users.models.MqttMetaData.DoesNotExist:
+    #         logger.error('MqttMetaData does not exist for the user.')
+    #     except IntegrityError as e:
+    #         logger.error(f'Database error when creating MQTT client: {e}')
 
     def modify_client(self, client_username, textname='New MQTT Device'):
         try:
@@ -263,8 +364,10 @@ class MqttClientManager:
         try:
             mqtt_meta_data = users.models.MqttMetaData.objects.get(user=self.user)
             device_role_name = mqtt_meta_data.device_role_name
-            clients = users.models.MqttClient.objects.filter(user=self.user, rolename=device_role_name)
-            return clients
+            device_clients = users.models.MqttClient.objects.filter(user=self.user, rolename=device_role_name)
+            inout_role_name = mqtt_meta_data.inout_role_name
+            inout_clients = users.models.MqttClient.objects.filter(user=self.user, rolename=inout_role_name)
+            return device_clients.union(inout_clients)
         except users.models.MqttMetaData.DoesNotExist:
             logger.error('MqttMetaData not found for the user.')
             return []

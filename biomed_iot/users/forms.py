@@ -44,6 +44,7 @@ class ProfileUpdateForm(forms.ModelForm):
 
 class MqttClientForm(forms.Form):
     textname = forms.CharField(label='Device Name', max_length=30, required=True)
+    same_topic = forms.BooleanField(label='in-out', required=False)
 
 class SelectDataForm(forms.Form):
     measurement = forms.ChoiceField(label="Select Measurement", required=True)

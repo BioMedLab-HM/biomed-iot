@@ -155,11 +155,18 @@ def devices(request):
         if request.POST.get('action') == 'create':
             print('in "create"')
             if new_device_form.is_valid():
-                print('form is valid')
+                # print('form is valid')
+                # new_textname = new_device_form.cleaned_data['textname']
+                # print(f'New Textname from form = {new_textname}')
+                # mqtt_client_manager.create_client(textname=new_textname, role_type=RoleType.DEVICE.value)
+                # print('after create client')
                 new_textname = new_device_form.cleaned_data['textname']
-                print(f'New Textname from form = {new_textname}')
-                mqtt_client_manager.create_client(textname=new_textname, role_type=RoleType.DEVICE.value)
-                print('after create client')
+                same = new_device_form.cleaned_data.get('same_topic', False)
+                role = RoleType.INOUT.value if same else RoleType.DEVICE.value
+                if same:
+                    new_textname = f"{new_textname} [inout/]"
+                mqtt_client_manager.create_client(textname=new_textname, role_type=role)
+
                 messages.success(request, f'Device with name "{new_textname}" successfully created.')
                 return redirect('devices')
             else:

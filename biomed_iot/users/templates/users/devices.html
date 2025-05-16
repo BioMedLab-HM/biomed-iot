@@ -21,6 +21,34 @@
                         placeholder="New Device Name (max. 30 characters)"
                         maxlength="{{ form.textname.field.max_length }}" autocomplete="off" required>
                 </div>
+
+                <div class="col-md-2 col-12 d-flex align-items-center">
+                    <div class="form-check mb-0">
+                        <input
+                            class="form-check-input"
+                            type="checkbox"
+                            id="id_same_topic"
+                            name="same_topic"
+                        >
+                        <span
+                            class="tooltip-label"
+                            tabindex="0"
+                            role="tooltip"
+                            aria-describedby="same-topic-help"
+                        >
+                        Use ‘inout/’ Topic
+                        <span
+                            class="tooltip-text"
+                            id="same-topic-help"
+                            role="tooltiptext"
+                        >
+                            Instead of separate <code>in/</code> and <code>out/</code> topics,<br>
+                            this uses a single <code>inout/…/#</code> topic for both (e.g. for Shelly Plugs).<br>
+                            See <a href="{% url 'message-and-topic-structure' %}">topic structures</a> for more details.
+                        </span>
+                        </span>
+                    </div>
+                </div>
                 <div class="col-md-3 col-12">
                     <button type="submit" class="btn btn-primary mt-md-0 mt-2 w-100" name="action"
                         value="create">Add Device</button>
@@ -146,7 +174,51 @@
     .copy-button:hover {
         background: #CCCCCC;
     }
+
+    .tooltip-label {
+        position: relative;
+        /* use a dashed bottom border for the “underline” */
+        border-bottom: 1px dashed currentColor;
+        cursor: help;
+        display: inline-block;
+    }
+    .tooltip-text code {
+        background-color: #eee;     /* light background */
+        color: #222;                /* dark text */
+        padding: 0.1em 0.3em;
+        border-radius: 2px;
+        font-family: monospace;
+        font-size: 0.9em;
+    }
+    .tooltip-text a {
+        color: #D5E0EF;        /* light blue */
+        text-decoration: underline;
+    }
+
+    .tooltip-text {
+        visibility: hidden;
+        opacity: 0;
+        transition: opacity 0.2s;
+        position: absolute;
+        bottom: 100%;
+        left: 50%;
+        transform: translateX(-50%);
+        background: #444;
+        color: #fff;
+        padding: 0.4em 0.6em;
+        border-radius: 0.3em;
+        white-space: nowrap;
+        z-index: 10;
+        font-size: 0.9em;
+    }
+    .tooltip-label:hover .tooltip-text,
+    .tooltip-label:focus .tooltip-text {
+        visibility: visible;
+        opacity: 1;
+    }
+
 </style>
+
 {% endblock %}
 
 {% block extra_js %}
