@@ -13,7 +13,7 @@
             <li>The new credentials will appear at the bottom of the list</li>
             <li>Toggle visibility with 'Show/Hide Credentials' and copy the username and password</li>
         </ul> -->
-        <form method="post" class="mt-3 mb-3">
+        <form id="device-form" method="post" class="mt-3 mb-3">
             {% csrf_token %}
             <div class="form-group row">
                 <div class="col-md-6 col-12">
@@ -44,7 +44,9 @@
                         >
                             Instead of separate <code>in/</code> and <code>out/</code> topics,<br>
                             this uses a single <code>inout/…/#</code> topic for both (e.g. for Shelly Plugs).<br>
-                            See <a href="{% url 'message-and-topic-structure' %}">topic structures</a> for more details.
+                            You need to create a separate 'mqtt-broker' configuration node in Node-RED!<br>
+                            Use this function only if necessary as it can produce infinite MQTT message loops.<br>
+                            Learn about <a href="{% url 'message-and-topic-structure' %}">topic structures</a> in Biomed IoT.
                         </span>
                         </span>
                     </div>

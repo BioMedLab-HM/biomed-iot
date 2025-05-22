@@ -29,3 +29,18 @@ document.addEventListener("DOMContentLoaded", function () {
       new bootstrap.Tooltip(tooltipTriggerEl);
     });
   });
+
+document.addEventListener('DOMContentLoaded', () => {
+  const form = document.getElementById('device-form');
+  form.addEventListener('submit', e => {
+    const checkbox = document.getElementById('id_same_topic');
+    if (checkbox && checkbox.checked) {
+      const ok = window.confirm(
+        "Are you sure you want to use 'inout/' topic for this device?"
+      );
+      if (!ok) {
+        e.preventDefault();
+      }
+    }
+  });
+});
