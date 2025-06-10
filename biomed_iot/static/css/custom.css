@@ -15,6 +15,7 @@ body {
     font-size: 1rem; /* Original 1rem: var(--bs-body-font-size); */
     margin: 0;
     padding: 0;  /* neu */
+    scrollbar-gutter: stable;
 }
 
 html {

@@ -7,7 +7,6 @@ import docker
 import requests
 from biomed_iot.config_loader import config
 from . import server_utils
-from .mosquitto_utils import MqttClientManager
 import datetime
 import jwt
 
@@ -58,7 +57,6 @@ class NoderedContainer:
             return 'not_found'
 
     def hash_password(self, password):
-        """Was used before jwt token based auth was implemented."""
         # Generate salt
         salt = bcrypt.gensalt()
         # Hash the password
@@ -66,46 +64,29 @@ class NoderedContainer:
         return hashed.decode('utf-8')
 
     def create(self, user):
-        influxdb_host = config.host.HOST_DOCKER_INTERNAL_IP
-        influxdb_port = config.influxdb.INFLUX_PORT
-        influxdb_protocol = "http"
-        influxdb_url = f"{influxdb_protocol}://{influxdb_host}:{influxdb_port}"
-
-        mqtt_client_manager = MqttClientManager(user)
-        nodered_mqtt_client = mqtt_client_manager.get_nodered_client()
-
-        if not nodered_mqtt_client:
-            raise RuntimeError("No Node-RED MQTT client configured for this user")
-
-        nodered_mqtt_username = nodered_mqtt_client.username
-        nodered_mqtt_password = nodered_mqtt_client.password
+        nodered_username, nodered_password = user.nodereduserdata.generate_credentials()
+        user.nodereduserdata.username = nodered_username
+        user.nodereduserdata.password = nodered_password
+        user.nodereduserdata.save()
+        # hashed_password = self.hash_password(nodered_password)
 
         if self.container is None:  # Only create a new container if one doesn't already exist
-            env = {
-                'SECRET_KEY': self.access_token,  # for Token (JWT) based auth
-                'INFLUXDB_ORG': config.influxdb.INFLUX_ORG_NAME,
-                'INFLUXDB_BUCKET': user.influxuserdata.bucket_name,
-                'INFLUXDB_TOKEN': user.influxuserdata.bucket_token,
-                'INFLUXDB_HOST': influxdb_host,
-                'INFLUXDB_PORT': influxdb_port,
-                'INFLUXDB_PROTOCOL': influxdb_protocol,
-                'INFLUXDB_URL': influxdb_url,
-                'MQTT_TOPIC_ID': user.mqttmetadata.user_topic_id,
-                'MQTT_HOST': config.host.HOST_DOCKER_INTERNAL_IP,
-                'MQTT_PORT': config.mosquitto.MOSQUITTO_PORT_DOCKER,
-                'MQTT_USERNAME': nodered_mqtt_username,
-                'MQTT_PASSWORD': nodered_mqtt_password,
-            }
 
             try:
                 self.container = self.docker_client.containers.run(
                     'custom-node-red',
                     detach=True,
                     restart_policy={'Name': 'unless-stopped'},
-                    ports={'1880/tcp': None},  # Node-RED port dynamically assigned by Docker
+                    ports={
+                        '1880/tcp': None,  # Node-RED port dynamically assigned by Docker
+                    },
                     volumes={f'{self.name}-volume': {'bind': '/data', 'mode': 'rw'}},
                     name=self.name,
-                    environment=env,
+                    environment={
+                        # 'USERNAME': nodered_username, for Basic User Auth
+                        # 'PASSWORD_HASH': hashed_password,
+                        'SECRET_KEY': self.access_token  # for Token (JWT) based auth
+                    },
                     network="bridge"  # Attach the container to the default network
                 )
                 self.determine_port()
@@ -135,7 +116,6 @@ class NoderedContainer:
             except Exception as e:
                 print(f'An error occurred while trying to delete the nodered container: {e}')
 
-    # Deprecated
     def copy_json_to_container(self, container, src_path, dest_path):
         # Create a tar archive of the file
         import tarfile
@@ -160,42 +140,34 @@ class NoderedContainer:
     def configure_nodered(self, user):
         '''Open flows.json template, replace placeholders for various values and copy it to the container'''
 
-        file_path = os.path.join(os.path.dirname(__file__), 'nodered_flows', 'flows.template.json')
+        file_path = os.path.join(os.path.dirname(__file__), 'nodered_flows', 'flows_template.json')
         with open(file_path, 'r') as file:
             flows_json = file.read()
 
-        modified_flows_json = flows_json.replace("MQTT_TOPIC_ID", user.mqttmetadata.user_topic_id)
+        modified_flows_json = flows_json.replace("topic_id", user.mqttmetadata.user_topic_id)
+        modified_flows_json = modified_flows_json.replace("user_bucket_name", user.influxuserdata.bucket_name)
 
-        nodered_mqtt_inout_username = "Ask the admin how to use the inout topic"  # Placeholder, should be set on devices page
-        nodered_mqtt_inout_password = ""  # Placeholder, should be set on devices page
-        modified_flows_json = modified_flows_json.replace("MQTT_INOUT_USERNAME", nodered_mqtt_inout_username)
-        modified_flows_json = modified_flows_json.replace("MQTT_INOUT_PASSWORD", nodered_mqtt_inout_password)
+        # broker_port = "8883" if config.host.TLS == "true" else "1883"
+        broker_port = "1885"  # "1885" if config.host.TLS == "true" else "1884"
+        modified_flows_json = modified_flows_json.replace("broker_port", broker_port)
+        # if config.host.TLS == "true":
+        #     modified_flows_json = modified_flows_json.replace('"usetls": false', '"usetls": true')
 
-        # Commented out replacements below are now handled by environmental variables in the Dockerfile
+        # host_address = config.host.DOMAIN if config.host.TLS == "true" and config.host.DOMAIN else config.host.IP
+        host_address = "172.17.0.1"
+        modified_flows_json = modified_flows_json.replace("server_ip_or_domain", host_address)
+        modified_flows_json = modified_flows_json.replace("influxdb-org-name", config.influxdb.INFLUX_ORG_NAME)
 
-        # modified_flows_json = modified_flows_json.replace("user_bucket_name", user.influxuserdata.bucket_name)
-
-        # # broker_port = "8883" if config.host.TLS == "true" else "1883"
-        # broker_port = "1885"  # "1885" if config.host.TLS == "true" else "1884"
-        # modified_flows_json = modified_flows_json.replace("broker_port", broker_port)
-        # # if config.host.TLS == "true":
-        # #     modified_flows_json = modified_flows_json.replace('"usetls": false', '"usetls": true')
-
-        # # host_address = config.host.DOMAIN if config.host.TLS == "true" and config.host.DOMAIN else config.host.IP
-        # host_address = "172.17.0.1"
-        # modified_flows_json = modified_flows_json.replace("server_ip_or_domain", host_address)
-        # modified_flows_json = modified_flows_json.replace("influxdb-org-name", config.influxdb.INFLUX_ORG_NAME)
-
-        # # server_scheme = "https" if config.host.TLS == "true" else "http"
-        # # influxdb_port = "8087"  # TODO: NGINX conf is 8087 to reverse proxy 8086. config.influxdb.INFLUX_PORT is 8086
-        # server_scheme = "http"
-        # influxdb_port = "8086"  # get from config
-        # influxdb_url = f"{server_scheme}://{host_address}:{influxdb_port}"
-        # modified_flows_json = modified_flows_json.replace("influxdb-url", influxdb_url)
+        # server_scheme = "https" if config.host.TLS == "true" else "http"
+        # influxdb_port = "8087"  # TODO: NGINX conf is 8087 to reverse proxy 8086. config.influxdb.INFLUX_PORT is 8086
+        server_scheme = "http"
+        influxdb_port = "8086"  # get from config
+        influxdb_url = f"{server_scheme}://{host_address}:{influxdb_port}"
+        modified_flows_json = modified_flows_json.replace("influxdb-url", influxdb_url)
 
         self.determine_port()
 
-        # Alternative for basic auth with username + password
+        # Alternative for basic auth with username + password 
         # nodered_username = user.nodereduserdata.username
         # nodered_password = user.nodereduserdata.password
 

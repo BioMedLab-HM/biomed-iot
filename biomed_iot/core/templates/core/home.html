@@ -1,26 +1,42 @@
 {% extends "core/base.html" %}
 
 {% block content %}
-<div class="card mb-3">
-    <div class="card-header">
-        <h4 class="my-0 font-weight-normal">Get startet with Biomed IoT</h4>
+<div class="card shadow mb-4 border-0">
+    <div class="card-header navbar-dark bg-primary text-white">
+        <h4 class="my-0 font-weight-normal">Get started with Biomed IoT</h4>
     </div>
     <div class="card-body">
-        <p> 
-            Biomed IoT is an open-source IoT platform, designed for collecting and storing sensor data, as well as automation between devices.
+        <p class="lead mb-4">
+            Biomed IoT is an <strong>open-source IoT platform</strong> for collecting and storing sensor data, and automating devices.
         </p>
-        <h5>Best for beginners</strong>: The <a href="{% url 'core-manual' %}">Manual</a> demonstrates the platform with a simple use case.<br><br></h5>
+        <div class="alert alert-info mb-4">
+            <h5 class="mb-1"><i class="bi bi-lightbulb"></i> Best for beginners:</h5>
+            <span>The <a href="{% url 'core-manual' %}" class="alert-link">Manual</a> demonstrates the platform with a simple use case.</span>
+        </div>
         <hr>
-        <!-- class="styled-list" -->
-        <h5>General Overview</h5>
-        <ol>
-            <li style="line-height: 2;"><strong><a href="{% url 'register' %}">Create an account</a></strong> and log in (email verification is required)</li>
-            <li style="line-height: 2;"><strong><a href="{% url 'devices' %}">Device List</a></strong>: Manage your IoT-Devices MQTT-Credentials</li> 
-            <li style="line-height: 2;"><strong><a href="{% url 'message-and-topic-structure' %}"> Message and topic structure</a></strong>: Learn about data format and topic structure</li>
-            <li style="line-height: 2;"><strong><a href="{% url 'code-examples' %}">Code Examples</a></strong>: Copy and paste code templates for your IoT devices</li>
-            <li style="line-height: 2;"><strong><a href="{% url 'nodered-manager' %}">Automate</a></strong>: Link your sensors and actuators and store data into the time series database (InfluxDB) with Node-RED.</li>
-            <li style="line-height: 2;"><strong><a href="{% url 'visualize' %}">"Visualize"</a></strong>: Visualize and export (csv) your data with Grafana.</li>
-            <li style="line-height: 2;"><strong><a href="{% url 'manage-data' %}">Delete Data</a></strong>: Selectively delete data. More functionality may come.</li>
+        <h5 class="mb-3"><i class="bi bi-list-check"></i> How to use</h5>
+        <ol class="list-group list-group-numbered mb-0">
+            <li class="list-group-item py-3">
+                <strong><a href="{% url 'register' %}">Register</a></strong> and log in
+            </li>
+            <li class="list-group-item py-3">
+                <strong><a href="{% url 'devices' %}">Device List</a></strong>: Manage your IoT-device's MQTT-credentials
+            </li>
+            <li class="list-group-item py-3">
+                <strong><a href="{% url 'message-and-topic-structure' %}">Message & Topic Structure</a></strong>: Learn about message data format and mandatory topic structure
+            </li>
+            <li class="list-group-item py-3">
+                <strong><a href="{% url 'code-examples' %}">Code Examples</a></strong>: Optionally copy and paste code templates for your IoT devices
+            </li>
+            <li class="list-group-item py-3">
+                <strong><a href="{% url 'nodered-manager' %}">Automate</a></strong>: Create automation logic and store data into the time series database (InfluxDB) with Node-RED
+            </li>
+            <li class="list-group-item py-3">
+                <strong><a href="{% url 'visualize' %}">Visualize</a></strong>: Visualize data with Grafana
+            </li>
+            <li class="list-group-item py-3">
+                <strong><a href="{% url 'manage-data' %}">Manage Data</a></strong>: Delete or export data as CSV-file
+            </li>
         </ol>
     </div>
 </div>

@@ -207,6 +207,7 @@ def devices(request):
         'topic_id': topic_id,
         'device_clients': device_clients_data,
         'form': new_device_form,
+        'show_inout_check_box': config.mosquitto.INOUT_TOPIC_ENABLED == "true",
         'title': 'Devices',
         'thin_navbar': False,
     }
@@ -267,7 +268,7 @@ def setup_gateway(request):
             download_path = reverse('public_download', args=[file_name])
             return redirect(download_path)
         else:
-            msg = "Gateway is currently only available for setups using TLS (https)."
+            msg = "Gateway is currently only available for setups using TLS (https). No file downloaded."
             messages.info(request, msg)
             return redirect('setup-gateway')
 
@@ -451,16 +452,16 @@ def nodered_open(request):
         return redirect('nodered-manager')
     del request.session['came_from_nodered_manager']
 
-    mqtt_client_manager = MqttClientManager(request.user)
-    nodered_mqtt_client_data = mqtt_client_manager.get_nodered_client()
+    # mqtt_client_manager = MqttClientManager(request.user)
+    # nodered_mqtt_client_data = mqtt_client_manager.get_nodered_client()
 
     page_title = 'Node-RED Automation - Connect Devices, Control & Save Data'
     context = {
         'title': page_title,
-        'nodered_mqtt_client_data': nodered_mqtt_client_data,
-        'influxdb_token': request.user.influxuserdata.bucket_token,
-        'username': request.user.nodereduserdata.username,
-        'password': request.user.nodereduserdata.password,
+        # 'nodered_mqtt_client_data': nodered_mqtt_client_data,
+        # 'influxdb_token': request.user.influxuserdata.bucket_token,
+        # 'username': request.user.nodereduserdata.username,
+        # 'password': request.user.nodereduserdata.password,
         'thin_navbar': False,
     }
     return render(request, 'users/nodered_open.html', context)
@@ -594,10 +595,10 @@ def access_nodered(request):
     if container_name is None:
         return redirect("core-home")
 
-    # Create a JWT payload. The token will expire in 300 minutes.
+    # Create a JWT payload.
     payload = {
         'username': request.user.username,
-        'exp': datetime.now(timezone.utc) + timedelta(minutes=300)
+        'exp': datetime.now(timezone.utc) + timedelta(minutes=600) # token expiration time
     }
 
     # Generate the token using the SECRET_KEY stored in nodered_user_data.access_token
@@ -627,6 +628,9 @@ def manage_data(request):
         "title": "Manage Measurement Data",
         "form": form,
     })
+
+# OLD Version of manage_data
+# @login_required
 # def manage_data(request):
 #     """
 #     Render the form for selecting measurement / tags / time range.

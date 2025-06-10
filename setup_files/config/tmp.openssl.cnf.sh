@@ -19,7 +19,7 @@ req_extensions     = req_ext
 C  = DE
 ST = Bavaria
 L  = Munich
-O  = BiomedLab
+O  = BioMedLab
 OU = Biomed-IoT
 CN = $HOSTNAME
 

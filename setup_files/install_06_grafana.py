@@ -4,7 +4,7 @@ from .setup_utils import run_bash, log, get_setup_dir, get_conf_path, get_random
 GRAFANA_INSTALL_LOG_FILE_NAME = 'install_06_grafana.log'
 
 
-def install_grafana(architecture, setup_scheme, ip_address, domain):
+def install_grafana(architecture, setup_scheme, ip_address):
     """
     Install Grafana OSS (Open Source) Version based on the provided architecture and setup scheme.
     Download pages:
@@ -14,7 +14,7 @@ def install_grafana(architecture, setup_scheme, ip_address, domain):
     setup_dir = get_setup_dir()
     conf_dir = get_conf_path()
     grafana_files_dir = f'{setup_dir}/setup_files/tmp/grafana_install_files'
-    host = "localhost"  # domain if setup_scheme == "TLS_DOMAIN" else ip_address
+    host = "localhost"
     port = 3000
     admin_name = get_random_string(30, incl_symbols=False)  # no symbols to avoid issues with api calls
     admin_pass = get_random_string(50, incl_symbols=False)

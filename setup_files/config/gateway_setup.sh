@@ -72,6 +72,8 @@ sudo systemctl restart mosquitto.service
 
 # 9. Final instructions
 cat <<MSG
+_____
+
 
 Your IoT-Gateway is set up. Please reboot.
 

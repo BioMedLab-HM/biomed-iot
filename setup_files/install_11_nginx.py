@@ -17,8 +17,10 @@ def install_nginx(setup_scheme, domain, server_ip, hostname):
 
     commands = []
 
-    if setup_scheme == 'TLS_WITH_DOMAIN':
-        # Configurations for TLS with domain
+    STUB_ENABLED = False
+
+    if STUB_ENABLED:  # if setup_scheme == 'TLS_DOMAIN':
+        # Configurations for TLS with domain moved to separate script
         commands = [
             'apt install -y openssl certbot python3-certbot-nginx',
             f'bash {config_path}/tmp.nginx-biomed-iot-tls-domain.conf.sh {domain} > {setup_dir}/setup_files/tmp/nginx-biomed-iot-tls-domain.conf',
@@ -32,7 +34,7 @@ def install_nginx(setup_scheme, domain, server_ip, hostname):
             'ln -s /etc/nginx/modules-available/nginx-stream-tls-domain.conf /etc/nginx/modules-enabled',
         ]
 
-    elif setup_scheme == 'TLS_NO_DOMAIN':
+    if setup_scheme in ('TLS_NO_DOMAIN', 'TLS_DOMAIN'):
         # Configurations for TLS without domain (self-signed certificate for 3650 days = 10 years)
         commands = [
             'apt install -y openssl',
@@ -48,8 +50,8 @@ def install_nginx(setup_scheme, domain, server_ip, hostname):
             'ln -s /etc/nginx/modules-available/nginx-stream-tls.conf /etc/nginx/modules-enabled',
         ]
 
-    else:
-        # Configurations for no TLS
+    elif setup_scheme == 'NO_TLS':
+        # Configurations for http (no TLS)
         commands = [
             f'bash {config_path}/tmp.nginx-biomed-iot-no-tls.conf.sh {server_ip} {hostname} > {setup_dir}/setup_files/tmp/nginx-biomed-iot-no-tls.conf',
             f'cp {setup_dir}/setup_files/tmp/nginx-biomed-iot-no-tls.conf /etc/nginx/sites-available/',

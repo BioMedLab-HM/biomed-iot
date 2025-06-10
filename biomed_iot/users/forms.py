@@ -1,7 +1,8 @@
 import re
 from django import forms
 from datetime import datetime, timedelta
-# from django.utils import timezone
+from django.utils import timezone
+from datetime import timezone as dt_tz
 # from django.contrib.auth.models import User
 from django.contrib.auth.forms import UserCreationForm, AuthenticationForm
 from .models import Profile, CustomUser
@@ -108,13 +109,26 @@ class SelectDataForm(forms.Form):
         return out
 
     def clean_start_time(self):
-        start_time = self.cleaned_data['start_time']
-        return start_time.strftime('%Y-%m-%dT%H:%M:%SZ')
+        # start_time = self.cleaned_data['start_time']
+        # return start_time.strftime('%Y-%m-%dT%H:%M:%SZ')
+        return self._utc_rfc3339(self.cleaned_data["start_time"])
 
     def clean_end_time(self):
-        end_time = self.cleaned_data['end_time']
-        return end_time.strftime('%Y-%m-%dT%H:%M:%SZ')
+        # end_time = self.cleaned_data['end_time']
+        # return end_time.strftime('%Y-%m-%dT%H:%M:%SZ')
+        return self._utc_rfc3339(self.cleaned_data["end_time"])
 
+    def _utc_rfc3339(self, dt):
+        """
+        Ensure *dt* is aware, convert to UTC, and render as RFC-3339.
+        Works on both summer (+02:00) and winter (+01:00).
+        """
+        if timezone.is_naive(dt):              # should not happen with USE_TZ=True,
+            dt = timezone.make_aware(dt)       # but keeps the code future-proof
+
+        return dt.astimezone(dt_tz.utc).strftime('%Y-%m-%dT%H:%M:%SZ')
+
+# OLD VERSION, KEEP FOR REFERENCE
 # class SelectDataForm(forms.Form):
 #     measurement = forms.ChoiceField(
 #         label="Select Measurement",

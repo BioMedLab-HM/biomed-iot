@@ -4,10 +4,10 @@
 
 {% block content %}
     {% for key, example in examples.items %}
-    <div class="card mt-3">
-        <div class="card-header d-flex justify-content-between align-items-center">
+    <div class="card shadow mb-4 border-0">
+        <div class="card-header navbar-dark bg-primary text-white d-flex justify-content-between align-items-center">
             <span>{{ example.headline }}</span>
-            <a href="#" class="copy-text" data-clipboard-text="{{ example.code }}">Copy Code</a>
+            <a href="#" class="copy-text text-white" data-clipboard-text="{{ example.code }}">Copy Code</a>
         </div>
         <div class="card-body">
             <pre><code>{{ example.code }}</code></pre>

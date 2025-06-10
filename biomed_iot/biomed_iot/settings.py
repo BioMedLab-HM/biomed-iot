@@ -165,7 +165,7 @@ AUTH_PASSWORD_VALIDATORS = [
 
 LANGUAGE_CODE = 'en-us'
 
-TIME_ZONE = 'Europe/Berlin'  # 'UTC'
+TIME_ZONE = config.django.TIME_ZONE  # set in setup.py; was 'UTC'
 
 USE_I18N = True  # Internationalization framework, enabling support for multiple languages
 

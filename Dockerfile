@@ -33,6 +33,9 @@ RUN rm -f /usr/src/node-red/node_modules/@node-red/nodes/core/storage/10-file.js
 RUN rm -f /usr/src/node-red/node_modules/@node-red/nodes/core/storage/23-watch.html
 RUN rm -f /usr/src/node-red/node_modules/@node-red/nodes/core/storage/23-watch.js
 
+# Copy templated flows.json into the default /data folder of the image
+COPY biomed_iot/users/services/nodered_flows/flows.template.json /data/flows.json
+
 # use custom settings.js for authentication
 COPY setup_files/config/settings.js /data/settings.js
 

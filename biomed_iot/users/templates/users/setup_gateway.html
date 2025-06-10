@@ -15,8 +15,8 @@
 {% endblock %}
 
 {% block content %}
-<div class="card mb-3">
-    <div class="card-header">
+<div class="card shadow mb-4 border-0">
+    <div class="card-header navbar-dark bg-primary text-white">
         <h4 class="my-0 font-weight-normal">What is a Biomed IoT-Gateway?</h4>
     </div>
     <div class="card-body">
@@ -34,13 +34,13 @@
         A Raspberry Pi 3 or 4 is sufficent.</p>
     </div>
 </div>
-<div class="card mb-3">
-    <div class="card-header">
+<div class="card shadow mb-4 border-0">
+    <div class="card-header navbar-dark bg-primary text-white">
         <h4 class="my-0 font-weight-normal">How to Setup a Gateway for Secure TLS Encryption</h4>
     </div>
     <div class="card-body">
         {% if not tls %}
-        <p><span style="color: #800000;"><em>Gateway is currently only available for setups using TLS (https). No file downloaded.</em></span></p>
+        <p><span style="color: #800000;"><em>Gateway is currently only available for setups using TLS (https).</em></span></p>
         {% endif %}
 <p><strong>First</strong>, create gateway credentials on the <a href="{% url 'devices' %}">Device List</a> page and get your <a href="{% url 'message-and-topic-structure' %}">personal topic ID</a>. Make sure to review the instructions on both of these pages.</p>
 

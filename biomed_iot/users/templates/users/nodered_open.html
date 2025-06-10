@@ -25,68 +25,50 @@
         </div>
     </div>
 
-    <div class="card mb-3">
-        <div class="card-header">
-            <h4 class="my-0 font-weight-normal">Personal Credentials for MQTT- and InfluxDB-Nodes</h4>
+    <div class="card shadow mb-4 border-0">
+        <div class="card-header navbar-dark bg-primary text-white">
+            <h4 class="my-0 font-weight-normal">Variables Used in Node Configurations</h4>
         </div>
         <div class="card-body">
             <div class="row">
-                <!-- Left column for explanatory text -->
-                <div class="col-lg-5 col-sm-12">
-                    <p>
-                        <!-- TODO: Activate and test manual toggle for credentials -->
-                        <!-- <a href="#" class="card-link" onclick="toggleVisibility(); return false;">Show/Hide Credentials</a> -->
-                        <a href="#" onclick="toggleVisibilityWithTimer(); return false;">Show Credentials</a>
-                        <!-- &nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;
-                        <a href="#" class="copy-text">Copy All Credentials </a><br><br>
-                        <strong>1. Login to Node-RED:</strong> <br>
-                        <strong>></strong> Use the credentials on the right <br>
-                        <strong>></strong> You will be prompted to re-enter them weekly <br> -->
-                    </p>
-                    <p>
-                        <strong>Complete Node Setup on First Launch:</strong> <br>
-                        <strong>a)</strong> Double-click on MQTT (violet) or InfluxDB (brown) node<br>
-                        <strong>b)</strong> Click on edit server (pencil icon) <br>
-                        &nbsp;&nbsp;&nbsp;&nbsp;&nbsp;For MQTT node: Click the 'Security' tab <br>
-                        <strong>c)</strong> Enter the credentials or token there <br>
-                    </p>
+                <div class="col-lg-4 col-sm-12">
+                    <p class="card-text">Some Node-RED nodes use environment variables like <code>${MQTT_PORT}</code>. If you accidentally delete them you can restore them using this list as reference:</p>
                 </div>
-                <!-- Right column for credentials -->
-                <div class="col-lg-5 col-sm-12">
-                    <!-- Nested structure for username and password fields to ensure they stack on small screens -->
-                    <!-- <div class="mb-3">
-                        <label for="usernameField" class="form-label">Node-RED Login Username</label>
-                        <input type="password" id="noderedUsernameField" class="form-control" value="{{ username }}" readonly>
-                    </div>
-                    <div class="mb-3">
-                        <label for="passwordField" class="form-label">Node-RED Login Password</label>
-                        <input type="password" id="noderedPasswordField" class="form-control" value="{{ password }}" readonly>
-                    </div> -->
-                    <div class="mb-3">
-                        <label for="usernameField" class="form-label">MQTT-Username</label>
-                        <div class="input-group">
-                            <input type="password" id="usernameField" class="form-control" value="{{ nodered_mqtt_client_data.username }}" readonly>
-                            <button class="btn btn-outline-secondary" type="button" onclick="copyValue('usernameField')">Copy</button>
-                        </div>
-                    </div>
-                    <div class="mb-3">
-                        <label for="passwordField" class="form-label">MQTT-Password</label>
-                        <div class="input-group">
-                            <input type="password" id="passwordField" class="form-control" value="{{ nodered_mqtt_client_data.password }}" readonly>
-                            <button class="btn btn-outline-secondary" type="button" onclick="copyValue('passwordField')">Copy</button>
-                        </div>
-                    </div>
-                    <div class="mb-3">
-                        <label for="tokenField" class="form-label">InfluxDB Read/Write Token</label>
-                        <div class="input-group">
-                            <input type="password" id="tokenField" class="form-control" value="{{ influxdb_token }}" readonly>
-                            <button class="btn btn-outline-secondary" type="button" onclick="copyValue('tokenField')">Copy</button>
-                        </div>
-                    </div>                    
+                <div class="w-100 d-block d-lg-none mb-3"></div>
+                <div class="col-lg-6 col-sm-12">
+                    <dl class="row">
+                    <dt class="col-sm-5"><code>${INFLUXDB_ORG}</code></dt>
+                    <dd class="col-sm-7">Organization for InfluxDB</dd>
+
+                    <dt class="col-sm-5"><code>${INFLUXDB_BUCKET}</code></dt>
+                    <dd class="col-sm-7">Bucket for InfluxDB</dd>
+
+                    <dt class="col-sm-5"><code>${INFLUXDB_TOKEN}</code></dt>
+                    <dd class="col-sm-7">Token for InfluxDB</dd>
+
+                    <dt class="col-sm-5"><code>${INFLUXDB_URL}</code></dt>
+                    <dd class="col-sm-7">Complete URL for InfluxDB</dd>
+
+                    <dt class="col-sm-5"><code>${MQTT_TOPIC_ID}</code></dt>
+                    <dd class="col-sm-7">Topic ID for MQTT</dd>
+
+                    <dt class="col-sm-5"><code>${MQTT_HOST}</code></dt>
+                    <dd class="col-sm-7">Hostname for MQTT broker</dd>
+
+                    <dt class="col-sm-5"><code>${MQTT_PORT}</code></dt>
+                    <dd class="col-sm-7">Port for MQTT broker</dd>
+
+                    <dt class="col-sm-5"><code>${MQTT_USERNAME}</code></dt>
+                    <dd class="col-sm-7">Username for MQTT broker</dd>
+
+                    <dt class="col-sm-5"><code>${MQTT_PASSWORD}</code></dt>
+                    <dd class="col-sm-7">Password for MQTT broker</dd>
+                    </dl>
                 </div>
             </div>
         </div>
     </div>
+    
     <!-- <div style="margin-bottom: 1.5rem;"></div> -->
     <!-- <hr> -->
     <div class="alert alert-danger" role="alert">

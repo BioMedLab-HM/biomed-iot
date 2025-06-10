@@ -96,18 +96,17 @@ Consider reading the information, given in the last lines at the end of the inst
 sudo reboot
 ```
 
-The Biomed IoT should now be up and running. Type your server's IP address, host name or domain in a web browser.
+The Biomed IoT should now be up and running. Type your server's IP address, host name in a web browser.  
 
+**Optional:** If you have a registered domain name (e.g., example.com) that points to your server’s public IP address, you can configure the platform to be accessible via this domain directly afterwards, follow [*Secure NGINX + Let’s Encrypt TLS Setup*](DOMAIN_SETUP.md)
+--
 To log in to the Biomed IoT platform as admin, use the email address you provided during setup. The password was auto-generated. You can find it by running the following command in the servers terminal:
 ```
 nano /etc/biomed-iot/config.toml
-# If you must edit this file use sudo. 
-# Do not change any value in this file except  
-# you know exactly what you are doing.
-# sudo nano /etc/biomed-iot/config.toml
 ```
 Look for the 'DJANGO_ADMIN_PASS' line at the bottom of the file to find your password.
 Close the file by pressing Ctrl+x.
+*If you must edit this file for some reason, use sudo. Do not change any value in this file except you know exactly what you are doing.*
 
 ### Troubleshooting
 

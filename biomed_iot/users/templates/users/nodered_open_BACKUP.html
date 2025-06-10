@@ -1,0 +1,103 @@
+{% extends "core/base.html" %}
+{% load static %}
+
+{% block content %}
+<form method="post">
+    {% csrf_token %}
+    <!-- <button type="submit" class="btn btn-info" name="action" value="open">Open Node-RED Flow Editor</button> -->
+    <div class="alert alert-success mb-3" role="alert">
+        <div class="row mt-12">
+            <div class="col-md-6" style="margin-bottom: 0.7rem;">
+                <h4>Your Node-RED is running</h4>
+            </div>
+        </div>
+        <div class="row mt-12">
+            <div class="col-md-4" style="margin-bottom: 0.7rem;">
+                <button type="button" class="btn btn-info btn-block" data-url="{% url 'nodered' %}" id="openFlows" title="Opens in a new tab">
+                    Node-RED Flow Editor <span aria-hidden="true">&#8599;</span>
+                </button>
+            </div>
+            <div class="col-md-4">
+                <button type="button" class="btn btn-info btn-block" data-url="{% url 'nodered-dashboard' %}" id="openDashboard" title="Opens in a new tab">
+                    Node-RED Dashboard <span aria-hidden="true">&#8599;</span>
+                </button>
+            </div>
+        </div>
+    </div>
+
+    <div class="card mb-3">
+        <div class="card-header">
+            <h4 class="my-0 font-weight-normal">Personal Credentials for MQTT- and InfluxDB-Nodes</h4>
+        </div>
+        <div class="card-body">
+            <div class="row">
+                <!-- Left column for explanatory text -->
+                <div class="col-lg-5 col-sm-12">
+                    <p>
+                        <!-- TODO: Activate and test manual toggle for credentials -->
+                        <!-- <a href="#" class="card-link" onclick="toggleVisibility(); return false;">Show/Hide Credentials</a> -->
+                        <a href="#" onclick="toggleVisibilityWithTimer(); return false;">Show Credentials</a>
+                        <!-- &nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;
+                        <a href="#" class="copy-text">Copy All Credentials </a><br><br>
+                        <strong>1. Login to Node-RED:</strong> <br>
+                        <strong>></strong> Use the credentials on the right <br>
+                        <strong>></strong> You will be prompted to re-enter them weekly <br> -->
+                    </p>
+                    <p>
+                        <strong>Complete Node Setup on First Launch:</strong> <br>
+                        <strong>a)</strong> Double-click on MQTT (violet) or InfluxDB (brown) node<br>
+                        <strong>b)</strong> Click on edit server (pencil icon) <br>
+                        &nbsp;&nbsp;&nbsp;&nbsp;&nbsp;For MQTT node: Click the 'Security' tab <br>
+                        <strong>c)</strong> Enter the credentials or token there <br>
+                    </p>
+                </div>
+                <!-- Right column for credentials -->
+                <div class="col-lg-5 col-sm-12">
+                    <!-- Nested structure for username and password fields to ensure they stack on small screens -->
+                    <!-- <div class="mb-3">
+                        <label for="usernameField" class="form-label">Node-RED Login Username</label>
+                        <input type="password" id="noderedUsernameField" class="form-control" value="{{ username }}" readonly>
+                    </div>
+                    <div class="mb-3">
+                        <label for="passwordField" class="form-label">Node-RED Login Password</label>
+                        <input type="password" id="noderedPasswordField" class="form-control" value="{{ password }}" readonly>
+                    </div> -->
+                    <div class="mb-3">
+                        <label for="usernameField" class="form-label">MQTT-Username</label>
+                        <div class="input-group">
+                            <input type="password" id="usernameField" class="form-control" value="{{ nodered_mqtt_client_data.username }}" readonly>
+                            <button class="btn btn-outline-secondary" type="button" onclick="copyValue('usernameField')">Copy</button>
+                        </div>
+                    </div>
+                    <div class="mb-3">
+                        <label for="passwordField" class="form-label">MQTT-Password</label>
+                        <div class="input-group">
+                            <input type="password" id="passwordField" class="form-control" value="{{ nodered_mqtt_client_data.password }}" readonly>
+                            <button class="btn btn-outline-secondary" type="button" onclick="copyValue('passwordField')">Copy</button>
+                        </div>
+                    </div>
+                    <div class="mb-3">
+                        <label for="tokenField" class="form-label">InfluxDB Read/Write Token</label>
+                        <div class="input-group">
+                            <input type="password" id="tokenField" class="form-control" value="{{ influxdb_token }}" readonly>
+                            <button class="btn btn-outline-secondary" type="button" onclick="copyValue('tokenField')">Copy</button>
+                        </div>
+                    </div>                    
+                </div>
+            </div>
+        </div>
+    </div>
+    <!-- <div style="margin-bottom: 1.5rem;"></div> -->
+    <!-- <hr> -->
+    <div class="alert alert-danger" role="alert">
+        <p>Stop Node-RED if you do not need it for a while (saves server resources).</p>
+        <p>Be aware that flows will be stopped and no data will be saved to the database</p>
+        <button type="submit" class="btn btn-danger" name="action" value="stop" title="Stop Node-RED" onclick="return confirm('Are your sure you want to stop Node-RED?');">Stop Node-RED</button>
+    </div>
+</form>
+{% endblock %}
+
+{% block extra_js %}
+    <script src="{% static 'js/custom/nodered_open_scripts.js' %}"></script>
+{% endblock %}
+

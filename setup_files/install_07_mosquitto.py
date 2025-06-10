@@ -76,7 +76,9 @@ def install_mosquitto(setup_scheme):
 	# Create dict config data
 	config_data = {
 		'MOSQUITTO_HOST': 'localhost',
-		'MOSQUITTO_PORT': 1883,
+		'MOSQUITTO_PORT_EXTERNAL': 1883,
+		'MOSQUITTO_PORT_INTERNAL': 1884,
+		'MOSQUITTO_PORT_DOCKER': 1885,
 		'DYNSEC_TOPIC': '$CONTROL/dynamic-security/v1',
 		'DYNSEC_RESPONSE_TOPIC': '$CONTROL/dynamic-security/v1/response',
 		'DYNSEC_ADMIN_USER': dynsec_admin_name,
@@ -87,6 +89,7 @@ def install_mosquitto(setup_scheme):
 		'MQTT_IN_TO_DB_PW': mqtt_in_to_db_pw,
 		'MQTT_OUT_TO_DB_USER': mqtt_out_to_db_user,
 		'MQTT_OUT_TO_DB_PW': mqtt_out_to_db_pw,
+		'INOUT_TOPIC_ENABLED': 'false',  # Can be set to 'true' in /etc/biomed-iot/config.toml if you want to use the inout topic
 	}
 
 	log('Mosquitto installation done', MOSQUITTO_INSTALL_LOG_FILE_NAME)

@@ -97,7 +97,7 @@ def get_setup_scheme():
         chosen_scheme = 'TLS_NO_DOMAIN'
         # Ask about the domain
         domain_answer = (
-            input('\n\n\nIs the server using a domain name like ' "'example.com')? (y/N, default is N): ").strip().lower()
+            input("\n\n\nDo you own a domain name like 'example.com' that you want to use for your server? (y/N, default is N): ").strip().lower()
         )
         if domain_answer == 'y':
             chosen_scheme = 'TLS_DOMAIN'
@@ -179,14 +179,6 @@ def prompt_for_password(required_length=12):
             print('Password does not meet the criteria.\n')
 
 
-def get_domain(setup_scheme):
-    domain = ''
-    if setup_scheme == 'TLS_DOMAIN':
-        domain = get_confirmed_text_input("\nEnter the domain name (e.g. 'example.com') without leading 'www.': ")
-    log('Entered Domain: ' + domain)
-    return domain
-
-
 def get_credentials_for_pw_reset():
     question = (
         "\n\n\nIf you want to use the platform's password reset function and email verification for users, you need to "
@@ -204,7 +196,7 @@ def get_credentials_for_pw_reset():
                 try:
                     pwreset_port = int(
                         get_confirmed_text_input(
-                            "Enter the port for the website's password reset function (e.g. 587): "
+                            "Enter the port for the website's password reset function (e.g. 587)"
                         )
                     )
                     if 1 <= pwreset_port <= 65535:
@@ -252,9 +244,8 @@ def create_config_dir():
 
 
 def create_gateway_setup_zip_file(config_path):
-    # TODO: add pem file from Let's Encrypt for "TLS_DOMAIN"
     # Define paths
-    cert_file_path = "/etc/ssl/certs/biomed-iot.crt"
+    cert_file_path = "/etc/ssl/certs/biomed-iot.crt" # For zip file creation for TLS-DOMAIN scheme, see DOMAIN_SETUP.md
     script_file_path = f"{config_path}/gateway_setup.sh"
     publish_example_script_file_path = f"{config_path}/publish_cpu_temp.sh"
     download_folder = "/var/www/biomed-iot/media/public_download_files"
@@ -284,10 +275,9 @@ def main():
 
     hostname = socket.gethostname()
     ip_address = run_bash("hostname --all-ip-addresses | awk '{print $1}'", show_output=False)
+    host_docker_internal_ip = "172.17.0.1"  # Default Docker internal IP address, can be changed later in config.toml
     linux_user = get_linux_user()
     setup_dir = get_setup_dir()
-    django_admin_name = 'iot_admin'
-    django_admin_pass = get_random_string(7) + '-' + get_random_string(7) + '-' + get_random_string(7)
     pwreset_email = None
     pwreset_pass = None
     domain = ''
@@ -309,7 +299,12 @@ def main():
     """ USER INPUT """
     setup_scheme = get_setup_scheme()
 
-    domain = get_domain(setup_scheme)
+    if setup_scheme == 'TLS_DOMAIN':  # TLS_DOMAIN scheme may be deprecated in the future
+        domain = get_confirmed_text_input("\nEnter the domain name (e.g. 'example.com') without leading 'www.'")
+        log('Entered Domain: ' + domain)
+        print("\n\nTo make your website accessible at your domain, run the 'setup_nginx_domain.py' after this setup. "
+            "Make sure a DNS A record is set up pointing to your server's IP address."
+        )
 
     django_admin_email = get_confirmed_text_input('\n\nEnter email address for ' "your website's admin user")
 
@@ -363,8 +358,9 @@ def main():
     host_config_data = {
         'IP': ip_address,
         'HOSTNAME': hostname,
-        'DOMAIN': domain,
-        'TLS': "true" if setup_scheme != 'NO_TLS' else "false"
+        'DOMAIN': "",
+        'TLS': "true" if setup_scheme != 'NO_TLS' else "false",
+        'HOST_DOCKER_INTERNAL_IP': host_docker_internal_ip
     }
 
     empty_config_data = generate_empty_config_data()
@@ -393,8 +389,7 @@ def main():
     grafana_config_data = install_grafana(
         architecture,
         setup_scheme,
-        ip_address,
-        domain
+        ip_address
         )
     print('Grafana installed')
     log('Grafana installed')
@@ -420,11 +415,7 @@ def main():
     write_config_file(current_config_data)
 
     set_setup_dir_rights()
-    django_config_data = install_django(
-        django_admin_email,
-        django_admin_name,
-        django_admin_pass
-    )
+    django_config_data = install_django(django_admin_email)
     print('Django installed')
     log('Django installed')
 
@@ -477,7 +468,9 @@ def main():
 
     msg_no_tls = f'The website is accessible at http://{ip_address}'
     msg_tls_no_domain = f'The website is accessible at https://{ip_address}'
-    msg_tls_domain = f'The website is accessible at https://{domain}'
+    msg_tls_domain = (f"To make the website accessible at https://{domain},"
+                      "follow the instructions in DOMAIN_SETUP.md directly after this setup.\n"
+    )
 
     if setup_scheme == 'NO_TLS':
         print(msg_no_tls)
@@ -492,7 +485,8 @@ def main():
     print(
         '\nFor detailed information on the installation process, '
         f'please refer to the log files located in {setup_dir}/setup_files/setup_logs.\n'
-        "\nTo make everything work, please reboot your machine with 'sudo reboot'"
+        "\nTo make everything work after this setup and the optional domain setup is finished, " \
+        "please reboot your machine with 'sudo reboot'."
     )
 
     print('\n--- END OF SETUP ---\n\n')

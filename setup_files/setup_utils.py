@@ -123,21 +123,6 @@ def get_random_string(length, incl_symbols=False):
     # simple secure choice
     return ''.join(secrets.choice(pool) for _ in range(length))
 
-## TODO OLD VERSION --> DELETE AFTER TESTS
-# def get_random_string(string_length, incl_symbols=False):
-# 	"""
-# 	Define the characters to include in the random string
-# 	Leave incl_symbols to False (no symbols in password) for easy copy paste
-# 	but make passwords etc. longer for security.
-# 	"""
-# 	symbols = '!@#$%&*()_+-=[]}{|;:<>/?'
-# 	characters = string.ascii_letters + string.digits
-# 	if incl_symbols:
-# 		characters += symbols
-# 	# Generate a random string of the specified length
-# 	rand_str = ''.join(random.choice(characters) for _ in range(string_length))
-# 	return rand_str
-
 
 def set_setup_dir_rights():
 	output = run_bash(f'chmod -R 700 {get_setup_dir()}')

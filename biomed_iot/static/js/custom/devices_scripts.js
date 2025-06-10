@@ -36,7 +36,7 @@ document.addEventListener('DOMContentLoaded', () => {
     const checkbox = document.getElementById('id_same_topic');
     if (checkbox && checkbox.checked) {
       const ok = window.confirm(
-        "Are you sure you want to use 'inout/' topic for this device?"
+        "I know what 'inout/' topic means and I know what I am doing?"
       );
       if (!ok) {
         e.preventDefault();

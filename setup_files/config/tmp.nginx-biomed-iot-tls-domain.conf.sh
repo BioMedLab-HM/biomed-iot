@@ -1,12 +1,5 @@
 #!/bin/sh
 
-# TODO: 
-# - Ergänzungen bei Gunicorn?
-# - location /media/ ...
-# - ggf. Grafana?
-# - weitere Dienste?
-# - Prüfen ob include snippets NACH Ergänzungen durch certbot stattfinden
-
 # Get passed parameter
 DOMAIN=$1
 
@@ -19,6 +12,9 @@ server {
     listen 443 ssl;
     listen [::]:443 ssl;
     server_name $DOMAIN www.$DOMAIN;
+
+    ssl_certificate     /etc/letsencrypt/live/$DOMAIN/fullchain.pem;
+    ssl_certificate_key /etc/letsencrypt/live/$DOMAIN/privkey.pem;
     include snippets/ssl-params.conf;  # in addition to certbots parameters
 
     location = /favicon.ico { access_log off; log_not_found off; }
@@ -55,6 +51,10 @@ server {
     listen [::]:80;
 
     server_name $DOMAIN www.$DOMAIN;
+
+    location /.well-known/acme-challenge/ {
+        root /var/www/letsencrypt;  # webroot for Certbot
+    }
 
     return 301 https://\$server_name\$request_uri;  # redirect to server block with port 443 listener. Changed 302 to 301 after successfull testing
 }

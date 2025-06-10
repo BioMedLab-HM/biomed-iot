@@ -3,7 +3,7 @@ from .setup_utils import get_setup_dir, get_linux_user, run_bash, log, get_rando
 DJANGO_INSTALL_LOG_FILE_NAME = 'install_09_django.log'
 
 
-def install_django(django_admin_email, django_admin_name, django_admin_pass):
+def install_django(django_admin_email, ):
     """
     Setup Django environment, including virtual environment creation,
     dependencies installation, migrations, and superuser creation.
@@ -11,6 +11,8 @@ def install_django(django_admin_email, django_admin_name, django_admin_pass):
     linux_user = get_linux_user()
     setup_dir = get_setup_dir()
 
+    django_admin_name = 'iot_admin'
+    django_admin_pass = get_random_string(7) + '_' + get_random_string(7) + '_' + get_random_string(7)
     django_secret = get_random_string(50, incl_symbols=True)
 
     # Create the Django virtual environment
@@ -106,6 +108,7 @@ def install_django(django_admin_email, django_admin_name, django_admin_pass):
         'DJANGO_ADMIN_NAME': django_admin_name,
         'DJANGO_ADMIN_PASS': django_admin_pass,
         'DJANGO_DEBUG': "false",  # Set to false for production
+        'TIME_ZONE': 'Europe/Berlin',  # Set to UTC or your preferred timezone
     }
 
     log('Django setup done', DJANGO_INSTALL_LOG_FILE_NAME)

@@ -1,9 +1,9 @@
 {% extends "core/base.html" %}
 {% load crispy_forms_tags %}
 {% block content %}
-<div class="card mb-3">
-  <div class="card-header">
-      <h4 class="my-0 font-weight-normal">Hello {{ user.username }}</h4>
+<div class="card shadow mb-4 border-0">
+  <div class="card-header navbar-dark bg-primary text-white">
+      <h4 class="my-0 font-weight-normal">Hello "{{ user.username }}"</h4>
   </div>
   <div class="card-body">
     <div class="row">

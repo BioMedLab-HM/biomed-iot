@@ -32,6 +32,22 @@ module.exports = {
  *  - userDir
  *  - nodesDir
  ******************************************************************************/
+    
+    // Expose selected process.env variables to the editor
+    env: {
+        INFLUXDB_ORG:    { value: process.env.INFLUXDB_ORG },
+        INFLUXDB_BUCKET: { value: process.env.INFLUXDB_BUCKET },
+        INFLUXDB_TOKEN:  { value: process.env.INFLUXDB_TOKEN },
+        INFLUXDB_HOST:   { value: process.env.INFLUXDB_HOST },
+        INFLUXDB_PORT:   { value: process.env.INFLUXDB_PORT },
+        INFLUXDB_PROTOCOL: { value: process.env.INFLUXDB_PROTOCOL },
+        INFLUXDB_URL:    { value: process.env.INFLUXDB_URL },
+        MQTT_TOPIC_ID:   { value: process.env.MQTT_TOPIC_ID },
+        MQTT_HOST: { value: process.env.MQTT_HOST },
+        MQTT_PORT:       { value: process.env.MQTT_PORT },
+        MQTT_USERNAME: { value: process.env.MQTT_USERNAME },
+        MQTT_PASSWORD: { value: process.env.MQTT_PASSWORD }
+    },
 
     /** The file containing the flows. If not set, defaults to flows_<hostname>.json **/
     flowFile: 'flows.json',

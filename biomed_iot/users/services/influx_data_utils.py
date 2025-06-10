@@ -8,6 +8,7 @@ import csv
 import io
 import requests
 from datetime import datetime
+from django.utils import timezone
 from typing import Iterator, Dict, Any, Tuple, List
 from influxdb_client import InfluxDBClient
 from influxdb_client.client.flux_table import FluxTable
@@ -84,10 +85,15 @@ class InfluxDataManager:
         csv_writer: csv.DictWriter | None = None
         header_fields: list[str] | None = None
 
+        # pick once outside the loop – respects TIME_ZONE or per-request activate()
+        local_tz = timezone.get_current_timezone()
+
         for record in record_stream:
+            # convert time from UTC → project/user zone
+            local_time = timezone.localtime(record.get_time(), local_tz)
             # flatten a single FluxRecord to a simple dict
             row: Dict[str, Any] = {
-                "time": record.get_time().isoformat(),
+                "time":      local_time.isoformat(),
                 "field":     record["_field"],
                 "value":     record["_value"],
             }
@@ -106,15 +112,19 @@ class InfluxDataManager:
                          else f"{key} (tag)"
                     for key in header_fields
                 }
-                # write custom header row
+                # write Excel separator hint
+                buffer.write("sep=,\n")
+                # write custom header rows
                 csv_writer.writerow(header_labels)
                 yield buffer.getvalue().encode("utf-8")
-                buffer.seek(0); buffer.truncate(0)
+                buffer.seek(0)
+                buffer.truncate(0)
 
             # write the current row and yield bytes
             csv_writer.writerow(row)
             yield buffer.getvalue().encode("utf-8")
-            buffer.seek(0); buffer.truncate(0)
+            buffer.seek(0)
+            buffer.truncate(0)
 
         # no records at all?
         if header_fields is None:
@@ -124,20 +134,38 @@ class InfluxDataManager:
     # ─────────────────────────── Public API ─────────────────────────────────
     def list_measurements(self) -> List[str]:
         """Return all distinct measurement names in this bucket."""
-        flux_query = f"""
-from(bucket:"{self.bucket}")
-  |> range(start: 1970-01-01T00:00:00Z)
-  |> keep(columns: ["_measurement"])
-  |> distinct(column: "_measurement")
-"""
+
+        flux_query = f'''
+import "influxdata/influxdb/schema"
+schema.measurements(
+bucket: "{self.bucket}",
+start: -inf
+)
+'''
+
         with self._client() as client:
             tables = client.query_api().query(flux_query)
 
-        # extract the measurement name from each row
         measurements: List[str] = []
         for table in tables:
-            for row in table:
-                measurements.append(row["_value"])
+            for record in table.records:
+                # record.get_value() will be the measurement name (string)
+                measurements.append(record.get_value())
+
+#         flux_query = f"""
+# from(bucket:"{self.bucket}")
+#   |> range(start: 1970-01-01T00:00:00Z)
+#   |> keep(columns: ["_measurement"])
+#   |> distinct(column: "_measurement")
+# """
+#         with self._client() as client:
+#             tables = client.query_api().query(flux_query)
+
+#         # extract the measurement name from each row
+#         measurements: List[str] = []
+#         for table in tables:
+#             for row in table:
+#                 measurements.append(row["_value"])
         return measurements
 
     def delete(
