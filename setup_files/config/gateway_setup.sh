@@ -13,10 +13,10 @@ echo -e "\n\n$logo_header\n\n"
 
 # 1. Prompt for details
 read -rp "Enter the hostname (domain or IP-address) of Biomed IoT: " hostname
-read -rp "Enter the 'Name' for your gateway (device): " gatewayname
-read -srp "Enter the corresponding 'username' for your device: " mqtt_username; echo
-read -srp "Enter the corresponding 'password' for your device: " mqtt_password; echo
-read -srp "Enter your personal topic-id: " topic_id; echo
+read -rp "Enter the 'Name' for your gateway (as shown on the 'Devices' page): " gatewayname
+read -srp "Enter the corresponding 'username' for your gateway (as shown on the 'Devices' page): " mqtt_username; echo
+read -srp "Enter the corresponding 'password' for your gateway (as shown on the 'Devices' page): " mqtt_password; echo
+read -srp "Enter your personal topic-id (as shown on the 'Message & Topic Structure' page): " topic_id; echo
 
 # 2. Detect the real user, even if run via sudo
 if [ -n "$SUDO_USER" ]; then
@@ -37,7 +37,13 @@ sudo mkdir -p /etc/mosquitto/conf.d
 sudo tee /etc/mosquitto/conf.d/biomed.conf > /dev/null <<EOL
 connection ${gatewayname}
 address ${hostname}:8883
+
+# comment the next line if using Let's Encrypt certs
 bridge_cafile /etc/mosquitto/certs/biomed-iot.crt
+
+# Uncomment the next line if using Let's Encrypt certs
+# bridge_cafile /etc/mosquitto/certs/ISRG_Root_X1.pem
+
 remote_username ${mqtt_username}
 remote_password ${mqtt_password}
 cleansession true
@@ -51,12 +57,16 @@ EOL
 
 # 6. Permissions & cert
 sudo chmod 644 /etc/mosquitto/conf.d/biomed.conf
+# Comment this if-block if you want to use Let's Encrypt certs
 if [ ! -f biomed-iot.crt ]; then
   echo "Error: biomed-iot.crt not found in current directory." >&2
-  exit 1
+  exit 1  
 fi
 sudo mkdir -p /etc/mosquitto/certs
-sudo cp biomed-iot.crt /etc/mosquitto/certs/
+sudo cp /etc/ssl/certs/ISRG_Root_X1.pem /etc/mosquitto/certs/
+sudo chmod 644 /etc/mosquitto/certs/ISRG_Root_X1.pem # for Let's Encrypt certs
+# Comment the next line if you want to use Let's Encrypt certs
+sudo cp biomed-iot.crt /etc/mosquitto/certs/  # for self-signed certs
 
 # 7. Schedule status cronjob without wiping existing jobs
 cron_job="* * * * * mosquitto_pub -t in/devicestatus -m '{\"$gatewayname\":1}' -h localhost -p 1883"

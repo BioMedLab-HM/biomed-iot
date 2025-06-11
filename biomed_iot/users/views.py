@@ -13,7 +13,7 @@ from django.core.exceptions import ObjectDoesNotExist
 from django.contrib.auth import login
 from django.shortcuts import render, redirect
 from django.contrib import messages
-from django.http import HttpResponse, JsonResponse, Http404, StreamingHttpResponse
+from django.http import HttpResponse, HttpResponseForbidden, JsonResponse, Http404, StreamingHttpResponse
 from django.http import HttpResponseBadRequest
 from django.db import IntegrityError
 from django.db import transaction
@@ -53,6 +53,18 @@ def send_verification_email(user, request):
 
 
 def register(request):
+    registration_enabled = True if config.django.REGISTRATION_ENABLED == "true" else False
+    if not registration_enabled:
+        if request.method == 'POST':
+            # Block any attempt to register even with crafted POST
+            return HttpResponseForbidden("Self-registration is disabled.")
+        else:
+            return render(request, 'users/register.html', {
+                'registration_enabled': False,
+                'title': 'Register',
+                'thin_navbar': False,
+            })
+
     if request.method == 'POST':
         form = UserRegisterForm(request.POST)
         if form.is_valid():
@@ -75,7 +87,11 @@ def register(request):
         form = UserRegisterForm()
 
     page_title = 'Register'
-    context = {'form': form, 'title': page_title, 'thin_navbar': False}
+    context = {
+        'registration_enabled': registration_enabled,
+        'form': form,
+        'title': page_title,
+        'thin_navbar': False}
     return render(request, 'users/register.html', context)
 
 

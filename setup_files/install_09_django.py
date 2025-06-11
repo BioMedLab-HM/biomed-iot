@@ -109,6 +109,7 @@ def install_django(django_admin_email, ):
         'DJANGO_ADMIN_PASS': django_admin_pass,
         'DJANGO_DEBUG': "false",  # Set to false for production
         'TIME_ZONE': 'Europe/Berlin',  # Set to UTC or your preferred timezone
+        'REGISTRATION_ENABLED': "true",  # Set to true to allow user registration
     }
 
     log('Django setup done', DJANGO_INSTALL_LOG_FILE_NAME)

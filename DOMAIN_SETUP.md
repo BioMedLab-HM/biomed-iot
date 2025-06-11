@@ -24,30 +24,38 @@ sudo apt install -y openssl certbot python3-certbot-nginx
 ```
 ### 2.2 Generate a domain-specific NGINX vhost from the template
 ```bash
+mkdir ~/biomed-iot/setup_files/tmp
 sudo bash ~/biomed-iot/setup_files/config/tmp.nginx-biomed-iot-tls-domain.conf.sh example.com \
      > ~/biomed-iot/setup_files/tmp/nginx-biomed-iot-tls-domain.conf
 ```
-### 2.3 Move the vhost into place & enable it (check for other links in sites-enabled and delete if necessary)
+### 2.3 Move the http vhost into place & enable it (check for other links in sites-enabled and delete if necessary)
 ```bash
 sudo cp ~/biomed-iot/setup_files/tmp/nginx-biomed-iot-tls-domain.conf \
         /etc/nginx/sites-available/example.com.conf
-sudo ln -s /etc/nginx/sites-available/example.com.conf /etc/nginx/sites-enabled
+sudo cp /etc/nginx/sites-available/example.com.conf \
+        /etc/nginx/sites-available/example.com.http.conf
+# Delete the 443 server block in the ...http.conf file
+sudo ln -s /etc/nginx/sites-available/example.com.http.conf /etc/nginx/sites-enabled
+# Test and reload 
+sudo nginx -t
+sudo systemctl reload nginx
 ```
 ### 2.4 Create a strong Diffie–Hellman parameter file (one-off, ~1 min)
 ```bash
 sudo openssl dhparam -out /etc/nginx/dhparam.pem 2048 # or 3072
 ```
 ### Create Let's Encrypt deploy hook for nginx
-Write the lines:
+Create directory and file
+```bash
+sudo mkdir -p /etc/letsencrypt/renewal-hooks/deploy
+sudo nano /etc/letsencrypt/renewal-hooks/deploy/reload-nginx.sh
+```
+Write the following lines into the file and save it:
 ```bash
 #!/bin/bash
 systemctl reload nginx
 ```
-into
-```bash
-sudo nano /etc/letsencrypt/renewal-hooks/deploy/reload-nginx.sh
-```
-and then make it executable:
+Then make it executable:
 ```bash
 sudo chmod +x /etc/letsencrypt/renewal-hooks/deploy/reload-nginx.sh
 ```
@@ -64,16 +72,17 @@ sudo chown -R <your-linux-user>:www-data /var/www/letsencrypt
 ```bash
 sudo chmod -R 2775 /var/www/letsencrypt
 ```
-Then run certbot (replace example.com with your own domain)
+Then run certbot (replace example.com with your own domain) and enable the new https server block
 ```bash
 sudo certbot certonly --webroot -w /var/www/letsencrypt -d example.com -d www.example.com
+sudo ln -s /etc/nginx/sites-available/example.com.conf /etc/nginx/sites-enabled
 ```
 Follow the interactive prompts. Certbot will:
 
 Prove domain ownership via HTTP-01 challenge.
 Edit the NGINX vhost so HTTPS traffic is redirected.
 
-### 2.6 Install the recommended SSL parameters snippet
+### 2.6 Install the recommended SSL parameters snippet if not yet existing
 ```bash
 sudo cp ~/biomed-iot/setup_files/config/tmp.ssl-params.conf \
         /etc/nginx/snippets/ssl-params.conf
@@ -114,11 +123,6 @@ systemctl list-timers | grep certbot
 mkdir ~/gateway-zip
 cd ~/gateway-zip
 ```
-### 4.2 Copy and rename the Let’s Encrypt fullchain.pem
-```
-sudo cp /etc/letsencrypt/live/example.com/fullchain.pem \
-        ./biomed_iot_fullchain.pem
-```
 ### 4.3 Copy the two scripts into your temp directory
 ```
 cp ~/biomed-iot/setup_files/config/gateway_setup.sh ./
@@ -128,22 +132,19 @@ cp ~/biomed-iot/setup_files/config/publish_cpu_temp.sh ./
 ```
 nano gateway_setup.sh
 ```
-Change:
-bridge_cafile /etc/mosquitto/certs/biomed-iot.crt
-to:
-bridge_cafile biomed_iot_fullchain.pem
+Change the code according to the commentsabout Let's Encrypt (ISRG_Root_X1.pem) and self-signed cert (biomed-iot.crt).
+
 Then save and exit
 
 
 ### 4.6 Create the ZIP archive
-Verify that all three files are present
+Verify that all two or three files are present
 ```
 ls -1
 ```
 Create the ZIP archive
 ```
-zip biomed_iot_gateway.zip biomed_iot_fullchain.pem \
-                            gateway_setup.sh \
+zip biomed_iot_gateway.zip  gateway_setup.sh \
                             publish_cpu_temp.sh
 ```
 ### 4.7 Move the ZIP into the public download folder
