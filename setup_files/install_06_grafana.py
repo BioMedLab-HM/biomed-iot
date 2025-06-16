@@ -24,8 +24,8 @@ def install_grafana(architecture, setup_scheme, ip_address):
         # Ensure the temp directory exists and enter it
         f'mkdir -p {grafana_files_dir} && cd {grafana_files_dir} && '
         'sudo apt-get install -y adduser libfontconfig1 musl && '
-        + 'wget https://dl.grafana.com/oss/release/grafana_10.4.2_amd64.deb && '
-        + 'sudo dpkg -i grafana_10.4.2_amd64.deb && '
+        + 'wget https://dl.grafana.com/oss/release/grafana_12.0.1+security~01_amd64.deb && '
+        + 'sudo dpkg -i grafana_12.0.1+security~01_amd64.deb && '
         + 'cd -',  # Return to install_dir
     ]
 
@@ -33,8 +33,8 @@ def install_grafana(architecture, setup_scheme, ip_address):
         # Ensure the temp directory exists and enter it
         f'mkdir -p {grafana_files_dir} && cd {grafana_files_dir} && '
         'sudo apt-get install -y adduser libfontconfig1 musl && '
-        + 'wget https://dl.grafana.com/oss/release/grafana_10.4.2_arm64.deb && '
-        + 'sudo dpkg -i grafana_10.4.2_arm64.deb && '
+        + 'wget https://dl.grafana.com/oss/release/grafana_12.0.1+security~01_arm64.deb && '
+        + 'sudo dpkg -i grafana_12.0.1+security~01_arm64.deb && '
         + 'cd -',  # Return to install_dir
     ]
 

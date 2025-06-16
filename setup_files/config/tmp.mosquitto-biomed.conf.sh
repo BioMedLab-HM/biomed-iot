@@ -35,6 +35,10 @@ persistence true
 # Allowed number of simultaneously connected clients (-1 is infinite) 
 max_connections -1
 
+# The maximum number of QoS 1 or 2 messages to hold in the queue (per client) above those 
+# messages that are currently in flight. Defaults to 1000. Set to 0 for no maximum (not recommended)
+max_queued_messages 10000
+
 # Max. number of outgoing QoS 1/2 messages that can be transmitted (be in-flight) without 
 # acknoledgements from the client. This helps avoid overwhelming clients with too many messages at once, 
 # particularly in unreliable network conditions. A value of 1 guarantees in Order transmission.
