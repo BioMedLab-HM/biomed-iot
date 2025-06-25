@@ -34,7 +34,11 @@ sudo cp /etc/mosquitto/mosquitto.conf /etc/mosquitto/mosquitto.conf.backup
 
 # 5. Drop in our bridge config
 sudo mkdir -p /etc/mosquitto/conf.d
-sudo tee /etc/mosquitto/conf.d/biomed.conf > /dev/null <<EOL
+sudo tee /etc/mosquitto/conf.d/biomed_gateway.conf > /dev/null <<EOL
+# Biomed IoT Gateway Configuration
+listener 1883 0.0.0.0
+allow_anonymous true
+
 connection ${gatewayname}
 address ${hostname}:8883
 
@@ -56,7 +60,7 @@ topic # in  2 out/ out/${topic_id}/${gatewayname}/
 EOL
 
 # 6. Permissions & cert
-sudo chmod 644 /etc/mosquitto/conf.d/biomed.conf
+sudo chmod 644 /etc/mosquitto/conf.d/biomed_gateway.conf
 # Comment this if-block if you want to use Let's Encrypt certs
 if [ ! -f biomed-iot.crt ]; then
   echo "Error: biomed-iot.crt not found in current directory." >&2

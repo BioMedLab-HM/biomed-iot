@@ -120,8 +120,8 @@ systemctl list-timers | grep certbot
 
 ### 4.1 Create a temporary work directory
 ```bash
-mkdir ~/gateway-zip
-cd ~/gateway-zip
+mkdir ~/build_gateway_zip
+cd ~/build_gateway_zip
 ```
 ### 4.3 Copy the two scripts into your temp directory
 ```
@@ -138,10 +138,6 @@ Then save and exit
 
 
 ### 4.6 Create the ZIP archive
-Verify that all two or three files are present
-```
-ls -1
-```
 Create the ZIP archive
 ```
 zip biomed_iot_gateway.zip  gateway_setup.sh \
@@ -154,7 +150,7 @@ sudo mv biomed_iot_gateway.zip /var/www/biomed-iot/media/public_download_files/
 ### 4.8 Clean up the temporary directory
 ```
 cd ~
-rm -rf ~/gateway-zip
+rm -rf ~/build_gateway_zip
 ```
 Back to [*README.md*](README.md)
 

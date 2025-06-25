@@ -1,7 +1,9 @@
 /////// USER INPUT SECTION ///////
 
+// Put this function node between your MQTT IN node and your InFLUX BATCH node
+
 // Mandatory: Define your measurement name
-var measurement = "esp32";
+var measurement = "WRITE_YOUR_MEASUREMENT_NAME_HERE";
 
 /////// END OF USER INPUT SECTION ///////
 
@@ -14,53 +16,35 @@ var measurement = "esp32";
 
 
 
-///// DO NOT CHANGE CODE BELOW /////
-/* This script is to store any device status that is received */
+
+
+
+
+
+///// DO NOT CHANGE THE CODE BELOW /////
+// This script is to store any device status that is received
 
 // Parse the incoming payload
 var data = msg.payload;
 
-// Dynamically build fields and tags objects from data properties
-var fields = {};
-var tags = {};
-
-// Iterate through the data and check if values exist
+// Build array of points
+var points = [];
 for (var key in data) {
-    if (data.hasOwnProperty(key) && key !== 'timestamp') {
-        // Check if the value is defined and not null/empty
-        if (data[key] !== null && data[key] !== undefined && data[key] !== "") {
-            fields[key] = data[key]; // Add the valid field to fields object
-            tags["fieldname"] = key; // Create a tag for the field
-        } else {
-            // Optionally log or handle empty or invalid data
-            node.warn("Invalid or missing value for key: " + key);
+    if (data.hasOwnProperty(key) && key !== "timestamp") {
+        var point = {
+            measurement: measurement,
+            fields: {},
+            tags: {}
+        };
+        point.fields[key] = data[key];
+        point.tags.fieldname = key;
+        if (data.timestamp) {
+            point.timestamp = data.timestamp;
         }
+        points.push(point);
     }
 }
 
-// Use the timestamp from the MQTT message, converting to the correct precision if necessary
-var timestamp = data.timestamp; // * factor
-
-// Create a new message object to pass to the InfluxDB out node
-var newMsg = {
-    payload: [
-        {
-            measurement: measurement,
-            fields: fields,
-            tags: tags
-        }
-    ]
-};
-
-// Add timestamp as the last element if it exists
-if (data.timestamp) {
-    newMsg.payload[0].timestamp = data.timestamp; // * factor if necessary
-}
-
-// Only return the newMsg if there are valid fields to write
-if (Object.keys(fields).length > 0) {
-    return newMsg;
-} else {
-    node.warn("No valid fields to send to InfluxDB.");
-    return null;
-}
+// Set payload to array of points
+msg.payload = points;
+return msg;
