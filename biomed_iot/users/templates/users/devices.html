@@ -13,6 +13,9 @@
             <li>The new credentials will appear at the bottom of the list</li>
             <li>Toggle visibility with 'Show/Hide Credentials' and copy the username and password</li>
         </ul> -->
+        <ul class="text-muted">
+            <li>><strong>Info</strong>: IoT devices are devices that directly communicate with the platform using the MQTT protocol (sensors in local setups or gateways). This means sensors which send their data to a gateway do not need credentials. Each device needs its own MQTT username and password. Use the form below to assign a unique name to your device and generate its credentials.</li>
+        </ul>
         <form id="device-form" method="post" class="mt-3">
             {% csrf_token %}
             <div class="form-group row">

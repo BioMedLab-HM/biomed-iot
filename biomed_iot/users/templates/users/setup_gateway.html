@@ -25,13 +25,13 @@
         
         <p><strong>Advantages:</strong></p>
         <ul>
-            <li><strong>Reduced Load:</strong> Shift tasks like encryption and optional data pre-processing to the gateway, boosting device performance.</li>
+            <li><strong>Reduced Load for Sensor Devices:</strong> Shift tasks like encryption and optional data pre-processing to the gateway.</li>
             <li><strong>Power Efficiency:</strong> Devices can use simpler, non-Wi-Fi protocols, conserving battery life.</li>
-            <li><strong>Simplified Management:</strong> Avoid programming access credentials into each device, minimizing errors.</li>
+            <li><strong>Simplified Management:</strong> Avoid programming access credentials into each device, minimizing errors and theft.</li>
         </ul>
 
         <p><strong>What You Need:</strong><br>
-        A Raspberry Pi 3 or 4 is sufficent.</p>
+        A Raspberry Pi 3 or newer is sufficent.</p>
     </div>
 </div>
 <div class="card shadow mb-4 border-0">
@@ -42,7 +42,9 @@
         {% if not tls %}
         <p><span style="color: #800000;"><em>Gateway is currently only available for setups using TLS (https).</em></span></p>
         {% endif %}
-<p><strong>First</strong>, create gateway credentials on the <a href="{% url 'devices' %}">Device List</a> page and get your <a href="{% url 'message-and-topic-structure' %}">personal topic ID</a>. Make sure to review the instructions on both of these pages.</p>
+        <p>
+            <strong>First</strong>, create gateway credentials on the <a href="{% url 'devices' %}">Device List</a> page and get your <a href="{% url 'message-and-topic-structure' %}">personal topic ID</a>.
+        </p>
 
         <p><strong>On your gateway device</strong>: to make sure you have 'unzip' and 'curl' installed on your gateways system, run this command in a terminal first.</p>
         <pre><code>sudo apt -y install curl unzip</code></pre>

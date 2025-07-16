@@ -1,5 +1,3 @@
-#!/usr/bin/env python
-
 # Hash a password using Django's default password hasher.
 # This script is useful for creating hashed passwords for use in Django's
 # admin interface for creating new users without self-registration.

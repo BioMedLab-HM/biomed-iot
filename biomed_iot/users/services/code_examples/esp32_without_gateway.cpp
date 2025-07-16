@@ -3,7 +3,6 @@
  * Example Code for Biomed IoT Device using 
  * - an ESP32 microcontroller
  * - a DHT22 temperature and humidity sensor on the A0 pin of your ESP32
- * - a real time unix timestamp (to be implemented in the future) 
  * 
  * To finish this code modify the following in the code below:
  * - wifi_ssid (enter your WiFi name)

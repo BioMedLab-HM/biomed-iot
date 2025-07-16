@@ -1,11 +1,8 @@
 """
 Django settings for biomed-iot project.
 
-For more information on this file, see respective latest version
-https://docs.djangoproject.com/en/4.2/topics/settings/
-
 For the full list of settings and their values, see
-https://docs.djangoproject.com/en/4.2/ref/settings/
+https://docs.djangoproject.com/en/5.2/topics/settings/
 """
 
 import os
@@ -19,7 +16,7 @@ BASE_DIR = Path(__file__).resolve().parent.parent
 
 
 # Quick-start development settings - unsuitable for production
-# See https://docs.djangoproject.com/en/4.2/howto/deployment/checklist/
+# See https://docs.djangoproject.com/en/5.2/howto/deployment/checklist/
 
 # SECURITY WARNING: keep the secret key used in production secret!
 SECRET_KEY = config.django.DJANGO_SECRET_KEY
@@ -27,6 +24,7 @@ SECRET_KEY = config.django.DJANGO_SECRET_KEY
 # SECURITY WARNING: don't run with debug turned on in production!
 DEBUG = True if config.django.DJANGO_DEBUG == "true" else False
 
+# Define a list of host/domain names that this Django site can serve.
 ALLOWED_HOSTS = [config.host.IP, config.host.HOSTNAME, config.host.DOMAIN, 'localhost', '127.0.0.1']
 
 
@@ -62,6 +60,7 @@ MIDDLEWARE = [
     # TODO: Ggf. automatische TZ-Erkennung https://github.com/adamcharnock/django-tz-detect
 ]
 
+# Point to the main URL configuration module that routes all incoming requests.
 ROOT_URLCONF = 'biomed_iot.urls'
 
 TEMPLATES = [
@@ -86,7 +85,8 @@ WSGI_APPLICATION = 'biomed_iot.wsgi.application'
 
 # Database
 # https://docs.djangoproject.com/en/5.0/ref/settings/#databases
-DATABASES = {  # Uncomment the database to use before setup and stay with it
+# Before setup, uncomment only the database you want to use and stay with it
+DATABASES = {
     'default': {
         'ENGINE': 'django.db.backends.sqlite3',
         'NAME': BASE_DIR / 'db.sqlite3',
@@ -111,7 +111,8 @@ AUTHENTICATION_BACKENDS = [  # first successful auth backend will authenticate t
 ]
 
 
-# TODO: Nach setup:
+# OAUTH2 not implemenmnted yet
+# Nach setup:
 # https://stackoverflow.com/questions/40933006/how-to-increase-expires-in-time-of-a-access-token-in-oauth-provider-toolkit-dj  # noqa
 # OAUTH2_PROVIDER = {
 #     'AUTHORIZATION_CODE_EXPIRE_SECONDS': 60 * 65,
@@ -119,7 +120,7 @@ AUTHENTICATION_BACKENDS = [  # first successful auth backend will authenticate t
 #     'OAUTH_SINGLE_ACCESS_TOKEN': True,
 #     'OAUTH_DELETE_EXPIRED': True
 #  }
-# TODO: Nur zum Testen/Tutorial: CORS_ORIGIN_ALLOW_ALL = True
+# Nur zum Testen/Tutorial: CORS_ORIGIN_ALLOW_ALL = True
 # CORS_ORIGIN_ALLOW_ALL = True
 
 # Password validation
@@ -179,7 +180,7 @@ STATIC_URL = '/static/'
 STATICFILES_DIRS = [BASE_DIR / 'static']  # for development server
 STATIC_ROOT = '/var/www/biomed-iot/static/'
 
-# TODO: static files; see above
+# User specific files; see above
 MEDIA_ROOT = '/var/www/biomed-iot/media/'
 MEDIA_DEVELOPMENT = BASE_DIR / 'media'
 MEDIA_URL = '/media/'
@@ -213,6 +214,7 @@ if config.host.TLS == "true":
     CSRF_COOKIE_SECURE = True
 
 
+# Configure loggers, handlers, and formatters for writing logs to file with rotation
 # see: https://docs.djangoproject.com/en/5.0/topics/logging/
 LOG_FILE_PATH = os.path.join(BASE_DIR, 'logging', 'django.log')
 

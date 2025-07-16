@@ -20,7 +20,7 @@ The figure below explains the functionality of Biomed IoT on a high level
 - An MQTT topic is like a label that tells devices where to send or get the messages
 - On the website, the user can store data to a database, create visualizations and send data out to effector devices
 - If you already have access to a ready set up Biomed IoT, go to section [How to use](#how-to-use)
-- Get a deeper understanding for the concept und implementation of Biomed IoT, by consulting the underlying [master's thesis](https://www.researchgate.net/publication/384329057_Weiterentwicklung_einer_Open_Source_IoT-Plattform_fur_Laborautomatisierung_mit_containerbasierten_Node-RED-Instanzen_fur_mehrere_Nutzer)
+- Get a deeper understanding for the concept und implementation of Biomed IoT, by consulting the underlying master's thesis [here](https://www.researchgate.net/publication/384329057_Weiterentwicklung_einer_Open_Source_IoT-Plattform_fur_Laborautomatisierung_mit_containerbasierten_Node-RED-Instanzen_fur_mehrere_Nutzer) or [here](https://opus4.kobv.de/opus4-hm/frontdoor/index/index/docId/727).
 
 ![Biomed IoT Schema](biomed_iot/media/biomed_iot.png "Biomed IoT Schema")
 
@@ -29,14 +29,14 @@ The figure below explains the functionality of Biomed IoT on a high level
 
 ### Requirements
 
-The setup and platform have been tested on a cleanly installed Debian 12 server (x86 and ARM) and under Raspberry Pi OS (64-Bit) on a Raspberry Pi 4, both running Python 3.11.2. It is recommended that you create a new Linux user (included in the sudo group) under which the platform will run.  
-To enable email verification for platform users, an SMTP email provider with 'App-password' is necessary. For example, Gmail&reg; offers this for free. during the Biomed IoT installation process you will be asked for the SMTP email server, port, email address and app-password (a more modern version than App-password may be implemented in the future.)
+The setup and platform have been tested on a cleanly installed Debian 12 server (x86 and ARM) and under Raspberry Pi OS (64-Bit) on a Raspberry Pi 4, both running Python 3.11.2. It is recommended that you create a new Linux user (included in the sudo group) under which the platform will run (instructions see below).  
+To enable email verification for platform users, an SMTP email provider with 'App-password' is necessary. For example, Gmail&reg; offers this for free. during the Biomed IoT installation process you will be asked for the SMTP email server, port, email address and app-password.
 
 ### Setup
 
-If you want to up Biomed IoT server on a Raspberry Pi, you can use [Debian for Pi](https://raspi.debian.net) or, the easier way, [Raspberry Pi OS light (64 Bit)](https://www.raspberrypi.com/software/operating-systems/), flashed to an SD-card using the [Raspberry Pi Imager](https://www.raspberrypi.com/software/). If your are using Raspberry Pi OS, the user can be created  before the flashing process with the Raspberry Pi Imager. In this case you can omit the first steps and start with ‘Add your newly created user to the sudo group‘.
+If you want to set up Biomed IoT server on a Raspberry Pi, you can use [Debian for Pi](https://raspi.debian.net) or, the easier way, [Raspberry Pi OS light (64 Bit)](https://www.raspberrypi.com/software/operating-systems/), flashed to an SD-card using the [Raspberry Pi Imager](https://www.raspberrypi.com/software/). If your are using Raspberry Pi OS, the user can be created before the flashing process with the Raspberry Pi Imager. In this case you can omit the first steps and start with ‘Add your newly created user to the sudo group‘.
 
-First prepare your system for the Biomed IoT setup. Read the instructions carefully before executing the following commands:
+First prepare your system for the Biomed IoT setup. Read and understand the instructions carefully before executing the following commands:
 
 
 Switch to user 'root' and enter the password when prompted
@@ -47,7 +47,7 @@ Create a new user if you have not already done so with the command below (choose
 ```
 adduser <your-username>
 ```
-Install the 'sudo' command capability. This will later allow your user to temporarily perform a command with elevated (root) privileges
+Install the 'sudo' command capability (if not yet installed). This will later allow your user to temporarily perform a command with elevated (root) privileges
 ```
 apt install sudo
 ```
@@ -96,16 +96,28 @@ Consider reading the information, given in the last lines at the end of the inst
 sudo reboot
 ```
 
-The Biomed IoT should now be up and running. Type your server's IP address, host name in a web browser.  
+The Biomed IoT should now be up and running. Type your server's IP address in a web browser.  
 
-**Optional:** If you have a registered domain name (e.g., example.com) that points to your server’s public IP address, you can configure the platform to be accessible via this domain directly afterwards, follow [*Secure NGINX + Let’s Encrypt TLS Setup*](DOMAIN_SETUP.md)
---
-To log in to the Biomed IoT platform as admin, use the email address you provided during setup. The password was auto-generated. You can find it by running the following command in the servers terminal:
+### Domain Setup (Optional)
+If you have a registered domain name (e.g., example.com) that points to your server’s public IP address, you can configure the platform to be accessible via this domain directly afterwards. Follow the [*Secure NGINX + Let’s Encrypt TLS Setup*](DOMAIN_SETUP.md)
+
+### First Login
+To log in to the Biomed IoT platform as admin, go to the Login page and use the email address you provided during setup. The password was auto-generated. Execute the following command in the servers terminal to print it to the terminal:
 ```
-nano /etc/biomed-iot/config.toml
+grep DJANGO_ADMIN_PASS /etc/biomed-iot/config.toml | cut -d '"' -f2
 ```
-Look for the 'DJANGO_ADMIN_PASS' line at the bottom of the file to find your password.
-Close the file by pressing Ctrl+x.
+
+### The config.toml file
+Contains important settings for the project. These are read dynamically during operation (when the server starts). With few exceptions, these parameters must not simply be changed.
+
+Parameters that can be safely changed during operation (changes take effect after restarting the Gunicorn server with sudo systemctl restart gunicorn):
+
+- **All parameters under [mail]**: Sets the login credentials for the SMTP email access used for email validation and password reset. Includes EMAIL_VERIFICATION: "true" or "false" ("true" triggers email verification emails to be sent; requires SMTP email credentials).
+- **INOUT_TOPIC_ENABLED**: ("true" shows a checkbox on the "Device List" page. If checked when creating MQTT credentials, it allows publishing and subscribing to subtopics under inout/<USER_TOPIC_ID>/ (useful for connecting, e.g., Shelly&reg; plugs directly to the platform)).
+- **DJANGO_DEBUG**: "true" or "false" ("true" displays Python error messages in the browser → not intended for production systems).
+- **TIME_ZONE**: Warning: Changing during operation has not yet been tested. Sets the time zone. Relevant for CSV data export.
+- **REGISTRATION_ENABLED**: "false" hides the user registration page → protection against spam sign-ups.
+
 *If you must edit this file for some reason, use sudo. Do not change any value in this file except you know exactly what you are doing.*
 
 ### Troubleshooting
@@ -115,11 +127,9 @@ Close the file by pressing Ctrl+x.
 - The safest way to repeat the installation of Biomed IoT is to re-setup your operating system from scratch (e.g. flashing the SD of for your Pi).
 - Execute the [*Tests After Installation*](tests/tests_after_setup.md) to check the integrity of your installation.
 
-
 ## Performance Testing
 
-A test script to measure core website performance will come in the future.
-
+The script ~/biomed-iot/tests/mqtt_load_tests/sine_load_test.py sends high frequency data to the platform for. Follow the instructions in the file.
 
 ## How to Use
 

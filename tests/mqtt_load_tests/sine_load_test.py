@@ -1,7 +1,6 @@
-#!/usr/bin/env python3
 """
 Publish mock ECG data (sine wave) over MQTT at a chosen sample-rate
-for a chosen run duration.
+for a chosen run duration. Requires paho-mqtt library.
 
 Examples
 --------

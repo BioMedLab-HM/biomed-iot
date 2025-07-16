@@ -40,11 +40,11 @@ while true
 do
 cputemp=$(cat /sys/class/thermal/thermal_zone0/temp)
 cputemp=$((cputemp / 1000))
-timestamp=$(date "+%s")
-echo '{"cputemp":'$cputemp',"timestamp":'$timestamp'}'
+
+echo '{"cputemp":'$cputemp'}'
 
 # TOPIC_ID will be replaced with actual topic id during gateway setup
-mosquitto_pub -h localhost -p 1883 -t in/$gatewayname/cputemp -m '{"cputemp":'$cputemp',"timestamp":'$timestamp'}'
+mosquitto_pub -h localhost -p 1883 -t in/$gatewayname/cputemp -m '{"cputemp":'$cputemp'}'
 
 sleep 20
 done
