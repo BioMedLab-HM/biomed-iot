@@ -20,7 +20,7 @@ The figure below explains the functionality of Biomed IoT on a high level
 - An MQTT topic is like a label that tells devices where to send or get the messages
 - On the website, the user can store data to a database, create visualizations and send data out to effector devices
 - If you already have access to a ready set up Biomed IoT, go to section [How to use](#how-to-use)
-- Get a deeper understanding for the concept und implementation of Biomed IoT, by consulting the underlying master's thesis [here](https://www.researchgate.net/publication/384329057_Weiterentwicklung_einer_Open_Source_IoT-Plattform_fur_Laborautomatisierung_mit_containerbasierten_Node-RED-Instanzen_fur_mehrere_Nutzer) or [here](https://opus4.kobv.de/opus4-hm/frontdoor/index/index/docId/727).
+- Get a deeper understanding for the concept and implementation of Biomed IoT, by consulting the underlying master's thesis [here](https://www.researchgate.net/publication/384329057_Weiterentwicklung_einer_Open_Source_IoT-Plattform_fur_Laborautomatisierung_mit_containerbasierten_Node-RED-Instanzen_fur_mehrere_Nutzer) or [here](https://opus4.kobv.de/opus4-hm/frontdoor/index/index/docId/727).
 
 ![Biomed IoT Schema](biomed_iot/media/biomed_iot.png "Biomed IoT Schema")
 
@@ -30,11 +30,11 @@ The figure below explains the functionality of Biomed IoT on a high level
 ### Requirements
 
 The setup and platform have been tested on a cleanly installed Debian 12 server (x86 and ARM) and under Raspberry Pi OS (64-Bit) on a Raspberry Pi 4, both running Python 3.11.2. It is recommended that you create a new Linux user (included in the sudo group) under which the platform will run (instructions see below).  
-To enable email verification for platform users, an SMTP email provider with 'App-password' is necessary. For example, Gmail&reg; offers this for free. during the Biomed IoT installation process you will be asked for the SMTP email server, port, email address and app-password.
+To enable email verification for platform users, an SMTP email provider with 'App-password' is necessary. For example, Gmail&reg; offers this for free. during the Biomed IoT installation process you will be asked for the SMTP email server, port, email address and App-password.
 
 ### Setup
 
-If you want to set up Biomed IoT server on a Raspberry Pi, you can use [Debian for Pi](https://raspi.debian.net) or, the easier way, [Raspberry Pi OS light (64 Bit)](https://www.raspberrypi.com/software/operating-systems/), flashed to an SD-card using the [Raspberry Pi Imager](https://www.raspberrypi.com/software/). If your are using Raspberry Pi OS, the user can be created before the flashing process with the Raspberry Pi Imager. In this case you can omit the first steps and start with ‘Add your newly created user to the sudo group‘.
+If you want to set up Biomed IoT server on a Raspberry Pi, you can use [Debian for Pi](https://raspi.debian.net) or, the easier way, [Raspberry Pi OS light (64 Bit)](https://www.raspberrypi.com/software/operating-systems/), flashed to an SD-card using the [Raspberry Pi Imager](https://www.raspberrypi.com/software/). If you are using Raspberry Pi OS, the user can be created before the flashing process with the Raspberry Pi Imager. In this case you can omit the first steps and start with ‘Add your newly created user to the sudo group‘.
 
 First prepare your system for the Biomed IoT setup. Read and understand the instructions carefully before executing the following commands:
 
@@ -43,7 +43,7 @@ Switch to user 'root' and enter the password when prompted
 ```
 su -
 ```
-Create a new user if you have not already done so with the command below (choose your own name for <your-username>) and follow the instructions (entries for "Full name", "Room number" etc. are not necessary):
+Create a new user if you have not already done so with the command below (choose your own name for <your-username>) and follow the instructions (entries for 'Full name', 'Room number' etc. are not necessary):
 ```
 adduser <your-username>
 ```
@@ -112,11 +112,11 @@ Contains important settings for the project. These are read dynamically during o
 
 Parameters that can be safely changed during operation (changes take effect after restarting the Gunicorn server with sudo systemctl restart gunicorn):
 
-- **All parameters under [mail]**: Sets the login credentials for the SMTP email access used for email validation and password reset. Includes EMAIL_VERIFICATION: "true" or "false" ("true" triggers email verification emails to be sent; requires SMTP email credentials).
-- **INOUT_TOPIC_ENABLED**: ("true" shows a checkbox on the "Device List" page. If checked when creating MQTT credentials, it allows publishing and subscribing to subtopics under inout/<USER_TOPIC_ID>/ (useful for connecting, e.g., Shelly&reg; plugs directly to the platform)).
-- **DJANGO_DEBUG**: "true" or "false" ("true" displays Python error messages in the browser → not intended for production systems).
+- **All parameters under [mail]**: Sets the login credentials for the SMTP email access used for email validation and password reset. Includes EMAIL_VERIFICATION: 'true' or 'false' ('true' triggers email verification emails to be sent; requires SMTP email credentials).
+- **INOUT_TOPIC_ENABLED**: ('true' shows a checkbox on the 'Device List' page. If checked when creating MQTT credentials, it allows publishing and subscribing to subtopics under inout/<USER_TOPIC_ID>/ (useful for connecting, e.g., Shelly&reg; plugs directly to the platform)).
+- **DJANGO_DEBUG**: 'true' or 'false' ('true' displays Python error messages in the browser → not intended for production systems).
 - **TIME_ZONE**: Warning: Changing during operation has not yet been tested. Sets the time zone. Relevant for CSV data export.
-- **REGISTRATION_ENABLED**: "false" hides the user registration page → protection against spam sign-ups.
+- **REGISTRATION_ENABLED**: 'false' hides the user registration page → protection against spam sign-ups.
 
 *If you must edit this file for some reason, use sudo. Do not change any value in this file except you know exactly what you are doing.*
 
