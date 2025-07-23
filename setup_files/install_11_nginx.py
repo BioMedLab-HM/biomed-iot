@@ -17,24 +17,30 @@ def install_nginx(setup_scheme, domain, server_ip, hostname):
 
     commands = []
 
-    STUB_ENABLED = False
-
-    if STUB_ENABLED:  # if setup_scheme == 'TLS_DOMAIN':
-        # Configurations for TLS with domain moved to separate script
+    # TODO: DOMAIN SETUP!
+    if setup_scheme == 'TLS_DOMAIN':
         commands = [
+            # 1. Packages
             'apt install -y openssl certbot python3-certbot-nginx',
+            # 2. Strong DH params & SSL snippet (needed *before* nginx/Certbot)
+            f'cp {config_path}/tmp.ssl-params.conf /etc/nginx/snippets/ssl-params.conf',
+            'openssl dhparam -out /etc/nginx/dhparam.pem 3072',  # 3072 is recommended for public servers
+            # 3. Create the server conf file
             f'bash {config_path}/tmp.nginx-biomed-iot-tls-domain.conf.sh {domain} > {setup_dir}/setup_files/tmp/nginx-biomed-iot-tls-domain.conf',
             f'cp {setup_dir}/setup_files/tmp/nginx-biomed-iot-tls-domain.conf /etc/nginx/sites-available/{domain}.conf',
             f'ln -s /etc/nginx/sites-available/{domain}.conf /etc/nginx/sites-enabled',
-            'openssl dhparam -out /etc/nginx/dhparam.pem 3072',  # 3072 is recommended for public servers
-            f'certbot --nginx --rsa-key-size 2048 -d {domain} -d www.{domain}',
-            f'cp {config_path}/tmp.ssl-params.conf /etc/nginx/snippets/ssl-params.conf',
+            # 4. Expose port 80 for the ACME HTTP-01 challenge
+            'nginx -t',
+            'systemctl reload nginx',
+            # 5. Pull the cert (non-interactive, agree TOS, add redirect)
+            f'certbot --nginx --non-interactive --agree-tos --email admin@{domain} --redirect --rsa-key-size 3072 -d {domain} -d www.{domain}',
+            # 6. MQTT TLS-passthrough stream block
             f'bash {config_path}/tmp.nginx-stream-tls-domain.conf.sh {domain} > {setup_dir}/setup_files/tmp/tmp.nginx-stream-tls-domain.conf',
             f'cp {setup_dir}/setup_files/tmp/tmp.nginx-stream-tls-domain.conf /etc/nginx/modules-available/nginx-stream-tls-domain.conf',
             'ln -s /etc/nginx/modules-available/nginx-stream-tls-domain.conf /etc/nginx/modules-enabled',
         ]
 
-    if setup_scheme in ('TLS_NO_DOMAIN', 'TLS_DOMAIN'):
+    if setup_scheme == 'TLS_NO_DOMAIN':
         # Configurations for TLS without domain (self-signed certificate for 3650 days = 10 years)
         commands = [
             'apt install -y openssl',
@@ -65,7 +71,7 @@ def install_nginx(setup_scheme, domain, server_ip, hostname):
         output = run_bash(command)
         log(output, NGINX_INSTALL_LOG_FILE_NAME)
 
-    # Verify the self-signed certificate
+    # Verify the self-signed certificate without output to terminal
     if setup_scheme == 'TLS_NO_DOMAIN':
         output = run_bash('openssl x509 -in /etc/ssl/certs/biomed-iot.crt -text -noout', show_output=False)
         log(output, NGINX_INSTALL_LOG_FILE_NAME)

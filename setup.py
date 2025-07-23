@@ -243,18 +243,25 @@ def create_config_dir():
     log("Directory '/etc/biomed-iot' created. Path: " + config_dir)
 
 
-def create_gateway_setup_zip_file(config_path):
+def create_gateway_setup_zip_file(config_path, setup_dir, setup_scheme):
     # Define paths
-    cert_file_path = "/etc/ssl/certs/biomed-iot.crt" # For zip file creation for TLS-DOMAIN scheme, see DOMAIN_SETUP.md
-    script_file_path = f"{config_path}/gateway_setup.sh"
+    if setup_scheme == 'TLS_NO_DOMAIN':
+        cert_file_path = "/etc/ssl/certs/biomed-iot.crt"
+        script_file_path = f"{config_path}/gateway_setup_no_domain.sh"
+    if setup_scheme == 'TLS_DOMAIN':
+        script_file_path = f"{config_path}/gateway_setup_domain.sh"
+
+    run_bash(f'cp {script_file_path} {setup_dir}/setup_files/tmp/gateway_setup.sh', show_output=False)
+    script_file_path = f"{setup_dir}/setup_files/tmp/gateway_setup.sh"
     publish_example_script_file_path = f"{config_path}/publish_cpu_temp.sh"
     download_folder = "/var/www/biomed-iot/media/public_download_files"
     zip_file_path = os.path.join(download_folder, "biomed_iot_gateway.zip")
 
     # Create zip file
     with zipfile.ZipFile(zip_file_path, 'w') as zipf:
-        # Add cert file
-        zipf.write(cert_file_path, os.path.basename(cert_file_path))
+        if setup_scheme == 'TLS_NO_DOMAIN':
+            # Add cert file
+            zipf.write(cert_file_path, os.path.basename(cert_file_path))
         # Add script file
         zipf.write(script_file_path, os.path.basename(script_file_path))
         # Add publish example script
@@ -358,7 +365,7 @@ def main():
     host_config_data = {
         'IP': ip_address,
         'HOSTNAME': hostname,
-        'DOMAIN': "",
+        'DOMAIN': domain,
         'TLS': "true" if setup_scheme != 'NO_TLS' else "false",
         'HOST_DOCKER_INTERNAL_IP': host_docker_internal_ip
     }
@@ -427,12 +434,12 @@ def main():
     print('NGINX installed')
     log('NGINX installed')
 
-    if setup_scheme == "TLS_NO_DOMAIN":
+    if setup_scheme != "NO_TLS":
         config_path = get_conf_path()
-        create_gateway_setup_zip_file(config_path)
+        create_gateway_setup_zip_file(config_path, setup_scheme)
 
     # Delete the tmp directory itself and its contents using the 'rm -rf' command
-    run_bash(f'rm -rf {setup_dir}/setup_files/tmp', show_output=False)
+    # run_bash(f'rm -rf {setup_dir}/setup_files/tmp', show_output=False)
 
     set_setup_dir_rights()
 

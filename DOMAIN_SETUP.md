@@ -1,5 +1,5 @@
 # Secure NGINX + Let’s Encrypt TLS Setup
-_for public deployment of **Biomed IoT**_
+_**This manual setup has been integrated into the automated setup of Biomed IoT. It is just kept for reference**_
 
 This guide walks you—step by step—through hardening an NGINX server with a free Let’s Encrypt certificate.  
 Everything is done from a **terminal** with **sudo** rights.
@@ -132,7 +132,7 @@ cp ~/biomed-iot/setup_files/config/publish_cpu_temp.sh ./
 ```
 nano gateway_setup.sh
 ```
-Change the code according to the commentsabout Let's Encrypt (ISRG_Root_X1.pem) and self-signed cert (biomed-iot.crt).
+Change the code according to the comments about Let's Encrypt (ISRG_Root_X1.pem) and self-signed cert (biomed-iot.crt).
 
 Then save and exit
 

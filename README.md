@@ -91,15 +91,12 @@ git clone https://github.com/BioMedLab-HM/biomed-iot.git
 cd biomed-iot
 sudo python3 setup.py
 ```
-Consider reading the information, given in the last lines at the end of the installation (e.g. for the URL or IP address to reach Biomed IoT in the web browser or where to find the login password for the admin account for which you already provided an email address during the setup process), then reboot, to make the Biomed IoT Platform fully work:
+Read the last lines at the end of the installation (e.g. for the URL or IP address to reach Biomed IoT in the web browser or where to find the login password for the admin account for which you already provided an email address during the setup process), then reboot, to make the Biomed IoT Platform fully work:
 ``` 
 sudo reboot
 ```
 
-The Biomed IoT should now be up and running. Type your server's IP address in a web browser.  
-
-### Domain Setup (Optional)
-If you have a registered domain name (e.g., example.com) that points to your server’s public IP address, you can configure the platform to be accessible via this domain directly afterwards. Follow the [*Secure NGINX + Let’s Encrypt TLS Setup*](DOMAIN_SETUP.md)
+The Biomed IoT should now be up and running. Type your server's IP address or domain in a web browser.  
 
 ### First Login
 To log in to the Biomed IoT platform as admin, go to the Login page and use the email address you provided during setup. The password was auto-generated. Execute the following command in the servers terminal to print it to the terminal:

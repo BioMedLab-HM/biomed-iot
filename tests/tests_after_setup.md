@@ -83,10 +83,5 @@ Enter container test01
 	\dt  # List database tables
 	exit  # to exit psql CLI
 
-### Optional:
 
-Check files in 
-```
-~/biomed-iot/setup_files/tmp
-```
 Have all variables been inserted correctly?

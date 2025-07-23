@@ -12,7 +12,7 @@ logo_header="
 echo -e "\n\n$logo_header\n\n"
 
 # 1. Prompt for details
-read -rp "Enter the hostname (domain or IP-address) of Biomed IoT: " hostname
+read -rp "Enter the domain (example.com) of Biomed IoT: " hostname
 read -rp "Enter the 'Name' for your gateway (as shown on the 'Devices' page): " gatewayname
 read -srp "Enter the corresponding 'username' for your gateway (as shown on the 'Devices' page): " mqtt_username; echo
 read -srp "Enter the corresponding 'password' for your gateway (as shown on the 'Devices' page): " mqtt_password; echo
@@ -42,11 +42,7 @@ allow_anonymous true
 connection ${gatewayname}
 address ${hostname}:8883
 
-# comment the next line if using Let's Encrypt certs
-bridge_cafile /etc/mosquitto/certs/biomed-iot.crt
-
-# Uncomment the next line if using Let's Encrypt certs
-# bridge_cafile /etc/mosquitto/certs/ISRG_Root_X1.pem
+bridge_cafile /etc/ssl/certs/ISRG_Root_X1.pem
 
 remote_username ${mqtt_username}
 remote_password ${mqtt_password}
@@ -59,18 +55,8 @@ topic # out 2 in/ in/${topic_id}/
 topic # in  2 out/ out/${topic_id}/${gatewayname}/
 EOL
 
-# 6. Permissions & cert
+# 6. Permissions
 sudo chmod 644 /etc/mosquitto/conf.d/biomed_gateway.conf
-# Comment this if-block if you want to use Let's Encrypt certs
-if [ ! -f biomed-iot.crt ]; then
-  echo "Error: biomed-iot.crt not found in current directory." >&2
-  exit 1  
-fi
-sudo mkdir -p /etc/mosquitto/certs
-sudo cp /etc/ssl/certs/ISRG_Root_X1.pem /etc/mosquitto/certs/
-sudo chmod 644 /etc/mosquitto/certs/ISRG_Root_X1.pem # for Let's Encrypt certs
-# Comment the next line if you want to use Let's Encrypt certs
-sudo cp biomed-iot.crt /etc/mosquitto/certs/  # for self-signed certs
 
 # 7. Schedule status cronjob without wiping existing jobs
 cron_job="* * * * * mosquitto_pub -t in/devicestatus -m '{\"$gatewayname\":1}' -h localhost -p 1883"
@@ -93,7 +79,9 @@ Your IoT-Gateway is set up. Please reboot.
 
 After reboot:
   • Go to 'Automate' (Node-RED) on the Biomed-IoT Platform.
-  • Look for a status message '{"$gatewayname":1}' under 'in/<your-topic-id>/devicestatus'.
+  • Use a green Debug Node to look for a status message '{"$gatewayname":1}' under 'in/<your-topic-id>/devicestatus'.
+  • If you see it, your gateway is successfully connected.
+  • You may run also run the script 'publish_cpu_temp.sh' to test publishing data with 'bash publish_cpu_temp.sh'.
 
 If you run into issues:
   • Check broker status: sudo systemctl status mosquitto
