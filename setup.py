@@ -430,7 +430,7 @@ def main():
     print('Gunicorn installed')
     log('Gunicorn installed')
 
-    install_nginx(setup_scheme, domain, ip_address, hostname)
+    install_nginx(setup_scheme, django_admin_email, domain, ip_address, hostname)
     print('NGINX installed')
     log('NGINX installed')
 
