@@ -436,7 +436,7 @@ def main():
 
     if setup_scheme != "NO_TLS":
         config_path = get_conf_path()
-        create_gateway_setup_zip_file(config_path, setup_scheme)
+        create_gateway_setup_zip_file(config_path, setup_dir, setup_scheme)
 
     # Delete the tmp directory itself and its contents using the 'rm -rf' command
     # run_bash(f'rm -rf {setup_dir}/setup_files/tmp', show_output=False)

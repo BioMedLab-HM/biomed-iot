@@ -31,7 +31,7 @@ def install_nginx(setup_scheme, django_admin_email, domain, server_ip, hostname)
             'nginx -t',
             'systemctl reload nginx',
             # 5. Pull the cert (non-interactive, agree TOS, add redirect)
-            f'certbot --nginx --non-interactive --agree-tos --email {django_admin_email} --redirect --rsa-key-size 3072 -d {domain} -d www.{domain}',
+            f'certbot --nginx --redirect --non-interactive --agree-tos --email {django_admin_email} --redirect --rsa-key-size 3072 -d {domain} -d www.{domain}',
             # 6. MQTT TLS-passthrough stream block
             f'bash {config_path}/tmp.nginx-stream-tls-domain.conf.sh {domain} > {setup_dir}/setup_files/tmp/tmp.nginx-stream-tls-domain.conf',
             f'cp {setup_dir}/setup_files/tmp/tmp.nginx-stream-tls-domain.conf /etc/nginx/modules-available/nginx-stream-tls-domain.conf',

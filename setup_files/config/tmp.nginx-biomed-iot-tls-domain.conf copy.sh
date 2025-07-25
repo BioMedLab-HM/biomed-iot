@@ -14,6 +14,12 @@ server {
     server_name $DOMAIN www.$DOMAIN;
     server_tokens off;
 
+    # ssl_certificate     /etc/letsencrypt/live/$DOMAIN/fullchain.pem;
+    # ssl_certificate_key /etc/letsencrypt/live/$DOMAIN/privkey.pem;
+
+    # “Managed by Certbot” defaults (TLS settings, DH params, stapling…)
+    # include /etc/letsencrypt/options-ssl-nginx.conf;
+
     # Custom headers (HSTS, X‑Frame‑Options, etc.)
     include snippets/nginx_security_options.conf;
 
@@ -44,5 +50,18 @@ server {
 
     # location files for nodered container instances
     include /etc/nginx/conf.d/nodered_locations/*.conf;
+}
+
+server {
+    listen 80;
+    listen [::]:80;
+
+    server_name $DOMAIN www.$DOMAIN;
+
+    location /.well-known/acme-challenge/ {
+        root /var/www/letsencrypt;  # webroot for Certbot
+    }
+
+    return 301 https://\$host\$request_uri;  # redirect to server block with port 443 listener. Changed 302 to 301 after successfull testing
 }
 EOF
