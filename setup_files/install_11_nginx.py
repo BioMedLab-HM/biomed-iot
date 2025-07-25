@@ -22,9 +22,7 @@ def install_nginx(setup_scheme, django_admin_email, domain, server_ip, hostname)
             # 1. Packages
             'apt install -y openssl certbot python3-certbot-nginx',
             # 2. Strong DH params & SSL snippet (needed *before* nginx/Certbot)
-            f'cp {config_path}/tmp.ssl-params.conf /etc/nginx/snippets/ssl-params.conf',
-            'cp /etc/letsencrypt/ssl-dhparams.pem /etc/nginx/dhparam.pem || true',  # Use existing DH params if available
-            #'openssl dhparam -out /etc/nginx/dhparam.pem 3072',  # 3072 is recommended for public servers
+            f'cp {config_path}/tmp.nginx_security_options.conf /etc/nginx/snippets/nginx_security_options.conf',
             # 3. Create the server conf file
             f'bash {config_path}/tmp.nginx-biomed-iot-tls-domain.conf.sh {domain} > {setup_dir}/setup_files/tmp/nginx-biomed-iot-tls-domain.conf',
             f'cp {setup_dir}/setup_files/tmp/nginx-biomed-iot-tls-domain.conf /etc/nginx/sites-available/{domain}.conf',

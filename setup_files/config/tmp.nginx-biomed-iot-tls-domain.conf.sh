@@ -12,10 +12,16 @@ server {
     listen 443 ssl;
     listen [::]:443 ssl;
     server_name $DOMAIN www.$DOMAIN;
+    server_tokens off;
 
     ssl_certificate     /etc/letsencrypt/live/$DOMAIN/fullchain.pem;
     ssl_certificate_key /etc/letsencrypt/live/$DOMAIN/privkey.pem;
-    include snippets/ssl-params.conf;  # in addition to certbots parameters
+
+    # “Managed by Certbot” defaults (TLS settings, DH params, stapling…)
+    include /etc/letsencrypt/options-ssl-nginx.conf;
+
+    # Custom headers (HSTS, X‑Frame‑Options, etc.)
+    include snippets/nginx_security_options.conf;
 
     location = /favicon.ico { access_log off; log_not_found off; }
 
@@ -56,6 +62,6 @@ server {
         root /var/www/letsencrypt;  # webroot for Certbot
     }
 
-    return 301 https://\$server_name\$request_uri;  # redirect to server block with port 443 listener. Changed 302 to 301 after successfull testing
+    return 301 https://\$host\$request_uri;  # redirect to server block with port 443 listener. Changed 302 to 301 after successfull testing
 }
 EOF

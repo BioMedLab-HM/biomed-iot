@@ -1,5 +1,7 @@
 # Secure NGINX + Let’s Encrypt TLS Setup
-_**This manual setup has been integrated into the automated setup of Biomed IoT. It is just kept for reference**_
+_**This manual setup has been integrated into the automated setup of Biomed IoT and is therefore obsolete. It is just kept for reference**_
+  
+  
 
 This guide walks you—step by step—through hardening an NGINX server with a free Let’s Encrypt certificate.  
 Everything is done from a **terminal** with **sudo** rights.
