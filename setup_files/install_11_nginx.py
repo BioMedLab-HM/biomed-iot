@@ -21,22 +21,49 @@ def install_nginx(setup_scheme, django_admin_email, domain, server_ip, hostname)
         commands = [
             # 1. Packages
             'apt install -y openssl certbot python3-certbot-nginx',
-            # 2. Strong DH params & SSL snippet (needed *before* nginx/Certbot)
+            # 2. Copy security options configuration
             f'cp {config_path}/tmp.nginx_security_options.conf /etc/nginx/snippets/nginx_security_options.conf',
             # 3. Create the server conf file
             f'bash {config_path}/tmp.nginx-biomed-iot-tls-domain.conf.sh {domain} > {setup_dir}/setup_files/tmp/nginx-biomed-iot-tls-domain.conf',
             f'cp {setup_dir}/setup_files/tmp/nginx-biomed-iot-tls-domain.conf /etc/nginx/sites-available/{domain}.conf',
-            f'ln -s /etc/nginx/sites-available/{domain}.conf /etc/nginx/sites-enabled',
-            # 4. Expose port 80 for the ACME HTTP-01 challenge
+            f'ln -sf /etc/nginx/sites-available/{domain}.conf /etc/nginx/sites-enabled',
+            # 4. Test the configuration and reload Nginx
             'nginx -t',
             'systemctl reload nginx',
-            # 5. Pull the cert (non-interactive, agree TOS, add redirect)
-            f'certbot --nginx --redirect --non-interactive --agree-tos --email {django_admin_email} --redirect --rsa-key-size 3072 -d {domain} -d www.{domain}',
-            # 6. MQTT TLS-passthrough stream block
+            # 5. Create webroot for Certbot
+            'mkdir -p /var/www/certbot',
+            # 6. Pull the cert (non-interactive, agree TOS, add redirect)
+            f'certbot certonly --webroot -w /var/www/certbot --non-interactive --agree-tos --email {django_admin_email} --key-type ecdsa -d {domain} -d www.{domain}',
+            # 7. Update nginx config to use real certificates and add SSL options
+            f"sed -i 's|ssl_certificate /etc/ssl/certs/ssl-cert-snakeoil.pem;|ssl_certificate /etc/letsencrypt/live/{domain}/fullchain.pem;|' /etc/nginx/sites-available/{domain}.conf",
+            f"sed -i 's|ssl_certificate_key /etc/ssl/private/ssl-cert-snakeoil.key;|ssl_certificate_key /etc/letsencrypt/live/{domain}/privkey.pem;|' /etc/nginx/sites-available/{domain}.conf",
+            # Add the include line after the ssl_certificate_key line
+            f"sed -i '/ssl_certificate_key.*privkey\.pem;/a\    include /etc/letsencrypt/options-ssl-nginx.conf;' /etc/nginx/sites-available/{domain}.conf",
+            # 8. MQTT TLS-passthrough stream block
             f'bash {config_path}/tmp.nginx-stream-tls-domain.conf.sh {domain} > {setup_dir}/setup_files/tmp/tmp.nginx-stream-tls-domain.conf',
             f'cp {setup_dir}/setup_files/tmp/tmp.nginx-stream-tls-domain.conf /etc/nginx/modules-available/nginx-stream-tls-domain.conf',
             'ln -s /etc/nginx/modules-available/nginx-stream-tls-domain.conf /etc/nginx/modules-enabled',
         ]
+    # if setup_scheme == 'TLS_DOMAIN':
+    #     commands = [
+    #         # 1. Packages
+    #         'apt install -y openssl certbot python3-certbot-nginx',
+    #         # 2. Copy security options configuration
+    #         f'cp {config_path}/tmp.nginx_security_options.conf /etc/nginx/snippets/nginx_security_options.conf',
+    #         # 3. Create the server conf file
+    #         f'bash {config_path}/tmp.nginx-biomed-iot-tls-domain.conf.sh {domain} > {setup_dir}/setup_files/tmp/nginx-biomed-iot-tls-domain.conf',
+    #         f'cp {setup_dir}/setup_files/tmp/nginx-biomed-iot-tls-domain.conf /etc/nginx/sites-available/{domain}.conf',
+    #         f'ln -s /etc/nginx/sites-available/{domain}.conf /etc/nginx/sites-enabled',
+    #         # 4. Test the configuration and reload Nginx
+    #         'nginx -t',
+    #         'systemctl reload nginx',
+    #         # 5. Pull the cert (non-interactive, agree TOS, add redirect)
+    #         f'certbot --nginx --non-interactive --agree-tos --email {django_admin_email} --redirect --key-type ecdsa -d {domain} -d www.{domain}',
+    #         # 6. MQTT TLS-passthrough stream block
+    #         f'bash {config_path}/tmp.nginx-stream-tls-domain.conf.sh {domain} > {setup_dir}/setup_files/tmp/tmp.nginx-stream-tls-domain.conf',
+    #         f'cp {setup_dir}/setup_files/tmp/tmp.nginx-stream-tls-domain.conf /etc/nginx/modules-available/nginx-stream-tls-domain.conf',
+    #         'ln -s /etc/nginx/modules-available/nginx-stream-tls-domain.conf /etc/nginx/modules-enabled',
+    #     ]
 
     if setup_scheme == 'TLS_NO_DOMAIN':
         # Configurations for TLS without domain (self-signed certificate for 3650 days = 10 years)

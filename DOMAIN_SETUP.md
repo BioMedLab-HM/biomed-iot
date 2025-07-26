@@ -1,5 +1,5 @@
 # Secure NGINX + Let’s Encrypt TLS Setup
-_**This manual setup has been integrated into the automated setup of Biomed IoT and is therefore obsolete. It is just kept for reference**_
+_**This manual setup was used before it has been integrated into the automated setup of Biomed IoT**_
   
   
 

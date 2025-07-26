@@ -20,7 +20,7 @@ server {
     # “Managed by Certbot” defaults (TLS settings, DH params, stapling…)
     # include /etc/letsencrypt/options-ssl-nginx.conf;
 
-    # Custom headers (HSTS, X‑Frame‑Options, etc.)
+    # Custom headers (X‑Frame‑Options, etc.)
     include snippets/nginx_security_options.conf;
 
     location = /favicon.ico { access_log off; log_not_found off; }

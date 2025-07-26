@@ -14,9 +14,6 @@ server {
     server_name $DOMAIN www.$DOMAIN;
     server_tokens off;
 
-    ssl_certificate /etc/ssl/certs/ssl-cert-snakeoil.pem;
-    ssl_certificate_key /etc/ssl/private/ssl-cert-snakeoil.key;
-
     # Custom headers (X‑Frame‑Options, etc.)
     include snippets/nginx_security_options.conf;
 
@@ -47,18 +44,5 @@ server {
 
     # location files for nodered container instances
     include /etc/nginx/conf.d/nodered_locations/*.conf;
-}
-
-server {
-    listen 80;
-    listen [::]:80;
-
-    server_name $DOMAIN www.$DOMAIN;
-
-    location /.well-known/acme-challenge/ {
-        root /var/www/certbot;  # webroot for Certbot
-    }
-
-    return 301 https://\$host\$request_uri;  # redirect to server block with port 443 listener. Changed 302 to 301 after successfull testing
 }
 EOF
