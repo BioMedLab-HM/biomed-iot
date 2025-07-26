@@ -55,10 +55,14 @@ server {
 
     server_name $DOMAIN www.$DOMAIN;
 
-    location /.well-known/acme-challenge/ {
-        root /var/www/certbot;  # webroot for Certbot
+    # Serve ACME challenges over HTTP (don't redirect these)
+    location ^~ /.well-known/acme-challenge/ {
+        root /var/www/certbot;
     }
 
-    return 301 https://\$host\$request_uri;  # redirect to server block with port 443 listener. Changed 302 to 301 after successfull testing
+    # Redirect everything else to HTTPS
+    location / {
+        return 301 https://\$host\$request_uri;
+    }
 }
 EOF
