@@ -246,6 +246,18 @@ def update_nodered_nginx_conf(nodered_user_data):
     # Logic to update Nginx configuration
     container_name = nodered_user_data.container_name
     port = nodered_user_data.container_port
+
+    # Port "None" fix:
+    if not container_name or port is None:
+        return
+
+    try:
+        port_int = int(str(port).strip())
+    except (TypeError, ValueError):
+        return
+
+    if not (1 <= port_int <= 65535):
+        return
     if not container_name and port:
         return
 
@@ -254,17 +266,15 @@ def update_nodered_nginx_conf(nodered_user_data):
     script_path = config.nodered.SERVERBLOCK_CREATE_SCRIPT_PATH
 
     # Call the script with sudo
-    command = ['sudo', script_path, container_name, str(port)]
+    command = ['sudo', script_path, container_name, str(port_int)]
     result = subprocess.run(
         command,
         check=False,  # change to False to handle errors manually
         stdout=subprocess.PIPE,
         stderr=subprocess.PIPE,
     )
-
     if result.returncode != 0:
-        logger.error('Error:', result.stderr.decode())
-
+        logger.error("update_nodered_nginx_conf failed: %s", result.stderr.decode(errors="replace"))
 
 def del_nodered_nginx_conf(nodered_user_data):
     """
