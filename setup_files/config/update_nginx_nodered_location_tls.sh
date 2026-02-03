@@ -10,6 +10,7 @@ NGINX_CONF_PATH="/etc/nginx/conf.d/nodered_locations/$CONTAINER_NAME.conf"
 # trim whitespace (POSIX)
 PORT=$(printf '%s' "$PORT" | tr -d '[:space:]')
 
+# port number fix:
 case "$PORT" in
   ""|None|none) exit 0 ;;
   *[!0-9]*)     exit 0 ;;
