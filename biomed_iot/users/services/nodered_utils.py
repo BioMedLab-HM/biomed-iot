@@ -247,7 +247,7 @@ def update_nodered_nginx_conf(nodered_user_data):
     container_name = nodered_user_data.container_name
     port = nodered_user_data.container_port
 
-    # Port "None" fix:
+    # Port "None" fix, made nginx restart fail:
     if not container_name or port is None:
         return
 
