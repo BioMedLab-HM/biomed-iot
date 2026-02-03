@@ -7,7 +7,19 @@ CONTAINER_NAME=$1
 PORT=$2
 NGINX_CONF_PATH="/etc/nginx/conf.d/nodered_locations/$CONTAINER_NAME.conf"
 
-# Create the directory if it doesn't exist
+# trim whitespace (POSIX)
+PORT=$(printf '%s' "$PORT" | tr -d '[:space:]')
+
+case "$PORT" in
+  ""|None|none) exit 0 ;;
+  *[!0-9]*)     exit 0 ;;
+esac
+
+# numeric range check
+if [ "$PORT" -lt 1 ] || [ "$PORT" -gt 65535 ]; then
+  exit 0
+fi
+
 mkdir -p /etc/nginx/conf.d/nodered_locations/
 
 # Create or overwrite the Nginx configuration for the given path segment
